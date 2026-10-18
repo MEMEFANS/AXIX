@@ -1,0 +1,105 @@
+--- src/funds-admin-api.js before
++++ src/funds-admin-api.js after
+@@ -1,5 +1,68 @@
+ import crypto from 'node:crypto';
+-import { formatUnits } from 'ethers';
++import { formatUnits, getAddress, parseUnits } from 'ethers';
++
++const REQUEST_ID = /^[A-Za-z0-9._:-]{8,80}$/;
++function requestIdOf(body) {
++  const requestId = String(body.requestId || '').trim();
++  if (!REQUEST_ID.test(requestId)) throw new Error('操作请求编号格式不正确');
++  return requestId;
++}
++function reasonOf(body) {
++  const reason = String(body.reason || '').trim().slice(0,120);
++  if (reason.length < 2) throw new Error('请填写操作原因');
++  return reason;
++}
++function conflict() {
++  return Object.assign(new Error('该请求编号已用于另一笔操作'), { statusCode:409, code:'IDEMPOTENCY_CONFLICT' });
++}
++
++function adjustAsset(walletService, body) {
++  if (!['grant','debit'].includes(body.action)) throw new Error('资产调整操作无效');
++  const asset = body.asset === 'AIX' ? 'A' : String(body.asset || '').toUpperCase();
++  if (!['USDT','A'].includes(asset)) throw new Error('仅支持调整 USDT 和 AIX');
++  const wallet = getAddress(String(body.wallet || '').trim());
++  const requestId = requestIdOf(body), reason = reasonOf(body);
++  const decimals = asset === 'A' ? 18 : 6;
++  const amount = String(body.amount || '').trim();
++  const units = parseUnits(amount,decimals);
++  if (units <= 0n) throw new Error('调整数量必须大于 0');
++  const type = body.action === 'grant' ? 'funds_grant' : 'funds_debit';
++  // The original wallet helper checks only wallet/amount when retrying. Check
++  // asset and direction too before delegating to the existing atomic ledger.
++  const existing = walletService.database.db.prepare('SELECT wallet,asset,amount_units,adjustment_type FROM balance_adjustments WHERE id=?').get(`adj_${requestId}`);
++  if (existing && (existing.wallet.toLowerCase() !== wallet.toLowerCase() || existing.asset !== asset
++      || existing.amount_units !== units.toString() || existing.adjustment_type !== type)) throw conflict();
++  const input = { wallet, asset, amount, reason, requestId, type };
++  return body.action === 'grant' ? walletService.adminCreditAsset(input,'funds-admin')
++    : walletService.adminDebitAsset(input,'funds-admin');
++}
++
++function grantMiner(walletService, minerService, body) {
++  if (!minerService) throw new Error('矿机服务不可用');
++  const wallet = getAddress(String(body.wallet || '').trim());
++  const requestId = requestIdOf(body), reason = reasonOf(body);
++  const plan = String(body.plan || '');
++  if (!['mini120','pro1500'].includes(plan)) throw new Error('矿机套餐无效');
++  const database = walletService.database;
++  const key = `funds_miner_grant:${requestId}`;
++  const previous = database.getSetting(key);
++  if (previous) {
++    const existing = JSON.parse(previous);
++    if (existing.wallet.toLowerCase() !== wallet.toLowerCase() || existing.plan !== plan) throw conflict();
++    return existing.miner;
++  }
++  // Establish the wallet before the DB transaction; createMiner and its durable
++  // request/audit record then commit together. No balance is credited here.
++  walletService.ensureUser(wallet);
++  return database.transaction(() => {
++    const miner = minerService.createMiner(wallet,plan);
++    const record = { wallet, plan, reason, requestId, miner, adminUsername:'funds-admin', createdAt:Date.now() };
++    database.saveSetting(key,JSON.stringify(record));
++    database.db.prepare('INSERT INTO audit_log(event_id,address,event_type,created_at,payload_json) VALUES(?,?,?,?,?)')
++      .run(`funds_miner_${requestId}`,wallet,'funds_miner_grant',record.createdAt,JSON.stringify(record));
++    return miner;
++  });
++}
+ 
+ function listFundsBalanceAdjustments(walletService, limit = 200) {
+   const bounded = Math.min(Math.max(Number(limit) || 200, 1), 1000);
+@@ -28,7 +91,7 @@
+ }
+ 
+ // Funds operations require their own bearer credential; operator cookies grant no access.
+-export function createFundsAdminApi({ walletService, payoutService, send:respond, readBody, isSameOrigin, allowRequest, getToken }) {
++export function createFundsAdminApi({ walletService, minerService, payoutService, send:respond, readBody, isSameOrigin, allowRequest, getToken }) {
+   const send = (res, status, payload) => { respond(res, status, payload); return true; };
+   async function handle(request, res, pathname) {
+     if (!pathname.startsWith('/api/wallet/admin/')) return false;
+@@ -42,6 +105,23 @@
+     try {
+       if (pathname === '/api/wallet/admin/session' && request.method === 'GET') {
+         return send(res, 200, { authenticated:true });
++      }
++      if (pathname === '/api/wallet/admin/asset-adjustments' && request.method === 'GET') {
++        return send(res, 200, { items:listFundsBalanceAdjustments(walletService) });
++      }
++      if (pathname === '/api/wallet/admin/asset-adjustments' && request.method === 'POST') {
++        if (!allowRequest(request,res,'funds-asset-adjust',30,60_000)) return true;
++        const body = await readBody(request,16_000);
++        return send(res,200,{ ok:true, adjustment:adjustAsset(walletService,body) });
++      }
++      if (pathname === '/api/wallet/admin/miner-grants' && request.method === 'GET') {
++        const rows = walletService.database.db.prepare("SELECT payload_json FROM audit_log WHERE event_type='funds_miner_grant' ORDER BY created_at DESC LIMIT 200").all();
++        return send(res,200,{ items:rows.map(row => JSON.parse(row.payload_json)) });
++      }
++      if (pathname === '/api/wallet/admin/miner-grants' && request.method === 'POST') {
++        if (!allowRequest(request,res,'funds-miner-grant',30,60_000)) return true;
++        const body = await readBody(request,16_000);
++        return send(res,200,{ ok:true, miner:grantMiner(walletService,minerService,body) });
+       }
+       if (pathname === '/api/wallet/admin/withdrawal-automation' && request.method === 'GET') {
+         return send(res, 200, { ...walletService.withdrawalAutomationSettings(), ...payoutService.status() });

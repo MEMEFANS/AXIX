@@ -1,0 +1,121 @@
+[
+  {
+    "path": "src/server.js",
+    "new_file": false,
+    "patch_groups": 10,
+    "production_equals_local_before": false,
+    "candidate_equals_local_after": false
+  },
+  {
+    "path": "src/lottery-service.js",
+    "new_file": false,
+    "patch_groups": 1,
+    "production_equals_local_before": true,
+    "candidate_equals_local_after": true
+  },
+  {
+    "path": "src/admin-security.js",
+    "new_file": true,
+    "patch_groups": 0,
+    "production_equals_local_before": true,
+    "candidate_equals_local_after": true
+  },
+  {
+    "path": "src/funds-admin-api.js",
+    "new_file": true,
+    "patch_groups": 0,
+    "production_equals_local_before": true,
+    "candidate_equals_local_after": true
+  },
+  {
+    "path": "public/admin.html",
+    "new_file": false,
+    "patch_groups": 4,
+    "production_equals_local_before": true,
+    "candidate_equals_local_after": true
+  },
+  {
+    "path": "public/withdraw-admin.html",
+    "new_file": false,
+    "patch_groups": 1,
+    "production_equals_local_before": true,
+    "candidate_equals_local_after": true
+  },
+  {
+    "path": "public/funds-admin.html",
+    "new_file": true,
+    "patch_groups": 0,
+    "production_equals_local_before": true,
+    "candidate_equals_local_after": true
+  },
+  {
+    "path": "public/js/admin-lottery.js",
+    "new_file": false,
+    "patch_groups": 3,
+    "production_equals_local_before": true,
+    "candidate_equals_local_after": true
+  },
+  {
+    "path": "public/js/operator-admin.js",
+    "new_file": false,
+    "patch_groups": 13,
+    "production_equals_local_before": true,
+    "candidate_equals_local_after": true
+  },
+  {
+    "path": "public/js/admin-dialogs.js",
+    "new_file": true,
+    "patch_groups": 0,
+    "production_equals_local_before": true,
+    "candidate_equals_local_after": true
+  },
+  {
+    "path": "public/js/funds-admin.js",
+    "new_file": true,
+    "patch_groups": 0,
+    "production_equals_local_before": true,
+    "candidate_equals_local_after": true
+  },
+  {
+    "path": "public/js/withdraw-admin.js",
+    "new_file": true,
+    "patch_groups": 0,
+    "production_equals_local_before": true,
+    "candidate_equals_local_after": true
+  },
+  {
+    "path": "public/js/support-chat.js",
+    "new_file": false,
+    "patch_groups": 4,
+    "production_equals_local_before": true,
+    "candidate_equals_local_after": true
+  },
+  {
+    "path": "public/js/page-loader.js",
+    "new_file": false,
+    "patch_groups": 1,
+    "production_equals_local_before": true,
+    "candidate_equals_local_after": true
+  },
+  {
+    "path": "public/index.html",
+    "new_file": false,
+    "patch_groups": 2,
+    "production_equals_local_before": true,
+    "candidate_equals_local_after": true
+  },
+  {
+    "path": "public/sw.js",
+    "new_file": false,
+    "patch_groups": 2,
+    "production_equals_local_before": true,
+    "candidate_equals_local_after": true
+  },
+  {
+    "path": "public/styles/funds-admin.css",
+    "new_file": true,
+    "patch_groups": 0,
+    "production_equals_local_before": true,
+    "candidate_equals_local_after": true
+  }
+]

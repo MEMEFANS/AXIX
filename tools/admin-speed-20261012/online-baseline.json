@@ -1,0 +1,59 @@
+{
+  "production": true,
+  "runtimeErrors": [],
+  "requests": [
+    {
+      "path": "/api/admin/session",
+      "method": "GET",
+      "milliseconds": 287
+    },
+    {
+      "path": "/api/admin/login",
+      "method": "POST",
+      "milliseconds": 1027
+    },
+    {
+      "path": "/api/admin/support/unread-count",
+      "method": "GET",
+      "milliseconds": 109
+    },
+    {
+      "path": "/api/admin/dashboard",
+      "method": "GET",
+      "milliseconds": 15963
+    },
+    {
+      "path": "/api/admin/support/unread-count",
+      "method": "GET",
+      "milliseconds": 3236
+    },
+    {
+      "path": "/api/admin/deposits",
+      "method": "GET",
+      "milliseconds": 1215
+    }
+  ],
+  "unexpectedWrites": [],
+  "appShownMs": 1154,
+  "firstDataReadyMs": 20086,
+  "state": {
+    "usersRows": 7223,
+    "depositsRows": 133,
+    "allNodes": 182905,
+    "longTasks": [
+      {
+        "start": 4008.9000000059605,
+        "duration": 98
+      },
+      {
+        "start": 19963.90000000596,
+        "duration": 1841
+      },
+      {
+        "start": 21805.80000001192,
+        "duration": 133
+      }
+    ]
+  },
+  "passed": true
+}

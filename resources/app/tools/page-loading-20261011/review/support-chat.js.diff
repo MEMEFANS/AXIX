@@ -1,0 +1,85 @@
+--- public/js/support-chat.js (before)
++++ public/js/support-chat.js (after)
+@@ -6,6 +6,8 @@
+   let pollTimer = null;
+   let sending = false;
+   let session = null;
++  let refreshRequest = null, refreshKey = '';
++  let sessionRevision = 0;
+ 
+   const api = async (path, options = {}) => {
+     if (window.currentWalletConnection?.address
+@@ -13,6 +15,7 @@
+       && typeof ensurePlatformSession === 'function') {
+       try { await ensurePlatformSession(); } catch {}
+     }
++    if (!options.method || options.method === 'GET') return P.readJSON(`/api/support/${path}`, options);
+     const response = await fetch(`/api/support/${path}`, {
+       ...options,
+       headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+@@ -171,7 +174,18 @@
+     scrollToBottom();
+   }
+ 
+-  async function refresh({ silent = false } = {}) {
++  function refresh(options = {}) {
++    if (!P.active('support')) return Promise.resolve();
++    const key = `${P.walletKey()}:${sessionRevision}`;
++    if (refreshRequest && key === refreshKey) return refreshRequest;
++    refreshKey = key;
++    const promise = refreshData(options);
++    refreshRequest = promise;
++    promise.finally(() => { if (refreshRequest === promise) refreshRequest = null; }).catch(() => {});
++    return promise;
++  }
++  async function refreshData({ silent = false } = {}) {
++    const wallet = P.walletKey(), revision = sessionRevision;
+     const authed = window.currentWalletProfile?.authenticated;
+     if (!authed) {
+       if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+@@ -180,6 +194,7 @@
+     }
+     try {
+       const next = await api('session');
++      if (revision !== sessionRevision || wallet !== P.walletKey() || !P.active('support')) return;
+       const prevCount = session?.messages?.length || 0;
+       session = next;
+       paint();
+@@ -189,7 +204,7 @@
+         api('read', { method: 'POST' }).catch(() => {});
+       }
+     } catch (e) {
+-      if (!silent) {
++      if (!silent && revision === sessionRevision && wallet === P.walletKey()) {
+         const host = document.getElementById('support-chat-content');
+         if (host) host.innerHTML = `<div class="support-chat-loading">${esc(e.message)}</div>`;
+       }
+@@ -199,17 +214,22 @@
+   async function load() {
+     render();
+     await refresh();
+-    if (pollTimer) clearInterval(pollTimer);
+-    pollTimer = setInterval(() => refresh({ silent: true }), 4000);
+-  }
+-
+-  P.register('support', { render, load, fail: () => {
++  }
++
++  function activate() {
++    if (pollTimer || !P.active('support')) return;
++    pollTimer = setInterval(() => refresh({ silent:true }), 4000);
++    if (session) refresh({ silent:true });
++  }
++  function deactivate() { clearInterval(pollTimer); pollTimer = null; }
++
++  P.register('support', { render, load, activate, deactivate, reset() { ++sessionRevision; session = null; deactivate(); paint(); }, fail: () => {
+     const h = document.getElementById('support-chat-content');
+     if (h) h.innerHTML = P.error('客服服务暂时不可用', "Portal.load('support',true)");
+   } });
+ 
+   // 钱包连接状态变化后刷新门禁/会话
+-  window.addEventListener('wallet-profile-update', () => {
++  window.addEventListener('walletstatechange', () => {
+     const panel = document.getElementById('tab-support');
+     if (panel?.classList.contains('active')) refresh();
+   });

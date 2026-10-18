@@ -1,0 +1,78 @@
+{
+  "captured_at_utc": "2026-10-10T19:46:14.954841+00:00",
+  "baseline": "/opt/wg-platform/backups/incident-cleanup-20261011-030921/before.sqlite",
+  "baseline_captured_beijing": "2026-10-11 03:09:21",
+  "users_now": 5632,
+  "normal_accounts_missing": [],
+  "deleted_accounts_reappeared": [],
+  "normal_AIX_balance_changes": [],
+  "unexplained_AIX_changes": [],
+  "table_changes": {
+    "a_token_miner_releases": {
+      "new": 0,
+      "removed": 0,
+      "modified": 0
+    },
+    "a_token_stake_rewards": {
+      "new": 0,
+      "removed": 0,
+      "modified": 0
+    },
+    "a_token_team_rewards": {
+      "new": 0,
+      "removed": 0,
+      "modified": 0
+    },
+    "a_token_direct_count_rewards": {
+      "new": 0,
+      "removed": 0,
+      "modified": 0
+    },
+    "a_token_transfers": {
+      "new": 0,
+      "removed": 0,
+      "modified": 0
+    },
+    "a_token_trades": {
+      "new": 0,
+      "removed": 0,
+      "modified": 0
+    },
+    "balance_adjustments": {
+      "new": 0,
+      "removed": 10,
+      "modified": 0
+    },
+    "lottery_wins": {
+      "new": 0,
+      "removed": 0,
+      "modified": 0
+    },
+    "a_token_stakes": {
+      "new": 0,
+      "removed": 0,
+      "modified": 0
+    },
+    "a_token_orders": {
+      "new": 0,
+      "removed": 0,
+      "modified": 41
+    },
+    "a_token_withdrawals": {
+      "new": 0,
+      "removed": 0,
+      "modified": 0
+    },
+    "a_token_claims": {
+      "new": 0,
+      "removed": 0,
+      "modified": 0
+    },
+    "ai_managed_batches": {
+      "new": 0,
+      "removed": 0,
+      "modified": 1
+    }
+  },
+  "new_zero_balance_users": 40
+}

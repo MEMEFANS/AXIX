@@ -1,0 +1,149 @@
+{
+  "production": true,
+  "scenarios": [
+    "public domain serves the deployed HTML and all three versioned admin scripts",
+    "online login and overview complete without hidden bulk tables",
+    "online users endpoint displays 50 per page and search reaches the complete user set",
+    "lottery prize/social/physical tabs load only when selected",
+    "public operator funding routes remain denied after deployment",
+    "public mobile navigation and user pagination display correctly"
+  ],
+  "runtimeErrors": [],
+  "unexpectedWrites": [],
+  "requests": [
+    {
+      "path": "/api/admin/session",
+      "method": "GET",
+      "milliseconds": 378
+    },
+    {
+      "path": "/api/admin/login",
+      "method": "POST",
+      "milliseconds": 236
+    },
+    {
+      "path": "/api/admin/support/unread-count",
+      "method": "GET",
+      "milliseconds": 84
+    },
+    {
+      "path": "/api/admin/dashboard",
+      "method": "GET",
+      "milliseconds": 106
+    },
+    {
+      "path": "/api/admin/users",
+      "method": "GET",
+      "milliseconds": 435
+    },
+    {
+      "path": "/api/admin/users",
+      "method": "GET",
+      "milliseconds": 125
+    },
+    {
+      "path": "/api/admin/users",
+      "method": "GET",
+      "milliseconds": 109
+    },
+    {
+      "path": "/api/admin/lottery/prizes",
+      "method": "GET",
+      "milliseconds": 303
+    },
+    {
+      "path": "/api/admin/lottery/social",
+      "method": "GET",
+      "milliseconds": 87
+    },
+    {
+      "path": "/api/admin/lottery/physical",
+      "method": "GET",
+      "milliseconds": 96
+    },
+    {
+      "path": "/api/admin/a-token/miners",
+      "method": "GET",
+      "milliseconds": 145
+    },
+    {
+      "path": "/api/admin/test-credits",
+      "method": "GET",
+      "milliseconds": 83
+    },
+    {
+      "path": "/api/admin/withdrawals",
+      "method": "GET",
+      "milliseconds": 390
+    },
+    {
+      "path": "/api/admin/a-token/grant",
+      "method": "GET",
+      "milliseconds": 96
+    },
+    {
+      "path": "/api/admin/a-token/debit",
+      "method": "GET",
+      "milliseconds": 92
+    },
+    {
+      "path": "/api/admin/a-token/grant-miner",
+      "method": "GET",
+      "milliseconds": 83
+    },
+    {
+      "path": "/api/admin/session",
+      "method": "GET",
+      "milliseconds": 171
+    },
+    {
+      "path": "/api/admin/support/unread-count",
+      "method": "GET",
+      "milliseconds": 134
+    },
+    {
+      "path": "/api/admin/dashboard",
+      "method": "GET",
+      "milliseconds": 148
+    },
+    {
+      "path": "/api/admin/users",
+      "method": "GET",
+      "milliseconds": 188
+    }
+  ],
+  "static": [
+    {
+      "uri": "/admin.html",
+      "status": 200,
+      "sha256": "78d49c3a01b6f59a8ed81ae03e4e513ff30d673413e50822b2aafc47c1bdae06"
+    },
+    {
+      "uri": "/js/operator-admin.js?v=20261012-admin-speed-1",
+      "status": 200,
+      "sha256": "43b0131b372495dec90dfaad822f4a67e8d6f4d6183fd99f30f469e12653b64c"
+    },
+    {
+      "uri": "/js/admin-lottery.js?v=20261012-admin-speed-1",
+      "status": 200,
+      "sha256": "51f4b8d3dc64e0df0bdc370a568dff37de0cc805182a0bf841f493c4b07f4b3e"
+    },
+    {
+      "uri": "/js/admin-agents.js?v=20261012-admin-speed-1",
+      "status": 200,
+      "sha256": "1e335a174456306f781bd5e85663ebb961fd04c794fb76df126548a9847b4e92"
+    }
+  ],
+  "appShownMs": 442,
+  "firstDataReadyMs": 583,
+  "state": {
+    "usersRows": 0,
+    "depositsRows": 0,
+    "allNodes": 485,
+    "longTasks": [
+      182
+    ]
+  },
+  "passed": true,
+  "checkedAtUtc": "2026-10-12T08:53:37.228Z"
+}

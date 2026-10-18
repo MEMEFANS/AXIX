@@ -1,0 +1,105 @@
+// 生成白皮书韩语翻译 part3（条目 91-177，key 自动从 _wp-scan.json 对齐）
+const fs = require('fs');
+const path = require('path');
+const LANG_DIR = path.join(__dirname, 'i18n-lang');
+const scan = JSON.parse(fs.readFileSync(path.join(LANG_DIR, '_wp-scan.json'), 'utf8'));
+
+// 第 91-177 条韩语翻译（索引 90 开始）
+const ko = [
+  "흔치 않은 시그널 생성 사례 공개",
+  "사용자는 코피트레이딩 페이지에서 각 슬롯의 creditBalance 내역과 랭킹 대사를 확인할 수 있습니다",
+  "05 · 핵심 팀(Leadership Team)",
+  "20년 시장 시그널 연구 · Prospero.ai 창립자 / 회장",
+  "전 Citadel / Allston HFT 퀀트 트레이더 · 미국 규제 기구에 시장 구조에 관해 증언",
+  "전 Hugging Face 대규모 언어모델 개발 임원",
+  "Harvard PhD · Tower Research 8년 퀀트 전략가",
+  "리스크 관리 책임자",
+  "전 Bullish 엔지니어",
+  "기관 커뮤니케이션 책임자",
+  "Prospero.ai CEO 후계자",
+  "Prospero.ai 오랜 CTO · 핵심 시그널 인프라 아키텍트",
+  "06 · 투명성 약속(Transparency Commitment)",
+  "Aethon은 헤지펀드 업계에서 드문 투명성 조치를 취했습니다: 계획은",
+  "시그널 기술의 생성 과정을 보여주는 사례를 공개 발표",
+  "하며, 외부에 모델이 개별 종목과 시장 상황을 어떻게 평가하는지 설명하는 동시에, 독점 투자 프로세스는 블랙박스로 유지합니다. FinTech Global이 인용한 Kailas의 원언:",
+  "(업계 대부분은 데이터를 기밀로 다루지만, 우리는 정반대로 갑니다).",
+  "AxiX 거래소는 이 정신을 계승합니다: 코피트레이딩 수익은 일일 정산이 아닌 72분마다 지급되며, 랭킹에서는 「지급된 reward + 계약 명목 금액 + ROI 분모 기준」 삼중 교차 대사로 사용자에게 전략 성과를 보여주고 NAV 곡선만 보여주지 않습니다.",
+  "07 · 검증 가능한 공신력 출처(Verification Sources)",
+  "링크를 클릭하여 직접 비교하십시오",
+  "[1] BusinessWire(버크셔 계열 공신력 있는 금융 보도자료 플랫폼) —",
+  "· 2026-07-14 · 펀드 공식 보도자료,",
+  "모든 핵심 사실의 제1차 출처",
+  "[2] Hedgeweek(헤지펀드 업계 공신력 미디어) —",
+  "[3] FinTech Global(핀테크 업계 미디어) —",
+  "[4] TradeTech Eye / FF News(트레이딩 기술 미디어) —",
+  "[5] TBPn Digest(창립자 독점 인터뷰) —",
+  "· 2026-07-15, Kailas가 17세 업계 입문과 Prospero 시그널 → LLM 전략 생성 아키텍처 세부를 직접 이야기했습니다.",
+  "[6] Prospero.ai 공식 소개 페이지 —",
+  "· 경영진 표시는 George Kailas = Chairman, Adam Plante = CEO, 7.5×→12.9× S&P 500 초과 수익 공개로 보도자료와 기준이 일치합니다.",
+  "[7] Aethon 공식 사이트 —",
+  "· 최신 상태는 공식 사이트 기준입니다.",
+  "08 · 영문 원문 핵심 발췌(Original Excerpts)",
+  "— BusinessWire 공식 보도자료",
+  "09 · AIX 플랫폼 네이티브 토큰(AxiX Token · 명명 경계 설명)",
+  "2026/08 명칭 변경生效",
+  "토큰 정식 명칭 Token Name",
+  "AIX 토큰(코드 AIX)",
+  "· 중국어 브랜드명 「AxiX 币」",
+  "소속 프로젝트 Issuer",
+  "AxiX 거래소(전신은 WG Grid 트레이딩 플랫폼, 2026/08 정식 명칭 변경)",
+  "최소 가격 단위 Unit",
+  "(최소 정밀도 6자리 소수, 0.000001 AIX부터 가격 책정). 프런트엔드 UI는 「AIX」를 표시 단위로 통일하며, 자산 페이지, 거래 페이지, Earn 페이지, 지갑 페이지 모두 AIX를 직접 표시하고 내부 코드 심볼의 환산 설명은 더 이상 나오지 않아 혼동을 피합니다.",
+  "※ 백엔드 호가창, 자산 정산, 주문 체결의 역사적 안정성을 유지하기 위해,",
+  "백엔드 인터페이스 레이어의 거래쌍 코드는 계속",
+  "(A는 내부 가격 심볼로, 인터페이스 레이어와 체결 엔진 호환용이며, 구현 세부는 일반 사용자에게 완전히 투명하여 신경 쓸 필요 없습니다).",
+  "거래쌍 코드 Market Code",
+  "프런트엔드 중국어 제목은 「",
+  "AIX / USDT(테더)",
+  "」로 통일 표시됩니다. 인터페이스가 반환하는",
+  "코드 심볼은 백엔드 체결 시스템 호환용으로만 존재하며 UI에는 더 이상 표시되지 않고, 모든 주문 다이얼로그, 잔액 Pill, P&L 계산은 AIX를 직관적 단위로 사용합니다.",
+  "토큰 가치 앵커 Value Model",
+  "AxiX 거래소 플랫폼 현금흐름 가치에 앵커되며, 핵심 지원:",
+  "① 코피트레이딩 72분 슬롯 실거래 수익 풀의 수수료 분배와 생태 소비;",
+  "② AIX / USDT 거래 수수료 구간(프런트엔드 표시 명칭, 백엔드",
+  "인터페이스는 역사 호환 유지; 직접 추천이 많을수록 절약되고, 50% Burn + 50%는 A10 배당 풀로);",
+  "③ 마이너 방출, 스테이킹, 생태 소비, 활성화 메커니즘의 디플레이션 모델.",
+  "위 내용은 2026/08 토큰 이코노미 사전 공개 v0.1이며, 구체 세칙은 AxiX 공식 후속 공고 기준입니다.",
+  "Aethon Fund와의 경계 성명",
+  "★ 핵심 컴플라이언스 레드라인",
+  "어떠한 형태의 연관도 존재하지 않습니다",
+  "(가능한 오해를 피하기 위해 다시 한번 강조):",
+  "① AIX = AxiX 거래소",
+  "네이티브 토큰으로, 명칭은 AxiX =",
+  "(시그널 × 거래소)의",
+  "방법론 브랜드화 약어",
+  "에서 유래하며, 어떤 Aethon Fund 지분, 채권, 펀드 지분, LP 수익권도 대표하지 않습니다;",
+  "② Aethon Fund 공식 성명",
+  "공식 Twitter/X 계정 없음",
+  "(BusinessWire + Hedgeweek 2026/07 공개),",
+  "따라서 어떤 AIX 토큰도 「Aethon 币 / Aethon 토큰 / Aethon Fund의 토큰」으로 표현되어서는 안 되며,",
+  "위반자는 본 플랫폼이 책임을 물을 수 있습니다;",
+  "③ AIX의 중국어 정식 명칭은 「艾克斯币」이며(비공식 커뮤니티 상황에서는 애칭 「阿币」 사용 가능), 둘 다",
+  "Aethon 브랜드와 병렬 표기를 금지합니다",
+  "(예: 「Aethon 艾克斯币」「Aethon 阿币」 등 조합 사용 불가) 브랜드 귀속 혼동을 피하기 위함입니다.",
+  "브랜드명 유래 Naming Origin",
+  "ethon 방법론 ×",
+  "nal 시그널(첫 글자 A 취함) ×",
+  "기관 Instiutional ×",
+  "거래소 IndeX.",
+  "슬로건은 George Kailas의 명언에서 가져왔습니다: \"",
+  "시그널이 있으면, 추측하지 않는다.",
+  "※ 향후 Aethon Fund가 명확한 서면 반대를 제출할 경우, AxiX 브랜드명과 AIX 토큰명은 48시간 이내에 재차 명칭을 변경할 수 있으며, 사용자의 핵심 자산과 계약에는 영향을 주지 않습니다.",
+  "© 2026 AxiX 거래소 · 전신 WG Grid 트레이딩 플랫폼 · 2026/08 정식 명칭 변경. 본 문서는 본 플랫폼 AI 전략이 참조하는 방법론 출처를 소개하기 위한 것이며, 어떤 증권이나 펀드 투자 권유도, AIX 토큰의 모집 설명서도 구성하지 않습니다. Aethon Fund®는 해당 소유자의 상표이며, 본 플랫폼은 방법론 보증 인용으로만 사용합니다.",
+  "문서 버전 v1.2 · 마지막 업데이트: 2026-08-30 ·生效 사항: 프로젝트 명칭 변경 WG → AxiX / 토큰 코드 AXX → AIX(AIX = AxiX의 세 글자 약어) · 모든 사실 링크는 당일 검증을 마쳤습니다.",
+];
+
+// 条目 93-177（索引 92 起；p2 已覆盖 0-91）
+const START = 92;
+const out = {};
+for (let i = 0; i < ko.length; i++) {
+  const s = scan[START + i];
+  if (!s) break;
+  out[s.zh] = ko[i];
+}
+fs.writeFileSync(path.join(LANG_DIR, 'ko.p3.json'), JSON.stringify(out, null, 2), 'utf8');
+console.log('ko.p3 entries:', Object.keys(out).length, '| expected:', Math.min(ko.length, scan.length - START), '| empty values:', Object.values(out).filter(v => !v).length);

@@ -1,0 +1,86 @@
+(function () {
+  const pendingOrders = new Map();
+  const profileReads = new Map();
+
+  async function profile(symbol = 'BTC') {
+    const key = `${window.Portal?.walletKey?.() || window.currentWalletProfile?.address || ''}:${window.getWalletStateRevision?.() || 0}:${symbol}`;
+    if (!profileReads.has(key)) {
+      // 手动 AbortController（不依赖 AbortSignal.timeout，兼容老内核 webview）
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 10000);
+      const promise = request(`/api/platform/profile?symbol=${encodeURIComponent(symbol)}`, { signal:controller.signal })
+        .finally(() => clearTimeout(timer));
+      profileReads.set(key, promise);
+      promise.finally(() => { if (profileReads.get(key) === promise) profileReads.delete(key); }).catch(() => {});
+    }
+    const data = await profileReads.get(key);
+    // structuredClone 需 Chrome 98+，老内核 webview 回退 JSON 深拷贝
+    return typeof structuredClone === 'function' ? structuredClone(data) : JSON.parse(JSON.stringify(data));
+  }
+
+  function randomId() {
+    return globalThis.crypto?.randomUUID?.() || `order_${Date.now()}_${Math.random().toString(16).slice(2)}`;
+  }
+
+  async function request(path, options = {}) {
+    const walletRevision = window.getWalletStateRevision?.();
+    let response;
+    try {
+      response = await fetch(path, { credentials:'same-origin', ...options });
+    } catch (cause) {
+      throw Object.assign(new Error('无法连接平台服务，请检查本地服务是否运行'), { code:'NETWORK_ERROR', cause });
+    }
+    const data = await response.json().catch(() => ({}));
+    window.handlePlatformUnauthorized?.(response, walletRevision);
+    if (!response.ok) {
+      throw Object.assign(new Error(data.error || `平台请求失败 (${response.status})`), {
+        code:data.code || 'PLATFORM_ERROR',
+        status:response.status,
+      });
+    }
+    return data;
+  }
+
+  function orderFingerprint(payload) {
+    return JSON.stringify({
+      product:payload.product,
+      symbol:payload.symbol,
+      type:payload.type,
+      side:payload.side,
+      size:String(payload.size),
+      leverage:Number(payload.leverage) || 1,
+      marginMode:payload.marginMode === 'cross' ? 'cross' : 'isolated',
+      limitPrice:String(payload.limitPrice || ''),
+      triggerPrice:String(payload.triggerPrice || ''),
+      triggerDirection:payload.triggerDirection === 'below' ? 'below' : 'above',
+      reduceOnly:Boolean(payload.reduceOnly),
+    });
+  }
+
+  async function placeOrder(payload) {
+    const fingerprint = orderFingerprint(payload);
+    const clientOrderId = pendingOrders.get(fingerprint) || randomId();
+    pendingOrders.set(fingerprint, clientOrderId);
+    try {
+      const result = await request('/api/platform/order', {
+        method:'POST',
+        headers:{ 'Content-Type':'application/json', 'Idempotency-Key':clientOrderId },
+        body:JSON.stringify(payload),
+      });
+      pendingOrders.delete(fingerprint);
+      return result;
+    } catch (error) {
+      if (error.status) pendingOrders.delete(fingerprint);
+      throw error;
+    }
+  }
+
+  window.PlatformClient = {
+    profile,
+    placeOrder,
+    cancelOrder:orderId => request(`/api/platform/orders/${encodeURIComponent(orderId)}`, { method:'DELETE' }),
+    staking:(action, amount) => request(`/api/platform/${action}`, {
+      method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ amount }),
+    }),
+  };
+})();

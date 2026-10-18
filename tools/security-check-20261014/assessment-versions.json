@@ -1,0 +1,1 @@
+{"captured_beijing":"2026-10-14T17:20:21.034053+08:00","readonly":true,"dependencies":{"undici":{"installed":true,"version":"6.28.0"},"http-cache-semantics":{"installed":true,"version":"4.2.0"}},"directory_access":{"/opt":{"mode":"0o755","uid":0,"gid":0},"/opt/wg-platform":{"mode":"0o777","uid":0,"gid":0}}}

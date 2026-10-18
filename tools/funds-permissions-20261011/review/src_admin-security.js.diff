@@ -1,0 +1,10 @@
+--- src/admin-security.js before
++++ src/admin-security.js after
+@@ -11,5 +11,6 @@
+ }
+ 
+ export function isLegacyFundsPath(pathname) {
+-  return /^\/api\/admin\/(?:test-credits|withdrawals|withdrawal-automation)(?:\/|$)/.test(pathname);
++  return /^\/api\/admin\/(?:test-credits|withdrawals|withdrawal-automation)(?:\/|$)/.test(pathname)
++    || /^\/api\/admin\/a-token\/(?:grant|debit|grant-miner|grant-stake|activations\/confirm)(?:\/|$)/.test(pathname);
+ }

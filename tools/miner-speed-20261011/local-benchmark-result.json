@@ -1,0 +1,18 @@
+{
+  "isolated_local_snapshot": true,
+  "accounts_checked": 1,
+  "results": [
+    {
+      "wallet": "0xfD4204…8FB9dF",
+      "direct_count": 1,
+      "team_count": 1,
+      "baseline_full_ms": 7,
+      "optimized_full_ms": 3,
+      "summary_ms": 0.18,
+      "full_profile_identical": true
+    }
+  ],
+  "balances_unchanged": true,
+  "rewards_unchanged": true,
+  "captured_at_utc": "2026-10-10T21:17:58.576Z"
+}

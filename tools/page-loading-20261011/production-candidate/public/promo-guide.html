@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>AxiX AIX 零撸全攻略</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html,body { width:1080px; }
+  body { font-family:"Microsoft YaHei","PingFang SC",sans-serif; color:#c7d5d2;
+    background:
+      radial-gradient(900px 520px at 50% -3%, rgba(79,209,181,.16), transparent 62%),
+      radial-gradient(760px 500px at 50% 102%, rgba(79,209,181,.09), transparent 60%),
+      linear-gradient(172deg,#07100f 0%,#0a1112 55%,#081211 100%);
+    padding:64px 56px 72px; }
+  .wm { position:fixed; inset:0; display:flex; align-items:center; justify-content:center;
+    font-size:240px; font-weight:900; letter-spacing:24px; color:rgba(79,209,181,.04); pointer-events:none; z-index:0; }
+  .wrap { position:relative; z-index:1; }
+
+  /* ── 头部 ── */
+  .top { display:flex; align-items:center; gap:18px; }
+  .top img { width:72px; height:72px; border-radius:16px; box-shadow:0 0 28px rgba(79,209,181,.4); }
+  .brand { font-size:34px; font-weight:900; color:#eaf6f3; }
+  .brand b { color:#4fd1b5; }
+  .hero { text-align:center; margin-top:52px; }
+  .hero h1 { font-size:92px; font-weight:900; letter-spacing:6px;
+    background:linear-gradient(100deg,#8ff0dc,#4fd1b5 50%,#b9f4e6);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    text-shadow:0 0 60px rgba(79,209,181,.3); }
+  .hero p { margin-top:20px; font-size:30px; color:#7d9691; letter-spacing:8px; }
+  .hero .miner { margin-top:40px; width:360px; filter:drop-shadow(0 24px 50px rgba(79,209,181,.25)); }
+
+  /* ── 章节卡片 ── */
+  .card { background:linear-gradient(180deg, rgba(16,27,29,.92), rgba(12,21,23,.92));
+    border:1px solid #29413e; border-radius:28px; padding:44px 48px; margin-top:40px; }
+  .card h2 { font-size:44px; font-weight:900; color:#eaf6f3; margin-bottom:26px;
+    display:flex; align-items:center; gap:16px; }
+  .card h2::before { content:""; width:12px; height:44px; border-radius:6px;
+    background:linear-gradient(180deg,#8ff0dc,#4fd1b5); box-shadow:0 0 16px rgba(79,209,181,.6); }
+  .card h2 em { font-style:normal; color:#4fd1b5; }
+  .card p { font-size:28px; line-height:1.75; color:#a9bdb8; }
+  .card p b { color:#5df0cf; font-weight:800; }
+  .hl { color:#5df0cf; font-weight:800; }
+
+  /* ── 表格 ── */
+  table { width:100%; border-collapse:collapse; margin-top:10px; border-radius:16px; overflow:hidden; }
+  th { background:linear-gradient(135deg,#123833,#0e2a27); color:#8ff0dc; font-size:26px; font-weight:900;
+    padding:20px 10px; letter-spacing:2px; border:1px solid #24493f; }
+  td { font-size:25px; color:#c2d3cf; padding:18px 10px; text-align:center;
+    border:1px solid rgba(36,73,63,.55); background:rgba(13,32,32,.5); }
+  td b { color:#5df0cf; font-weight:800; }
+  .note { margin-top:18px; font-size:22px; line-height:1.7; color:#6d857f; }
+
+  /* ── 分润大字 ── */
+  .rates { display:flex; gap:22px; margin-top:8px; }
+  .rate { flex:1; background:#0d2020; border:1px solid #24493f; border-radius:20px; text-align:center; padding:34px 10px 28px; }
+  .rate .n { font-size:64px; font-weight:900; color:#5df0cf; text-shadow:0 0 30px rgba(79,209,181,.4); }
+  .rate .t { margin-top:10px; font-size:26px; color:#9fb4af; font-weight:700; }
+
+  /* ── 阶梯条 ── */
+  .steps { display:flex; flex-wrap:wrap; gap:14px; margin-top:14px; }
+  .step { background:#0d2020; border:1px solid #24493f; border-radius:14px; padding:18px 22px; text-align:center; }
+  .step b { display:block; font-size:34px; color:#5df0cf; font-weight:900; }
+  .step span { font-size:21px; color:#8ba39e; }
+
+  /* ── 双栏销毁 ── */
+  .burn { display:flex; gap:22px; margin-top:16px; }
+  .burn .b { flex:1; border-radius:20px; padding:32px 28px; text-align:center; }
+  .burn .b1 { background:linear-gradient(180deg,rgba(239,83,80,.14),rgba(239,83,80,.05)); border:1px solid rgba(239,83,80,.35); }
+  .burn .b2 { background:linear-gradient(180deg,rgba(79,209,181,.16),rgba(79,209,181,.05)); border:1px solid rgba(79,209,181,.4); }
+  .burn .n { font-size:58px; font-weight:900; }
+  .b1 .n { color:#ff8a80; } .b2 .n { color:#5df0cf; }
+  .burn .t { margin-top:8px; font-size:26px; color:#c2d3cf; font-weight:700; }
+  .burn .s { margin-top:6px; font-size:21px; color:#8ba39e; }
+
+  /* ── 优势图标 ── */
+  .feats { display:grid; grid-template-columns:1fr 1fr 1fr; gap:26px; margin-top:10px; }
+  .ft { background:#0d2020; border:1px solid #24493f; border-radius:20px; text-align:center; padding:34px 14px 30px; }
+  .ft .ic { width:78px; height:78px; margin:0 auto 16px; border-radius:50%;
+    background:linear-gradient(135deg,rgba(143,240,220,.2),rgba(79,209,181,.08));
+    border:1px solid rgba(79,209,181,.5); display:flex; align-items:center; justify-content:center;
+    font-size:38px; }
+  .ft b { display:block; font-size:26px; color:#e6f4f1; font-weight:800; }
+  .ft span { display:block; margin-top:8px; font-size:20px; color:#7d9691; line-height:1.5; }
+
+  .cta { margin-top:52px; text-align:center; }
+  .cta .btn { display:inline-block; font-size:42px; font-weight:900; color:#04211b; letter-spacing:8px;
+    background:linear-gradient(135deg,#8ff0dc,#4fd1b5); border-radius:999px; padding:28px 100px;
+    box-shadow:0 20px 60px rgba(79,209,181,.35); }
+  .foot { margin-top:34px; text-align:center; font-size:22px; color:#3d5a53; letter-spacing:4px; }
+</style>
+</head>
+<body>
+<div class="wm">AIX</div>
+<div class="wrap">
+
+  <div class="top">
+    <img src="assets/brand/logo.png" alt="AxiX">
+    <div class="brand">Axi<b>X</b> Exchange</div>
+  </div>
+
+  <div class="hero">
+    <h1>AIX 零撸全攻略</h1>
+    <p>矿机产出 · 质押收益 · 团队分润</p>
+    <img class="miner" src="assets/miner-rig.svg" alt="AIX 矿机">
+  </div>
+
+  <!-- 什么是 AxiX -->
+  <div class="card">
+    <h2>什么是 <em>AxiX</em>？</h2>
+    <p>AxiX 是部署在 <b>BSC 币安智能链</b>上的一站式 Web3 交易平台，平台代币 <b>AIX</b> 贯穿整个生态：算力矿机每日产出、质押收益、现货 P2P 撮合、合约跟单、团队级差分润、A10 手续费分红，所有数据<b>链上可查、自动日结</b>。</p>
+  </div>
+
+  <!-- 如何零撸 -->
+  <div class="card">
+    <h2>如何<em>零撸</em>？</h2>
+    <p>注册钱包后，仅需 <b>0.002 BNB</b>（约 1U）即可激活一台 <b>Mini 矿机</b>，周期 30 天，每天自动产出约 <b>3.33 AIX</b>，共产出 <b>100 AIX</b>。产出的 AIX 可直接在现货市场卖出变现，也可质押复投赚取收益，还能复投兑换 Pro 矿机扩大产出——<span class="hl">复利滚动，越滚越大</span>。</p>
+  </div>
+
+  <!-- 矿机套餐 -->
+  <div class="card">
+    <h2>矿机<em>算力套餐</em></h2>
+    <table>
+      <thead><tr><th>矿机型号</th><th>激活价</th><th>周期(天)</th><th>日产出</th><th>总产出</th><th>限购</th></tr></thead>
+      <tbody>
+        <tr><td><b>Mini 矿机</b></td><td>0.002 BNB</td><td>30</td><td>≈3.33 AIX</td><td><b>100 AIX</b></td><td>每人 1 台</td></tr>
+        <tr><td><b>Pro 矿机</b></td><td>0.05 BNB</td><td>90</td><td>≈16.67 AIX</td><td><b>1500 AIX</b></td><td>每人 1 台</td></tr>
+      </tbody>
+    </table>
+    <div class="note">备注：矿机每分钟自动结算产出，AIX 实时到账可自由支配；到期自动停止，无需维护；每档每人限购 1 台。</div>
+  </div>
+
+  <!-- 质押生息 -->
+  <div class="card">
+    <h2>AIX <em>质押收益</em></h2>
+    <table>
+      <thead><tr><th>套餐</th><th>期限</th><th>日利率</th><th>最低起存</th><th>结算方式</th></tr></thead>
+      <tbody>
+        <tr><td><b>活期</b></td><td>随进随出</td><td><b>0.30%</b></td><td>100 AIX</td><td>每日收益·AIX 随时赎回</td></tr>
+        <tr><td><b>1 号</b></td><td>30 天</td><td><b>0.80%</b></td><td>1000 AIX</td><td>AIX 与收益每日到账</td></tr>
+        <tr><td><b>2 号</b></td><td>60 天</td><td><b>1.00%</b></td><td>2000 AIX</td><td>AIX 与收益每日到账</td></tr>
+        <tr><td><b>3 号</b></td><td>90 天</td><td><b>1.20%</b></td><td>5000 AIX</td><td>AIX 与收益每日到账</td></tr>
+      </tbody>
+    </table>
+    <div class="note">备注：定期档每日释放 AIX 与收益，到期自动结清；活期收益每日到账，AIX 随进随出。</div>
+  </div>
+
+  <!-- 合约跟单 -->
+  <div class="card">
+    <h2>合约<em>跟单托管</em></h2>
+    <p>销毁 <b>1000 AIX</b> 即可开通 <b>30 天 VIP 跟单权益</b>（永久销毁不返还，到期续费需再销毁 1000 AIX）。投入 USDT，由 AI 策略自动开平仓，<b>月化 20%–25%</b> 随机浮动，每 8 小时结算入账，<b>USDT 随时可赎回</b>，进退自由。</p>
+    <div class="burn">
+      <div class="b b1"><div class="n">1000 AIX</div><div class="t">销毁开通 VIP</div><div class="s">30 天权益 · 永久销毁</div></div>
+      <div class="b b2"><div class="n">20-25%</div><div class="t">月化收益</div><div class="s">每 8 小时结算 · USDT 可赎回</div></div>
+    </div>
+    <div class="note">跟单收益以 USDT 结算；推荐人额外享受下级跟单收益 10% USDT 分成（见下方分享收益）。</div>
+  </div>
+
+  <!-- 分享收益 -->
+  <div class="card">
+    <h2>分享<em>推广收益</em></h2>
+    <p>下级激活矿机、质押赚收益，推荐人自动获得分润，<b>实时到账、永不归零</b>：</p>
+    <div class="rates" style="margin-top:24px">
+      <div class="rate"><div class="n">15%</div><div class="t">直推奖励<br>（一代）</div></div>
+      <div class="rate"><div class="n">10%</div><div class="t">间推奖励<br>（二代）</div></div>
+      <div class="rate"><div class="n">10%</div><div class="t">平级奖励<br>（同级别）</div></div>
+    </div>
+    <div class="note">此外还有级差分润：沿推荐链向上，第一个等级高于你的上级，赚取「等级收益比例差」。</div>
+    <p style="margin-top:26px; font-size:28px; line-height:1.75; color:#a9bdb8">推广<b>建议</b>：</p>
+    <div class="note" style="margin-top:8px; line-height:2.1">
+      ① 先自购 Mini 矿机（0.002 BNB）激活有效身份，再开始推广；<br>
+      ② 直推满 10 人，卖币手续费降至 3%，几乎无摩擦；<br>
+      ③ 引导下级参与合约跟单，长期享受其跟单收益 10% USDT 分成；<br>
+      ④ 团队累计持仓达标升级，级差分润比例最高 90%。
+    </div>
+  </div>
+
+  <!-- 团队等级 -->
+  <div class="card">
+    <h2>团队<em>等级体系</em>（A1–A10）</h2>
+    <p>个人持有 + 团队持有双达标即可升级，等级越高，级差收益比例越高：</p>
+    <table style="margin-top:20px">
+      <thead><tr><th>级别</th><th>个人持有(AIX)</th><th>团队持有(AIX)</th><th>收益比例</th></tr></thead>
+      <tbody>
+        <tr><td><b>A1</b></td><td>1,000</td><td>5,000</td><td><b>10%</b></td></tr>
+        <tr><td><b>A2</b></td><td>2,000</td><td>1 万</td><td><b>20%</b></td></tr>
+        <tr><td><b>A3</b></td><td>4,000</td><td>5 万</td><td><b>30%</b></td></tr>
+        <tr><td><b>A4</b></td><td>8,000</td><td>10 万</td><td><b>40%</b></td></tr>
+        <tr><td><b>A5</b></td><td>1.6 万</td><td>50 万</td><td><b>50%</b></td></tr>
+        <tr><td><b>A6</b></td><td>3.2 万</td><td>100 万</td><td><b>60%</b></td></tr>
+        <tr><td><b>A7</b></td><td>6.4 万</td><td>500 万</td><td><b>70%</b></td></tr>
+        <tr><td><b>A8</b></td><td>12.8 万</td><td>1000 万</td><td><b>80%</b></td></tr>
+        <tr><td><b>A9</b></td><td>25.6 万</td><td>5000 万</td><td><b>90%</b></td></tr>
+        <tr><td><b>A10</b></td><td>50 万</td><td>1 亿</td><td><b>手续费分红</b></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 卖出手续费阶梯 -->
+  <div class="card">
+    <h2>直推越多<em>手续费越低</em></h2>
+    <p>卖出 AIX 的手续费按<b>直推有效人数</b>阶梯递减（持有运行中矿机或质押即为有效）：</p>
+    <div class="steps">
+      <div class="step"><b>50%</b><span>0~1 人</span></div>
+      <div class="step"><b>40%</b><span>2~3 人</span></div>
+      <div class="step"><b>30%</b><span>4~5 人</span></div>
+      <div class="step"><b>20%</b><span>6~7 人</span></div>
+      <div class="step"><b>10%</b><span>8~9 人</span></div>
+      <div class="step"><b>3%</b><span>≥10 人</span></div>
+    </div>
+    <div class="note">团队长直推 10 人以上，卖币手续费仅 3%，几乎无摩擦。</div>
+  </div>
+
+  <!-- 通缩机制 -->
+  <div class="card">
+    <h2>AIX 为什么<em>越来越稀缺</em>？</h2>
+    <p>所有卖盘手续费 + 代币互转手续费，五五分流：</p>
+    <div class="burn">
+      <div class="b b1"><div class="n">50%</div><div class="t">永久销毁</div><div class="s">通缩销毁，流通量持续减少</div></div>
+      <div class="b b2"><div class="n">50%</div><div class="t">A10 分红池</div><div class="s">每日 0 点结算，均分所有 A10</div></div>
+    </div>
+    <div class="note" style="text-align:center; margin-top:22px">销毁得越多，流通越少，AIX 价值支撑越强；A10 股东每日坐享全平台手续费分红。</div>
+  </div>
+
+  <!-- 平台优势 -->
+  <div class="card">
+    <h2>为什么选择 <em>AxiX</em>？</h2>
+    <div class="feats">
+      <div class="ft"><div class="ic">⛓️</div><b>BSC 链上结算</b><span>合约自动执行，链上可查</span></div>
+      <div class="ft"><div class="ic">⏱️</div><b>自动日结</b><span>矿机/质押每分钟产出</span></div>
+      <div class="ft"><div class="ic">🔄</div><b>现货 P2P</b><span>挂单撮合，自由买卖</span></div>
+      <div class="ft"><div class="ic">📈</div><b>合约跟单</b><span>AI 策略，一键托管</span></div>
+      <div class="ft"><div class="ic">👥</div><b>团队分润</b><span>直推/间推/级差/平级</span></div>
+      <div class="ft"><div class="ic">💰</div><b>A10 分红</b><span>手续费每日均分</span></div>
+    </div>
+  </div>
+
+  <div class="cta">
+    <div class="btn">立即激活 · 开启 AIX 收益</div>
+  </div>
+  <div class="foot">AxiX Exchange · axix.cc · BSC Chain</div>
+
+</div>
+</body>
+</html>

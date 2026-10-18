@@ -1,0 +1,50 @@
+--- public/js/portfolio.js (before)
++++ public/js/portfolio.js (after)
+@@ -6,24 +6,32 @@
+     root().innerHTML = `<div class="portal-shell">${P.header('投资组合', 'Hyperliquid 账户净值、持仓与资产', '<div class="portal-actions"><button class="portal-button" onclick="Portal.load(\'portfolio\', true)">刷新</button><button class="portal-button primary" onclick="switchTab(\'trade\')">交易</button></div>')}<div id="portfolio-content">${P.walletGate()}</div></div>`;
+   }
+ 
+-  async function load() {
++  async function load(context = { isCurrent:() => true }) {
+     const user = Hyperliquid.address();
+     const host = document.getElementById('portfolio-content');
+     if (!user) { host.innerHTML = P.walletGate(); return; }
+-    host.innerHTML = P.loading(8);
+-    const [perps, spot, orders, vaults] = await Promise.all([
+-      Hyperliquid.info('clearinghouseState', { user }), Hyperliquid.info('spotClearinghouseState', { user }),
+-      Hyperliquid.info('frontendOpenOrders', { user }), Hyperliquid.info('userVaultEquities', { user }),
+-    ]);
+-    const summary = perps.marginSummary || perps.crossMarginSummary || {};
+-    const positions = (perps.assetPositions || []).map(item => item.position || item).filter(item => Number(item.szi));
+-    const balances = (spot.balances || []).filter(item => Number(item.total) || Number(item.hold));
+-    const spotValue = balances.reduce((sum, item) => sum + (item.coin === 'USDC' ? Number(item.total) : 0), 0);
+-    const accountValue = Number(summary.accountValue || 0);
+-    const upnl = positions.reduce((sum, item) => sum + Number(item.unrealizedPnl || 0), 0);
+-    const positionRows = positions.map(pos => `<tr><td><strong>${P.esc(pos.coin)}</strong></td><td class="${Number(pos.szi) >= 0 ? 'portal-positive' : 'portal-negative'}">${Number(pos.szi) >= 0 ? '多' : '空'} ${P.number(Math.abs(Number(pos.szi)), 8)}</td><td>${P.money(pos.positionValue)}</td><td>${P.number(pos.entryPx, 6)}</td><td>${P.number(pos.liquidationPx, 6)}</td><td class="${Number(pos.unrealizedPnl) >= 0 ? 'portal-positive' : 'portal-negative'}">${P.money(pos.unrealizedPnl)} (${P.percent(pos.returnOnEquity)})</td></tr>`).join('');
+-    const assetRows = balances.map(asset => `<tr><td><strong>${P.esc(asset.coin)}</strong><span class="portal-chip">现货</span></td><td>${P.number(asset.total, 8)}</td><td>${P.number(Number(asset.total) - Number(asset.hold || 0), 8)}</td><td>${P.number(asset.hold, 8)}</td><td>${asset.entryNtl ? P.money(asset.entryNtl) : '—'}</td></tr>`).join('');
+-    host.innerHTML = `<div class="portal-metrics">${P.metric('账户价值', P.money(accountValue + spotValue))}${P.metric('永续账户价值', P.money(accountValue))}${P.metric('未实现盈亏', `<span class="${upnl >= 0 ? 'portal-positive' : 'portal-negative'}">${P.money(upnl)}</span>`)}${P.metric('当前委托', P.number(orders.length, 0), `金库持仓 ${vaults.length || 0}`)}</div><div class="portal-section"><div class="portal-section-head"><h2>永续持仓</h2><span>${P.short(user)}</span></div><div class="portal-table-wrap"><table class="portal-table"><thead><tr><th>市场</th><th>方向 / 数量</th><th>仓位价值</th><th>开仓价</th><th>清算价</th><th>未实现盈亏</th></tr></thead><tbody>${positionRows || `<tr><td colspan="6">${P.empty('暂无永续持仓')}</td></tr>`}</tbody></table></div></div><div class="portal-section"><div class="portal-section-head"><h2>现货资产</h2><span>HyperCore</span></div><div class="portal-table-wrap"><table class="portal-table"><thead><tr><th>资产</th><th>总余额</th><th>可用</th><th>占用</th><th>成本价值</th></tr></thead><tbody>${assetRows || `<tr><td colspan="5">${P.empty('暂无现货资产')}</td></tr>`}</tbody></table></div></div>`;
++    const results = {}, errors = {};
++    function draw() {
++      if (!context.isCurrent() || Hyperliquid.address() !== user) return;
++      const { perps = {}, spot = {}, orders = [], vaults = [] } = results;
++      const summary = perps.marginSummary || perps.crossMarginSummary || {};
++      const positions = (perps.assetPositions || []).map(item => item.position || item).filter(item => Number(item.szi));
++      const balances = (spot.balances || []).filter(item => Number(item.total) || Number(item.hold));
++      const spotValue = balances.reduce((sum, item) => sum + (item.coin === 'USDC' ? Number(item.total) : 0), 0);
++      const accountValue = Number(summary.accountValue || 0);
++      const upnl = positions.reduce((sum, item) => sum + Number(item.unrealizedPnl || 0), 0);
++      const positionRows = positions.map(pos => `<tr><td><strong>${P.esc(pos.coin)}</strong></td><td class="${Number(pos.szi) >= 0 ? 'portal-positive' : 'portal-negative'}">${Number(pos.szi) >= 0 ? '多' : '空'} ${P.number(Math.abs(Number(pos.szi)), 8)}</td><td>${P.money(pos.positionValue)}</td><td>${P.number(pos.entryPx, 6)}</td><td>${P.number(pos.liquidationPx, 6)}</td><td class="${Number(pos.unrealizedPnl) >= 0 ? 'portal-positive' : 'portal-negative'}">${P.money(pos.unrealizedPnl)} (${P.percent(pos.returnOnEquity)})</td></tr>`).join('');
++      const assetRows = balances.map(asset => `<tr><td><strong>${P.esc(asset.coin)}</strong><span class="portal-chip">现货</span></td><td>${P.number(asset.total, 8)}</td><td>${P.number(Number(asset.total) - Number(asset.hold || 0), 8)}</td><td>${P.number(asset.hold, 8)}</td><td>${asset.entryNtl ? P.money(asset.entryNtl) : '—'}</td></tr>`).join('');
++      const fallback = (key, columns) => `<tr><td colspan="${columns}">${errors[key] ? P.error(errors[key].message, "Portal.load('portfolio',true)") : P.loading(2)}</td></tr>`;
++      const pending = key => results[key] ? '' : (errors[key] ? '—' : '加载中');
++      host.innerHTML = `<div class="portal-metrics">${P.metric('账户价值', results.perps && results.spot ? P.money(accountValue + spotValue) : '—')}${P.metric('永续账户价值', pending('perps') || P.money(accountValue))}${P.metric('未实现盈亏', pending('perps') || `<span class="${upnl >= 0 ? 'portal-positive' : 'portal-negative'}">${P.money(upnl)}</span>`)}${P.metric('当前委托', pending('orders') || P.number(orders.length, 0), `金库持仓 ${pending('vaults') || vaults.length}`)}</div><div class="portal-section"><div class="portal-section-head"><h2>永续持仓</h2><span>${P.short(user)}</span></div><div class="portal-table-wrap"><table class="portal-table"><thead><tr><th>市场</th><th>方向 / 数量</th><th>仓位价值</th><th>开仓价</th><th>清算价</th><th>未实现盈亏</th></tr></thead><tbody>${!results.perps ? fallback('perps', 6) : positionRows || `<tr><td colspan="6">${P.empty('暂无永续持仓')}</td></tr>`}</tbody></table></div></div><div class="portal-section"><div class="portal-section-head"><h2>现货资产</h2><span>HyperCore</span></div><div class="portal-table-wrap"><table class="portal-table"><thead><tr><th>资产</th><th>总余额</th><th>可用</th><th>占用</th><th>成本价值</th></tr></thead><tbody>${!results.spot ? fallback('spot', 5) : assetRows || `<tr><td colspan="5">${P.empty('暂无现货资产')}</td></tr>`}</tbody></table></div></div>`;
++    }
++    draw();
++    await Promise.all(Object.entries({ perps:'clearinghouseState', spot:'spotClearinghouseState', orders:'frontendOpenOrders', vaults:'userVaultEquities' }).map(async ([key, type]) => {
++      try { results[key] = await Hyperliquid.info(type, { user }); }
++      catch (error) { errors[key] = error; }
++      draw();
++    }));
+   }
+ 
+   P.register('portfolio', { render, load, fail:error => { document.getElementById('portfolio-content').innerHTML = P.error(error.message, "Portal.load('portfolio',true)"); } });

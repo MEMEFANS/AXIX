@@ -1,0 +1,18 @@
+{
+  "release": "mobile-auth-20261011-012935",
+  "deployedAt": "2026-10-11T01:29:50.0433216+08:00",
+  "backup": "/opt/wg-platform/backups/mobile-auth-20261011-012935/previous.tar.gz",
+  "files": [
+    "src/wallet-service.js",
+    "src/server.js",
+    "public/js/wallet.js",
+    "public/js/earn.js",
+    "public/js/i18n.js",
+    "public/js/page-loader.js",
+    "public/sw.js",
+    "public/index.html"
+  ],
+  "backendRestarted": true,
+  "serverSessionVerified": true,
+  "sha256Verified": true
+}

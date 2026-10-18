@@ -1,0 +1,74 @@
+{
+  "ai": {
+    "report": {
+      "t": 1792238445559,
+      "text": "规则复盘（近 24 小时）\nDecibel：未运行。\nExtended：未运行。\nRISEx：未运行。\n建议：继续观察成交密度；若长期无成交，可结合波动率复核区间和格距。"
+    },
+    "market": {
+      "t": 1792293598088,
+      "source": "Extended",
+      "market": "BTC-USD",
+      "price": 81843.68,
+      "frames": {
+        "4小时": {
+          "trend": "range",
+          "strength": 0.1,
+          "slopePct": -0.0067,
+          "atrPct": 0.756,
+          "emaGap": -0.68
+        },
+        "1小时": {
+          "trend": "range",
+          "strength": 0.02,
+          "slopePct": 0.0035,
+          "atrPct": 0.332,
+          "emaGap": -0.13
+        },
+        "15分钟": {
+          "trend": "range",
+          "strength": 0.05,
+          "slopePct": 0.0374,
+          "atrPct": 0.168,
+          "emaGap": 0.1
+        }
+      },
+      "regime": "震荡",
+      "suitable": true,
+      "recommendMode": "neutral",
+      "confidence": 0.57,
+      "suggestedRange": {
+        "lower": 80206.8064,
+        "upper": 83480.5536
+      },
+      "suggestedGridCount": 19,
+      "suggestedSpacingPct": 0.209,
+      "reasoning": "3 个周期中，上升 0、下降 0、震荡 3；平均 ATR 0.42%，趋势强度 5.67%。",
+      "caution": "规则只基于历史K线指标，震荡状态也可能快速转为单边行情。",
+      "currentGrid": null
+    },
+    "baseline": {
+      "t": 1792238445559,
+      "per": {
+        "de": {
+          "equity": 10000,
+          "realizedPnl": 0,
+          "completedRungs": 0,
+          "volume": 0
+        },
+        "ex": {
+          "equity": 10000,
+          "realizedPnl": 0,
+          "completedRungs": 0,
+          "volume": 0
+        },
+        "rs": {
+          "equity": 10000,
+          "realizedPnl": 0,
+          "completedRungs": 0,
+          "volume": 0
+        }
+      }
+    },
+    "reportDoneDay": "2026-10-17"
+  }
+}

@@ -1,0 +1,16 @@
+--- before/public/js/admin-agents.js
++++ after/public/js/admin-agents.js
+@@ -108,11 +108,8 @@
+ 
+   byId('admin-agents-refresh')?.addEventListener('click', loadAgents);
+ 
+-  // 点击代理管理导航时加载
+-  document.addEventListener('click', e => {
+-    const btn = e.target.closest('[data-admin-page="agents"]');
+-    if (btn) { bindForm(); bindActions(); loadAgents(); }
+-  });
++  // 由主导航和全局刷新按钮统一调用，避免进入页面时重复读取。
++  window.AdminAgents = { load() { bindForm(); bindActions(); return loadAgents(); } };
+ 
+   // 如果默认就在代理页
+   if (document.querySelector('[data-admin-panel="agents"].active')) {

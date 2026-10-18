@@ -1,0 +1,279 @@
+--- public/js/operator-admin.js before
++++ public/js/operator-admin.js after
+@@ -21,8 +21,6 @@
+   let currentPage = 'overview';
+   let dashboard = { summary:{}, users:[], tokens:[], recentDeposits:[], recentWithdrawals:[] };
+   let deposits = [];
+-  let withdrawals = [];
+-  let testCredits = [];
+ 
+   function setLoginError(message = '') { byId('admin-login-error').textContent = message; }
+   function toast(message = '') {
+@@ -414,49 +412,6 @@
+     </tr>`).join('') || emptyRow(7, '暂无充值记录');
+   }
+ 
+-  function renderTestCredits() {
+-    byId('admin-test-credit-count').textContent = `${testCredits.length} 条记录`;
+-    byId('admin-test-credits-body').innerHTML = testCredits.map(item => `<tr>
+-      <td>${date(item.createdAt)}</td><td><code>${esc(item.wallet)}</code></td>
+-      <td>${amount(item.amount)} ${esc(item.asset || 'USDT')}</td>
+-      <td>${esc(item.reason || '-')}</td><td>${esc(item.adminUsername || '-')}</td>
+-    </tr>`).join('') || emptyRow(5, '暂无测试入账记录');
+-  }
+-
+-  function renderWithdrawals() {
+-    const automation = dashboard.withdrawalAutomation || {};
+-    byId('admin-auto-withdraw-status').textContent = automation.enabled ? '已启用' : '未启用';
+-    byId('admin-auto-withdraw-status').style.color = automation.enabled ? 'var(--admin-green)' : 'var(--admin-yellow)';
+-    byId('admin-auto-withdraw-enabled').checked = Boolean(automation.enabled);
+-    byId('admin-auto-withdraw-threshold').value = automation.reviewThresholdUsdt || '';
+-    byId('admin-auto-withdraw-daily-limit').value = automation.dailyLimitUsdt || '';
+-    byId('admin-usdt-multiple-of-ten').checked = Boolean(automation.usdtMultipleOfTen);
+-    byId('admin-auto-withdraw-note').textContent = automation.enabled
+-      ? `单笔超过 ${automation.reviewThresholdUsdt} USDT，或 24 小时累计达到 ${automation.dailyLimitUsdt} USDT 后，需要人工放行。`
+-      : automation.configured ? '自动提现已关闭，所有新提现都会进入人工审核。' : '尚未配置出款私钥，配置并重启服务后才可开启。';
+-    byId('admin-withdrawal-count').textContent = `${withdrawals.length} 条记录`;
+-    byId('admin-withdrawals-body').innerHTML = withdrawals.map(item => {
+-      const reviewActions = automation.enabled
+-        ? `<button class="admin-table-action approve" type="button" data-withdrawal-action="release" data-id="${esc(item.id)}">放行自动转出</button><button class="admin-table-action reject" type="button" data-withdrawal-action="reject" data-id="${esc(item.id)}">拒绝退款</button>`
+-        : `<span class="admin-action-note">请先启用自动提现</span><button class="admin-table-action reject" type="button" data-withdrawal-action="reject" data-id="${esc(item.id)}">拒绝退款</button>`;
+-      const failedActions = automation.enabled
+-        ? `<button class="admin-table-action approve" type="button" data-withdrawal-action="retry" data-id="${esc(item.id)}">重试自动转出</button><button class="admin-table-action reject" type="button" data-withdrawal-action="reject" data-id="${esc(item.id)}">拒绝退款</button>`
+-        : '<span class="admin-action-note">请先启用自动提现</span>';
+-      const fundsActions = automation.enabled
+-        ? `<button class="admin-table-action approve" type="button" data-withdrawal-action="release" data-id="${esc(item.id)}">补币完成·放行</button><button class="admin-table-action reject" type="button" data-withdrawal-action="reject" data-id="${esc(item.id)}">拒绝退款</button>`
+-        : '<span class="admin-action-note">请先启用自动提现</span>';
+-      return `<tr>
+-      <td>${date(item.createdAt)}</td><td><code>${esc(shortAddress(item.wallet))}</code></td>
+-      <td>${esc(String(item.network || '').toUpperCase())}</td>
+-      <td>${amount(item.amount)} ${esc(item.asset || 'USDT')}</td><td>${statusBadge(item.status)}</td>
+-      <td>${item.status === 'pending_review' ? reviewActions : item.status === 'pending_funds' ? fundsActions : item.status === 'payout_failed' ? failedActions : '-'}</td>
+-    </tr>`;
+-    }).join('') || emptyRow(6, '暂无提现记录');
+-    document.querySelectorAll('[data-withdrawal-action]').forEach(button => {
+-      button.addEventListener('click', () => processWithdrawal(button.dataset.id, button.dataset.withdrawalAction));
+-    });
+-  }
+-
+   function renderTokens() {
+     byId('admin-tokens-body').innerHTML = (dashboard.tokens || []).filter(token => token.category !== 'stock').map(token => `<tr>
+       <td><img class="admin-token-logo" src="${esc(token.logo)}" alt=""><b>${esc(token.symbol)}</b></td>
+@@ -472,7 +427,7 @@
+ 
+   // 股票字母兜底头像（币安 CDN / 本地图都加载失败时）
+   function stockLetterLogo(symbol) {
+-    const text = String(symbol || '').slice(0, 4);
++    const text = String(symbol || '').replace(/[^A-Za-z0-9]/g, '').slice(0, 4);
+     const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#38b6a6"/><stop offset="1" stop-color="#2f8fd0"/></linearGradient></defs><rect width="64" height="64" rx="14" fill="url(#g)"/><text x="32" y="40" font-family="Arial,sans-serif" font-size="${text.length > 2 ? 20 : 26}" font-weight="700" fill="#0b1113" text-anchor="middle">${text}</text></svg>`;
+     return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+   }
+@@ -480,7 +435,7 @@
+     const sym = esc(token.symbol);
+     const local = `/assets/tokens/${sym.toLowerCase()}.png?v=5`;
+     const remote = `https://bin.bnbstatic.com/static/stock/${sym}.png`;
+-    return `<img class="admin-token-logo" src="${local}" alt="" onerror="if(!this.dataset.f){this.dataset.f=1;this.src='${remote}'}else{this.onerror=null;this.src='${stockLetterLogo(token.symbol)}'}">`;
++    return `<img class="admin-token-logo" src="${local}" alt="" data-stock-logo data-remote="${remote}" data-fallback="${esc(stockLetterLogo(token.symbol))}">`;
+   }
+   function mergeStocks(stocks) {
+     dashboard.tokens = (dashboard.tokens || []).filter(token => token.category !== 'stock').concat(stocks || []);
+@@ -498,6 +453,12 @@
+         <button class="admin-table-action admin-table-danger" type="button" data-stock-delete="${esc(token.symbol)}">删除</button>
+       </td>
+     </tr>`).join('') || emptyRow(6, '暂无股票代币');
++    byId('admin-stocks-body').querySelectorAll('[data-stock-logo]').forEach(image => {
++      image.addEventListener('error', () => {
++        if (!image.dataset.triedRemote) { image.dataset.triedRemote = '1'; image.src = image.dataset.remote; }
++        else if (!image.dataset.triedFallback) { image.dataset.triedFallback = '1'; image.src = image.dataset.fallback; }
++      });
++    });
+     document.querySelectorAll('[data-stock-toggle]').forEach(button => {
+       button.addEventListener('click', () => toggleStock(button.dataset.stockToggle, button.dataset.enabled === '1'));
+     });
+@@ -518,7 +479,7 @@
+       renderUsers();
+       renderTokens();
+       renderStocks();
+-      await Promise.all([loadDeposits(), loadWithdrawals(), loadTestCredits()]);
++      await loadDeposits();
+       byId('admin-updated').textContent = `更新于 ${new Date().toLocaleTimeString('zh-CN', { hour12:false })}`;
+     } catch (error) { toast(error.message); }
+   }
+@@ -530,71 +491,14 @@
+     renderDeposits();
+   }
+ 
+-  async function loadWithdrawals() {
+-    const filter = byId('admin-withdrawal-filter').value;
+-    const result = await api(`/api/admin/withdrawals${filter ? `?status=${encodeURIComponent(filter)}` : ''}`);
+-    withdrawals = result.items || [];
+-    renderWithdrawals();
+-  }
+-
+-  async function loadTestCredits() {
+-    const result = await api('/api/admin/test-credits');
+-    testCredits = result.items || [];
+-    renderTestCredits();
+-  }
+-
+   function navigate(page) {
+     currentPage = page;
+-    const titles = { overview:'首页总览', users:'用户管理', 'test-credits':'测试入账', deposits:'充值记录', withdrawals:'提现审核', tokens:'代币管理', stocks:'股票管理', agents:'代理管理', support:'在线客服' };
++    const titles = { overview:'首页总览', users:'用户管理', deposits:'充值记录', tokens:'代币管理', stocks:'股票管理', agents:'代理管理', support:'在线客服' };
+     document.querySelectorAll('[data-admin-page]').forEach(button => button.classList.toggle('active', button.dataset.adminPage === page));
+     document.querySelectorAll('[data-admin-panel]').forEach(panel => panel.classList.toggle('active', panel.dataset.adminPanel === page));
+     byId('admin-page-title').textContent = titles[page] || '管理后台';
+     window.scrollTo({ top:0, behavior:'auto' });
+     if (page === 'support') activateSupport(); else deactivateSupport();
+-  }
+-
+-  async function processWithdrawal(id, action) {
+-    let body;
+-    if (action === 'release' || action === 'retry') {
+-      const confirmed = await confirmDialog(action === 'release'
+-        ? '确认放行这笔大额提现并由平台出款钱包自动转出吗？'
+-        : '确认重新尝试自动转出这笔提现吗？');
+-      if (!confirmed) return;
+-      body = { action };
+-    } else {
+-      const reason = await promptDialog('请输入拒绝原因：', '人工审核未通过');
+-      if (reason === null) return;
+-      body = { action:'reject', reason:reason.trim() || '人工审核未通过' };
+-    }
+-    try {
+-      await api(`/api/admin/withdrawals/${encodeURIComponent(id)}`, { method:'POST', body:JSON.stringify(body) });
+-      toast(action === 'release' ? '已放行，正在进入自动出款队列' : action === 'retry' ? '已重新进入自动出款队列' : '提现已拒绝并退回用户余额');
+-      await loadAll();
+-    } catch (error) { toast(error.message); }
+-  }
+-
+-  async function saveWithdrawalSettings(event) {
+-    event.preventDefault();
+-    const button = event.submitter || event.target.querySelector('button[type="submit"]');
+-    button.disabled = true;
+-    try {
+-      const result = await api('/api/admin/withdrawal-automation', {
+-        method:'PATCH',
+-        body:JSON.stringify({
+-          enabled:byId('admin-auto-withdraw-enabled').checked,
+-          reviewThresholdUsdt:byId('admin-auto-withdraw-threshold').value,
+-          dailyLimitUsdt:byId('admin-auto-withdraw-daily-limit').value,
+-          usdtMultipleOfTen:byId('admin-usdt-multiple-of-ten').checked,
+-        }),
+-      });
+-      dashboard.withdrawalAutomation = result;
+-      renderWithdrawals();
+-      toast('自动提现设置已保存');
+-    } catch (error) {
+-      renderWithdrawals();
+-      toast(error.message);
+-    }
+-    finally { button.disabled = false; }
+   }
+ 
+   async function toggleToken(symbol, enabled) {
+@@ -703,32 +607,6 @@
+     } catch (error) { stockStatus(error.message, true); }
+   }
+ 
+-  async function submitTestCredit(event) {
+-    event.preventDefault();
+-    const form = event.currentTarget;
+-    const button = event.submitter || form.querySelector('button[type="submit"]');
+-    const wallet = byId('admin-test-credit-wallet').value.trim();
+-    const creditAmount = byId('admin-test-credit-amount').value.trim();
+-    const reason = byId('admin-test-credit-reason').value.trim();
+-    if (!await confirmDialog(`确认给钱包 ${shortAddress(wallet)} 增加 ${creditAmount} USDT 平台测试余额？`)) return;
+-    form.dataset.requestId ||= `credit_${crypto.randomUUID().replaceAll('-', '')}`;
+-    button.disabled = true;
+-    byId('admin-test-credit-status').textContent = '正在处理入账...';
+-    try {
+-      const result = await api('/api/admin/test-credits', {
+-        method:'POST', body:JSON.stringify({ wallet, amount:creditAmount, reason, requestId:form.dataset.requestId }),
+-      });
+-      delete form.dataset.requestId;
+-      form.reset();
+-      byId('admin-test-credit-status').textContent = `${result.adjustment.amount} USDT 已入账`;
+-      toast('测试资金已加入用户的平台余额');
+-      await loadAll();
+-    } catch (error) {
+-      byId('admin-test-credit-status').textContent = error.message;
+-      toast(error.message);
+-    } finally { button.disabled = false; }
+-  }
+-
+   byId('admin-login-form').addEventListener('submit', async event => {
+     event.preventDefault();
+     const button = byId('admin-login-button');
+@@ -754,14 +632,13 @@
+   document.querySelectorAll('[data-close-detail]').forEach(el => el.addEventListener('click', () => {
+     byId('admin-user-detail-modal').hidden = true;
+   }));
++  document.querySelectorAll('[data-open-funds]').forEach(button => button.addEventListener('click', () => window.open('/funds-admin.html', '_blank', 'noopener,noreferrer')));
+   byId('admin-refresh').addEventListener('click', () => currentPage==='community' ? window.AdminCommunity?.load() : loadAll());
+   byId('admin-user-search').addEventListener('input', renderUsers);
+   byId('admin-real-only').addEventListener('change', renderUsers);
+   byId('admin-deposit-filter').addEventListener('change', () => loadDeposits().catch(error => toast(error.message)));
+-  byId('admin-withdrawal-filter').addEventListener('change', () => loadWithdrawals().catch(error => toast(error.message)));
+   byId('admin-token-form').addEventListener('submit', submitToken);
+   byId('admin-stock-form').addEventListener('submit', submitStock);
+-  byId('admin-test-credit-form').addEventListener('submit', submitTestCredit);
+ 
+   // ── AIX 代币充值 / 扣除 ──
+   const aixActionSel = byId('admin-aix-action');
+@@ -813,7 +690,6 @@
+       byId('admin-aix-balance-result').innerHTML = `<b>AIX 余额：${aBal}</b>　|　USDT 余额：${usdtBal}`;
+     } catch (error) { byId('admin-aix-balance-result').textContent = error.message; }
+   });
+-  byId('admin-withdraw-settings-form').addEventListener('submit', saveWithdrawalSettings);
+   document.querySelectorAll('[data-admin-page]').forEach(button => button.addEventListener('click', () => {
+     navigate(button.dataset.adminPage);
+     // mobile: 点菜单后自动收起侧栏
+@@ -916,13 +792,6 @@
+     const t = supportConv.ticket || {};
+     const msgs = supportConv.messages || [];
+     const closed = t.status === 'closed';
+-    const bubbles = msgs.map(m => {
+-      const mine = m.sender === 'admin';
+-      return `<div class="as-msg ${mine ? 'me' : 'them'}">
+-        <div class="as-bubble">${esc(m.body).replace(/\n/g, '<br>')}</div>
+-        <div class="as-time">${mine ? '客服' : '用户'} · ${supportTime(m.createdAt)}</div>
+-      </div>`;
+-    }).join('') || '<div class="as-empty">还没有消息</div>';
+     host.innerHTML = `
+       <div class="as-head">
+         <div>
+@@ -931,13 +800,22 @@
+         </div>
+         <button type="button" class="admin-secondary-button" id="admin-support-close" ${closed ? 'disabled' : ''}>${closed ? '已关闭' : '关闭会话'}</button>
+       </div>
+-      <div class="as-messages" id="admin-support-messages">${bubbles}</div>
++      <div class="as-messages" id="admin-support-messages"></div>
+       <div class="as-reply">
+         <textarea id="admin-support-reply-input" rows="2" maxlength="2000" placeholder="输入回复内容…（Enter 发送，Shift+Enter 换行）"></textarea>
+         <button type="button" class="admin-primary-button" id="admin-support-send">发送回复</button>
+       </div>`;
+     const box = byId('admin-support-messages');
+-    if (box) box.scrollTop = box.scrollHeight;
++    if (box) {
++      for (const message of msgs) {
++        const row = document.createElement('div'); row.className = `as-msg ${message.sender === 'admin' ? 'me' : 'them'}`;
++        const bubble = document.createElement('div'); bubble.className = 'as-bubble'; bubble.style.whiteSpace = 'pre-wrap'; bubble.textContent = String(message.body ?? '');
++        const time = document.createElement('div'); time.className = 'as-time'; time.textContent = `${message.sender === 'admin' ? '客服' : '用户'} · ${supportTime(message.createdAt)}`;
++        row.append(bubble, time); box.append(row);
++      }
++      if (!msgs.length) { const empty = document.createElement('div'); empty.className = 'as-empty'; empty.textContent = '还没有消息'; box.append(empty); }
++      box.scrollTop = box.scrollHeight;
++    }
+     byId('admin-support-send').addEventListener('click', sendSupportReply);
+     byId('admin-support-close').addEventListener('click', closeSupportTicketFromAdmin);
+     const input = byId('admin-support-reply-input');
+@@ -1303,7 +1181,7 @@
+     if (page === 'lottery') window.AdminLottery?.load();
+     if (page === 'a-kline' && !aKlineStatus) loadAKline();
+     if (page === 'a-miner' && !aMinerData) loadAMiner();
+-    const titlesMap = { overview:'首页总览', users:'用户管理', 'test-credits':'测试入账', deposits:'充值记录', withdrawals:'提现审核', tokens:'代币管理', stocks:'股票管理', 'a-kline':'AIX 行情调控', 'a-token-balance':'AIX 代币管理', 'a-miner':'AIX 矿机管理', lottery:'抽奖管理' };
++    const titlesMap = { overview:'首页总览', users:'用户管理', deposits:'充值记录', tokens:'代币管理', stocks:'股票管理', 'a-kline':'AIX 行情调控', 'a-token-balance':'AIX 代币管理', 'a-miner':'AIX 矿机管理', lottery:'抽奖管理' };
+     byId('admin-page-title').textContent = page==='community' ? '社群链接' : (titlesMap[page] || '管理后台');
+   };
+   // 刷新按钮

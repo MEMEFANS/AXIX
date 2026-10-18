@@ -1,0 +1,39 @@
+{
+  "isolatedSyntheticData": true,
+  "userCount": 7223,
+  "scenarios": [
+    "overview loads only its own data and creates no hidden user/deposit tables",
+    "actual users endpoint pages 50 users and next/previous preserve all records",
+    "debounced server search works across all pages and the real-user filter retains totals",
+    "an older search response cannot overwrite a newer result",
+    "tokens, stocks and deposits read their own endpoints after navigation",
+    "AIX kline/miner pages remain functional and simultaneous refreshes share one request",
+    "lottery loads only selected subtab data; assigned awards also load the prize list",
+    "support and agents load independently and the global refresh updates agents",
+    "50-row users list and pager work on mobile",
+    "logout clears loaded data and rejects pending user responses; no financial writes occurred"
+  ],
+  "runtimeErrors": [],
+  "unexpectedWrites": [],
+  "frontendBefore": {
+    "nodes": 181418,
+    "hiddenUserRows": 7223,
+    "hiddenDepositRows": 19,
+    "longTasks": [
+      96,
+      2077,
+      101
+    ],
+    "firstDataReadyMs": 2833
+  },
+  "frontendAfter": {
+    "nodes": 484,
+    "hiddenUserRows": 0,
+    "hiddenDepositRows": 0,
+    "longTasks": [
+      63
+    ],
+    "firstDataReadyMs": 135
+  },
+  "passed": true
+}

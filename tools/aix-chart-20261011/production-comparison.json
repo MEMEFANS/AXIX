@@ -1,0 +1,20 @@
+[
+  {
+    "path": "public/js/a-token-trade.js",
+    "patch_groups": 5,
+    "production_equals_local_before": true,
+    "candidate_equals_local_after": true
+  },
+  {
+    "path": "public/js/page-loader.js",
+    "patch_groups": 1,
+    "production_equals_local_before": true,
+    "candidate_equals_local_after": true
+  },
+  {
+    "path": "public/index.html",
+    "patch_groups": 1,
+    "production_equals_local_before": true,
+    "candidate_equals_local_after": true
+  }
+]

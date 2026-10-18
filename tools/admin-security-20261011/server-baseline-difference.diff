@@ -1,0 +1,21 @@
+--- 
++++ 
+@@ -979,18 +979,6 @@
+       if (await supportApi.handleAdmin(request, res, p)) return;
+       if (await aTokenAdminApi.handle(request, res, p, { operatorSession, url, allowRequest })) return;
+       if (await lotteryApi.handle(request, res, p)) return;
+-      // 手动触发平级奖 + A10 池日结（幂等；服务重启错过 0 点窗口时补发用）
+-      if (p === '/api/admin/a-token/settle-daily' && request.method === 'POST') {
+-        if (!allowRequest(request, res, 'a-token-admin', 10, 60_000)) return;
+-        try {
+-          try { aTokenMinerService.processAll(); } catch (e) { console.error('[A币矿机]', e?.message || e); }
+-          try { aTokenStakingService.processAll(); } catch (e) { console.error('[A币质押]', e?.message || e); }
+-          const parity = aTokenTeamService.settleParityRewards();
+-          const a10 = aTokenTeamService.settleA10Pool();
+-          console.log('[手动日结] 平级奖', JSON.stringify(parity), 'A10', JSON.stringify(a10));
+-          return send(res, 200, { ok: true, parity, a10 });
+-        } catch (error) { return send(res, 400, { error: error?.message || String(error) }); }
+-      }
+       // ── Admin 代理账号管理 ──────────────────────────────────────
+       if (p === '/api/admin/agents' && request.method === 'GET') {
+         const agents = walletService.database.listAgents().map(({ passwordHash, ...rest }) => rest);

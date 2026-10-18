@@ -1,0 +1,19 @@
+--- public/js/vaults.js before
++++ public/js/vaults.js after
+@@ -1,7 +1,7 @@
+ (function () {
+   const P = Portal;
+   function render() { document.getElementById('tab-vaults').innerHTML = `<div class="portal-shell">${P.header('金库', '浏览 Hyperliquid 协议与交易者金库', '<div class="portal-actions"><button class="portal-button primary" onclick="Portal.load(\'vaults\', true)">刷新金库</button></div>')}<div id="vaults-content">${P.loading(8)}</div></div>`; }
+-  async function load() {
++  async function load(context = { isCurrent:() => true }) {
+     const host = document.getElementById('vaults-content'); host.innerHTML = P.loading(8);
+     let vaults = await Hyperliquid.info('vaultSummaries');
+     if (!Array.isArray(vaults)) vaults = vaults.vaults || vaults.data || [];
+@@ -13,6 +13,7 @@
+       const pnls = history.pnlHistory || [];
+       vaults = hlp ? [{ ...hlp, tvl:values.at(-1)?.[1], allTimePnl:pnls.at(-1)?.[1], numFollowers:hlp.followers?.length }] : [];
+     }
++    if (!context.isCurrent()) return;
+     const normalized = vaults.map(item => ({
+       address:item.vaultAddress || item.address, name:item.name || item.vaultName || 'Hyperliquid Vault',
+       tvl:Number(item.tvl || item.accountValue || item.equity || 0), apr:Number(item.apr || item.apy || item.yearlyReturn || 0),

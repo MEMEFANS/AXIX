@@ -1,0 +1,11 @@
+=== 词典规模 ===
+dict(en) keys: 2260
+EXTRA[zh-TW] keys: 2079
+EXTRA[ja] keys: 1965
+EXTRA[ko] keys: 1965
+EXTRA[ru] keys: 1965
+EXTRA[es] keys: 1965
+
+=== 英文(dict) 未覆盖的中文文案（按文件） ===
+
+总计缺失片段: 0

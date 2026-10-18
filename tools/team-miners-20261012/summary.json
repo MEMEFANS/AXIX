@@ -1,0 +1,212 @@
+{
+  "root": "0x7d1159b9f72f4f15493773e4473b9555ae73ac29",
+  "excluded_branch": "0xe9ee6473942671b1779b60c0bafd850ccf55f06a",
+  "start_beijing": "2026-10-06T00:00:00+08:00",
+  "captured_at_beijing": "2026-10-12T14:59:40.852127+08:00",
+  "branches": [
+    {
+      "wallet": "0x5E7E8920e8a44079a20B57A4ef0861F041361cDC",
+      "short": "0x5E7E89...361cDC",
+      "joined_at_beijing": "2026-10-08 14:45:08",
+      "direct_mini": 1,
+      "direct_pro": 1,
+      "team_mini": 10,
+      "team_pro": 10,
+      "confirmed_count": 22,
+      "team_members_excluding_direct": 10,
+      "confirmed_bnb": "0.572",
+      "actual_miner_records": 22
+    },
+    {
+      "wallet": "0xa0A2Dd3edC11b5999422F5d19DA559e105d68Ae7",
+      "short": "0xa0A2Dd...d68Ae7",
+      "joined_at_beijing": "2026-10-08 14:45:32",
+      "direct_mini": 1,
+      "direct_pro": 1,
+      "team_mini": 10,
+      "team_pro": 10,
+      "confirmed_count": 22,
+      "team_members_excluding_direct": 10,
+      "confirmed_bnb": "0.572",
+      "actual_miner_records": 22
+    },
+    {
+      "wallet": "0xF43b33dD02cc6F05B2FD12762a06A6d7Fd166a9A",
+      "short": "0xF43b33...166a9A",
+      "joined_at_beijing": "2026-10-08 14:45:51",
+      "direct_mini": 1,
+      "direct_pro": 1,
+      "team_mini": 10,
+      "team_pro": 10,
+      "confirmed_count": 22,
+      "team_members_excluding_direct": 10,
+      "confirmed_bnb": "0.572",
+      "actual_miner_records": 22
+    },
+    {
+      "wallet": "0xbBc8043145DF0F17caF2D76E24dDC854C3260400",
+      "short": "0xbBc804...260400",
+      "joined_at_beijing": "2026-10-08 14:46:13",
+      "direct_mini": 1,
+      "direct_pro": 1,
+      "team_mini": 10,
+      "team_pro": 10,
+      "confirmed_count": 22,
+      "team_members_excluding_direct": 10,
+      "confirmed_bnb": "0.572",
+      "actual_miner_records": 22
+    },
+    {
+      "wallet": "0x53Dc0e3D6f67037e91261e1443219528A44C8C6A",
+      "short": "0x53Dc0e...4C8C6A",
+      "joined_at_beijing": "2026-10-08 14:49:21",
+      "direct_mini": 1,
+      "direct_pro": 1,
+      "team_mini": 10,
+      "team_pro": 10,
+      "confirmed_count": 22,
+      "team_members_excluding_direct": 10,
+      "confirmed_bnb": "0.572",
+      "actual_miner_records": 22
+    },
+    {
+      "wallet": "0x6f2D1435B4c6BF8729D47278705D686620e0A046",
+      "short": "0x6f2D14...e0A046",
+      "joined_at_beijing": "2026-10-08 14:49:39",
+      "direct_mini": 1,
+      "direct_pro": 1,
+      "team_mini": 10,
+      "team_pro": 10,
+      "confirmed_count": 22,
+      "team_members_excluding_direct": 10,
+      "confirmed_bnb": "0.572",
+      "actual_miner_records": 22
+    },
+    {
+      "wallet": "0xd60D51e7C8779B5B39c95B1969907E228F3fb6a4",
+      "short": "0xd60D51...3fb6a4",
+      "joined_at_beijing": "2026-10-08 14:50:04",
+      "direct_mini": 1,
+      "direct_pro": 1,
+      "team_mini": 10,
+      "team_pro": 10,
+      "confirmed_count": 22,
+      "team_members_excluding_direct": 10,
+      "confirmed_bnb": "0.572",
+      "actual_miner_records": 22
+    },
+    {
+      "wallet": "0xe8f0E8ff69aB780725415049bC237072D35da8b5",
+      "short": "0xe8f0E8...5da8b5",
+      "joined_at_beijing": "2026-10-08 14:50:26",
+      "direct_mini": 1,
+      "direct_pro": 1,
+      "team_mini": 10,
+      "team_pro": 10,
+      "confirmed_count": 22,
+      "team_members_excluding_direct": 10,
+      "confirmed_bnb": "0.572",
+      "actual_miner_records": 22
+    },
+    {
+      "wallet": "0xAd9DfC6d99648AFe138bCE207F4286745F8a5d8D",
+      "short": "0xAd9DfC...8a5d8D",
+      "joined_at_beijing": "2026-10-08 14:50:48",
+      "direct_mini": 1,
+      "direct_pro": 1,
+      "team_mini": 10,
+      "team_pro": 10,
+      "confirmed_count": 22,
+      "team_members_excluding_direct": 10,
+      "confirmed_bnb": "0.572",
+      "actual_miner_records": 22
+    },
+    {
+      "wallet": "0x3618525CD3c773065B61BC2eE6FbB83FB4134270",
+      "short": "0x361852...134270",
+      "joined_at_beijing": "2026-10-09 14:52:28",
+      "direct_mini": 1,
+      "direct_pro": 1,
+      "team_mini": 218,
+      "team_pro": 196,
+      "confirmed_count": 416,
+      "team_members_excluding_direct": 218,
+      "confirmed_bnb": "10.288",
+      "actual_miner_records": 420
+    }
+  ],
+  "totals": {
+    "direct_mini": 10,
+    "direct_pro": 10,
+    "team_mini": 308,
+    "team_pro": 286,
+    "confirmed_count": 614,
+    "actual_miner_records": 618,
+    "team_members_excluding_direct": 308,
+    "mini": 318,
+    "pro": 296,
+    "confirmed_bnb": "15.436"
+  },
+  "exceptions": [
+    {
+      "wallet": "0x614C4FbA35AaE54B40D4db7089521327E88D152c",
+      "branch": "0x3618525CD3c773065B61BC2eE6FbB83FB4134270",
+      "plan": "pro1500",
+      "started_at_beijing": "2026-10-11 00:24:52",
+      "miner_status": "active",
+      "activation_statuses": [
+        "rejected"
+      ],
+      "miner_id": "atm_pro1500_1791649492371_61913814-b70e-4f6c-91b0-428bd83b0fe1",
+      "reject_reason": "收款地址不符"
+    },
+    {
+      "wallet": "0xD08f17EAC2760041C26c93c026DFF95cB8b41108",
+      "branch": "0x3618525CD3c773065B61BC2eE6FbB83FB4134270",
+      "plan": "pro1500",
+      "started_at_beijing": "2026-10-11 00:26:43",
+      "miner_status": "active",
+      "activation_statuses": [
+        "rejected"
+      ],
+      "miner_id": "atm_pro1500_1791649603228_a1ea0588-f57f-4764-a98a-a31200dfcc65",
+      "reject_reason": "收款地址不符"
+    },
+    {
+      "wallet": "0xebD85cE5e40a5Ba3da113662B4AD6277e131b7B9",
+      "branch": "0x3618525CD3c773065B61BC2eE6FbB83FB4134270",
+      "plan": "pro1500",
+      "started_at_beijing": "2026-10-11 00:27:29",
+      "miner_status": "active",
+      "activation_statuses": [
+        "rejected"
+      ],
+      "miner_id": "atm_pro1500_1791649649667_698230e3-ad34-4986-9cf8-11ef508e5cd0",
+      "reject_reason": "收款地址不符"
+    },
+    {
+      "wallet": "0xA26bc28F6b574f8D3fE0BF03B3C5E69e09B46330",
+      "branch": "0x3618525CD3c773065B61BC2eE6FbB83FB4134270",
+      "plan": "pro1500",
+      "started_at_beijing": "2026-10-11 00:32:17",
+      "miner_status": "active",
+      "activation_statuses": [
+        "rejected"
+      ],
+      "miner_id": "atm_pro1500_1791649937307_06d7fd8a-7907-436c-bc21-8f5a6ed5b3c7",
+      "reject_reason": "收款地址不符"
+    }
+  ],
+  "database_read_only": true,
+  "exceptions_verified_at_utc": "2026-10-12T07:06:29.029258+00:00",
+  "chain_payment_verification": {
+    "checked": 614,
+    "passed": true,
+    "mini": 318,
+    "pro": 296,
+    "bnb_total": "15.436",
+    "verified_at_beijing": "2026-10-12 15:27:17",
+    "platform_collection_addresses_match": true,
+    "miner_creation_delay_ms_max": 19
+  }
+}

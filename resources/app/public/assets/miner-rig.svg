@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 420" role="img" aria-labelledby="title desc">
+  <title id="title">AIX 矿机</title>
+  <desc id="desc">一台带有发光风扇和绿色状态灯的现代化加密货币矿机插画</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#112a2b"/>
+      <stop offset=".55" stop-color="#0d1a1e"/>
+      <stop offset="1" stop-color="#201a2b"/>
+    </linearGradient>
+    <linearGradient id="metal" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#354a4a"/>
+      <stop offset=".5" stop-color="#182b2e"/>
+      <stop offset="1" stop-color="#0c171b"/>
+    </linearGradient>
+    <linearGradient id="front" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#183d3c"/>
+      <stop offset="1" stop-color="#0e2025"/>
+    </linearGradient>
+    <linearGradient id="teal" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#75f1d8"/>
+      <stop offset="1" stop-color="#25aa9c"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffe18a"/>
+      <stop offset="1" stop-color="#d5912c"/>
+    </linearGradient>
+    <filter id="glow" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur stdDeviation="7" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="soft" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="18"/></filter>
+  </defs>
+  <rect width="960" height="420" rx="30" fill="url(#bg)"/>
+  <circle cx="790" cy="72" r="90" fill="#50d2c2" opacity=".08" filter="url(#soft)"/>
+  <circle cx="170" cy="355" r="120" fill="#9f7aea" opacity=".08" filter="url(#soft)"/>
+  <path d="M72 336H888" stroke="#294243" stroke-width="2" opacity=".8"/>
+  <path d="M112 350H848" stroke="#50d2c2" stroke-width="2" stroke-dasharray="5 13" opacity=".3"/>
+
+  <!-- rear chassis -->
+  <path d="M220 112 690 74l126 58-482 50z" fill="#233b3d" stroke="#4a6a67" stroke-width="3"/>
+  <path d="M334 182 816 132v168l-482 42z" fill="url(#metal)" stroke="#3b5556" stroke-width="3"/>
+  <path d="m220 112 114 70v160l-114-58z" fill="#132326" stroke="#365050" stroke-width="3"/>
+  <path d="m334 182 482-50-116-57-480 37z" fill="#223c3d" opacity=".8"/>
+
+  <!-- front panel -->
+  <path d="m366 198 410-42v116l-410 35z" fill="url(#front)" stroke="#50716d" stroke-width="3"/>
+  <path d="m388 212 366-37" stroke="#74e6d1" stroke-width="2" opacity=".55"/>
+  <path d="m388 282 366-37" stroke="#152f32" stroke-width="3"/>
+  <path d="m386 295 368-38" stroke="#50d2c2" stroke-width="2" opacity=".3"/>
+
+  <!-- three cooling fans -->
+  <g transform="translate(450 245)">
+    <circle r="41" fill="#081519" stroke="#3a7770" stroke-width="3"/>
+    <circle r="31" fill="#0d292c" stroke="#50d2c2" stroke-width="2" opacity=".8"/>
+    <g fill="url(#teal)" opacity=".86">
+      <path d="M0-5c-2-18 3-26 11-25 8 1 10 10 4 22-4 8-9 12-15 13z"/>
+      <path d="M5 0c18-2 26 3 25 11-1 8-10 10-22 4C0 11-4 6-5 0z" transform="rotate(120)"/>
+      <path d="M5 0c18-2 26 3 25 11-1 8-10 10-22 4C0 11-4 6-5 0z" transform="rotate(240)"/>
+    </g><circle r="6" fill="#b8fff0" filter="url(#glow)"/>
+  </g>
+  <g transform="translate(570 235)">
+    <circle r="41" fill="#081519" stroke="#3a7770" stroke-width="3"/>
+    <circle r="31" fill="#0d292c" stroke="#50d2c2" stroke-width="2" opacity=".8"/>
+    <g fill="url(#teal)" opacity=".86">
+      <path d="M0-5c-2-18 3-26 11-25 8 1 10 10 4 22-4 8-9 12-15 13z"/>
+      <path d="M5 0c18-2 26 3 25 11-1 8-10 10-22 4C0 11-4 6-5 0z" transform="rotate(120)"/>
+      <path d="M5 0c18-2 26 3 25 11-1 8-10 10-22 4C0 11-4 6-5 0z" transform="rotate(240)"/>
+    </g><circle r="6" fill="#b8fff0" filter="url(#glow)"/>
+  </g>
+  <g transform="translate(690 225)">
+    <circle r="41" fill="#081519" stroke="#6e5f35" stroke-width="3"/>
+    <circle r="31" fill="#292314" stroke="#f6c454" stroke-width="2" opacity=".8"/>
+    <g fill="url(#gold)" opacity=".9">
+      <path d="M0-5c-2-18 3-26 11-25 8 1 10 10 4 22-4 8-9 12-15 13z"/>
+      <path d="M5 0c18-2 26 3 25 11-1 8-10 10-22 4C0 11-4 6-5 0z" transform="rotate(120)"/>
+      <path d="M5 0c18-2 26 3 25 11-1 8-10 10-22 4C0 11-4 6-5 0z" transform="rotate(240)"/>
+    </g><circle r="6" fill="#fff0b1" filter="url(#glow)"/>
+  </g>
+
+  <!-- top status panel -->
+  <path d="m263 130 423-35 75 36-423 40z" fill="#102426" stroke="#355756" stroke-width="2"/>
+  <circle cx="298" cy="142" r="6" fill="#50d2c2" filter="url(#glow)"/>
+  <circle cx="322" cy="140" r="6" fill="#f6c454"/>
+  <path d="M360 132h106M490 121h160" stroke="#9adbd0" stroke-width="4" stroke-linecap="round" opacity=".5"/>
+  <text x="715" y="127" fill="#78ead5" font-family="Arial,sans-serif" font-size="13" letter-spacing="2">MINING NODE</text>
+  <text x="118" y="108" fill="#dffaf3" font-family="Arial,sans-serif" font-size="22" font-weight="700" letter-spacing="4">AIX  ·  HASHPOWER</text>
+  <text x="118" y="135" fill="#7ea29d" font-family="Arial,sans-serif" font-size="13">自动日结 · BSC 链上 · 透明可查</text>
+
+  <!-- side vents -->
+  <g stroke="#3f6362" stroke-width="3" opacity=".75">
+    <path d="M247 213 309 201"/><path d="M247 228 309 216"/><path d="M247 243 309 231"/><path d="M247 258 309 246"/><path d="M247 273 309 261"/>
+  </g>
+  <path d="M270 304h42" stroke="#50d2c2" stroke-width="4" stroke-linecap="round" opacity=".7"/>
+  <circle cx="327" cy="301" r="5" fill="#f6c454" filter="url(#glow)"/>
+
+  <!-- feet -->
+  <path d="m365 317 35 17-4 18-35-17zM739 278l34 14-3 18-35-15z" fill="#0a1619" stroke="#385352" stroke-width="2"/>
+</svg>

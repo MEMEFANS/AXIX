@@ -1,0 +1,77 @@
+{
+  "passed": true,
+  "production": true,
+  "financialMutationsPerformed": false,
+  "checks": [
+    "mobile funds console accepts existing token, loads withdrawals and keeps automatic payout disabled",
+    "test-credit history loads in the same independent funds console",
+    "locking clears funds data and credential",
+    "operator login works and funding panels are removed",
+    "historical script images are suppressed through the live operator list and have no preview control",
+    "operator customer-service conversation renders after strict CSP is enabled"
+  ],
+  "runtimeErrors": [],
+  "blockedUnexpectedWrites": [],
+  "apiResponses": [
+    {
+      "path": "/api/admin/session",
+      "status": 200
+    },
+    {
+      "path": "/api/admin/login",
+      "status": 200
+    },
+    {
+      "path": "/api/admin/support/unread-count",
+      "status": 200
+    },
+    {
+      "path": "/api/admin/dashboard",
+      "status": 200
+    },
+    {
+      "path": "/api/admin/deposits",
+      "status": 200
+    },
+    {
+      "path": "/api/admin/lottery/prizes",
+      "status": 200
+    },
+    {
+      "path": "/api/admin/lottery/social",
+      "status": 200
+    },
+    {
+      "path": "/api/admin/lottery/assigned",
+      "status": 200
+    },
+    {
+      "path": "/api/admin/lottery/physical",
+      "status": 200
+    },
+    {
+      "path": "/api/admin/lottery/social",
+      "status": 200
+    },
+    {
+      "path": "/api/admin/support/tickets",
+      "status": 200
+    },
+    {
+      "path": "/api/admin/support/unread-count",
+      "status": 200
+    },
+    {
+      "path": "/api/admin/support/tickets/fc3c40ce-a04b-49f5-8a42-33a6af474016/messages",
+      "status": 200
+    },
+    {
+      "path": "/api/admin/support/unread-count",
+      "status": 200
+    },
+    {
+      "path": "/api/admin/logout",
+      "status": 200
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "release": "mobile-wallet-20261010-234329",
+  "backup": "/opt/wg-platform/backups/mobile-wallet-20261010-234329",
+  "files": [
+    "public/js/ai-managed.js",
+    "public/js/assets.js",
+    "public/js/core.js",
+    "public/js/i18n-zh-en.js",
+    "public/js/wallet.js",
+    "public/js/platform-client.js",
+    "public/js/earn.js",
+    "public/js/page-loader.js",
+    "public/js/i18n.js",
+    "public/js/i18n-extra.js",
+    "public/vendor/wallet/connector.js",
+    "public/index.html"
+  ],
+  "verified": true
+}

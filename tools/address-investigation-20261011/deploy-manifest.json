@@ -1,0 +1,26 @@
+{
+  "src/lottery-service.js": {
+    "before": "0aa5f4a124cd0c4cb06000e7711180a2eb9527f82b51a3d09914965b5e7e88bd",
+    "after": "9babefbc1e88cd6a7ce3a134ac3d4f8b99a38ea574b217e72da09b3799512b25"
+  },
+  "src/a-token-api.js": {
+    "before": "a51e82ee81c1218f7405c3564334aa6d03af3d1cceadebb8d47a844e0df2d514",
+    "after": "b9199d2fd8c095957864f92019c425212270346cb74e7a52701ef9900c372f36"
+  },
+  "src/withdrawal-payout-service.js": {
+    "before": "5bfd81d2cd2f718d511c1bd070948e986d6793be3d68dec7dd56f0d45707e0d4",
+    "after": "4c7a58b2777ece5909f88b7e571103c5a7855550ef9a74941afe102ea94c582a"
+  },
+  "public/js/admin-lottery.js": {
+    "before": "3f3e91fb512f4bc2909148f855628ee2976737c4bb30a8b1b05d741075ec7e62",
+    "after": "dc4989e3b7be18ee78072cfd8921248646e1d54a38cb17697a18a008bd892075"
+  },
+  "public/js/admin-community.js": {
+    "before": "c0086ca121d50c90e7ea66deda668a856de0bec6c0e197ce057485db9f5fc869",
+    "after": "e1e384c5993812d68b20cdf3e3745afe647a431ae31264973f22ccaee8753c95"
+  },
+  "public/admin.html": {
+    "before": "6cc7807aded381d1ffca8912cf9c8adff156a4df896addeeef0ecbc82c016404",
+    "after": "cf2b6a9640345033df0bda32df328c9c72d6cbacf3cc43961f4c450510f1873a"
+  }
+}

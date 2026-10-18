@@ -1,0 +1,120 @@
+{
+  "passed": true,
+  "production": true,
+  "checks": [
+    "1440px: online chart loads both new script versions and displays all 6 periods at their intended widths",
+    "390px: online chart loads both new script versions and displays all 6 periods at their intended widths"
+  ],
+  "measurements": [
+    {
+      "viewport": 1440,
+      "period": "1m",
+      "count": 500,
+      "spacing": 12,
+      "paneWidth": 624,
+      "lastX": 569,
+      "timeVisible": true
+    },
+    {
+      "viewport": 1440,
+      "period": "5m",
+      "count": 500,
+      "spacing": 12,
+      "paneWidth": 624,
+      "lastX": 569,
+      "timeVisible": true
+    },
+    {
+      "viewport": 1440,
+      "period": "15m",
+      "count": 500,
+      "spacing": 12,
+      "paneWidth": 624,
+      "lastX": 569,
+      "timeVisible": true
+    },
+    {
+      "viewport": 1440,
+      "period": "1h",
+      "count": 251,
+      "spacing": 11,
+      "paneWidth": 624,
+      "lastX": 573.5,
+      "timeVisible": true
+    },
+    {
+      "viewport": 1440,
+      "period": "4h",
+      "count": 64,
+      "spacing": 10,
+      "paneWidth": 624,
+      "lastX": 578,
+      "timeVisible": true
+    },
+    {
+      "viewport": 1440,
+      "period": "1d",
+      "count": 12,
+      "spacing": 9,
+      "paneWidth": 624,
+      "lastX": 582.5,
+      "timeVisible": false
+    },
+    {
+      "viewport": 390,
+      "period": "1m",
+      "count": 500,
+      "spacing": 12,
+      "paneWidth": 288,
+      "lastX": 233,
+      "timeVisible": true
+    },
+    {
+      "viewport": 390,
+      "period": "5m",
+      "count": 500,
+      "spacing": 12,
+      "paneWidth": 288,
+      "lastX": 233,
+      "timeVisible": true
+    },
+    {
+      "viewport": 390,
+      "period": "15m",
+      "count": 500,
+      "spacing": 12,
+      "paneWidth": 288,
+      "lastX": 233,
+      "timeVisible": true
+    },
+    {
+      "viewport": 390,
+      "period": "1h",
+      "count": 251,
+      "spacing": 11,
+      "paneWidth": 288,
+      "lastX": 237.5,
+      "timeVisible": true
+    },
+    {
+      "viewport": 390,
+      "period": "4h",
+      "count": 64,
+      "spacing": 10,
+      "paneWidth": 288,
+      "lastX": 242,
+      "timeVisible": true
+    },
+    {
+      "viewport": 390,
+      "period": "1d",
+      "count": 12,
+      "spacing": 9,
+      "paneWidth": 288,
+      "lastX": 246.5,
+      "timeVisible": false
+    }
+  ],
+  "runtimeErrors": [],
+  "blockedUnexpectedWrites": []
+}

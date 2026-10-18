@@ -1,0 +1,38 @@
+{
+  "deployed": true,
+  "release": "aix-chart-20261011-024625",
+  "backup_directory": "/opt/wg-platform/backups/aix-chart-20261011-024625",
+  "completed_at_utc": "2026-10-11T02:46:26.268620+00:00",
+  "files": [
+    "public/js/a-token-trade.js",
+    "public/js/page-loader.js",
+    "public/index.html"
+  ],
+  "service": {
+    "MainPID": "16042",
+    "ActiveState": "active",
+    "SubState": "running"
+  },
+  "service_restarted": false,
+  "protected_sources_unchanged": true,
+  "env_unchanged": true,
+  "database_accessed": false,
+  "database_restored": false,
+  "static": [
+    {
+      "uri": "/",
+      "status": 200,
+      "sha256": "9fc33b60efb0dcc20a6f1917a1d1c44af8c219821d8219e8131a28648fd9710f"
+    },
+    {
+      "uri": "/js/page-loader.js?v=20261011-aix-chart-1",
+      "status": 200,
+      "sha256": "9e750cf728d285a1f26651b95ca35ccb647541e0c773ccfca449acbc2ebf2d6e"
+    },
+    {
+      "uri": "/js/a-token-trade.js?v=20261011-aix-chart-1",
+      "status": 200,
+      "sha256": "3acf645ea4577ff4ba94330e7f587d84471c9198bef475fc419f73295bae70e1"
+    }
+  ]
+}

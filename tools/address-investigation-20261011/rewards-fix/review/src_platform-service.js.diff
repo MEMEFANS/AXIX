@@ -1,0 +1,47 @@
+--- production/src/platform-service.js
++++ candidate/src/platform-service.js
+@@ -3,6 +3,7 @@
+ import path from 'node:path';
+ import { formatUnits, getAddress, isAddress, parseUnits } from 'ethers';
+ import { openDatabase } from './database.js';
++import { splitStakePayment } from './a-token-income.js';
+ 
+ const ASSET_DECIMALS = 8;
+ export const MAX_PERP_LEVERAGE = 100;
+@@ -670,7 +671,8 @@
+       positionEquity+=BigInt(pos.marginUnits)+unrealized; marginUsed+=BigInt(pos.marginUnits);
+       return [symbol,{symbol,size:formatUnits(size,ASSET_DECIMALS),entryPrice:formatUnits(entry,PRICE_DECIMALS),markPrice:formatUnits(mark>0n?mark:0n,PRICE_DECIMALS),margin:formatUnits(pos.marginUnits,USDT_DECIMALS),marginMode:normalizeMarginMode(pos.marginMode),leverage:pos.leverage,liquidationPrice:String(liquidationPrice),unrealizedPnl:formatUnits(unrealized,USDT_DECIMALS),realizedPnl:formatUnits(pos.realizedPnlUnits,USDT_DECIMALS),totalFee:formatUnits(pos.feeUnits||'0',USDT_DECIMALS),netRealizedPnl:formatUnits(BigInt(pos.realizedPnlUnits)-BigInt(pos.feeUnits||'0'),USDT_DECIMALS),fundingPnl:formatUnits(pos.fundingPnlUnits,USDT_DECIMALS),maintenanceMargin:formatUnits(mark>0n?feeUnits(notionalUnits(size,mark),MAINTENANCE_BPS):0n,USDT_DECIMALS)}];
+     }));
+-    const stakingValue=BigInt(user.staking.principalUnits)+BigInt(user.staking.rewardUnits);
++    let stakingValue=BigInt(user.staking.principalUnits)+BigInt(user.staking.rewardUnits);
++    const aStakedPrincipal=(database.listATokenStakes?.(address)||[]).reduce((sum,stake)=>sum+splitStakePayment(stake,stake.totalEarnedUnits).outstanding,0n);
+     const internalStrategyValue=Object.values(user.internalStrategies||{}).filter(strategy=>strategy?.running).reduce((sum,strategy)=>{
+       const strategySymbol=marketSymbol(strategy?.config?.symbol||'BTC');
+       const liveMark=BigInt(Math.round(Number(prices[strategySymbol]||0)*1e6));
+@@ -679,9 +681,7 @@
+     },0n);
+     marginUsed+=frozenPerpUsdt;
+     // A 币行：可用 = A 钱包余额；冻结中 = OPEN 卖单锁定（含手续费冻结）
+-    // AIX 折算：可用余额和锁定余额都按 AIX/USDT 现价（来自 AIX 交易页 priceProvider）折算成 USDT，
+-    // 并入总资产。修复点：原代码只折算锁定 AIX，可用 AIX 余额被漏算，导致 totalEquity 缺 AIX 价值。
+-    let totalEquity=freeUsdt+frozenUsdt+spotValue+BigInt(user.strategyBalanceUnits)+internalStrategyValue+stakingValue+positionEquity;
++    // AIX 现货归入现货市值，尚未返还的质押本金归入质押市值；总资产只汇总一次。
+     try {
+       const aBalanceUnits=BigInt(walletService.balanceUnits(address,'A')||'0');
+       spot.A=formatUnits(aBalanceUnits,A_DECIMALS);
+@@ -689,11 +689,13 @@
+       if (aTokenPriceProvider) {
+         const aPrice=BigInt(aTokenPriceProvider()||0n);
+         if (aPrice>0n) {
+-          if (aBalanceUnits>0n) totalEquity+=aBalanceUnits*aPrice/(10n**BigInt(A_DECIMALS));
+-          if (aLockedA>0n) totalEquity+=aLockedA*aPrice/(10n**BigInt(A_DECIMALS));
++          if (aBalanceUnits>0n) spotValue+=aBalanceUnits*aPrice/(10n**BigInt(A_DECIMALS));
++          if (aLockedA>0n) spotValue+=aLockedA*aPrice/(10n**BigInt(A_DECIMALS));
++          if (aStakedPrincipal>0n) stakingValue+=aStakedPrincipal*aPrice/(10n**BigInt(A_DECIMALS));
+         }
+       }
+     } catch {}
++    const totalEquity=freeUsdt+frozenUsdt+spotValue+BigInt(user.strategyBalanceUnits)+internalStrategyValue+stakingValue+positionEquity;
+     const collateralEquity=freeUsdt+frozenPerpUsdt+positionEquity;
+     const marginUsage=collateralEquity>0n?Number(marginUsed*1_000_000n/collateralEquity)/1_000_000:0;
+     const symbol=marketSymbol(selectedSymbol);

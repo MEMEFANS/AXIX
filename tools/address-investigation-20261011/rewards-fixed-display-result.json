@@ -1,0 +1,32 @@
+{
+  "capture": "2026-10-10T19:37:53.893031+00:00",
+  "users_checked": 5632,
+  "AIX_row_mismatches": [],
+  "income_summary_mismatches": [],
+  "admin_summary_mismatches": [],
+  "AIX_total_equity_mismatches": [],
+  "classification_mismatches": [],
+  "stake_principal_units_excluded_from_balance_row": "31584844594083409823342",
+  "today_lottery": {
+    "none": {
+      "count": 72,
+      "amount_units": "0"
+    },
+    "USDT": {
+      "count": 26,
+      "amount_units": "7251271"
+    },
+    "AIX": {
+      "count": 24,
+      "amount_units": "58295800000000000000"
+    },
+    "积分": {
+      "count": 11,
+      "amount_units": "0"
+    }
+  },
+  "AI_rewards": {
+    "credited_USDT": "0.6142",
+    "pending_referral_USDT": "0.06142"
+  }
+}

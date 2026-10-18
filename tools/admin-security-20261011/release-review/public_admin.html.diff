@@ -1,0 +1,76 @@
+--- public/admin.html before
++++ public/admin.html after
+@@ -40,9 +40,8 @@
+       <nav class="admin-navigation" aria-label="后台功能">
+         <button class="active" type="button" data-admin-page="overview"><span class="admin-nav-icon">📊</span>首页总览</button>
+         <button type="button" data-admin-page="users"><span class="admin-nav-icon">👥</span>用户管理</button>
+-        <button type="button" data-admin-page="test-credits"><span class="admin-nav-icon">+</span>测试入账</button>
++        <button type="button" data-open-funds><span class="admin-nav-icon">↗</span>资金后台</button>
+         <button type="button" data-admin-page="deposits"><span class="admin-nav-icon">💰</span>充值记录</button>
+-        <button type="button" data-admin-page="withdrawals"><span class="admin-nav-icon">📤</span>提现审核</button>
+         <button type="button" data-admin-page="tokens"><span class="admin-nav-icon">🪙</span>代币管理</button>
+         <button type="button" data-admin-page="stocks"><span class="admin-nav-icon">📈</span>股票管理</button>
+         <button type="button" data-admin-page="community"><span class="admin-nav-icon">↗</span>社群链接</button>
+@@ -85,7 +84,7 @@
+             <header><div><h2>待办事项</h2><p>需要运营人员关注的业务</p></div></header>
+             <div class="admin-todo-list">
+               <button type="button" data-jump-page="deposits"><span>待确认充值</span><b id="todo-pending-deposits">0</b></button>
+-              <button type="button" data-jump-page="withdrawals"><span>待处理提现</span><b id="todo-pending-withdrawals">0</b></button>
++              <button type="button" data-open-funds><span>待处理提现</span><b id="todo-pending-withdrawals">0</b></button>
+               <button type="button" data-jump-page="tokens"><span>已启用代币</span><b id="todo-enabled-tokens">0</b></button>
+             </div>
+           </section>
+@@ -115,39 +114,6 @@
+         <section class="admin-content-block">
+           <header class="admin-list-header"><div><h2>充值记录</h2><p id="admin-deposit-count">0 条记录</p></div><select id="admin-deposit-filter"><option value="">全部状态</option><option value="pending">待确认</option><option value="confirmed">已确认</option><option value="rejected">已拒绝</option><option value="expired">已过期</option></select></header>
+           <div class="admin-table-scroll"><table><thead><tr><th>提交时间</th><th>钱包地址</th><th>网络</th><th>资产</th><th>金额</th><th>状态</th><th>交易哈希</th></tr></thead><tbody id="admin-deposits-body"></tbody></table></div>
+-        </section>
+-      </section>
+-
+-      <section class="admin-page-panel" data-admin-panel="withdrawals">
+-        <form id="admin-withdraw-settings-form" class="admin-automation-banner">
+-          <div class="admin-automation-state"><span>自动提现</span><b id="admin-auto-withdraw-status">未启用</b></div>
+-          <label class="admin-switch-control"><input id="admin-auto-withdraw-enabled" type="checkbox"><span></span><b>开启自动提现</b></label>
+-          <label class="admin-automation-field"><span>单笔人工审核金额</span><div><input id="admin-auto-withdraw-threshold" type="number" min="0.000001" step="0.000001" required><em>USDT</em></div></label>
+-          <label class="admin-automation-field"><span>24 小时自动额度</span><div><input id="admin-auto-withdraw-daily-limit" type="number" min="0.000001" step="0.000001" required><em>USDT</em></div></label>
+-          <label class="admin-switch-control"><input id="admin-usdt-multiple-of-ten" type="checkbox"><span></span><b>USDT 整十提现</b></label>
+-          <button class="admin-primary-button" type="submit">保存设置</button>
+-          <p id="admin-auto-withdraw-note">配置服务器出款私钥并开启后，小额提现自动转出，大额由管理员放行</p>
+-        </form>
+-        <section class="admin-content-block">
+-          <header class="admin-list-header"><div><h2>提现审核</h2><p id="admin-withdrawal-count">0 条记录</p></div><select id="admin-withdrawal-filter"><option value="action_required">待处理</option><option value="">全部状态</option><option value="pending_review">待人工审核</option><option value="pending_funds">待补款放行</option><option value="pending_auto">自动队列</option><option value="broadcast">链上确认中</option><option value="payout_failed">出款失败</option><option value="paid">已支付</option><option value="rejected">已拒绝</option></select></header>
+-          <div class="admin-table-scroll"><table><thead><tr><th>申请时间</th><th>申请钱包</th><th>网络</th><th>金额</th><th>状态</th><th>操作</th></tr></thead><tbody id="admin-withdrawals-body"></tbody></table></div>
+-        </section>
+-      </section>
+-
+-      <section class="admin-page-panel" data-admin-panel="test-credits">
+-        <section class="admin-content-block">
+-          <header><div><h2>测试入账</h2><p>平台内部 USDT</p></div></header>
+-          <form id="admin-test-credit-form" class="admin-credit-form">
+-            <label>用户钱包地址<input id="admin-test-credit-wallet" autocomplete="off" placeholder="0x..." required></label>
+-            <label>入账数量<div class="admin-credit-amount"><input id="admin-test-credit-amount" type="number" min="0.000001" max="100000000" step="0.000001" required><em>USDT</em></div></label>
+-            <label>操作备注<input id="admin-test-credit-reason" maxlength="120" placeholder="例如：功能测试" required></label>
+-            <button class="admin-primary-button" type="submit">确认入账</button>
+-          </form>
+-          <div id="admin-test-credit-status" class="admin-inline-status"></div>
+-        </section>
+-        <section class="admin-content-block admin-credit-history">
+-          <header><div><h2>测试入账记录</h2><p id="admin-test-credit-count">0 条记录</p></div></header>
+-          <div class="admin-table-scroll"><table><thead><tr><th>操作时间</th><th>钱包地址</th><th>入账数量</th><th>备注</th><th>管理员</th></tr></thead><tbody id="admin-test-credits-body"></tbody></table></div>
+         </section>
+       </section>
+ 
+@@ -294,10 +260,10 @@
+       </section>
+     </section>
+   </div>
+-  <script src="/js/core.js?v=72"></script>
++  <script src="/js/admin-dialogs.js?v=20261011-security-1"></script>
+   <script src="/js/admin-community.js?v=7-security-20261011"></script>
+-  <script src="/js/admin-lottery.js?v=4-security-20261011"></script>
+-  <script src="/js/operator-admin.js?v=45-assets-20261011"></script>
++  <script src="/js/admin-lottery.js?v=20261011-security-2"></script>
++  <script src="/js/operator-admin.js?v=20261011-security-2"></script>
+   <script src="/js/admin-agents.js?v=1"></script>
+ </body>
+ </html>

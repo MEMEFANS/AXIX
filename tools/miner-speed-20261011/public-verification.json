@@ -1,0 +1,48 @@
+{
+  "captured_at_utc": "2026-10-10T21:31:28.542853+00:00",
+  "checks": [
+    {
+      "uri": "/",
+      "status": 200,
+      "cf_cache_status": "DYNAMIC",
+      "cache_control": "no-cache",
+      "cloudflare_analytics_inserted": true,
+      "new_earn_script_version": true,
+      "origin_content_sha256": "49580d30c471ff6a262a90f50e798a05e3eb5b7c40e41fe80281b899586e2e9a"
+    },
+    {
+      "uri": "/js/earn.js?v=20261011-team-fast-2",
+      "status": 200,
+      "cf_cache_status": "MISS",
+      "cache_control": "public, max-age=2592000, s-maxage=2592000, immutable",
+      "origin_content_sha256": "2f22a3a2939478ab42a6fe6cd08bfddcbd807bca26b3805012af2fd40f61b7bb"
+    },
+    {
+      "uri": "/js/assets.js?v=20261011-aix-quantity",
+      "status": 200,
+      "cf_cache_status": "HIT",
+      "cache_control": "public, max-age=2592000, s-maxage=2592000, immutable",
+      "origin_content_sha256": "7b6d59d1e1f3c09afc6786fd07f8c9f7c349c76ad8602f7951f357bb00ed6801"
+    },
+    {
+      "uri": "/js/page-loader.js?v=5-assets",
+      "status": 200,
+      "cf_cache_status": "HIT",
+      "cache_control": "public, max-age=2592000, s-maxage=2592000, immutable",
+      "origin_content_sha256": "1b82a25c4ea1f9fa3025d037fe506808eb4516d2b6bf2ddc8d8bc84a2fe1c2de"
+    },
+    {
+      "uri": "/api/a-token/team/summary",
+      "status": 401,
+      "cf_cache_status": "DYNAMIC",
+      "cache_control": null,
+      "requires_wallet_login": true
+    },
+    {
+      "uri": "/api/wallet/session",
+      "status": 200,
+      "cf_cache_status": "DYNAMIC",
+      "cache_control": "no-store"
+    }
+  ]
+}

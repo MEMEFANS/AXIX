@@ -1,0 +1,38 @@
+# ───────── 机密：绝不入库 ─────────
+# 私钥 / 管理员口令 / RPC 等全部环境变量
+.env
+.env.*
+!.env.example
+# 服务器 SSH 凭据（root 口令）
+resources/app/tools/_cred.ps1
+resources/app/tools/_cred.enc.xml
+resources/app/tools/_make-cred.ps1
+# 用户钱包快照
+wallet-accounts.json
+# 本地库与运行数据
+resources/app/data/
+resources/app/backups/
+*.sqlite
+*.sqlite3
+*.sqlite-wal
+*.sqlite-shm
+*.sqlite.gz
+
+# ───────── 依赖 ─────────
+node_modules/
+
+# ───────── 大文件（不适合进仓库）─────────
+resources/app/tools/cloudflared.exe
+tools/address-investigation-20261011/rewards-audit-data.json
+# 生成的部署包/审计归档（非源码）
+*.tar.gz
+*.zip
+
+# ───────── 运行时产物 / 临时文件 ─────────
+wg-debug*/
+_server.*.log
+*.log
+本地测试截图/
+.trae/
+.DS_Store
+Thumbs.db

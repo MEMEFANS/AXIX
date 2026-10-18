@@ -1,0 +1,55 @@
+{
+  "checkedAt": "2026-10-10T17:33:07.092Z",
+  "verified": true,
+  "assets": [
+    {
+      "file": "public/sw.js",
+      "status": 200,
+      "bytes": 2872,
+      "match": true
+    },
+    {
+      "file": "public/index.html",
+      "status": 200,
+      "bytes": 118750,
+      "match": true
+    },
+    {
+      "file": "public/js/earn.js",
+      "status": 200,
+      "bytes": 68689,
+      "match": true
+    },
+    {
+      "file": "public/js/wallet.js",
+      "status": 200,
+      "bytes": 30531,
+      "match": true
+    },
+    {
+      "file": "public/js/page-loader.js",
+      "status": 200,
+      "bytes": 2723,
+      "match": true
+    },
+    {
+      "file": "public/js/i18n.js",
+      "status": 200,
+      "bytes": 8246,
+      "match": true
+    }
+  ],
+  "sessionCheck": {
+    "status": 200,
+    "milliseconds": 473,
+    "unauthenticated": true,
+    "noStore": true
+  },
+  "challengeCheck": {
+    "statuses": [
+      200,
+      200
+    ],
+    "retryStable": true
+  }
+}

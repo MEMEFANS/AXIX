@@ -1,0 +1,529 @@
+--- public/admin.html before
++++ public/admin.html after
+@@ -1,269 +1,257 @@
+-<!DOCTYPE html>
+-<html lang="zh-CN">
+-<head>
+-  <meta charset="utf-8">
+-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5">
+-  <meta name="format-detection" content="telephone=no">
+-  <meta name="mobile-web-app-capable" content="yes">
+-  <meta name="apple-mobile-web-app-capable" content="yes">
+-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+-  <title>AxiX 管理后台</title>
+-  <link rel="icon" type="image/png" sizes="32x32" href="/assets/brand/favicon-32.png?v=3">
+-  <link rel="alternate icon" href="/favicon.ico?v=3">
+-  <meta name="theme-color" content="#101a1c">
+-  <link rel="stylesheet" href="/styles/base.css?v=14">
+-  <link rel="stylesheet" href="/styles/operator-admin.css?v=14">
+-  <link rel="stylesheet" href="/styles/community-links.css?v=2">
+-  <link rel="stylesheet" href="/styles/terminal.css?v=51">
+-  <!-- 管理后台不加载 i18n.js：后台内容不翻译，避免词典替换破坏 DOM 结构 -->
+-</head>
+-<body class="operator-admin-page">
+-  <main id="admin-login-view" class="admin-login-view">
+-    <form id="admin-login-form" class="admin-login-card">
+-      <div class="admin-login-brand"><i class="brand-mark"></i><b>AxiX Exchange</b></div>
+-      <div class="admin-login-heading">
+-        <h1>管理后台</h1>
+-        <p>使用管理员账号登录运营控制台</p>
+-      </div>
+-      <label>账号<input id="admin-username" name="username" autocomplete="username" required></label>
+-      <label>密码<input id="admin-password" name="password" type="password" autocomplete="current-password" required></label>
+-      <div id="admin-login-error" class="admin-login-error" role="alert"></div>
+-      <button id="admin-login-button" class="admin-primary-button" type="submit">登录</button>
+-      <a class="admin-back-link" href="/">返回交易平台</a>
+-    </form>
+-  </main>
+-
+-  <div id="admin-app" class="admin-app" hidden>
+-    <div class="admin-sidebar-backdrop" id="admin-sidebar-backdrop" aria-hidden="true"></div>
+-    <aside class="admin-sidebar" id="admin-sidebar" aria-label="管理侧边栏">
+-      <div class="admin-sidebar-brand"><i class="brand-mark"></i><span><b>AxiX Exchange</b><small>管理控制台</small></span></div>
+-      <nav class="admin-navigation" aria-label="后台功能">
+-        <button class="active" type="button" data-admin-page="overview"><span class="admin-nav-icon">📊</span>首页总览</button>
+-        <button type="button" data-admin-page="users"><span class="admin-nav-icon">👥</span>用户管理</button>
+-        <button type="button" data-open-funds><span class="admin-nav-icon">↗</span>资金后台</button>
+-        <button type="button" data-admin-page="deposits"><span class="admin-nav-icon">💰</span>充值记录</button>
+-        <button type="button" data-admin-page="tokens"><span class="admin-nav-icon">🪙</span>代币管理</button>
+-        <button type="button" data-admin-page="stocks"><span class="admin-nav-icon">📈</span>股票管理</button>
+-        <button type="button" data-admin-page="community"><span class="admin-nav-icon">↗</span>社群链接</button>
+-        <div class="admin-sidebar-divider" aria-hidden="true"></div>
+-        <button type="button" data-admin-page="a-kline"><span class="admin-nav-icon">📈</span>AIX 行情调控</button>
+-        <button type="button" data-admin-page="a-token-balance"><span class="admin-nav-icon">💎</span>AIX 代币管理</button>
+-        <button type="button" data-admin-page="a-miner"><span class="admin-nav-icon">⛏️</span>AIX 矿机管理</button>
+-        <button type="button" data-admin-page="lottery"><span class="admin-nav-icon">🎰</span>抽奖管理</button>
+-        <button type="button" data-admin-page="support"><span class="admin-nav-icon">💬</span>在线客服<span id="admin-support-nav-badge" class="admin-nav-badge" hidden>0</span></button>
+-        <button type="button" data-admin-page="agents"><span class="admin-nav-icon">🤝</span>代理管理</button>
+-      </nav>
+-      <div class="admin-sidebar-account">
+-        <span>当前管理员</span>
+-        <b id="admin-current-user">-</b>
+-        <button id="admin-logout" type="button">退出登录</button>
+-      </div>
+-    </aside>
+-
+-    <section class="admin-workspace">
+-      <header class="admin-topbar">
+-        <button class="admin-topbar-menu" id="admin-menu-toggle" type="button" aria-label="打开菜单" aria-controls="admin-sidebar">☰</button>
+-        <div><h1 id="admin-page-title">首页总览</h1><p id="admin-updated">正在读取平台数据</p></div>
+-        <div style="display:flex;align-items:center;gap:8px"><button id="lang-toggle" class="admin-secondary-button lang-toggle" type="button" title="切换语言" aria-label="切换语言">🌐</button><button id="admin-refresh" class="admin-secondary-button" type="button">刷新数据</button></div>
+-      </header>
+-      <div id="admin-global-status" class="admin-global-status" role="status"></div>
+-
+-      <section class="admin-page-panel active" data-admin-panel="overview">
+-        <div class="admin-metrics" aria-label="平台核心数据">
+-          <article><span>钱包用户</span><b id="metric-wallet-users">0</b><small>连接并验证过的钱包</small></article>
+-          <article><span>真实充值用户</span><b id="metric-real-users">0</b><small>存在已确认 USDT 充值</small></article>
+-          <article><span>累计确认充值</span><b><i id="metric-total-deposited">0.00</i> <em>USDT</em></b><small id="metric-deposit-count">0 笔到账</small></article>
+-          <article><span>用户平台余额</span><b><i id="metric-total-balance">0.00</i> <em>USDT</em></b><small>所有用户余额合计</small></article>
+-        </div>
+-        <div class="admin-overview-grid">
+-          <section class="admin-content-block">
+-            <header><div><h2>近期充值</h2><p>最新提交与确认的链上充值</p></div><button type="button" data-jump-page="deposits">查看全部</button></header>
+-            <div class="admin-table-scroll"><table><thead><tr><th>钱包</th><th>网络</th><th>金额</th><th>状态</th><th>时间</th></tr></thead><tbody id="overview-deposits-body"></tbody></table></div>
+-          </section>
+-          <section class="admin-content-block">
+-            <header><div><h2>待办事项</h2><p>需要运营人员关注的业务</p></div></header>
+-            <div class="admin-todo-list">
+-              <button type="button" data-jump-page="deposits"><span>待确认充值</span><b id="todo-pending-deposits">0</b></button>
+-              <button type="button" data-open-funds><span>待处理提现</span><b id="todo-pending-withdrawals">0</b></button>
+-              <button type="button" data-jump-page="tokens"><span>已启用代币</span><b id="todo-enabled-tokens">0</b></button>
+-            </div>
+-          </section>
+-        </div>
+-      </section>
+-
+-      <section class="admin-page-panel" data-admin-panel="users">
+-        <section class="admin-content-block">
+-          <header class="admin-list-header"><div><h2>钱包用户</h2><p id="admin-user-count">0 位用户</p></div><div class="admin-filters"><input id="admin-user-search" type="search" placeholder="搜索钱包地址"><label><input id="admin-real-only" type="checkbox"> 只看真实充值用户</label></div></header>
+-          <div class="admin-table-scroll"><table><thead><tr><th>钱包地址</th><th>等级</th><th>用户类型</th><th>确认充值</th><th>平台余额</th><th>首次连接</th><th>最近充值</th><th>操作</th></tr></thead><tbody id="admin-users-body"></tbody></table></div>
+-        </section>
+-      </section>
+-
+-      <!-- 用户详情弹窗 -->
+-      <div id="admin-user-detail-modal" class="admin-modal" hidden>
+-        <div class="admin-modal-overlay" data-close-detail></div>
+-        <div class="admin-modal-content admin-user-detail-content">
+-          <div class="admin-modal-head">
+-            <h3 id="admin-user-detail-title">用户详情</h3>
+-            <button type="button" class="admin-modal-close" data-close-detail>×</button>
+-          </div>
+-          <div id="admin-user-detail-body" class="admin-user-detail-body">正在加载...</div>
+-        </div>
+-      </div>
+-
+-      <section class="admin-page-panel" data-admin-panel="deposits">
+-        <section class="admin-content-block">
+-          <header class="admin-list-header"><div><h2>充值记录</h2><p id="admin-deposit-count">0 条记录</p></div><select id="admin-deposit-filter"><option value="">全部状态</option><option value="pending">待确认</option><option value="confirmed">已确认</option><option value="rejected">已拒绝</option><option value="expired">已过期</option></select></header>
+-          <div class="admin-table-scroll"><table><thead><tr><th>提交时间</th><th>钱包地址</th><th>网络</th><th>资产</th><th>金额</th><th>状态</th><th>交易哈希</th></tr></thead><tbody id="admin-deposits-body"></tbody></table></div>
+-        </section>
+-      </section>
+-
+-      <section class="admin-page-panel" data-admin-panel="tokens">
+-        <section class="admin-content-block">
+-          <header><div><h2>代币管理</h2><p>交易市场使用币安 USDT 行情</p></div></header>
+-          <form id="admin-token-form" class="admin-token-form">
+-            <label>代币代码<input id="admin-token-symbol" maxlength="12" placeholder="例如 ADA" required></label>
+-            <label>代币名称<input id="admin-token-name" maxlength="40" placeholder="例如 Cardano" required></label>
+-            <label>价格小数位<input id="admin-token-decimals" type="number" min="0" max="8" value="4" required></label>
+-            <label class="admin-checkbox"><input id="admin-token-spot" type="checkbox" checked> 现货</label>
+-            <label class="admin-checkbox"><input id="admin-token-perp" type="checkbox" checked> 合约</label>
+-            <button class="admin-primary-button" type="submit">添加代币</button>
+-          </form>
+-          <div id="admin-token-status" class="admin-inline-status"></div>
+-          <div class="admin-table-scroll"><table><thead><tr><th>代币</th><th>名称</th><th>价格精度</th><th>交易市场</th><th>状态</th><th>操作</th></tr></thead><tbody id="admin-tokens-body"></tbody></table></div>
+-        </section>
+-      </section>
+-
+-      <section class="admin-page-panel" data-admin-panel="stocks">
+-        <section class="admin-content-block">
+-          <header><div><h2>股票管理</h2><p>美股代币使用币安 USDT 行情（现货交易对自动带 B 后缀），添加后即时生效</p></div></header>
+-          <form id="admin-stock-form" class="admin-token-form">
+-            <label>股票代码<input id="admin-stock-symbol" maxlength="12" placeholder="例如 AAPL" required></label>
+-            <label>股票名称<input id="admin-stock-name" maxlength="40" placeholder="例如 Apple" required></label>
+-            <label>价格小数位<input id="admin-stock-decimals" type="number" min="0" max="8" value="2" required></label>
+-            <label class="admin-checkbox"><input id="admin-stock-spot" type="checkbox" checked> 现货</label>
+-            <label class="admin-checkbox"><input id="admin-stock-perp" type="checkbox" checked> 合约</label>
+-            <button class="admin-primary-button" type="submit">添加股票</button>
+-          </form>
+-          <div id="admin-stock-status" class="admin-inline-status"></div>
+-          <div class="admin-table-scroll"><table><thead><tr><th>股票</th><th>名称</th><th>价格精度</th><th>交易市场</th><th>状态</th><th>操作</th></tr></thead><tbody id="admin-stocks-body"></tbody></table></div>
+-        </section>
+-      </section>
+-
+-      <section class="admin-page-panel" data-admin-panel="community">
+-        <section class="admin-content-block">
+-          <header><div><h2>社群链接</h2><p>管理前台社群与支持入口，保存后即时生效</p></div><a class="admin-community-preview" href="/?page=community" target="_blank" rel="noopener noreferrer">查看前台 ↗</a></header>
+-          <div class="admin-community-quick"><span>快捷添加</span><div id="admin-community-presets"></div></div>
+-          <form id="admin-community-form" class="admin-community-form">
+-            <h3 id="admin-community-editor-title">添加链接</h3>
+-            <label>入口类型<select id="admin-community-type" required><option value="telegram">TG</option><option value="twitter">推特</option><option value="dexbox">dexBOX</option><option value="telegram-support">TG客服</option><option value="qq">QQ社群</option><option value="email">邮箱投递</option><option value="ticket">留言工单</option></select></label>
+-            <label>显示名称<input id="admin-community-title" maxlength="40" placeholder="例如：AxiX 官方 TG 社群" required></label>
+-            <label class="admin-community-wide">链接 / 邮箱<input id="admin-community-url" type="text" maxlength="2048" placeholder="https://t.me/你的社群" autocomplete="off"><small id="admin-community-url-hint">填写完整的 https:// 链接；邮箱类型可直接填写邮箱地址。</small></label>
+-            <label class="admin-community-wide admin-community-qq-group" style="display:none">QQ 群号码<input id="admin-community-group-number" type="text" inputmode="numeric" maxlength="12" placeholder="例如：123456789" autocomplete="off"><small>填写后前台 QQ 卡片会显示群号码，访客可一键复制后到 QQ 加群。</small></label>
+-            <label class="admin-community-wide">入口说明<input id="admin-community-description" maxlength="140" placeholder="简短介绍此入口的用途（选填）"></label>
+-            <label class="admin-community-wide admin-community-qr-field">二维码图片<span class="admin-field-hint">QQ社群推荐上传，支持 PNG/JPG/WEBP（≤2MB）。前台将优先显示二维码卡片。</span><input id="admin-community-qrcode" type="file" accept="image/png,image/jpeg,image/webp" class="admin-community-qr-input"><input id="admin-community-qrcode-data" type="hidden"><div id="admin-community-qrcode-preview" class="admin-community-qr-preview" style="display:none"></div></label>
+-            <label>显示顺序<input id="admin-community-order" type="number" min="0" max="9999" step="1" value="0" required><small>数值越小越靠前，也可使用列表中的上移 / 下移。</small></label>
+-            <label class="admin-community-enabled"><input id="admin-community-enabled" type="checkbox" checked><span>在前台显示</span></label>
+-            <div class="admin-community-form-actions"><button id="admin-community-save" type="submit" class="admin-primary-button">添加链接</button><button id="admin-community-cancel" type="button" class="admin-secondary-button">清空表单</button></div>
+-            <div id="admin-community-form-status" class="admin-community-wide" role="status"></div>
+-          </form>
+-        </section>
+-        <section class="admin-content-block admin-community-list-block">
+-          <header><div><h2>已添加的链接</h2><p id="admin-community-count">尚未加载</p></div><button id="admin-community-refresh" class="admin-secondary-button" type="button">刷新列表</button></header>
+-          <div id="admin-community-list-status" role="status"></div>
+-          <div id="admin-community-list" class="admin-community-list"></div>
+-        </section>
+-      </section>
+-      <section class="admin-page-panel" data-admin-panel="a-kline">
+-        <section class="admin-content-block">
+-          <header><div><h2>AIX 代币行情调控</h2><p>实时操控 AIX / USDT 资金池价格、K 线模式与全周期 K 线</p></div><button class="admin-secondary-button" type="button" id="admin-a-kline-refresh">🔄 刷新</button></header>
+-          <div id="admin-a-kline-root" class="admin-a-module">正在读取 AIX 代币状态...</div>
+-        </section>
+-      </section>
+-
+-      <section class="admin-page-panel" data-admin-panel="a-token-balance">
+-        <section class="admin-content-block">
+-          <header><div><h2>AIX 代币充值 / 扣除</h2><p>向指定钱包地址充值或扣除平台 AIX 代币余额，操作均有审计记录</p></div></header>
+-          <form id="admin-aix-credit-form" class="admin-credit-form">
+-            <label>用户钱包地址<input id="admin-aix-wallet" autocomplete="off" placeholder="0x..." required></label>
+-            <label>操作类型
+-              <select id="admin-aix-action">
+-                <option value="credit">充值（增加余额）</option>
+-                <option value="debit">扣除（减少余额）</option>
+-              </select>
+-            </label>
+-            <label>AIX 数量<div class="admin-credit-amount"><input id="admin-aix-amount" type="number" min="0.000000000000000001" step="0.000000000000000001" required><em>AIX</em></div></label>
+-            <label>操作备注<input id="admin-aix-reason" maxlength="120" placeholder="例如：活动奖励 / 违规扣除" required></label>
+-            <button class="admin-primary-button" type="submit" id="admin-aix-submit">确认充值</button>
+-          </form>
+-          <div id="admin-aix-status" class="admin-inline-status"></div>
+-        </section>
+-        <section class="admin-content-block">
+-          <header><div><h2>查询用户 AIX 余额</h2><p>输入钱包地址查看当前 AIX 余额</p></div></header>
+-          <div class="admin-credit-form" style="flex-direction:row;gap:8px;align-items:flex-end">
+-            <label style="flex:1">钱包地址<input id="admin-aix-query-wallet" autocomplete="off" placeholder="0x..."></label>
+-            <button class="admin-secondary-button" type="button" id="admin-aix-query-btn">查询余额</button>
+-          </div>
+-          <div id="admin-aix-balance-result" class="admin-inline-status"></div>
+-        </section>
+-      </section>
+-
+-      <section class="admin-page-panel" data-admin-panel="a-miner">
+-        <section class="admin-content-block">
+-          <header><div><h2>AIX 矿机管理</h2><p>AIX 代币矿机发放、搜索、手动产出、强制过期等后台运营操作</p></div><button class="admin-secondary-button" type="button" id="admin-a-miner-refresh">🔄 刷新</button></header>
+-          <div id="admin-a-miner-root" class="admin-a-module">正在读取矿机数据...</div>
+-        </section>
+-      </section>
+-      <section class="admin-page-panel" data-admin-panel="lottery">
+-        <div id="admin-lottery-root">正在读取抽奖数据...</div>
+-      </section>
+-      <section class="admin-page-panel" data-admin-panel="support">
+-        <section class="admin-content-block">
+-          <header class="admin-list-header">
+-            <div><h2>在线客服</h2><p>回复用户在「在线客服」页面发送的咨询，未读消息会实时提醒</p></div>
+-            <div class="admin-filters">
+-              <select id="admin-support-filter">
+-                <option value="open">进行中</option>
+-                <option value="">全部会话</option>
+-                <option value="closed">已关闭</option>
+-              </select>
+-              <button class="admin-secondary-button" type="button" id="admin-support-refresh">🔄 刷新</button>
+-            </div>
+-          </header>
+-          <div id="admin-support-root" class="admin-support-wrap">
+-            <div class="admin-support-list" id="admin-support-ticket-list"><div class="admin-inline-status">正在读取会话…</div></div>
+-            <div class="admin-support-conv" id="admin-support-conv">
+-              <div class="admin-support-conv-empty">从左侧选择一个会话查看并回复</div>
+-            </div>
+-          </div>
+-        </section>
+-      </section>
+-      <section class="admin-page-panel" data-admin-panel="agents">
+-        <header>
+-          <div><h2>代理管理</h2><p>创建代理账号，绑定团队根钱包。代理用用户名密码登录独立后台，仅能查看其下级团队数据，无资金操作权限。</p></div>
+-          <button id="admin-agents-refresh" class="admin-secondary-button" type="button">刷新</button>
+-        </header>
+-        <div class="admin-content-block">
+-          <header><h3>新建代理</h3></header>
+-          <form id="admin-agents-form" class="admin-grid-form" style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:12px;align-items:end">
+-            <label>用户名<input id="agent-username" maxlength="32" placeholder="agent001" required></label>
+-            <label>密码<input id="agent-password" type="password" placeholder="至少6位" required></label>
+-            <label>绑定钱包地址<input id="agent-wallet" maxlength="64" placeholder="0x..." required></label>
+-            <button class="admin-primary-button" type="submit">创建</button>
+-          </form>
+-          <div id="admin-agents-form-status" role="status" style="margin-top:8px"></div>
+-        </div>
+-        <div class="admin-content-block">
+-          <header><h3>代理列表</h3></header>
+-          <div id="admin-agents-list-status" role="status"></div>
+-          <div id="admin-agents-list"></div>
+-        </div>
+-      </section>
+-    </section>
+-  </div>
+-  <script src="/js/admin-dialogs.js?v=20261011-security-1"></script>
+-  <script src="/js/admin-community.js?v=7-security-20261011"></script>
+-  <script src="/js/admin-lottery.js?v=20261011-security-2"></script>
+-  <script src="/js/operator-admin.js?v=20261011-security-2"></script>
+-  <script src="/js/admin-agents.js?v=1"></script>
+-</body>
+-</html>
++<!DOCTYPE html>
++<html lang="zh-CN">
++<head>
++  <meta charset="utf-8">
++  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5">
++  <meta name="format-detection" content="telephone=no">
++  <meta name="mobile-web-app-capable" content="yes">
++  <meta name="apple-mobile-web-app-capable" content="yes">
++  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
++  <title>AxiX 管理后台</title>
++  <link rel="icon" type="image/png" sizes="32x32" href="/assets/brand/favicon-32.png?v=3">
++  <link rel="alternate icon" href="/favicon.ico?v=3">
++  <meta name="theme-color" content="#101a1c">
++  <link rel="stylesheet" href="/styles/base.css?v=14">
++  <link rel="stylesheet" href="/styles/operator-admin.css?v=14">
++  <link rel="stylesheet" href="/styles/community-links.css?v=2">
++  <link rel="stylesheet" href="/styles/terminal.css?v=51">
++  <!-- 管理后台不加载 i18n.js：后台内容不翻译，避免词典替换破坏 DOM 结构 -->
++</head>
++<body class="operator-admin-page">
++  <main id="admin-login-view" class="admin-login-view">
++    <form id="admin-login-form" class="admin-login-card">
++      <div class="admin-login-brand"><i class="brand-mark"></i><b>AxiX Exchange</b></div>
++      <div class="admin-login-heading">
++        <h1>管理后台</h1>
++        <p>使用管理员账号登录运营控制台</p>
++      </div>
++      <label>账号<input id="admin-username" name="username" autocomplete="username" required></label>
++      <label>密码<input id="admin-password" name="password" type="password" autocomplete="current-password" required></label>
++      <div id="admin-login-error" class="admin-login-error" role="alert"></div>
++      <button id="admin-login-button" class="admin-primary-button" type="submit">登录</button>
++      <a class="admin-back-link" href="/">返回交易平台</a>
++    </form>
++  </main>
++
++  <div id="admin-app" class="admin-app" hidden>
++    <div class="admin-sidebar-backdrop" id="admin-sidebar-backdrop" aria-hidden="true"></div>
++    <aside class="admin-sidebar" id="admin-sidebar" aria-label="管理侧边栏">
++      <div class="admin-sidebar-brand"><i class="brand-mark"></i><span><b>AxiX Exchange</b><small>管理控制台</small></span></div>
++      <nav class="admin-navigation" aria-label="后台功能">
++        <button class="active" type="button" data-admin-page="overview"><span class="admin-nav-icon">📊</span>首页总览</button>
++        <button type="button" data-admin-page="users"><span class="admin-nav-icon">👥</span>用户管理</button>
++        <button type="button" data-open-funds><span class="admin-nav-icon">↗</span>资金后台</button>
++        <button type="button" data-admin-page="deposits"><span class="admin-nav-icon">💰</span>充值记录</button>
++        <button type="button" data-admin-page="tokens"><span class="admin-nav-icon">🪙</span>代币管理</button>
++        <button type="button" data-admin-page="stocks"><span class="admin-nav-icon">📈</span>股票管理</button>
++        <button type="button" data-admin-page="community"><span class="admin-nav-icon">↗</span>社群链接</button>
++        <div class="admin-sidebar-divider" aria-hidden="true"></div>
++        <button type="button" data-admin-page="a-kline"><span class="admin-nav-icon">📈</span>AIX 行情调控</button>
++        <button type="button" data-admin-page="a-token-balance"><span class="admin-nav-icon">💎</span>AIX 代币管理</button>
++        <button type="button" data-admin-page="a-miner"><span class="admin-nav-icon">⛏️</span>AIX 矿机管理</button>
++        <button type="button" data-admin-page="lottery"><span class="admin-nav-icon">🎰</span>抽奖管理</button>
++        <button type="button" data-admin-page="support"><span class="admin-nav-icon">💬</span>在线客服<span id="admin-support-nav-badge" class="admin-nav-badge" hidden>0</span></button>
++        <button type="button" data-admin-page="agents"><span class="admin-nav-icon">🤝</span>代理管理</button>
++      </nav>
++      <div class="admin-sidebar-account">
++        <span>当前管理员</span>
++        <b id="admin-current-user">-</b>
++        <button id="admin-logout" type="button">退出登录</button>
++      </div>
++    </aside>
++
++    <section class="admin-workspace">
++      <header class="admin-topbar">
++        <button class="admin-topbar-menu" id="admin-menu-toggle" type="button" aria-label="打开菜单" aria-controls="admin-sidebar">☰</button>
++        <div><h1 id="admin-page-title">首页总览</h1><p id="admin-updated">正在读取平台数据</p></div>
++        <div style="display:flex;align-items:center;gap:8px"><button id="lang-toggle" class="admin-secondary-button lang-toggle" type="button" title="切换语言" aria-label="切换语言">🌐</button><button id="admin-refresh" class="admin-secondary-button" type="button">刷新数据</button></div>
++      </header>
++      <div id="admin-global-status" class="admin-global-status" role="status"></div>
++
++      <section class="admin-page-panel active" data-admin-panel="overview">
++        <div class="admin-metrics" aria-label="平台核心数据">
++          <article><span>钱包用户</span><b id="metric-wallet-users">0</b><small>连接并验证过的钱包</small></article>
++          <article><span>真实充值用户</span><b id="metric-real-users">0</b><small>存在已确认 USDT 充值</small></article>
++          <article><span>累计确认充值</span><b><i id="metric-total-deposited">0.00</i> <em>USDT</em></b><small id="metric-deposit-count">0 笔到账</small></article>
++          <article><span>用户平台余额</span><b><i id="metric-total-balance">0.00</i> <em>USDT</em></b><small>所有用户余额合计</small></article>
++        </div>
++        <div class="admin-overview-grid">
++          <section class="admin-content-block">
++            <header><div><h2>近期充值</h2><p>最新提交与确认的链上充值</p></div><button type="button" data-jump-page="deposits">查看全部</button></header>
++            <div class="admin-table-scroll"><table><thead><tr><th>钱包</th><th>网络</th><th>金额</th><th>状态</th><th>时间</th></tr></thead><tbody id="overview-deposits-body"></tbody></table></div>
++          </section>
++          <section class="admin-content-block">
++            <header><div><h2>待办事项</h2><p>需要运营人员关注的业务</p></div></header>
++            <div class="admin-todo-list">
++              <button type="button" data-jump-page="deposits"><span>待确认充值</span><b id="todo-pending-deposits">0</b></button>
++              <button type="button" data-open-funds><span>待处理提现</span><b id="todo-pending-withdrawals">0</b></button>
++              <button type="button" data-jump-page="tokens"><span>已启用代币</span><b id="todo-enabled-tokens">0</b></button>
++            </div>
++          </section>
++        </div>
++      </section>
++
++      <section class="admin-page-panel" data-admin-panel="users">
++        <section class="admin-content-block">
++          <header class="admin-list-header"><div><h2>钱包用户</h2><p id="admin-user-count">0 位用户</p></div><div class="admin-filters"><input id="admin-user-search" type="search" placeholder="搜索钱包地址"><label><input id="admin-real-only" type="checkbox"> 只看真实充值用户</label></div></header>
++          <div class="admin-table-scroll"><table><thead><tr><th>钱包地址</th><th>等级</th><th>用户类型</th><th>确认充值</th><th>平台余额</th><th>首次连接</th><th>最近充值</th><th>操作</th></tr></thead><tbody id="admin-users-body"></tbody></table></div>
++        </section>
++      </section>
++
++      <!-- 用户详情弹窗 -->
++      <div id="admin-user-detail-modal" class="admin-modal" hidden>
++        <div class="admin-modal-overlay" data-close-detail></div>
++        <div class="admin-modal-content admin-user-detail-content">
++          <div class="admin-modal-head">
++            <h3 id="admin-user-detail-title">用户详情</h3>
++            <button type="button" class="admin-modal-close" data-close-detail>×</button>
++          </div>
++          <div id="admin-user-detail-body" class="admin-user-detail-body">正在加载...</div>
++        </div>
++      </div>
++
++      <section class="admin-page-panel" data-admin-panel="deposits">
++        <section class="admin-content-block">
++          <header class="admin-list-header"><div><h2>充值记录</h2><p id="admin-deposit-count">0 条记录</p></div><select id="admin-deposit-filter"><option value="">全部状态</option><option value="pending">待确认</option><option value="confirmed">已确认</option><option value="rejected">已拒绝</option><option value="expired">已过期</option></select></header>
++          <div class="admin-table-scroll"><table><thead><tr><th>提交时间</th><th>钱包地址</th><th>网络</th><th>资产</th><th>金额</th><th>状态</th><th>交易哈希</th></tr></thead><tbody id="admin-deposits-body"></tbody></table></div>
++        </section>
++      </section>
++
++      <section class="admin-page-panel" data-admin-panel="tokens">
++        <section class="admin-content-block">
++          <header><div><h2>代币管理</h2><p>交易市场使用币安 USDT 行情</p></div></header>
++          <form id="admin-token-form" class="admin-token-form">
++            <label>代币代码<input id="admin-token-symbol" maxlength="12" placeholder="例如 ADA" required></label>
++            <label>代币名称<input id="admin-token-name" maxlength="40" placeholder="例如 Cardano" required></label>
++            <label>价格小数位<input id="admin-token-decimals" type="number" min="0" max="8" value="4" required></label>
++            <label class="admin-checkbox"><input id="admin-token-spot" type="checkbox" checked> 现货</label>
++            <label class="admin-checkbox"><input id="admin-token-perp" type="checkbox" checked> 合约</label>
++            <button class="admin-primary-button" type="submit">添加代币</button>
++          </form>
++          <div id="admin-token-status" class="admin-inline-status"></div>
++          <div class="admin-table-scroll"><table><thead><tr><th>代币</th><th>名称</th><th>价格精度</th><th>交易市场</th><th>状态</th><th>操作</th></tr></thead><tbody id="admin-tokens-body"></tbody></table></div>
++        </section>
++      </section>
++
++      <section class="admin-page-panel" data-admin-panel="stocks">
++        <section class="admin-content-block">
++          <header><div><h2>股票管理</h2><p>美股代币使用币安 USDT 行情（现货交易对自动带 B 后缀），添加后即时生效</p></div></header>
++          <form id="admin-stock-form" class="admin-token-form">
++            <label>股票代码<input id="admin-stock-symbol" maxlength="12" placeholder="例如 AAPL" required></label>
++            <label>股票名称<input id="admin-stock-name" maxlength="40" placeholder="例如 Apple" required></label>
++            <label>价格小数位<input id="admin-stock-decimals" type="number" min="0" max="8" value="2" required></label>
++            <label class="admin-checkbox"><input id="admin-stock-spot" type="checkbox" checked> 现货</label>
++            <label class="admin-checkbox"><input id="admin-stock-perp" type="checkbox" checked> 合约</label>
++            <button class="admin-primary-button" type="submit">添加股票</button>
++          </form>
++          <div id="admin-stock-status" class="admin-inline-status"></div>
++          <div class="admin-table-scroll"><table><thead><tr><th>股票</th><th>名称</th><th>价格精度</th><th>交易市场</th><th>状态</th><th>操作</th></tr></thead><tbody id="admin-stocks-body"></tbody></table></div>
++        </section>
++      </section>
++
++      <section class="admin-page-panel" data-admin-panel="community">
++        <section class="admin-content-block">
++          <header><div><h2>社群链接</h2><p>管理前台社群与支持入口，保存后即时生效</p></div><a class="admin-community-preview" href="/?page=community" target="_blank" rel="noopener noreferrer">查看前台 ↗</a></header>
++          <div class="admin-community-quick"><span>快捷添加</span><div id="admin-community-presets"></div></div>
++          <form id="admin-community-form" class="admin-community-form">
++            <h3 id="admin-community-editor-title">添加链接</h3>
++            <label>入口类型<select id="admin-community-type" required><option value="telegram">TG</option><option value="twitter">推特</option><option value="dexbox">dexBOX</option><option value="telegram-support">TG客服</option><option value="qq">QQ社群</option><option value="email">邮箱投递</option><option value="ticket">留言工单</option></select></label>
++            <label>显示名称<input id="admin-community-title" maxlength="40" placeholder="例如：AxiX 官方 TG 社群" required></label>
++            <label class="admin-community-wide">链接 / 邮箱<input id="admin-community-url" type="text" maxlength="2048" placeholder="https://t.me/你的社群" autocomplete="off"><small id="admin-community-url-hint">填写完整的 https:// 链接；邮箱类型可直接填写邮箱地址。</small></label>
++            <label class="admin-community-wide admin-community-qq-group" style="display:none">QQ 群号码<input id="admin-community-group-number" type="text" inputmode="numeric" maxlength="12" placeholder="例如：123456789" autocomplete="off"><small>填写后前台 QQ 卡片会显示群号码，访客可一键复制后到 QQ 加群。</small></label>
++            <label class="admin-community-wide">入口说明<input id="admin-community-description" maxlength="140" placeholder="简短介绍此入口的用途（选填）"></label>
++            <label class="admin-community-wide admin-community-qr-field">二维码图片<span class="admin-field-hint">QQ社群推荐上传，支持 PNG/JPG/WEBP（≤2MB）。前台将优先显示二维码卡片。</span><input id="admin-community-qrcode" type="file" accept="image/png,image/jpeg,image/webp" class="admin-community-qr-input"><input id="admin-community-qrcode-data" type="hidden"><div id="admin-community-qrcode-preview" class="admin-community-qr-preview" style="display:none"></div></label>
++            <label>显示顺序<input id="admin-community-order" type="number" min="0" max="9999" step="1" value="0" required><small>数值越小越靠前，也可使用列表中的上移 / 下移。</small></label>
++            <label class="admin-community-enabled"><input id="admin-community-enabled" type="checkbox" checked><span>在前台显示</span></label>
++            <div class="admin-community-form-actions"><button id="admin-community-save" type="submit" class="admin-primary-button">添加链接</button><button id="admin-community-cancel" type="button" class="admin-secondary-button">清空表单</button></div>
++            <div id="admin-community-form-status" class="admin-community-wide" role="status"></div>
++          </form>
++        </section>
++        <section class="admin-content-block admin-community-list-block">
++          <header><div><h2>已添加的链接</h2><p id="admin-community-count">尚未加载</p></div><button id="admin-community-refresh" class="admin-secondary-button" type="button">刷新列表</button></header>
++          <div id="admin-community-list-status" role="status"></div>
++          <div id="admin-community-list" class="admin-community-list"></div>
++        </section>
++      </section>
++      <section class="admin-page-panel" data-admin-panel="a-kline">
++        <section class="admin-content-block">
++          <header><div><h2>AIX 代币行情调控</h2><p>实时操控 AIX / USDT 资金池价格、K 线模式与全周期 K 线</p></div><button class="admin-secondary-button" type="button" id="admin-a-kline-refresh">🔄 刷新</button></header>
++          <div id="admin-a-kline-root" class="admin-a-module">正在读取 AIX 代币状态...</div>
++        </section>
++      </section>
++
++      <section class="admin-page-panel" data-admin-panel="a-token-balance">
++        <section class="admin-content-block">
++          <header><div><h2>AIX 资产管理</h2><p>充值、扣除需要单独验证资金权限。</p></div></header>
++          <button type="button" class="admin-primary-button" data-open-funds>打开资金后台</button>
++        </section>
++        <section class="admin-content-block">
++          <header><div><h2>查询用户 AIX 余额</h2><p>输入钱包地址查看当前 AIX 余额</p></div></header>
++          <div class="admin-credit-form" style="flex-direction:row;gap:8px;align-items:flex-end">
++            <label style="flex:1">钱包地址<input id="admin-aix-query-wallet" autocomplete="off" placeholder="0x..."></label>
++            <button class="admin-secondary-button" type="button" id="admin-aix-query-btn">查询余额</button>
++          </div>
++          <div id="admin-aix-balance-result" class="admin-inline-status"></div>
++        </section>
++      </section>
++
++      <section class="admin-page-panel" data-admin-panel="a-miner">
++        <section class="admin-content-block">
++          <header><div><h2>AIX 矿机管理</h2><p>AIX 代币矿机发放、搜索、手动产出、强制过期等后台运营操作</p></div><button class="admin-secondary-button" type="button" id="admin-a-miner-refresh">🔄 刷新</button></header>
++          <div id="admin-a-miner-root" class="admin-a-module">正在读取矿机数据...</div>
++        </section>
++      </section>
++      <section class="admin-page-panel" data-admin-panel="lottery">
++        <div id="admin-lottery-root">正在读取抽奖数据...</div>
++      </section>
++      <section class="admin-page-panel" data-admin-panel="support">
++        <section class="admin-content-block">
++          <header class="admin-list-header">
++            <div><h2>在线客服</h2><p>回复用户在「在线客服」页面发送的咨询，未读消息会实时提醒</p></div>
++            <div class="admin-filters">
++              <select id="admin-support-filter">
++                <option value="open">进行中</option>
++                <option value="">全部会话</option>
++                <option value="closed">已关闭</option>
++              </select>
++              <button class="admin-secondary-button" type="button" id="admin-support-refresh">🔄 刷新</button>
++            </div>
++          </header>
++          <div id="admin-support-root" class="admin-support-wrap">
++            <div class="admin-support-list" id="admin-support-ticket-list"><div class="admin-inline-status">正在读取会话…</div></div>
++            <div class="admin-support-conv" id="admin-support-conv">
++              <div class="admin-support-conv-empty">从左侧选择一个会话查看并回复</div>
++            </div>
++          </div>
++        </section>
++      </section>
++      <section class="admin-page-panel" data-admin-panel="agents">
++        <header>
++          <div><h2>代理管理</h2><p>创建代理账号，绑定团队根钱包。代理用用户名密码登录独立后台，仅能查看其下级团队数据，无资金操作权限。</p></div>
++          <button id="admin-agents-refresh" class="admin-secondary-button" type="button">刷新</button>
++        </header>
++        <div class="admin-content-block">
++          <header><h3>新建代理</h3></header>
++          <form id="admin-agents-form" class="admin-grid-form" style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:12px;align-items:end">
++            <label>用户名<input id="agent-username" maxlength="32" placeholder="agent001" required></label>
++            <label>密码<input id="agent-password" type="password" placeholder="至少6位" required></label>
++            <label>绑定钱包地址<input id="agent-wallet" maxlength="64" placeholder="0x..." required></label>
++            <button class="admin-primary-button" type="submit">创建</button>
++          </form>
++          <div id="admin-agents-form-status" role="status" style="margin-top:8px"></div>
++        </div>
++        <div class="admin-content-block">
++          <header><h3>代理列表</h3></header>
++          <div id="admin-agents-list-status" role="status"></div>
++          <div id="admin-agents-list"></div>
++        </div>
++      </section>
++    </section>
++  </div>
++  <script src="/js/admin-dialogs.js?v=20261011-security-1"></script>
++  <script src="/js/admin-community.js?v=7-security-20261011"></script>
++  <script src="/js/admin-lottery.js?v=20261011-security-2"></script>
++  <script src="/js/operator-admin.js?v=20261011-permissions-1"></script>
++  <script src="/js/admin-agents.js?v=1"></script>
++</body>
++</html>

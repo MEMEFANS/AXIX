@@ -1,0 +1,35 @@
+[
+  {
+    "path": "/js/assets.js?v=20261011-aix-fix",
+    "status": 200,
+    "sha256": "3f1aae919a86374cbe002033ffbe21dbaf97470a052e494412c3a7bbf3360d97",
+    "local_sha256": "3f1aae919a86374cbe002033ffbe21dbaf97470a052e494412c3a7bbf3360d97"
+  },
+  {
+    "path": "/js/page-loader.js",
+    "status": 200,
+    "sha256": "2e995741e484b4d8fa47fb7031a681715607534509e342ccd987b29b56744b19",
+    "local_sha256": "2e995741e484b4d8fa47fb7031a681715607534509e342ccd987b29b56744b19"
+  },
+  {
+    "path": "/js/trade-account.js",
+    "status": 200,
+    "sha256": "8de3b68a80d6a45c97e7f2dbfad74b3acfa0ed39747a61b17a0fafe9e70af989",
+    "local_sha256": "8de3b68a80d6a45c97e7f2dbfad74b3acfa0ed39747a61b17a0fafe9e70af989"
+  },
+  {
+    "path": "/js/wallet-funds.js",
+    "status": 200,
+    "sha256": "0fa683d0e274a93391bb0ddf5e430f293560c326c7603ee5cb311b687d6392f9",
+    "local_sha256": "0fa683d0e274a93391bb0ddf5e430f293560c326c7603ee5cb311b687d6392f9"
+  },
+  {
+    "path": "/",
+    "status": 200,
+    "sha256": "1c150f662f66fb2e2bbeed16ddb89149e582f2a2216c8096f15f769230500ee1",
+    "local_sha256": null,
+    "loader_scripts": [
+      "/js/page-loader.js?v=4"
+    ]
+  }
+]

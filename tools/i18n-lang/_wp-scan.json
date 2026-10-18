@@ -1,0 +1,710 @@
+[
+  {
+    "zh": "AxiX × Aethon Fund · 策略背书白皮书",
+    "en": "AxiX × Aethon Fund · Strategy Endorsement Whitepaper"
+  },
+  {
+    "zh": "版本 v1.2 · 发布日期 2026/08/30 · 全部事实均有权威公开来源可核验",
+    "en": "Version v1.2 · Released 2026/08/30 · All facts verifiable from authoritative public sources"
+  },
+  {
+    "zh": "Aethon 官网 ↗",
+    "en": "Aethon Official Site ↗"
+  },
+  {
+    "zh": "BusinessWire 官方新闻稿 ↗",
+    "en": "BusinessWire official press release ↗"
+  },
+  {
+    "zh": "BusinessWire 官方披露",
+    "en": "BusinessWire official disclosure"
+  },
+  {
+    "zh": "Hedgeweek / FinTech Global 同步报道",
+    "en": "As covered by Hedgeweek / FinTech Global"
+  },
+  {
+    "zh": "团队信号研究积淀",
+    "en": "Team signal research heritage"
+  },
+  {
+    "zh": "创始人 George Kailas 自 17 岁入行",
+    "en": "Founder George Kailas started at 17"
+  },
+  {
+    "zh": "Prospero.ai 2022 以来超越标普",
+    "en": "Beating the S&P since 2022 with Prospero.ai"
+  },
+  {
+    "zh": "01 · 背书声明（Disclaimer）",
+    "en": "01 · Disclaimer"
+  },
+  {
+    "zh": "本文档用于说明",
+    "en": "This document explains"
+  },
+  {
+    "zh": "AxiX 交易所",
+    "en": "AxiX Exchange"
+  },
+  {
+    "zh": "（下称\"本平台\"，前身为 WG Grid 交易平台，2026/08 正式更名）合约跟单、量化信号、风控框架在方法论层面所参考的机构范式。文中涉及的全部机构、人物、履历、基金规模、团队结构、媒体报道均来自可公开核验的第三方权威来源，本平台并未对其进行任何虚构或夸大。",
+    "en": "(hereinafter \"the Platform\", formerly WG Grid Trading Platform, renamed 2026/08), the institutional paradigm referenced by its copy-trading strategies, quantitative signals and risk framework at the methodology level. All institutions, people, track records, fund sizes, team structures and media coverage herein come from publicly verifiable third-party authoritative sources; the Platform has neither fabricated nor exaggerated them."
+  },
+  {
+    "zh": "以下内容必须严格遵守：",
+    "en": "The following must be strictly observed:"
+  },
+  {
+    "zh": "Aethon Fund 未发行任何代币（No Token Issued）。",
+    "en": "Aethon Fund has issued no tokens (No Token Issued)."
+  },
+  {
+    "zh": "本平台原生代币为",
+    "en": "The Platform's native token is"
+  },
+  {
+    "zh": "AIX（代号 AIX）",
+    "en": "AIX (ticker: AIX)"
+  },
+  {
+    "zh": "，前端统一以 AIX 为直观单位展示。为保持后端订单簿、撮合引擎、资产结算的历史稳定性，代码层计价符号沿用内部标识（对普通用户完全透明，无需关心）。AIX 代币与 Aethon Fund 之间",
+    "en": ", displayed uniformly as AIX on the frontend. To keep the backend order book, matching engine and asset settlement stable, the code layer retains the internal pricing symbol (fully transparent to users). Between the AIX token and Aethon Fund there is"
+  },
+  {
+    "zh": "不存在任何股权、债权、基金份额、收益权或代币的直接关联",
+    "en": "no direct equity, debt, fund-share, profit-interest or token relationship whatsoever"
+  },
+  {
+    "zh": "，请勿将二者混同。",
+    "en": " — do not confuse the two."
+  },
+  {
+    "zh": "Aethon Fund 无官方 Twitter / X 账号。",
+    "en": "Aethon Fund has no official Twitter / X account."
+  },
+  {
+    "zh": "任何以 Aethon Fund 名义在社交平台私信拉群、招揽投资的账号均为诈骗，请直接举报。",
+    "en": "Any account soliciting investments in the name of Aethon Fund on social media is a scam — report it."
+  },
+  {
+    "zh": "本平台与 Aethon Fund 的合作性质为：策略方法论与风控框架参考（Methodology Reference）。",
+    "en": "The cooperation between the Platform and Aethon Fund is: strategy methodology and risk-framework reference (Methodology Reference)."
+  },
+  {
+    "zh": "用户在本平台参与合约跟单，并非直接投资于 Aethon Fund，不构成对 Aethon Fund 的有限合伙（LP）承诺，亦不享有 Aethon Fund 的 LP 收益分配权。",
+    "en": "Participating in copy trading on the Platform is not a direct investment in Aethon Fund; it constitutes neither an LP commitment to Aethon Fund nor any claim on its LP distributions."
+  },
+  {
+    "zh": "所有关于 Aethon Fund 的对外展示措辞（含本白皮书、合约跟单页、排行榜、赚取页），均在场景范围内使用\"方法论参考\"\"信号驱动型框架借鉴\"\"机构级风控标准对齐\"等明确边界的表述，未使用\"旗下\"\"子公司\"\"全资\"\"战略入股\"等任何可能造成误导的用语。",
+    "en": "All external references to Aethon Fund (this whitepaper, Copy Trading, Leaderboard and Earn pages) use clearly bounded wording such as \"methodology reference\", \"signal-driven framework benchmark\" and \"institutional-grade risk alignment\", never misleading terms like \"subsidiary\", \"wholly owned\" or \"strategic equity stake\"."
+  },
+  {
+    "zh": "若 Aethon Fund 或创始人 George Kailas 出具明确书面反对意见，本平台承诺在 48 小时内调整相关措辞。",
+    "en": "Should Aethon Fund or founder George Kailas raise a clear written objection, the Platform will adjust the wording within 48 hours."
+  },
+  {
+    "zh": "02 · 基金基本信息（Fund Overview）",
+    "en": "02 · Fund Overview"
+  },
+  {
+    "zh": "基金名称 Fund Name",
+    "en": "Fund Name"
+  },
+  {
+    "zh": "基金类型 Fund Type",
+    "en": "Fund Type"
+  },
+  {
+    "zh": "AI 驱动的系统性对冲基金（AI-Driven Systematic Hedge Fund）",
+    "en": "AI-Driven Systematic Hedge Fund"
+  },
+  {
+    "zh": "总部 Headquarters",
+    "en": "Headquarters"
+  },
+  {
+    "zh": "美国纽约 New York, USA",
+    "en": "New York, USA"
+  },
+  {
+    "zh": "正式启动 Launch Date",
+    "en": "Launch Date"
+  },
+  {
+    "zh": "2026 年 7 月 15 日（July 15, 2026）",
+    "en": "July 15, 2026"
+  },
+  {
+    "zh": "初始资本 Initial Capital",
+    "en": "Initial Capital"
+  },
+  {
+    "zh": "$50,000,000 美元（含母基金锚定独立管理账户 + 机构 / 家族办公室 / UHNWI 承诺资金）",
+    "en": "$50,000,000 USD (incl. fund-of-funds anchored SMA + institutional / family office / UHNWI commitments)"
+  },
+  {
+    "zh": "创始人 Founder",
+    "en": "Founder"
+  },
+  {
+    "zh": "官方网站 Official Site",
+    "en": "Official Site"
+  },
+  {
+    "zh": "代币政策 Token Policy",
+    "en": "Token Policy"
+  },
+  {
+    "zh": "基金本身未发行任何代币。Aethon Fund 无官方 Twitter / X 账号。",
+    "en": "The fund itself has issued no tokens. Aethon Fund has no official Twitter / X account."
+  },
+  {
+    "zh": "目标投资者 Target LPs",
+    "en": "Target LPs"
+  },
+  {
+    "zh": "机构投资者、家族办公室（Family Office）、超高净值个人（UHNWI）",
+    "en": "Institutional investors, Family Offices and UHNWIs"
+  },
+  {
+    "zh": "03 · 创始人履历 · George Kailas",
+    "en": "03 · Founder Profile · George Kailas"
+  },
+  {
+    "zh": "17 岁入行 / 25 岁售模 / 7.5× 跑赢",
+    "en": "Trading at 17 / model sold at 25 / 7.5× outperformance"
+  },
+  {
+    "zh": "🧠 20 年市场信号研究",
+    "en": "🧠 20 Years of Market Signal Research"
+  },
+  {
+    "zh": "Kailas 将其职业生涯定义为\"持续找出传统量化模型抓不到的信号（identifying what the models consistently miss）\"，以 20 年跨度系统性打磨信号库，而非单纯堆砌数据量。",
+    "en": "Kailas defines his career as \"identifying what the models consistently miss\", systematically refining his signal library over 20 years rather than stacking up data."
+  },
+  {
+    "zh": "🎯 17 岁进入对冲基金",
+    "en": "🎯 Entered Hedge Funds at 17"
+  },
+  {
+    "zh": "第一份工作即在对冲基金任职（价值投资），自学会计拿到 offer，是华尔街极为罕见的入行起点。",
+    "en": "His first job was at a hedge fund (value investing) — self-taught in accounting to land the offer, an extremely rare start on Wall Street."
+  },
+  {
+    "zh": "🏆 25 岁出售抵押贷款预测模型",
+    "en": "🏆 Sold mortgage prediction model at 25"
+  },
+  {
+    "zh": "在 Excel 中搭建的抵押贷款预测算法，以技术出售方式交付给一家管理规模 200 亿美元的对冲基金（$20B Hedge Fund）。",
+    "en": "A mortgage-prediction algorithm built in Excel, sold as technology to a $20B hedge fund."
+  },
+  {
+    "zh": "🚀 2019 创立 Prospero.ai",
+    "en": "🚀 Founded Prospero.ai in 2019"
+  },
+  {
+    "zh": "面向散户的情报平台，旨在弥合机构与散户之间的研究鸿沟。累计通过 20 万+ 次零售投资者的市场呼叫与反馈打磨信号库，月活超过 2 万。",
+    "en": "A retail intelligence platform bridging the research gap between institutions and retail, with 200k+ retail market calls refining the signal library and 20k+ monthly active users."
+  },
+  {
+    "zh": "📈 2022 以来前瞻选股跑赢标普 500 × 7.5 倍",
+    "en": "📈 Forward picks beating S&P 500 ×7.5 since 2022"
+  },
+  {
+    "zh": "Prospero.ai 付费新闻通讯（Newsletter）的前瞻选股组合自 2022 年以来，以实盘可跟踪的收益曲线超越 S&P 500 指数 7.5 倍。这一数字由 BusinessWire 官方新闻稿披露，为 Aethon 信号质量提供了跨越牛熊的实盘背书。",
+    "en": "Since 2022 the Prospero.ai paid newsletter forward picks have beaten the S&P 500 by 7.5× on a trackable live curve — disclosed by BusinessWire, an across-cycle live endorsement of Aethon signal quality."
+  },
+  {
+    "zh": "🔄 与 Prospero.ai 的角色切换",
+    "en": "🔄 Role Shift with Prospero.ai"
+  },
+  {
+    "zh": "Aethon 启动后，Kailas 退出 Prospero.ai 日常运营，转任董事长（Chairman），专注管理基金；原 Prospero.ai 首席技术官 Adam Plante（核心信号基础设施架构师）升任 CEO。Aethon 部分利润将回流 Prospero.ai，回馈其 4 年实盘信号反馈社区。",
+    "en": "After the Aethon launch, Kailas stepped back from Prospero.ai daily operations to Chairman; former CTO Adam Plante (core signal-infrastructure architect) became CEO. Part of Aethon profits flow back to Prospero.ai for its 4-year live signal-feedback community."
+  },
+  {
+    "zh": "04 · 投资策略与技术栈（Strategy Stack）",
+    "en": "04 · Strategy Stack"
+  },
+  {
+    "zh": "AxiX 合约跟单直接对齐的方法论",
+    "en": "The methodology directly aligned with AxiX Copy Trading"
+  },
+  {
+    "zh": "Aethon 不以数据集体量作为护城河，而以",
+    "en": "Aethon does not treat dataset size as the moat, but"
+  },
+  {
+    "zh": "信号质量本身（signals themselves are the moat）",
+    "en": "signal quality itself"
+  },
+  {
+    "zh": "为核心竞争优势。其信号库并非回测产物，而是通过 Prospero.ai 4 年实盘呼叫、20 万+ 散户反馈反复验证与淘汰的结果。",
+    "en": "as the core moat. Its signal library is not a backtest artifact but the product of 4 years of live Prospero.ai calls and 200k+ retail feedback repeatedly validating and eliminating signals."
+  },
+  {
+    "zh": "4.1 多策略并行框架（Diversified Strategy Stack）",
+    "en": "4.1 Diversified Strategy Stack"
+  },
+  {
+    "zh": "基金同时运行多类系统性策略，由投资团队搭建并进行压力测试后，交由 AI 执行，并根据当期表现持续向优策略倾斜配置资本：",
+    "en": "The fund runs multiple systematic strategies in parallel — built and stress-tested by the investment team, executed by AI, with capital continuously tilted toward better performers:"
+  },
+  {
+    "zh": "做多策略 Long",
+    "en": "Long strategy"
+  },
+  {
+    "zh": "做空策略 Short",
+    "en": "Short strategy"
+  },
+  {
+    "zh": "动量策略 Momentum",
+    "en": "Momentum strategy"
+  },
+  {
+    "zh": "均值回归 Mean-Reversion",
+    "en": "Mean-Reversion"
+  },
+  {
+    "zh": "：价格偏离后收敛",
+    "en": ": prices converge after deviation"
+  },
+  {
+    "zh": "隐蔽积累 Stealth-Accumulation",
+    "en": "Stealth Accumulation"
+  },
+  {
+    "zh": "4.2 风控体系（Risk Management）",
+    "en": "4.2 Risk Management"
+  },
+  {
+    "zh": "每一个仓位均由利润目标 Profit Target、止损 Stop Loss、追踪止损 Trailing Stop 和时间止损 Time Stop 预设规则管制，",
+    "en": "Every position is governed by preset rules — Profit Target, Stop Loss, Trailing Stop and Time Stop —"
+  },
+  {
+    "zh": "任何仓位不得无限期持有",
+    "en": "no position may be held indefinitely"
+  },
+  {
+    "zh": "方差风险溢价层 Variance Risk Premium Overlay",
+    "en": "Variance Risk Premium Overlay"
+  },
+  {
+    "zh": "，根据市场制度（Regime）分类自动调整多空敞口，避免在波动率飙升时被动持仓。",
+    "en": ", automatically adjusting long/short exposure by regime to avoid passive holding during volatility spikes."
+  },
+  {
+    "zh": "系统目标为在所有市场制度（牛 / 熊 / 震荡）下均能产生绝对回报。",
+    "en": "The system aims for absolute returns across all market regimes (bull / bear / range)."
+  },
+  {
+    "zh": "4.3 信号库覆盖范围（Signal Library）",
+    "en": "4.3 Signal Library"
+  },
+  {
+    "zh": "覆盖 2,000+ 只股票的 9 项日频信号，0-100 分打分，由散户与机构资金流交互淬炼而成。",
+    "en": "Covers 9 daily signals across 2,000+ stocks, scored 0–100, refined through the interplay of retail and institutional order flow."
+  },
+  {
+    "zh": "监控 Reddit、X、StockTwits，带账户级别可信度加权，可区分\"值得跟随的信号\"与\"值得反向下注的噪音\"。",
+    "en": "Monitors Reddit, X and StockTwits with account-level credibility weighting, separating \"signals worth following\" from \"noise worth fading\"."
+  },
+  {
+    "zh": "分析师评级加权模型，按 6 个月历史准确率重新赋权，替代传统共识均价（Consensus Average）。",
+    "en": "An analyst-rating weighting model re-weighted by 6-month accuracy, replacing the traditional Consensus Average."
+  },
+  {
+    "zh": "覆盖数千只股票与 ETF 的多时间尺度回报概率预测模型。",
+    "en": "A multi-horizon return-probability model covering thousands of stocks and ETFs."
+  },
+  {
+    "zh": "4.4 AxiX 与 Aethon 方法论的对齐点",
+    "en": "4.4 AxiX × Aethon Methodology Alignment"
+  },
+  {
+    "zh": "Aethon Fund 机构级标准",
+    "en": "Aethon Fund institutional standard"
+  },
+  {
+    "zh": "AxiX 交易所落地实现",
+    "en": "AxiX Exchange implementation"
+  },
+  {
+    "zh": "long / short / momentum / mean-reversion / stealth-accumulation 并行，动态倾斜仓位",
+    "en": "long / short / momentum / mean-reversion / stealth-accumulation run in parallel with dynamic tilt"
+  },
+  {
+    "zh": "合约跟单对不同资产类别的做市、趋势、对冲子策略并行，72 分钟分位 slot 即兑现收益",
+    "en": "Copy trading runs market-making, trend and hedging sub-strategies in parallel across asset classes, with yields credited per 72-minute slot"
+  },
+  {
+    "zh": "Profit Target / Stop Loss / Trailing Stop / Time Stop 四要素",
+    "en": "Profit Target / Stop Loss / Trailing Stop / Time Stop — four elements"
+  },
+  {
+    "zh": "每笔托管合约带到期日 + 每日止盈止损 + 目标收益阈值 + 资金费率闭环",
+    "en": "each managed contract carries a maturity date + daily TP/SL + target-return threshold + funding-rate closed loop"
+  },
+  {
+    "zh": "波动率/制度自适应",
+    "en": "Volatility / regime adaptive"
+  },
+  {
+    "zh": "VRP Overlay 按制度调整净敞口",
+    "en": "VRP Overlay adjusts net exposure by regime"
+  },
+  {
+    "zh": "AIX 代币 K 线以 Akima + 单 tick 限幅平滑推进，强抑价格异动",
+    "en": "AIX token K-lines advance smoothly via Akima + single-tick clamping, strongly suppressing price anomalies"
+  },
+  {
+    "zh": "4 年 20 万+ 散户反馈淬炼",
+    "en": "Refined by 200k+ retail feedback over 4 years"
+  },
+  {
+    "zh": "排行榜以已入账 reward + 合约名义量双重交叉对账，而非纯回测",
+    "en": "the leaderboard cross-checks credited reward + contract notional instead of pure backtests"
+  },
+  {
+    "zh": "罕见公开展示信号生成示例",
+    "en": "Rare public signal-generation examples"
+  },
+  {
+    "zh": "用户可在合约跟单页查看每个 slot 的 creditBalance 明细与排行榜对账",
+    "en": "Users can view per-slot creditBalance details and leaderboard reconciliation on the Copy Trading page"
+  },
+  {
+    "zh": "05 · 核心团队（Leadership Team）",
+    "en": "05 · Leadership Team"
+  },
+  {
+    "zh": "20 年市场信号研究 · Prospero.ai 创始人 / 董事长",
+    "en": "20 years of signal research · Founder / Chairman of Prospero.ai"
+  },
+  {
+    "zh": "前 Citadel / Allston 高频量化交易员 · 曾就市场结构向美国监管机构作证",
+    "en": "Former Citadel / Allston HFT trader · testified on market structure before US regulators"
+  },
+  {
+    "zh": "前 Hugging Face 大语言模型开发高管",
+    "en": "Former Hugging Face LLM executive"
+  },
+  {
+    "zh": "Harvard PhD · Tower Research 8 年量化策略师",
+    "en": "Harvard PhD · 8 years quant strategist at Tower Research"
+  },
+  {
+    "zh": "风险管理负责人",
+    "en": "Head of Risk Management"
+  },
+  {
+    "zh": "前 Bullish 工程师",
+    "en": "Former Bullish engineer"
+  },
+  {
+    "zh": "机构沟通负责人",
+    "en": "Head of Institutional Relations"
+  },
+  {
+    "zh": "Prospero.ai CEO 继任者",
+    "en": "Prospero.ai CEO successor"
+  },
+  {
+    "zh": "Prospero.ai 长期 CTO · 核心信号基础设施架构师",
+    "en": "Long-time Prospero.ai CTO · core signal infrastructure architect"
+  },
+  {
+    "zh": "06 · 透明度承诺（Transparency Commitment）",
+    "en": "06 · Transparency Commitment"
+  },
+  {
+    "zh": "Aethon 在对冲基金行业中采取了罕见的透明度举措：计划",
+    "en": "Aethon takes a rare transparency step in the hedge-fund industry: it plans"
+  },
+  {
+    "zh": "公开发表示例展示其信号技术的生成过程",
+    "en": "publicly published examples showing how its signal technology generates"
+  },
+  {
+    "zh": "，向外部受众说明其模型如何评估个股及市场状况，同时保留专有投资流程为黑箱。FinTech Global 引述 Kailas 原话：",
+    "en": ", explaining to external audiences how its models evaluate stocks and markets while keeping the proprietary process a black box. FinTech Global quotes Kailas:"
+  },
+  {
+    "zh": "（行业大多把数据当机密，我们反其道而行）。",
+    "en": "(Most of the industry keeps data secret — we do the opposite)."
+  },
+  {
+    "zh": "AxiX 交易所借鉴这一精神：合约跟单收益 72 分钟即入账而非每日结算，并在排行榜中以「已入账 reward + 合约名义量 + ROI 分母口径」三重交叉对账，向用户展示策略表现而非仅展示净值曲线。",
+    "en": "AxiX Exchange draws on this spirit: copy-trading yields are credited every 72 minutes rather than settled daily, and the leaderboard triple cross-checks \"credited reward + contract notional + ROI denominator\" to show strategy performance instead of only a NAV curve."
+  },
+  {
+    "zh": "07 · 可核验权威来源（Verification Sources）",
+    "en": "07 · Verification Sources"
+  },
+  {
+    "zh": "请自行点击链接比对",
+    "en": "Click the links to verify"
+  },
+  {
+    "zh": "[1] BusinessWire（巴菲特旗下权威金融新闻稿平台）——",
+    "en": "[1] BusinessWire (Berkshire-owned authoritative press-release platform) —"
+  },
+  {
+    "zh": "· 2026-07-14 · 基金官方新闻稿，",
+    "en": "· 2026-07-14 · Fund press release,"
+  },
+  {
+    "zh": "全部核心事实的第一来源",
+    "en": "primary source for all core facts"
+  },
+  {
+    "zh": "[2] Hedgeweek（对冲基金行业权威媒体）——",
+    "en": "[2] Hedgeweek (hedge-fund media) —"
+  },
+  {
+    "zh": "[3] FinTech Global（金融科技行业媒体）——",
+    "en": "[3] FinTech Global —"
+  },
+  {
+    "zh": "[4] TradeTech Eye / FF News（交易技术媒体）——",
+    "en": "[4] TradeTech Eye / FF News (trading-tech media) —"
+  },
+  {
+    "zh": "[5] TBPn Digest（创始人独家专访）——",
+    "en": "[5] TBPn Digest (exclusive founder interview) —"
+  },
+  {
+    "zh": "· 2026-07-15，Kailas 亲述 17 岁入行、Prospero 信号 → LLM 生成策略的架构细节。",
+    "en": "· 2026-07-15, Kailas personally details entering the industry at 17 and the Prospero signals → LLM strategy architecture."
+  },
+  {
+    "zh": "[6] Prospero.ai 官方关于页——",
+    "en": "[6] Prospero.ai About page —"
+  },
+  {
+    "zh": "· 领导层显示 George Kailas = Chairman、Adam Plante = CEO、7.5×→12.9× S&P500 超越披露，与新闻稿口径一致。",
+    "en": "· Leadership shows George Kailas = Chairman, Adam Plante = CEO, and the 7.5×→12.9× S&P 500 outperformance disclosure, consistent with the press release."
+  },
+  {
+    "zh": "[7] Aethon 官方网站——",
+    "en": "[7] Aethon official site —"
+  },
+  {
+    "zh": "· 最新状态以官网为准。",
+    "en": "· latest status subject to the official site."
+  },
+  {
+    "zh": "08 · 英文原文关键摘录（Original Excerpts）",
+    "en": "08 · Original Excerpts"
+  },
+  {
+    "zh": "— BusinessWire 官方新闻稿",
+    "en": "— BusinessWire press release"
+  },
+  {
+    "zh": "09 · AIX 平台原生代币（AxiX Token · 命名边界说明）",
+    "en": "09 · AIX Native Token (AxiX Token · Naming Boundary)"
+  },
+  {
+    "zh": "2026/08 更名生效",
+    "en": "Renaming effective 2026/08"
+  },
+  {
+    "zh": "代币正式名 Token Name",
+    "en": "Token Name"
+  },
+  {
+    "zh": "AIX 代币（代码 AIX）",
+    "en": "AIX token (code AIX)"
+  },
+  {
+    "zh": "· 中文品牌名「AxiX 币」",
+    "en": "· Chinese brand name \"AxiX\""
+  },
+  {
+    "zh": "所属项目 Issuer",
+    "en": "Issuer"
+  },
+  {
+    "zh": "AxiX 交易所（前身为 WG Grid 交易平台，2026/08 正式更名）",
+    "en": "AxiX Exchange (formerly WG Grid Trading Platform, officially renamed 2026/08)"
+  },
+  {
+    "zh": "最小计价单位 Unit",
+    "en": "Unit"
+  },
+  {
+    "zh": "（最小精度 6 位小数，0.000001 AIX 起计价）。前端 UI 统一以「AIX」为显示单位，资产页、交易页、赚取页、钱包页均直接显示 AIX，不再出现任何内部代码符号的换算说明，避免混淆。",
+    "en": "(Minimum precision 6 decimals, priced from 0.000001 AIX). The frontend UI uniformly uses \"AIX\" as the display unit: assets, trading, earn and wallet pages all show AIX directly, with no internal code-symbol conversion notes, to avoid confusion."
+  },
+  {
+    "zh": "※ 为保持后端订单簿、资产结算、挂单撮合的历史稳定性，",
+    "en": "※ To preserve the historical stability of the backend order book, asset settlement and order matching,"
+  },
+  {
+    "zh": "后端接口层交易对代码仍使用",
+    "en": "the backend API layer still uses"
+  },
+  {
+    "zh": "（A 为内部计价符号，用于接口层与撮合引擎兼容，实现细节对普通用户完全透明，无需关心）。",
+    "en": "(A is an internal pricing symbol kept for API and matching-engine compatibility; the detail is fully transparent to ordinary users and can be ignored)."
+  },
+  {
+    "zh": "交易对代码 Market Code",
+    "en": "Market Code"
+  },
+  {
+    "zh": "前端中文标题统一显示为「",
+    "en": "The frontend Chinese title is uniformly displayed as \""
+  },
+  {
+    "zh": "AIX / USDT（泰达币）",
+    "en": "AIX / USDT (Tether)"
+  },
+  {
+    "zh": "」。接口返回的",
+    "en": "\". The API"
+  },
+  {
+    "zh": "代码符号仅用于后端撮合系统兼容，UI 上不再对用户展示，所有下单弹窗、余额 Pill、P&L 计算均以 AIX 为直观单位。",
+    "en": "The code symbol exists only for backend matching-system compatibility and is no longer shown in the UI; all order dialogs, balance pills and P&L calculations use AIX as the intuitive unit."
+  },
+  {
+    "zh": "代币价值锚定 Value Model",
+    "en": "Value Model"
+  },
+  {
+    "zh": "锚定 AxiX 交易所平台现金流价值，核心支撑：",
+    "en": "Anchored to the AxiX Exchange platform cash-flow value; core supports:"
+  },
+  {
+    "zh": "① 合约跟单 72 分钟 slot 实盘收益池的手续费分配与生态消耗；",
+    "en": "① fee distribution and ecosystem consumption of the copy-trading 72-minute slot live yield pool;"
+  },
+  {
+    "zh": "② AIX / USDT 交易手续费阶梯（前端显示名称，后端",
+    "en": "② AIX / USDT trading fee tiers (frontend display name, backend"
+  },
+  {
+    "zh": "接口保持历史兼容；直推越多越省，50% 销毁 + 50% 进入 A10 分红池）；",
+    "en": "the API stays backward compatible; the more direct referrals, the lower the fee — 50% burned + 50% into the A10 dividend pool);"
+  },
+  {
+    "zh": "③ 矿机释放、质押、生态消耗、激活机制的通缩模型。",
+    "en": "③ The deflation model of miner release, staking, ecosystem consumption and activation."
+  },
+  {
+    "zh": "以上为 2026/08 代币经济学预披露 v0.1，具体细则以 AxiX 官方后续公告为准。",
+    "en": "The above is the 2026/08 tokenomics pre-disclosure v0.1; specifics are subject to subsequent official AxiX announcements."
+  },
+  {
+    "zh": "与 Aethon Fund 的边界声明",
+    "en": "Boundary statement with Aethon Fund"
+  },
+  {
+    "zh": "★ 关键合规红线",
+    "en": "★ Key compliance red line"
+  },
+  {
+    "zh": "不存在任何形式的关联",
+    "en": "has no connection of any kind"
+  },
+  {
+    "zh": "（再次重申以规避任何可能的误解）：",
+    "en": "(reiterated to avoid any possible misunderstanding):"
+  },
+  {
+    "zh": "① AIX = AxiX 交易所",
+    "en": "① AIX = AxiX Exchange"
+  },
+  {
+    "zh": "原生代币，名称来源于 AxiX =",
+    "en": "native token, named after AxiX ="
+  },
+  {
+    "zh": "（信号 × 交易所）的",
+    "en": "of (signals × exchange)"
+  },
+  {
+    "zh": "方法论品牌化缩写",
+    "en": "methodology-branded abbreviation"
+  },
+  {
+    "zh": "，不代表任何 Aethon Fund 股权、债权、基金份额、LP 收益权；",
+    "en": ", and represents no Aethon Fund equity, debt, fund shares or LP profit rights;"
+  },
+  {
+    "zh": "② Aethon Fund 官方公开声明",
+    "en": "② Aethon Fund official statement"
+  },
+  {
+    "zh": "无官方 Twitter/X 账号",
+    "en": ""
+  },
+  {
+    "zh": "（BusinessWire + Hedgeweek 2026/07 披露），",
+    "en": "(BusinessWire + Hedgeweek 2026/07),"
+  },
+  {
+    "zh": "因此任何 AIX 代币绝不能被表述为「Aethon 币 / Aethon 代币 / Aethon Fund 的代币」",
+    "en": "Therefore no AIX token may ever be described as \"Aethon Coin / Aethon Token / the token of Aethon Fund\""
+  },
+  {
+    "zh": "，违者本平台有权追责；",
+    "en": "; violators will be held accountable by the Platform;"
+  },
+  {
+    "zh": "③ AIX 中文正式代称为「艾克斯币」（非正式社区场景可使用昵称「阿币」），二者均",
+    "en": "③ The official Chinese name of AIX is 「艾克斯币」(community nickname 「阿币」); neither may be"
+  },
+  {
+    "zh": "禁止与 Aethon 品牌并列表述",
+    "en": "juxtaposing it with the Aethon brand is prohibited"
+  },
+  {
+    "zh": "（例如不得使用「Aethon 艾克斯币」「Aethon 阿币」等组合），以避免造成品牌归属混淆。",
+    "en": "(e.g. combinations such as \"Aethon Aix Coin\" or \"Aethon A-Coin\" must not be used) to avoid brand-attribution confusion."
+  },
+  {
+    "zh": "品牌名由来 Naming Origin",
+    "en": "Naming Origin"
+  },
+  {
+    "zh": "ethon 方法论 ×",
+    "en": "ethon methodology ×"
+  },
+  {
+    "zh": "nal 信号（取首字母 A） ×",
+    "en": "nal signal (initial A) ×"
+  },
+  {
+    "zh": "机构 Instiutional ×",
+    "en": "Institutional ×"
+  },
+  {
+    "zh": "交易所 IndeX 。",
+    "en": "Exchange IndeX."
+  },
+  {
+    "zh": "Slogan 取自 George Kailas 名言：\"",
+    "en": "Slogan from George Kailas:"
+  },
+  {
+    "zh": "有信号，不瞎猜。",
+    "en": "Measure, don't guess."
+  },
+  {
+    "zh": "※ 若未来 Aethon Fund 出具明确书面反对，AxiX 品牌名与 AIX 代币名可在 48 小时内重新更名，不影响用户核心资产与合约。",
+    "en": "※ Should Aethon Fund issue a clear written objection in the future, the AxiX brand and AIX token names can be renamed within 48 hours without affecting users' core assets or contracts."
+  },
+  {
+    "zh": "© 2026 AxiX 交易所 · 前身 WG Grid 交易平台 · 2026/08 正式更名。本文档旨在介绍本平台 AI 策略所参考的方法论来源，不构成任何证券或基金投资邀请，不构成 AIX 代币的募股说明书。Aethon Fund® 为其各自所有的商标，本平台使用仅作方法论背书引用。",
+    "en": "© 2026 AxiX Exchange · formerly WG Grid Trading Platform · officially renamed 2026/08. This document introduces the methodology sources referenced by the Platform's AI strategies; it constitutes no securities or fund investment solicitation and no prospectus for the AIX token. Aethon Fund® is the trademark of its respective owner; the Platform uses it only as a methodology-reference endorsement."
+  },
+  {
+    "zh": "文档版本 v1.2 · 最后更新：2026-08-30 · 生效事项：项目更名 WG → AxiX / 代币代号 AXX → AIX（AIX = AxiX 三字母缩写）· 所有事实链接均已于当日核验可访问。",
+    "en": "Document v1.2 · Last updated 2026-08-30 · Effective: project renamed WG → AxiX / token code AXX → AIX (AIX = three-letter abbreviation of AxiX) · all fact links verified accessible on that day."
+  }
+]

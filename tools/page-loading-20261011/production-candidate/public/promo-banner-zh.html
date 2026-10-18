@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>AxiX 推特背景 中文</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html,body { width:1500px; height:500px; overflow:hidden; }
+  body { font-family:"Microsoft YaHei","PingFang SC",sans-serif; color:#c7d5d2;
+    background:
+      radial-gradient(1100px 480px at 50% -30%, rgba(79,209,181,.20), transparent 62%),
+      radial-gradient(700px 400px at 88% 120%, rgba(79,209,181,.10), transparent 60%),
+      linear-gradient(170deg,#07100f 0%,#0a1213 55%,#081211 100%);
+    position:relative; }
+  .candles { position:absolute; left:0; right:0; bottom:0; height:150px; display:flex; align-items:flex-end;
+    gap:14px; padding:0 30px; opacity:.5; }
+  .c { width:26px; border-radius:3px 3px 0 0; }
+  .c.g { background:linear-gradient(180deg,rgba(79,209,181,.55),rgba(79,209,181,.05)); }
+  .c.r { background:linear-gradient(180deg,rgba(242,108,120,.45),rgba(242,108,120,.04)); }
+  .wm { position:absolute; right:56px; top:50%; transform:translateY(-50%); font-size:210px; font-weight:900;
+    letter-spacing:8px; color:rgba(79,209,181,.06); pointer-events:none; }
+  .wrap { position:relative; height:100%; display:flex; align-items:center; justify-content:center; }
+  .core { text-align:center; margin-left:110px; }
+  .brand { display:flex; align-items:center; justify-content:center; gap:26px; }
+  .brand img { width:104px; height:104px; border-radius:24px; box-shadow:0 0 44px rgba(79,209,181,.45); }
+  .word { font-size:96px; font-weight:900; color:#eaf6f3; letter-spacing:2px; line-height:1; }
+  .word b { color:#4fd1b5; }
+  .tag { margin-top:20px; font-size:31px; font-weight:800; color:#9fe8d8; letter-spacing:6px; }
+  .tag b { color:#4fd1b5; }
+  .chips { margin-top:24px; display:flex; justify-content:center; gap:14px; }
+  .chip { font-size:21px; font-weight:700; color:#b9d8d1; background:rgba(13,32,32,.8); border:1px solid #24493f;
+    border-radius:999px; padding:9px 24px; }
+  .chain { margin-top:18px; font-size:19px; color:#3d5a53; letter-spacing:6px; }
+</style>
+</head>
+<body>
+<div class="candles">
+  <div class="c g" style="height:46px"></div><div class="c r" style="height:30px"></div>
+  <div class="c g" style="height:64px"></div><div class="c g" style="height:88px"></div>
+  <div class="c r" style="height:52px"></div><div class="c g" style="height:104px"></div>
+  <div class="c r" style="height:70px"></div><div class="c g" style="height:122px"></div>
+  <div class="c r" style="height:58px"></div><div class="c g" style="height:96px"></div>
+  <div class="c g" style="height:134px"></div><div class="c r" style="height:80px"></div>
+  <div class="c g" style="height:112px"></div><div class="c r" style="height:66px"></div>
+  <div class="c g" style="height:126px"></div><div class="c r" style="height:44px"></div>
+  <div class="c g" style="height:92px"></div><div class="c g" style="height:118px"></div>
+  <div class="c r" style="height:72px"></div><div class="c g" style="height:140px"></div>
+  <div class="c r" style="height:84px"></div><div class="c g" style="height:110px"></div>
+</div>
+<div class="wm">AXIX</div>
+<div class="wrap">
+  <div class="core">
+    <div class="brand">
+      <img src="assets/brand/logo.png" alt="AxiX">
+      <div class="word">Axi<b>X</b> Exchange</div>
+    </div>
+    <div class="tag">机构信号驱动 · <b>合约跟单</b> · 链上透明</div>
+    <div class="chips">
+      <span class="chip">现货</span><span class="chip">永续合约</span><span class="chip">合约跟单</span>
+      <span class="chip">AIX 矿机 · 质押</span><span class="chip">0 手续费提现</span>
+    </div>
+    <div class="chain">BNB SMART CHAIN</div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,177 @@
+{
+  "baseline": false,
+  "scenarios": [
+    "1440px: all 6 periods use readable candles with latest price visible",
+    "1440px: sparse daily history remains 9px wide without fabricated candles",
+    "1440px: live new candles preserve historical pan and zoom",
+    "1440px: live view follows the latest candle without changing width",
+    "1440px: resizing changes visible candle count, not candle width",
+    "1440px: stale refresh and rapid period switching cannot overwrite new data",
+    "1440px: empty periods clear old candles and can receive their first live candle",
+    "390px: all 6 periods use readable candles with latest price visible",
+    "390px: sparse daily history remains 9px wide without fabricated candles",
+    "390px: live new candles preserve historical pan and zoom",
+    "390px: live view follows the latest candle without changing width",
+    "390px: resizing changes visible candle count, not candle width",
+    "390px: stale refresh and rapid period switching cannot overwrite new data",
+    "390px: empty periods clear old candles and can receive their first live candle"
+  ],
+  "measurements": [
+    {
+      "viewport": 1440,
+      "period": "1m",
+      "count": 500,
+      "spacing": 12,
+      "paneWidth": 624,
+      "range": {
+        "from": 452,
+        "to": 503
+      },
+      "pixelGap": 12,
+      "lastX": 569
+    },
+    {
+      "viewport": 1440,
+      "period": "5m",
+      "count": 500,
+      "spacing": 12,
+      "paneWidth": 624,
+      "range": {
+        "from": 452,
+        "to": 503
+      },
+      "pixelGap": 12,
+      "lastX": 569
+    },
+    {
+      "viewport": 1440,
+      "period": "15m",
+      "count": 500,
+      "spacing": 12,
+      "paneWidth": 624,
+      "range": {
+        "from": 452,
+        "to": 503
+      },
+      "pixelGap": 12,
+      "lastX": 569
+    },
+    {
+      "viewport": 1440,
+      "period": "1h",
+      "count": 500,
+      "spacing": 11,
+      "paneWidth": 624,
+      "range": {
+        "from": 447.27272727272725,
+        "to": 503
+      },
+      "pixelGap": 11,
+      "lastX": 573.5
+    },
+    {
+      "viewport": 1440,
+      "period": "4h",
+      "count": 500,
+      "spacing": 10,
+      "paneWidth": 624,
+      "range": {
+        "from": 441.6,
+        "to": 503
+      },
+      "pixelGap": 10,
+      "lastX": 578
+    },
+    {
+      "viewport": 1440,
+      "period": "1d",
+      "count": 2,
+      "spacing": 9,
+      "paneWidth": 624,
+      "range": {
+        "from": -63.33333333333333,
+        "to": 5
+      },
+      "pixelGap": 9,
+      "lastX": 582.5
+    },
+    {
+      "viewport": 390,
+      "period": "1m",
+      "count": 500,
+      "spacing": 12,
+      "paneWidth": 288,
+      "range": {
+        "from": 480,
+        "to": 503
+      },
+      "pixelGap": 12,
+      "lastX": 233
+    },
+    {
+      "viewport": 390,
+      "period": "5m",
+      "count": 500,
+      "spacing": 12,
+      "paneWidth": 288,
+      "range": {
+        "from": 480,
+        "to": 503
+      },
+      "pixelGap": 12,
+      "lastX": 233
+    },
+    {
+      "viewport": 390,
+      "period": "15m",
+      "count": 500,
+      "spacing": 12,
+      "paneWidth": 288,
+      "range": {
+        "from": 480,
+        "to": 503
+      },
+      "pixelGap": 12,
+      "lastX": 233
+    },
+    {
+      "viewport": 390,
+      "period": "1h",
+      "count": 500,
+      "spacing": 11,
+      "paneWidth": 288,
+      "range": {
+        "from": 477.8181818181818,
+        "to": 503
+      },
+      "pixelGap": 11,
+      "lastX": 237.5
+    },
+    {
+      "viewport": 390,
+      "period": "4h",
+      "count": 500,
+      "spacing": 10,
+      "paneWidth": 288,
+      "range": {
+        "from": 475.2,
+        "to": 503
+      },
+      "pixelGap": 10,
+      "lastX": 242
+    },
+    {
+      "viewport": 390,
+      "period": "1d",
+      "count": 2,
+      "spacing": 9,
+      "paneWidth": 288,
+      "range": {
+        "from": -26,
+        "to": 5
+      },
+      "pixelGap": 9,
+      "lastX": 246.5
+    }
+  ]
+}

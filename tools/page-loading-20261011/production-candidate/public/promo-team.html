@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>AxiX 团队级差</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html,body { width:1080px; height:1920px; overflow:hidden; }
+  body { font-family:"Microsoft YaHei","PingFang SC",sans-serif; color:#c7d5d2;
+    background:
+      radial-gradient(900px 500px at 50% -5%, rgba(79,209,181,.14), transparent 60%),
+      radial-gradient(700px 400px at 50% 105%, rgba(79,209,181,.08), transparent 60%),
+      linear-gradient(170deg,#07100f 0%,#0a1112 55%,#081211 100%);
+    position:relative; display:flex; flex-direction:column; padding:64px 70px 56px; }
+  .wm { position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    font-size:220px; font-weight:900; letter-spacing:20px; color:rgba(79,209,181,.045); pointer-events:none; }
+  .top { display:flex; align-items:center; gap:20px; }
+  .top img { width:76px; height:76px; border-radius:18px; box-shadow:0 0 30px rgba(79,209,181,.4); }
+  .brand { font-size:36px; font-weight:900; color:#eaf6f3; }
+  .brand b { color:#4fd1b5; }
+  .hero { text-align:center; margin-top:64px; }
+  .hero h1 { font-size:92px; font-weight:900; letter-spacing:6px;
+    background:linear-gradient(100deg,#8ff0dc,#4fd1b5 50%,#b9f4e6);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    text-shadow:0 0 60px rgba(79,209,181,.3); }
+  .hero p { margin-top:20px; font-size:30px; color:#7d9691; letter-spacing:8px; }
+  .table { margin-top:70px; background:linear-gradient(180deg,#101b1d,#0c1517);
+    border:1px solid #29413e; border-radius:26px; overflow:hidden; }
+  .tr { display:flex; align-items:center; padding:0 44px; }
+  .tr.head { background:#0d2020; border-bottom:1px solid #24493f; }
+  .tr.row { border-bottom:1px solid #1a2f2c; }
+  .tr.row:last-child { border-bottom:none; }
+  .c { padding:20px 0; font-size:26px; }
+  .c1 { flex:0 0 150px; font-weight:900; color:#eaf6f3; }
+  .c2 { flex:1; color:#a9bfb9; }
+  .c3 { flex:0 0 170px; text-align:right; }
+  .head .c { font-size:23px; color:#7d9691; font-weight:700; padding:24px 0; }
+  .head .c3 { text-align:right; }
+  .row .c1 { color:#7fe6d3; }
+  .row .c3 b { font-size:32px; font-weight:900; color:#4fd1b5; }
+  .row.hot { background:rgba(242,108,120,.06); }
+  .row.hot .c1 { color:#f898a2; }
+  .row.hot .c3 b { color:#f26c78; font-size:27px; }
+  .legend { margin-top:24px; display:flex; justify-content:center; gap:40px; font-size:22px; color:#7d9691; }
+  .legend b { color:#4fd1b5; }
+  .bonus { margin-top:56px; background:linear-gradient(180deg,rgba(242,108,120,.08),rgba(242,108,120,.02));
+    border:2px solid #5c3037; border-radius:26px; padding:40px 48px; text-align:center; }
+  .bonus .t { font-size:30px; color:#b9cbc7; font-weight:700; }
+  .bonus .v { margin-top:12px; font-size:56px; font-weight:900; color:#f26c78; line-height:1.15; }
+  .bonus .s { margin-top:12px; font-size:23px; color:#7d9691; line-height:1.7; }
+  .how { margin-top:48px; background:linear-gradient(180deg,#101b1d,#0c1517);
+    border:1px solid #29413e; border-radius:26px; padding:36px 48px; }
+  .how h3 { font-size:29px; font-weight:900; color:#7fe6d3; display:flex; align-items:center; gap:14px; }
+  .how h3::before { content:""; width:12px; height:12px; border-radius:50%; background:#4fd1b5; box-shadow:0 0 12px #4fd1b5; }
+  .how p { margin-top:16px; font-size:24px; line-height:1.85; color:#b9cbc7; }
+  .how p b { color:#4fd1b5; }
+  .cta { margin-top:auto; text-align:center; }
+  .cta .btn { display:inline-block; font-size:44px; font-weight:900; color:#04211b; letter-spacing:8px;
+    background:linear-gradient(135deg,#8ff0dc,#4fd1b5); border-radius:999px; padding:30px 110px;
+    box-shadow:0 20px 60px rgba(79,209,181,.35); }
+  .foot { margin-top:40px; text-align:center; font-size:22px; color:#3d5a53; letter-spacing:5px; }
+</style>
+</head>
+<body>
+<div class="wm">TEAM</div>
+<div class="top">
+  <img src="assets/brand/logo.png" alt="AxiX">
+  <div class="brand">Axi<b>X</b> Exchange</div>
+</div>
+
+<div class="hero">
+  <h1>团队级差 A1 ~ A10</h1>
+  <p>级别越高 · 分润越高</p>
+</div>
+
+<div class="table">
+  <div class="tr head"><div class="c c1">级别</div><div class="c c2">晋级条件（个人 / 团队持有 AIX）</div><div class="c c3">收益比例</div></div>
+  <div class="tr row"><div class="c c1">A1</div><div class="c c2">1 千 / 5 千</div><div class="c c3"><b>10%</b></div></div>
+  <div class="tr row"><div class="c c1">A2</div><div class="c c2">2 千 / 1 万</div><div class="c c3"><b>20%</b></div></div>
+  <div class="tr row"><div class="c c1">A3</div><div class="c c2">4 千 / 5 万</div><div class="c c3"><b>30%</b></div></div>
+  <div class="tr row"><div class="c c1">A4</div><div class="c c2">8 千 / 10 万</div><div class="c c3"><b>40%</b></div></div>
+  <div class="tr row"><div class="c c1">A5</div><div class="c c2">1.6 万 / 50 万</div><div class="c c3"><b>50%</b></div></div>
+  <div class="tr row"><div class="c c1">A6</div><div class="c c2">3.2 万 / 100 万</div><div class="c c3"><b>60%</b></div></div>
+  <div class="tr row"><div class="c c1">A7</div><div class="c c2">6.4 万 / 500 万</div><div class="c c3"><b>70%</b></div></div>
+  <div class="tr row"><div class="c c1">A8</div><div class="c c2">12.8 万 / 1000 万</div><div class="c c3"><b>80%</b></div></div>
+  <div class="tr row"><div class="c c1">A9</div><div class="c c2">25.6 万 / 5000 万</div><div class="c c3"><b>90%</b></div></div>
+  <div class="tr row hot"><div class="c c1">A10</div><div class="c c2">50 万 / 1 亿</div><div class="c c3"><b>手续费分红</b></div></div>
+</div>
+<div class="legend"><span>晋级条件 = <b>个人持有 + 团队持有</b></span></div>
+
+<div class="bonus">
+  <div class="t">A10 顶级专属</div>
+  <div class="v">均分手续费分红池</div>
+  <div class="s">每笔 AIX 卖出手续费的 50% 进入分红池<br>每日 00:00 自动结算到账</div>
+</div>
+
+<div class="how">
+  <h3>级差怎么拿</h3>
+  <p>团队矿机<b>每笔产出</b>按级差分配：直推、间推先拿固定奖励，级别更高的上级拿<b>级差差额</b>。团队越壮大、级别越高，每一笔产出你分得越多。</p>
+</div>
+
+<div class="cta"><span class="btn">开始组建我的团队</span></div>
+<div class="foot">AXIX EXCHANGE · BNB SMART CHAIN</div>
+</body>
+</html>

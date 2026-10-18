@@ -1,0 +1,74 @@
+{
+  "deployed": true,
+  "release": "team-speed-20261010-212931",
+  "backup_directory": "/opt/wg-platform/backups/team-speed-20261010-212931",
+  "completed_at_utc": "2026-10-10T21:29:41.332855+00:00",
+  "files": [
+    "src/a-token-team-service.js",
+    "src/a-token-api.js",
+    "public/js/earn.js",
+    "public/index.html"
+  ],
+  "service": {
+    "MainPID": "11129",
+    "ActiveState": "active",
+    "SubState": "running"
+  },
+  "service_restarted": true,
+  "protected_sources_unchanged": true,
+  "env_unchanged": true,
+  "balances_checked": 5636,
+  "balance_changes_after_service_resumed": 0,
+  "reward_rows_unchanged_after_restart": true,
+  "ledger_unchanged_during_file_switch": true,
+  "database_restored": false,
+  "candidate_verification": {
+    "isolated_database": true,
+    "accounts_checked": 3,
+    "results": [
+      {
+        "wallet": "0x24b1Fb…C3688d",
+        "direct_count": 119,
+        "team_count": 129,
+        "baseline_full_ms": 1627,
+        "optimized_full_ms": 100,
+        "summary_ms": 17,
+        "profile_identical": true,
+        "authenticated_api_verified": true
+      },
+      {
+        "wallet": "0x96C16a…75F874",
+        "direct_count": 60,
+        "team_count": 60,
+        "baseline_full_ms": 997,
+        "optimized_full_ms": 77,
+        "summary_ms": 15.29,
+        "profile_identical": true,
+        "authenticated_api_verified": true
+      },
+      {
+        "wallet": "0xCF3772…c66892",
+        "direct_count": 58,
+        "team_count": 501,
+        "baseline_full_ms": 878,
+        "optimized_full_ms": 109,
+        "summary_ms": 16.04,
+        "profile_identical": true,
+        "authenticated_api_verified": true
+      }
+    ]
+  },
+  "summary_requires_login": true,
+  "static": [
+    {
+      "uri": "/",
+      "status": 200,
+      "sha256": "49580d30c471ff6a262a90f50e798a05e3eb5b7c40e41fe80281b899586e2e9a"
+    },
+    {
+      "uri": "/js/earn.js?v=20261011-team-fast-2",
+      "status": 200,
+      "sha256": "2f22a3a2939478ab42a6fe6cd08bfddcbd807bca26b3805012af2fd40f61b7bb"
+    }
+  ]
+}

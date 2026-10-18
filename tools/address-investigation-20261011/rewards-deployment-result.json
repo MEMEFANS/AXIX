@@ -1,0 +1,102 @@
+{
+  "deployed": true,
+  "release": "aix-reporting-20261010-202302",
+  "backup_directory": "/opt/wg-platform/backups/aix-reporting-20261010-202302",
+  "completed_at_utc": "2026-10-10T20:23:09.937015+00:00",
+  "files": [
+    "src/platform-service.js",
+    "src/server.js",
+    "src/a-token-income.js",
+    "src/a-token-revenue-service.js",
+    "public/js/operator-admin.js",
+    "src/a-token-admin-income.js",
+    "public/admin.html"
+  ],
+  "service": "MainPID=9731\nActiveState=active\nSubState=running\n",
+  "balances_checked": 5635,
+  "existing_balance_changes": [],
+  "reward_rows_unchanged": true,
+  "protected_sources_unchanged": true,
+  "env_unchanged": true,
+  "admin_verification": [
+    {
+      "wallet": "0x968acf8d6111b7668d730641d86efaec0f6b48a6",
+      "team": {
+        "count": 9180,
+        "total": "3682.833390767746909406",
+        "byKind": {
+          "miner_direct": "178.797940636574073714",
+          "miner_indirect": "1607.19880191743826974",
+          "miner_team": "1896.836648213734565952"
+        }
+      },
+      "stakes": {
+        "count": 14,
+        "totalEarned": "17.1",
+        "principalReturned": "0.0",
+        "totalCredited": "17.1"
+      },
+      "principal_interest_checked": true,
+      "aix_balance_matches": true
+    },
+    {
+      "wallet": "0xc6da1e64eca3cb29e160fd72a1787a6e9e40a11d",
+      "team": {
+        "count": 4643,
+        "total": "4905.183019448302466204",
+        "byKind": {
+          "miner_direct": "144.829280150462962752",
+          "miner_indirect": "161.139053159722222059",
+          "miner_team": "4511.844949463734565413",
+          "stake_direct": "0.63",
+          "stake_team": "2.01",
+          "stake_indirect": "0.18",
+          "miner_level_diff": "84.54973667438271598"
+        }
+      },
+      "stakes": {
+        "count": 13,
+        "totalEarned": "147.31599562703218448",
+        "principalReturned": "513.333333333333333327",
+        "totalCredited": "660.649328960365517807"
+      },
+      "principal_interest_checked": true,
+      "aix_balance_matches": true
+    },
+    {
+      "wallet": "0x436252b4759eee30066a0d1101911caa7a63ccf2",
+      "team": {
+        "count": 1858,
+        "total": "3731.43843154754313718",
+        "byKind": {
+          "miner_indirect": "109.306576963734567819",
+          "miner_direct": "36.718664305555555521",
+          "stake_indirect": "6.44397199613020833",
+          "stake_direct": "0.64950224091618958",
+          "miner_level_diff": "1037.121846979166666139",
+          "miner_team": "2513.860981057098764911",
+          "stake_level_diff": "23.28438427008086891",
+          "stake_team": "4.05250373486031597"
+        }
+      },
+      "stakes": {
+        "count": 3,
+        "totalEarned": "2.724",
+        "principalReturned": "0.0",
+        "totalCredited": "2.724"
+      },
+      "principal_interest_checked": true,
+      "aix_balance_matches": true
+    }
+  ],
+  "static": {
+    "/admin.html": {
+      "status": 200,
+      "sha256": "58beb8c9d07796da431d48916a6011a3701810ee8045af487fbc47d0107543ec"
+    },
+    "/js/operator-admin.js?v=45-assets-20261011": {
+      "status": 200,
+      "sha256": "87fdf127acf19c17b65be64ed8e346c4be4f78016b080e170de8ddc52a308d0d"
+    }
+  }
+}

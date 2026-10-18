@@ -1,0 +1,131 @@
+--- public/js/assets.js before
++++ public/js/assets.js after
+@@ -8,6 +8,7 @@
+   const remoteLogo = symbol => symbol === 'A' ? '/assets/tokens/a.png?v=4' : `https://bin.bnbstatic.com/static/assets/logos/${symbol}.png`;
+   let wallet = null;
+   let platform = null;
++  let transfersSeq = 0, revenueSeq = 0;
+ 
+   function node(id) { return document.getElementById(id); }
+   function value(input) { const number = Number(input); return Number.isFinite(number) ? number : 0; }
+@@ -83,7 +84,7 @@
+       const actions = item.symbol === 'USDT'
+         ? '<button onclick="window.ExchangeAssets.openFunding(\'deposit\')">充值</button><button onclick="window.ExchangeAssets.openFunding(\'withdraw\')">提现</button>'
+         : item.symbol === 'A'
+-          ? '<button onclick="window.ATokenTransfer.open()">互转</button><button onclick="window.ATokenWithdrawal.open()">提现</button><button onclick="window.ExchangeAssets.openTrade(\'A\')">交易</button>'
++          ? '<button onclick="window.ExchangeAssets.openAix(\'transfer\',this)">互转</button><button onclick="window.ExchangeAssets.openAix(\'withdrawal\',this)">提现</button><button onclick="window.ExchangeAssets.openTrade(\'A\')">交易</button>'
+           : `<button onclick="window.ExchangeAssets.openTrade('${item.symbol}')">交易</button>`;
+       const fallbackLogo = `/assets/tokens/${item.symbol.toLowerCase()}.png?v=5`;
+       return `<tr><td><div class="assets-coin"><span class="assets-coin-icon ${item.symbol.toLowerCase()}"><span class="assets-coin-fallback">${disp(item.symbol).slice(0,1)}</span><img src="${logo(item.symbol)}" alt="${disp(item.symbol)}" loading="lazy" onerror="if(!this.dataset.f){this.dataset.f=1;this.src='${remoteLogo(item.symbol)}'}else{this.onerror=null;this.src='${fallbackLogo}'}"></span><span><b>${disp(item.symbol)}</b><small>${names[item.symbol] || disp(item.symbol)}</small></span></div></td><td><span class="assets-total-amount">${quantity(item.total,item.symbol)}</span><small class="assets-mobile-valuation">≈ ${money(item.valuation)} USDT</small></td><td>${quantity(item.available,item.symbol)}</td><td>${quantity(item.frozen,item.symbol)}</td><td>${money(item.valuation)}</td><td class="assets-row-actions">${actions}</td></tr>`;
+@@ -93,7 +94,9 @@
+   function renderWallet(profile) {
+     const nextAddress = profile?.address?.toLowerCase();
+     const previousAddress = wallet?.address?.toLowerCase();
+-    if (!profile || profile.authenticated === false || (previousAddress && nextAddress && previousAddress !== nextAddress)) platform = null;
++    if (!profile || profile.authenticated === false || (previousAddress && nextAddress && previousAddress !== nextAddress)) {
++      platform = null; ++transfersSeq; ++revenueSeq;
++    }
+     wallet = profile?.authenticated === false ? null : profile || null;
+     renderSummary();
+     renderAssets();
+@@ -196,15 +199,18 @@
+ 
+   // AIX 互转记录（/api/a-token/my-transfers）：转入按净额到账，转出展示总额与手续费
+   async function loadTransfers() {
++    const wallet = Portal.walletKey(), seq = ++transfersSeq;
++    const valid = () => seq === transfersSeq && wallet === Portal.walletKey() && window.currentWalletProfile?.authenticated;
+     const host = node('aix-transfer-history');
+     if (!host) return;
+     host.innerHTML = '<tr><td colspan="7" class="account-empty">加载中…</td></tr>';
+     try {
+-      const res = await fetch('/api/a-token/my-transfers', { credentials: 'include' });
+-      const data = await res.json();
+-      if (!res.ok || data.error) throw new Error(data.error || '加载失败');
++      const data = await Portal.readJSON('/api/a-token/my-transfers');
++      if (!valid()) return;
++      if (data.error) throw new Error(data.error);
+       renderTransfers(data.transfers || []);
+     } catch (e) {
++      if (!valid()) return;
+       host.innerHTML = '<tr><td colspan="7" class="account-empty">暂无互转记录</td></tr>';
+     }
+   }
+@@ -263,18 +269,21 @@
+   });
+ 
+   async function loadRevenue() {
++    const wallet = Portal.walletKey(), seq = ++revenueSeq;
++    const valid = () => seq === revenueSeq && wallet === Portal.walletKey() && window.currentWalletProfile?.authenticated;
+     const sumHost = node('aix-revenue-summary');
+     const listHost = node('aix-revenue-list');
+     if (!sumHost || !listHost) return;
+     sumHost.textContent = '正在加载…';
+     listHost.innerHTML = '<tr><td colspan="5" class="account-empty">加载中…</td></tr>';
+     try {
+-      const res = await fetch('/api/a-token/revenue?limit=200', { credentials: 'include' });
+-      const data = await res.json();
+-      if (!res.ok || data.error) throw new Error(data.error || '加载失败');
++      const data = await Portal.readJSON('/api/a-token/revenue?limit=200');
++      if (!valid()) return;
++      if (data.error) throw new Error(data.error);
+       renderRevenueSummary(data);
+       renderRevenueList(data);
+     } catch (e) {
++      if (!valid()) return;
+       sumHost.textContent = '加载失败：' + (e.message || e);
+       listHost.innerHTML = '<tr><td colspan="5" class="account-empty">暂无收益记录</td></tr>';
+       const revCards = document.getElementById('aix-revenue-cards');
+@@ -330,7 +339,9 @@
+     }
+   }
+ 
+-  function openFunding(type) {
++  async function openFunding(type) {
++    try { if (!walletConfig) await loadWalletConfig(); }
++    catch (error) { showToast(error.message, 'error'); return; }
+     // 提现改为全局 modal 弹窗（与 AIX 提现风格统一），不再走资产页内嵌表单
+     if (type === 'withdraw') {
+       if (window.USDTWithdrawal?.open) return window.USDTWithdrawal.open();
+@@ -364,10 +375,26 @@
+     if (typeof openTradePage === 'function') openTradePage('spot', symbol);
+   }
+ 
+-  async function refresh() {
++  let refreshRequest = null, refreshWallet = '';
++  function refresh() {
++    const key = window.Portal?.walletKey();
++    if (refreshRequest && refreshWallet === key) return refreshRequest;
++    refreshWallet = key;
++    const promise = refreshData();
++    refreshRequest = promise;
++    promise.finally(() => { if (refreshRequest === promise) refreshRequest = null; }).catch(() => {});
++    return promise;
++  }
++  async function refreshData() {
+     const refreshButton = document.querySelector('.assets-icon-btn');
+     if (refreshButton) refreshButton.disabled = true;
+     try {
++      // The authenticated wallet and platform sections can update independently.
++      if (window.currentWalletProfile?.authenticated) {
++        renderWallet(window.currentWalletProfile);
++        await Promise.allSettled([loadWalletProfile(), loadPlatformProfile()]);
++        return;
++      }
+       if (typeof loadWalletProfile === 'function') await loadWalletProfile();
+       if (!window.currentWalletProfile?.authenticated && window.currentWalletConnection?.address
+         && typeof ensurePlatformSession === 'function') await ensurePlatformSession(refreshButton);
+@@ -383,5 +410,13 @@
+     refresh().catch(error => console.error('[assets]', error));
+   }
+ 
+-  window.ExchangeAssets = { activate, closeFunding, openFunding, openTrade, refresh, renderAssets, renderPlatform, renderWallet, setView };
++  async function openAix(type, button) {
++    if (button) button.disabled = true;
++    try {
++      await window.loadPageFeature(`a-token-${type}`);
++      await (type === 'transfer' ? window.ATokenTransfer : window.ATokenWithdrawal).open();
++    } catch (error) { showToast(error.message, 'error'); }
++    finally { if (button) button.disabled = false; }
++  }
++  window.ExchangeAssets = { activate, closeFunding, openFunding, openAix, openTrade, refresh, renderAssets, renderPlatform, renderWallet, setView };
+ })();

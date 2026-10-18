@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>AxiX 新手三步</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html,body { width:1080px; height:1920px; overflow:hidden; }
+  body { font-family:"Microsoft YaHei","PingFang SC",sans-serif; color:#c7d5d2;
+    background:
+      radial-gradient(900px 500px at 50% -5%, rgba(79,209,181,.14), transparent 60%),
+      radial-gradient(700px 400px at 50% 105%, rgba(79,209,181,.08), transparent 60%),
+      linear-gradient(170deg,#07100f 0%,#0a1112 55%,#081211 100%);
+    position:relative; display:flex; flex-direction:column; padding:64px 70px 56px; }
+  .wm { position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    font-size:230px; font-weight:900; letter-spacing:20px; color:rgba(79,209,181,.045); pointer-events:none; }
+  .top { display:flex; align-items:center; gap:20px; }
+  .top img { width:76px; height:76px; border-radius:18px; box-shadow:0 0 30px rgba(79,209,181,.4); }
+  .brand { font-size:36px; font-weight:900; color:#eaf6f3; }
+  .brand b { color:#4fd1b5; }
+  .hero { text-align:center; margin-top:70px; }
+  .hero h1 { font-size:96px; font-weight:900; letter-spacing:6px;
+    background:linear-gradient(100deg,#8ff0dc,#4fd1b5 50%,#b9f4e6);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    text-shadow:0 0 60px rgba(79,209,181,.3); }
+  .hero p { margin-top:22px; font-size:32px; color:#7d9691; letter-spacing:10px; }
+  .steps { margin-top:90px; display:flex; flex-direction:column; gap:0; position:relative; }
+  .step { display:flex; gap:44px; position:relative; padding-bottom:70px; }
+  .step:last-child { padding-bottom:0; }
+  .step::before { content:""; position:absolute; left:71px; top:150px; bottom:0; width:3px;
+    background:linear-gradient(180deg,#2b6157,rgba(43,97,87,.1)); }
+  .step:last-child::before { display:none; }
+  .no { flex:0 0 146px; width:146px; height:146px; border-radius:40px; display:flex; align-items:center; justify-content:center;
+    font-size:64px; font-weight:900; color:#04211b; background:linear-gradient(135deg,#8ff0dc,#4fd1b5);
+    box-shadow:0 14px 44px rgba(79,209,181,.35); }
+  .bd { flex:1; background:linear-gradient(180deg,#101b1d,#0c1517); border:1px solid #29413e;
+    border-radius:26px; padding:40px 46px; }
+  .bd h3 { font-size:42px; font-weight:900; color:#eaf6f3; }
+  .bd h3 em { font-style:normal; color:#4fd1b5; }
+  .bd p { margin-top:18px; font-size:26px; line-height:1.85; color:#a9bfb9; }
+  .bd p b { color:#4fd1b5; }
+  .bd .chips { margin-top:24px; display:flex; flex-wrap:wrap; gap:14px; }
+  .chip { font-size:22px; font-weight:700; color:#9fe8d8; background:#0d2020; border:1px solid #24493f;
+    border-radius:999px; padding:10px 24px; }
+  .cta { margin-top:auto; text-align:center; }
+  .cta .btn { display:inline-block; font-size:44px; font-weight:900; color:#04211b; letter-spacing:6px;
+    background:linear-gradient(135deg,#8ff0dc,#4fd1b5); border-radius:999px; padding:30px 96px;
+    box-shadow:0 20px 60px rgba(79,209,181,.35); }
+  .foot { margin-top:40px; text-align:center; font-size:22px; color:#3d5a53; letter-spacing:5px; }
+</style>
+</head>
+<body>
+<div class="wm">AXIX</div>
+<div class="top">
+  <img src="assets/brand/logo.png" alt="AxiX">
+  <div class="brand">Axi<b>X</b> Exchange</div>
+</div>
+
+<div class="hero">
+  <h1>三步开启交易</h1>
+  <p>GET STARTED IN 3 STEPS</p>
+</div>
+
+<div class="steps">
+  <div class="step">
+    <div class="no">1</div>
+    <div class="bd">
+      <h3>连接钱包</h3>
+      <p>打开 AxiX Exchange，点击右上角<b>连接钱包</b>，使用 OKX / MetaMask 等 Web3 钱包一键授权登录，<b>无需注册</b>。</p>
+      <div class="chips"><span class="chip">钱包直连</span><span class="chip">资产自持</span></div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="no">2</div>
+    <div class="bd">
+      <h3>充值 USDT</h3>
+      <p>选择 <b>BNB Smart Chain（BSC）</b>网络充值 USDT，链上到账自动入金，链上交易全程可查。</p>
+      <div class="chips"><span class="chip">链上到账</span><span class="chip">快速入金</span></div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="no">3</div>
+    <div class="bd">
+      <h3>开始交易</h3>
+      <p>现货、永续合约自由选择；激活 <b>AIX 矿机</b>每日产出，质押增值，或一键<b>合约跟单</b>。</p>
+      <div class="chips"><span class="chip">现货</span><span class="chip">永续合约</span><span class="chip">合约跟单</span><span class="chip">矿机</span><span class="chip">质押</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="cta"><span class="btn">开启我的 AxiX</span></div>
+<div class="foot">AXIX EXCHANGE · BNB SMART CHAIN</div>
+</body>
+</html>

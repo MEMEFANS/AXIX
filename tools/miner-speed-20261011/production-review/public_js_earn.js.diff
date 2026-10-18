@@ -1,0 +1,263 @@
+--- public/js/earn.js before
++++ public/js/earn.js after
+@@ -3,14 +3,16 @@
+   let currentSubTab = 'activation';
+   let plansCache = null;
+   let profileCache = null;
++  let teamCache = null;
+   let refProfileCache = null;
+   let plansRequest = null;
++  const readRequests = new Map();
+   // 加载失效序号：钱包连接/登录完成会强制重载本页，旧加载即使仍在请求中也不得再写 DOM，
+   // 否则慢网下旧加载结束时会把游客态覆盖到新的已登录内容上。
+   let loadSeq = 0;
+ 
+   // profile 数据 stale-while-revalidate 缓存：二次进站秒开矿机/团队数据，后台静默更新。
+-  // 30 秒上限：矿机产出/团队数据是动态的，不能缓存太久。
++  // 两分钟上限：只供首屏展示，每次进入仍刷新接口。
+   const PROFILE_CACHE_KEY = 'axix:profile:v1';
+   const PROFILE_CACHE_MAX_MS = 120_000;
+   function readProfileCache(addr) {
+@@ -48,7 +50,7 @@
+     let payload;
+     try { payload = await response.json(); }
+     catch { throw new Error('矿机服务暂时不可用，请稍后重试'); }
+-    if (!response.ok) throw new Error(payload.error || 'AIX 代币服务请求失败');
++    if (!response.ok) throw Object.assign(new Error(payload.error || 'AIX 代币服务请求失败'), { status: response.status, code: payload.code });
+     return payload;
+   };
+   const authApi = async (path, options = {}, timeoutMs = 15000) => {
+@@ -57,6 +59,35 @@
+     if (!window.currentWalletProfile?.authenticated) throw new Error('SESSION_REQUIRED');
+     return api(path, options, timeoutMs);
+   };
++  function readEarnData(path, timeoutMs = 10000) {
++    const key = `${String(window.currentWalletConnection?.address || '').toLowerCase()}:${path}`;
++    if (readRequests.has(key)) return readRequests.get(key);
++    const request = authApi(path, {}, timeoutMs).finally(() => {
++      if (readRequests.get(key) === request) readRequests.delete(key);
++    });
++    readRequests.set(key, request);
++    return request;
++  }
++  function readTeamCounts() {
++    const address = window.currentWalletConnection?.address;
++    return readEarnData('team/summary', 8000).catch(error => {
++      // 升级期间，仍运行旧接口的本地/线上服务可以继续显示人数。
++      if (![404, 405].includes(error.status) || !window.currentWalletProfile?.authenticated
++        || window.currentWalletConnection?.address !== address) throw error;
++      return readEarnData('team/profile');
++    });
++  }
++  function teamData() {
++    if (!profileCache?.teamLevel && !teamCache) return null;
++    return { ...profileCache?.teamLevel, ...teamCache };
++  }
++  function saveCurrentProfile(address) {
++    if (profileCache) writeProfileCache(address, { ...profileCache, teamLevel: teamData() });
++  }
++  function renderUpdatedData() {
++    // 后台返回数据不能清空正在编辑的质押表单。
++    if (!document.activeElement?.closest('input, select, textarea') && !document.getElementById('earn-stake-modal')) return renderSubTab();
++  }
+   const fmt = (v, d = 4) => Number.isFinite(Number(v)) ? Number(v).toLocaleString('en-US', { maximumFractionDigits: d }) : '0';
+   const fmtA = (v) => { const n = Number(v); return Number.isFinite(n) ? n.toLocaleString('en-US', { maximumFractionDigits: 2, minimumFractionDigits: 2 }) : '0.00'; };
+   // 前端单位清洗：把文本中所有「N A」或「NA」连写的旧单位标签替换成「N AIX」。
+@@ -87,13 +118,13 @@
+ 
+   // 激活页顶部：参考设计 —— 我的上级地址 + 直推/团队人数大卡片 + 邀请链接
+   function teamSummaryCard() {
+-    const team = profileCache?.teamLevel;
+-    const directCount = team?.directCount || 0;
+-    const teamCount = team?.teamCount || 0;
++    const team = teamData();
++    const directCount = team?.directCount;
++    const teamCount = team?.teamCount;
+     const referrer = team?.directReferrer || null;
+     const referrerHtml = referrer
+       ? `<code title="${escapeHtml(referrer)}" class="ts-upline-addr">${escapeHtml(shortAddr(referrer))}</code>`
+-      : '<span class="ts-upline-none">无推荐人</span>';
++      : `<span class="ts-upline-none">${teamCount == null ? '加载中…' : '无推荐人'}</span>`;
+     const refLink = refProfileCache?.code ? earnRefLink() : '';
+     const inviteHtml = refLink
+       ? `<div class="ts-invite">
+@@ -114,12 +145,12 @@
+         </div>
+         <div class="ts-stat-grid">
+           <div class="ts-stat-cell">
+-            <div class="ts-stat-num">${directCount}<small>人</small></div>
++            <div class="ts-stat-num">${directCount == null ? '—' : Number(directCount).toLocaleString()}<small>人</small></div>
+             <div class="ts-stat-label">直推人数</div>
+             <span class="ts-stat-icon">👥</span>
+           </div>
+           <div class="ts-stat-cell">
+-            <div class="ts-stat-num">${teamCount.toLocaleString()}<small>人</small></div>
++            <div class="ts-stat-num">${teamCount == null ? '—' : Number(teamCount).toLocaleString()}<small>人</small></div>
+             <div class="ts-stat-label">团队人数</div>
+             <span class="ts-stat-icon">🌐</span>
+           </div>
+@@ -130,8 +161,11 @@
+ 
+   // 直推明细列表：参考设计的紧凑卡片式列表
+   function directReferralList() {
+-    const team = profileCache?.teamLevel;
++    const team = teamData();
+     const directs = team?.directs || [];
++    if (!Array.isArray(team?.directs) && Number(team?.directCount) > 0) {
++      return '<div class="ts-empty">直推明细可在<button type="button" onclick="window.earnSwitch(\'team\')">团队页面</button>查看</div>';
++    }
+     if (directs.length === 0) {
+       return `<div class="ts-empty">暂无直推用户，分享邀请链接邀请好友加入</div>`;
+     }
+@@ -192,7 +226,7 @@
+     const mToday = sum(miners, 'dayEarned');
+     const mPlanned = sum(active, 'remaining');
+     const mLifetime = sum(miners, 'totalEarned');
+-    const mTeamTotal = Number(profileCache?.teamLevel?.totalEarnedA || 0);
++    const mTeamTotal = teamData()?.totalEarnedA;
+     return `
+       <div class="pool-overview">
+         <div class="pool-section">
+@@ -220,7 +254,7 @@
+             </div>
+             <div class="pool-cell">
+               <div class="pool-cell-label">累计团队分润</div>
+-              <div class="pool-cell-value" style="color:#f6c454">${fmtNum(mTeamTotal, 2)} <small>AIX</small></div>
++              <div class="pool-cell-value" style="color:#f6c454">${mTeamTotal == null ? '—' : fmtNum(mTeamTotal, 2)} <small>AIX</small></div>
+             </div>
+           </div>
+         </div>
+@@ -248,13 +282,9 @@
+       if (!window.currentWalletProfile?.authenticated || earnRefreshBusy) return;
+       if (!['miner', 'team'].includes(currentSubTab)) return;
+       if (document.activeElement?.closest('input, select, textarea')) return;
+-      const wallet = window.currentWalletConnection?.address;
+-      const tab = currentSubTab;
+       earnRefreshBusy = true;
+       try {
+-        const fresh = await authApi('profile');
+-        if (tab === 'team') fresh.teamLevel = await authApi('team/profile');
+-        if (window.currentWalletProfile?.authenticated && window.currentWalletConnection?.address === wallet && currentSubTab === tab) { profileCache = fresh; await renderSubTab(); }
++        await load();
+       } catch {} finally { earnRefreshBusy = false; }
+     }, 60_000);
+   }
+@@ -361,26 +391,33 @@
+       const cachedProfile = readProfileCache(window.currentWalletConnection?.address);
+       if (cachedProfile) {
+         profileCache = cachedProfile;
++        if (!teamCache) teamCache = cachedProfile.teamLevel || null;
+       }
+       // 先展示最新钱包状态，个人数据在后台刷新，不能把旧游客按钮留到请求结束。
+       await renderSubTab();
+       try {
+-        // Team/referral data is only needed when the team tab is opened.
+-        const [profileRes, teamRes, refRes] = await Promise.allSettled([
+-          authApi('profile', {}, 10000),
+-          currentSubTab === 'team' ? authApi('team/profile', {}, 8000) : Promise.resolve(null),
+-          currentSubTab === 'team' ? fetchWithTimeout('/api/referrals/profile', { headers: { 'Content-Type': 'application/json' } }, 8000)
+-            .then(r => r.ok ? r.json() : null) : Promise.resolve(null),
+-        ]);
+-        if (stale()) return;
+-        if (profileRes.status === 'fulfilled' && profileRes.value) {
+-          profileCache = profileRes.value;
+-          if (teamRes.status === 'fulfilled' && teamRes.value) profileCache.teamLevel = teamRes.value;
+-          writeProfileCache(window.currentWalletConnection?.address, profileCache);
++        const address = window.currentWalletConnection?.address;
++        const stillCurrent = () => !stale() && window.currentWalletProfile?.authenticated
++          && window.currentWalletConnection?.address === address;
++        const update = apply => async data => {
++          if (!stillCurrent() || !data) return;
++          apply(data);
++          saveCurrentProfile(address);
++          await renderUpdatedData();
++        };
++        // 人数与矿机各自返回即显示，不等待团队明细或邀请链接。
++        const requests = [
++          readEarnData('profile').then(update(data => { profileCache = data; })),
++          readTeamCounts().then(update(data => { if (!data.error) teamCache = { ...teamCache, ...data }; })),
++        ];
++        if (currentSubTab === 'team') {
++          requests.push(readEarnData('team/profile', 10000).then(update(data => {
++            if (!data.error) teamCache = { ...teamCache, ...data };
++          })));
++          requests.push(fetchWithTimeout('/api/referrals/profile', { headers: { 'Content-Type': 'application/json' } }, 8000)
++            .then(r => r.ok ? r.json() : null).then(update(data => { refProfileCache = data; })));
+         }
+-        if (refRes.status === 'fulfilled' && refRes.value) refProfileCache = refRes.value;
+-        if (stale()) return;
+-        await renderSubTab();
++        await Promise.allSettled(requests);
+         return;
+       } catch (e) {
+         if (stale()) return;
+@@ -399,6 +436,7 @@
+     // 钱包初始化会自动发起登录；登录成功后 wallet.js refreshWalletDependents 强制重载本页，
+     // 自动切换为已登录视图；用户也可直接点卡片上的按钮触发连接/签名，完成后同样自动刷新。
+     profileCache = null;
++    teamCache = null;
+     refProfileCache = null;
+     if (!stale()) await renderSubTab();
+   }
+@@ -595,7 +633,7 @@
+       <div class="portal-section" style="border-radius:14px;overflow:hidden;margin-top:18px">
+         <div class="portal-section-head">
+           <h2>👥 直推明细</h2>
+-          <span>${profileCache?.teamLevel?.directCount || 0} 位直推用户</span>
++          <span>${teamData()?.directCount ?? '—'} 位直推用户</span>
+         </div>
+         <div style="padding:12px">
+           ${directReferralList()}
+@@ -728,12 +766,14 @@
+ 
+   // ── 团队 v2 ──
+   function renderTeam() {
+-        const team = profileCache?.teamLevel;
++        const team = teamData();
+         const userId = profileCache?.userId || '';
+         const lvlColor = team?.level >= 9 ? '#f26c78' : team?.level >= 7 ? '#f6c454' : team?.level >= 4 ? '#50d2c2' : '#81918e';
+         const byKind = team?.byKind || {};
+         const directs = team?.directs || [];
+-        const teamAmount = value => `${fmtA(value || 0)} AIX`;
++        const hasDetails = Array.isArray(team?.directs);
++        const teamAmount = value => value == null && !hasDetails ? '—' : `${fmtA(value || 0)} AIX`;
++        const people = value => value == null ? '—' : `${Number(value).toLocaleString()} 人`;
+         const directRows = directs.slice(0, 20).map(d => {
+           const dc = d.level >= 9 ? '#f26c78' : d.level >= 7 ? '#f6c454' : d.level >= 4 ? '#50d2c2' : '#81918e';
+           return `<tr>
+@@ -755,11 +795,11 @@
+ 
+           <div class="portal-metrics" style="margin-bottom:22px;border-radius:14px;overflow:hidden">
+             ${P.metric('我的团队级别', team?.level > 0 ? `<b style="font-size:22px;color:${lvlColor}">${team.levelLabel || 'A' + team.level}</b>` : '未达标')}
+-            ${P.metric('直推用户数', team ? (team.directCount || 0) + ' 人' : '—')}
+-            ${P.metric('间推用户数', team ? (team.indirectCount || 0) + ' 人' : '—')}
+-            ${P.metric('团队总人数', team ? (team.teamCount || 0) + ' 人' : '—')}
+-            ${P.metric('团队激活矿机', team ? (team.teamMinerUsers || 0) + ' 人' : '—', `Mini ${team?.teamMini || 0} 人 · Pro ${team?.teamPro || 0} 人`)}
+-            ${P.metric('直推激活矿机', team ? (team.directMinerUsers || 0) + ' 人' : '—', `Mini ${team?.directMini || 0} 人 · Pro ${team?.directPro || 0} 人`)}
++            ${P.metric('直推用户数', people(team?.directCount))}
++            ${P.metric('间推用户数', people(team?.indirectCount))}
++            ${P.metric('团队总人数', people(team?.teamCount))}
++            ${P.metric('团队激活矿机', people(team?.teamMinerUsers), hasDetails ? `Mini ${team?.teamMini || 0} 人 · Pro ${team?.teamPro || 0} 人` : '')}
++            ${P.metric('直推激活矿机', people(team?.directMinerUsers), hasDetails ? `Mini ${team?.directMini || 0} 人 · Pro ${team?.directPro || 0} 人` : '')}
+             ${P.metric('团队收益总计', teamAmount(team?.totalEarnedA))}
+             ${P.metric('团队持币总量', teamAmount(team?.teamHoldA), `直推 ${fmtA(team?.directHoldA || 0)} AIX · 团队 ${team?.teamHoldUsers || 0} 人持有`)}
+             ${P.metric('团队质押业绩', teamAmount(team?.teamStakeA), `直推 ${fmtA(team?.directStakeA || 0)} AIX · 团队 ${team?.teamStakeUsers || 0} 人质押中`)}
+@@ -776,7 +816,7 @@
+               ${P.metric('间推·质押(10%)', teamAmount(byKind.stake_indirect))}
+               ${P.metric('级差·矿机', teamAmount(byKind.miner_level_diff))}
+               ${P.metric('级差·质押', teamAmount(byKind.stake_level_diff))}
+-              ${P.metric('平级奖(10%)', teamAmount((parseFloat(byKind.parity) || 0) + (parseFloat(byKind.miner_parity) || 0) + (parseFloat(byKind.stake_parity) || 0)))}
++              ${P.metric('平级奖(10%)', teamAmount(hasDetails ? (parseFloat(byKind.parity) || 0) + (parseFloat(byKind.miner_parity) || 0) + (parseFloat(byKind.stake_parity) || 0) : null))}
+               ${Number(byKind.direct_count) > 0 ? P.metric('历史直推阶梯奖', teamAmount(byKind.direct_count)) : ''}
+               ${team?.level === 10 || Number(byKind.a10_pool_share) > 0 ? P.metric('A10 分红池收益', teamAmount(byKind.a10_pool_share)) : ''}
+             </div>
+@@ -851,7 +891,9 @@
+     const wallet = String(event.detail?.address || '').toLowerCase();
+     if (wallet !== observedWallet || !event.detail?.authenticated) {
+       profileCache = null;
++      teamCache = null;
+       refProfileCache = null;
++      readRequests.clear();
+     }
+     observedWallet = wallet;
+     if (plansCache && document.getElementById('tab-earn')?.classList.contains('active')) renderSubTab();

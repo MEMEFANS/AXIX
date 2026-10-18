@@ -1,0 +1,226 @@
+{
+  "version": 1,
+  "tokens": [
+    {
+      "symbol": "BTC",
+      "name": "Bitcoin",
+      "priceDecimals": 2,
+      "spot": true,
+      "perp": true,
+      "category": "crypto",
+      "enabled": true,
+      "createdAt": "2026-10-10T04:43:26.648Z",
+      "updatedAt": "2026-10-10T04:43:26.654Z"
+    },
+    {
+      "symbol": "ETH",
+      "name": "Ethereum",
+      "priceDecimals": 2,
+      "spot": true,
+      "perp": true,
+      "category": "crypto",
+      "enabled": true,
+      "createdAt": "2026-10-10T04:43:26.654Z",
+      "updatedAt": "2026-10-10T04:43:26.654Z"
+    },
+    {
+      "symbol": "BNB",
+      "name": "BNB",
+      "priceDecimals": 2,
+      "spot": true,
+      "perp": true,
+      "category": "crypto",
+      "enabled": true,
+      "createdAt": "2026-10-10T04:43:26.654Z",
+      "updatedAt": "2026-10-10T04:43:26.654Z"
+    },
+    {
+      "symbol": "SOL",
+      "name": "Solana",
+      "priceDecimals": 2,
+      "spot": true,
+      "perp": true,
+      "category": "crypto",
+      "enabled": true,
+      "createdAt": "2026-10-10T04:43:26.654Z",
+      "updatedAt": "2026-10-10T04:43:26.654Z"
+    },
+    {
+      "symbol": "XRP",
+      "name": "XRP",
+      "priceDecimals": 4,
+      "spot": true,
+      "perp": true,
+      "category": "crypto",
+      "enabled": true,
+      "createdAt": "2026-10-10T04:43:26.654Z",
+      "updatedAt": "2026-10-10T04:43:26.654Z"
+    },
+    {
+      "symbol": "DOGE",
+      "name": "Dogecoin",
+      "priceDecimals": 5,
+      "spot": true,
+      "perp": true,
+      "category": "crypto",
+      "enabled": true,
+      "createdAt": "2026-10-10T04:43:26.654Z",
+      "updatedAt": "2026-10-10T04:43:26.654Z"
+    },
+    {
+      "symbol": "ADA",
+      "name": "ADA",
+      "priceDecimals": 4,
+      "spot": true,
+      "perp": true,
+      "category": "crypto",
+      "enabled": true,
+      "createdAt": "2026-10-10T04:43:26.654Z",
+      "updatedAt": "2026-10-10T04:43:26.654Z"
+    },
+    {
+      "symbol": "ALLO",
+      "name": "ALLO",
+      "priceDecimals": 4,
+      "spot": true,
+      "perp": true,
+      "category": "crypto",
+      "enabled": true,
+      "createdAt": "2026-10-10T04:43:26.654Z",
+      "updatedAt": "2026-10-10T04:43:26.654Z"
+    },
+    {
+      "symbol": "TRX",
+      "name": "TRX",
+      "priceDecimals": 4,
+      "spot": true,
+      "perp": true,
+      "category": "crypto",
+      "enabled": true,
+      "createdAt": "2026-10-10T04:43:26.654Z",
+      "updatedAt": "2026-10-10T04:43:26.654Z"
+    },
+    {
+      "symbol": "ZEC",
+      "name": "Zcash",
+      "priceDecimals": 2,
+      "spot": true,
+      "perp": true,
+      "category": "crypto",
+      "enabled": true,
+      "createdAt": "2026-10-10T04:43:26.654Z",
+      "updatedAt": "2026-10-10T04:43:26.654Z"
+    },
+    {
+      "symbol": "XLM",
+      "name": "Stellar",
+      "priceDecimals": 4,
+      "spot": true,
+      "perp": true,
+      "category": "crypto",
+      "enabled": true,
+      "createdAt": "2026-10-10T04:43:26.654Z",
+      "updatedAt": "2026-10-10T04:43:26.654Z"
+    },
+    {
+      "symbol": "LINK",
+      "name": "Chainlink",
+      "priceDecimals": 2,
+      "spot": true,
+      "perp": true,
+      "category": "crypto",
+      "enabled": true,
+      "createdAt": "2026-10-10T04:43:26.654Z",
+      "updatedAt": "2026-10-10T04:43:26.654Z"
+    },
+    {
+      "symbol": "BCH",
+      "name": "Bitcoin Cash",
+      "priceDecimals": 4,
+      "spot": true,
+      "perp": true,
+      "category": "crypto",
+      "enabled": true,
+      "createdAt": "2026-10-10T04:43:26.654Z",
+      "updatedAt": "2026-10-10T04:43:26.654Z"
+    },
+    {
+      "symbol": "SUI",
+      "name": "Sui",
+      "priceDecimals": 4,
+      "spot": true,
+      "perp": true,
+      "category": "crypto",
+      "enabled": true,
+      "createdAt": "2026-10-10T04:43:26.654Z",
+      "updatedAt": "2026-10-10T04:43:26.654Z"
+    },
+    {
+      "symbol": "AVAX",
+      "name": "Avalanche",
+      "priceDecimals": 2,
+      "spot": true,
+      "perp": true,
+      "category": "crypto",
+      "enabled": true,
+      "createdAt": "2026-10-10T04:43:26.654Z",
+      "updatedAt": "2026-10-10T04:43:26.654Z"
+    },
+    {
+      "symbol": "PUMP",
+      "name": "Pump.fun",
+      "priceDecimals": 7,
+      "spot": true,
+      "perp": true,
+      "category": "crypto",
+      "enabled": true,
+      "createdAt": "2026-10-10T04:43:26.654Z",
+      "updatedAt": "2026-10-10T04:43:26.654Z"
+    },
+    {
+      "symbol": "NVDA",
+      "name": "NVIDIA",
+      "priceDecimals": 2,
+      "spot": true,
+      "perp": true,
+      "category": "stock",
+      "enabled": true,
+      "createdAt": "2026-10-10T04:43:26.654Z",
+      "updatedAt": "2026-10-10T04:43:26.654Z"
+    },
+    {
+      "symbol": "MU",
+      "name": "Micron Technology",
+      "priceDecimals": 2,
+      "spot": true,
+      "perp": true,
+      "category": "stock",
+      "enabled": true,
+      "createdAt": "2026-10-10T04:43:26.654Z",
+      "updatedAt": "2026-10-10T04:43:26.654Z"
+    },
+    {
+      "symbol": "SNDK",
+      "name": "Sandisk",
+      "priceDecimals": 2,
+      "spot": true,
+      "perp": true,
+      "category": "stock",
+      "enabled": true,
+      "createdAt": "2026-10-10T04:43:26.654Z",
+      "updatedAt": "2026-10-10T04:43:26.654Z"
+    },
+    {
+      "symbol": "AMD",
+      "name": "AMD",
+      "priceDecimals": 2,
+      "spot": true,
+      "perp": true,
+      "category": "stock",
+      "enabled": true,
+      "createdAt": "2026-10-10T04:43:26.654Z",
+      "updatedAt": "2026-10-10T04:43:26.654Z"
+    }
+  ],
+  "removedDefaults": []
+}

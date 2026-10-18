@@ -1,0 +1,55 @@
+--- public/js/core.js before
++++ public/js/core.js after
+@@ -59,12 +59,15 @@
+ 
+ let pageNavigationSeq = 0;
+ async function switchTab(name) {
++  if (!$('tab-' + name)) return false;
++  const previous = document.querySelector('.tab-panel.active')?.id?.replace('tab-', '');
+   const navigation = ++pageNavigationSeq;
+   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+   const panel = $('tab-' + name);
+   if (!panel) return;
+   panel.classList.add('active');
++  window.dispatchEvent(new CustomEvent('pagechange', { detail:{ previous, current:name } }));
+   if (name !== 'trade') tradeMarketStream?.close();
+   else if (window.__tradeDeferredReady) initTradeMarketStream();
+   const nav = ['de', 'ex', 'rs'].includes(name)
+@@ -89,7 +92,6 @@
+   }
+   if (name === 'ledger') loadLedger(true);
+   if (name === 'account') {
+-    if (typeof loadWalletConfig === 'function' && !walletConfig) loadWalletConfig().catch(() => {});
+     window.ExchangeAssets?.activate();
+   }
+   if (name === 'ai') aiRefreshStatus();
+@@ -681,10 +683,8 @@
+   const product = tradeProduct, symbol = tradeSymbol;
+   const requestId = ++tradeMarketRequest;
+   try {
+-    const response = await fetch(`/api/market/candles?product=${product}&symbol=${symbol}&intervalSec=${intervalSec}`);
+-    const payload = await response.json();
+-    if (!response.ok) throw new Error(payload.error || 'K 线读取失败');
+-    if (requestId !== tradeMarketRequest || product !== tradeProduct || symbol !== tradeSymbol) return;
++    const payload = await Portal.readJSON(`/api/market/candles?product=${product}&symbol=${symbol}&intervalSec=${intervalSec}`);
++    if (requestId !== tradeMarketRequest || product !== tradeProduct || symbol !== tradeSymbol || !Portal.active('trade')) return;
+     const raw = Array.isArray(payload.candles) ? payload.candles : [];
+     const metrics = renderTradeChartCandles(raw);
+     if (!metrics) return;
+@@ -711,6 +711,7 @@
+     updateTradeMarketDetails();
+     refreshTradeOrderBook();
+   } catch (error) {
++    if (requestId !== tradeMarketRequest || product !== tradeProduct || symbol !== tradeSymbol || !Portal.active('trade')) return;
+     console.error('[trade] market refresh failed:', error.message);
+     $('trade-mark-price').textContent = '行情不可用';
+     $('trade-high').textContent = '—'; $('trade-low').textContent = '—'; $('trade-change').textContent = '—';
+@@ -1117,6 +1118,7 @@
+     document.querySelectorAll('[data-amount-percent]').forEach(item => item.classList.toggle('active', item === button));
+     applyTradeAmountSlider(percent);
+   });
++  if (Portal.active('trade')) ensureTradeChart();
+   setTradeProduct('spot');
+   loadTradeMarkets().catch(error => console.error('[trade] token catalog:', error.message));
+   loadPlatformProfile().catch(() => {});

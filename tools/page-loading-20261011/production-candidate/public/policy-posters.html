@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>AxiX 扶持政策</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  /* ─────────── 通用 ─────────── */
+  body { font-family:"Microsoft YaHei","PingFang SC",sans-serif; color:#c7d5d2; }
+  .brand-row { display:flex; align-items:center; gap:20px; }
+  .brand-row img { width:76px; height:76px; border-radius:18px; box-shadow:0 0 30px rgba(79,209,181,.4); }
+  .brand-row .brand { font-size:36px; font-weight:900; color:#eaf6f3; }
+  .brand-row .brand b { color:#4fd1b5; }
+
+  .hero { text-align:center; margin-top:70px; }
+  .hero h1 { font-size:88px; font-weight:900; letter-spacing:6px;
+    background:linear-gradient(100deg,#8ff0dc,#4fd1b5 50%,#b9f4e6);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    text-shadow:0 0 60px rgba(79,209,181,.3); }
+  .hero p { margin-top:22px; font-size:32px; color:#7d9691; letter-spacing:10px; }
+
+  .wm { position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    font-size:230px; font-weight:900; letter-spacing:20px; color:rgba(79,209,181,.045); pointer-events:none; }
+
+  .block-title { font-size:40px; font-weight:900; color:#7fe6d3; display:flex; align-items:center; gap:14px; }
+  .block-title::before { content:""; width:14px; height:14px; border-radius:50%; background:#4fd1b5; box-shadow:0 0 12px #4fd1b5; }
+
+  .cta { margin-top:auto; text-align:center; }
+  .cta .btn { display:inline-block; font-size:40px; font-weight:900; color:#04211b; letter-spacing:8px;
+    background:linear-gradient(135deg,#8ff0dc,#4fd1b5); border-radius:999px; padding:26px 100px;
+    box-shadow:0 20px 60px rgba(79,209,181,.35); }
+  .foot { margin-top:40px; text-align:center; font-size:22px; color:#3d5a53; letter-spacing:5px; }
+
+  /* ─────────── 海报 1: 工作室扶持 ─────────── */
+  #poster1 { width:1080px; height:1920px; position:relative; display:flex; flex-direction:column;
+    background:
+      radial-gradient(900px 500px at 50% -5%, rgba(79,209,181,.14), transparent 60%),
+      radial-gradient(700px 400px at 50% 105%, rgba(79,209,181,.08), transparent 60%),
+      linear-gradient(170deg,#07100f 0%,#0a1112 55%,#081211 100%);
+    padding:64px 70px 56px; }
+
+  .reqs { margin-top:60px; display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+  .req { background:linear-gradient(180deg,#101b1d,#0c1517); border:1px solid #29413e;
+    border-radius:20px; padding:24px 28px; font-size:26px; color:#c7d5d2; display:flex; align-items:center; gap:16px; }
+  .req .n { width:38px; height:38px; border-radius:50%; background:linear-gradient(135deg,#8ff0dc,#4fd1b5);
+    color:#04211b; font-weight:900; font-size:24px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .req b { color:#4fd1b5; }
+
+  .sup-block { margin-top:60px; }
+  .sup-table { width:100%; border-collapse:separate; border-spacing:0; margin-top:30px; border-radius:22px; overflow:hidden; }
+  .sup-table th { background:linear-gradient(90deg,#1a2a35,#0d2018); color:#4fd1b5; padding:26px; font-size:30px; font-weight:700; text-align:left;
+    border:1px solid #29413e; }
+  .sup-table td { padding:28px 26px; color:#eaf6f3; font-size:28px; border:1px solid #29413e; }
+  .sup-table tr td:first-child { color:#b9cbc7; }
+  .amount { color:#4fd1b5; font-weight:900; font-size:34px; text-shadow:0 0 20px rgba(79,209,181,.3); }
+
+  .note-box { margin-top:36px; background:linear-gradient(180deg,#1c1a10,#14130a);
+    border:1px solid #5c4b22; border-radius:20px; padding:28px 32px; }
+  .note-box .nt { font-size:28px; font-weight:900; color:#f2c94c; }
+  .note-box p { margin-top:14px; font-size:24px; line-height:1.9; color:#c9b97a; }
+  .note-box p b { color:#ffdd88; }
+
+  /* ─────────── 海报 2: 级别扶持 ─────────── */
+  #poster2 { width:1080px; height:1920px; position:relative; display:flex; flex-direction:column;
+    background:
+      radial-gradient(900px 500px at 50% -5%, rgba(79,209,181,.14), transparent 60%),
+      radial-gradient(700px 400px at 50% 105%, rgba(79,209,181,.08), transparent 60%),
+      linear-gradient(170deg,#07100f 0%,#0a1112 55%,#081211 100%);
+    padding:64px 70px 56px; }
+
+  .lv-block { margin-top:70px; flex:1; }
+  .lv-table { width:100%; border-collapse:separate; border-spacing:0; margin-top:30px; border-radius:22px; overflow:hidden; }
+  .lv-table th { background:linear-gradient(90deg,#1a2a35,#0d2018); color:#4fd1b5; padding:28px; font-size:32px; font-weight:700;
+    border:1px solid #29413e; }
+  .lv-table td { padding:30px 26px; color:#eaf6f3; font-size:30px; text-align:center; border:1px solid #29413e; }
+  .lv-table td.lv-name { background:rgba(79,209,181,.08); color:#7fe6d3; font-weight:900; letter-spacing:4px; font-size:34px; }
+  .lv-table .amt { font-size:38px; font-weight:900; color:#4fd1b5; text-shadow:0 0 25px rgba(79,209,181,.4); }
+  .lv-table tr:nth-child(odd) td { background:rgba(16,27,29,.5); }
+
+  .lv-note { margin-top:30px; text-align:center; font-size:26px; color:#7d9691; letter-spacing:4px; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════
+  海报 1: 工作室扶持政策
+  ═══════════════════════════════════════════ -->
+<div id="poster1">
+  <div class="wm">STUDIO</div>
+  <div class="brand-row">
+    <img src="assets/brand/logo.png" alt="AxiX">
+    <div class="brand">Axi<b>X</b> Exchange</div>
+  </div>
+
+  <div class="hero">
+    <h1>工作室扶持政策</h1>
+    <p>STUDIO SUPPORT POLICY</p>
+  </div>
+
+  <div class="sup-block">
+    <div class="block-title">工作室运营要求</div>
+    <div class="reqs">
+      <div class="req"><div class="n">1</div><div>文化上墙 · 品牌形象到位</div></div>
+      <div class="req"><div class="n">2</div><div>每日激活数量不低于 <b>50</b></div></div>
+      <div class="req"><div class="n">3</div><div>每日课程视频输出</div></div>
+      <div class="req"><div class="n">4</div><div>每日腾讯会议不少于 <b>5</b> 人</div></div>
+      <div class="req"><div class="n">5</div><div>每日工作室工作总结</div></div>
+      <div class="req"><div class="n">6</div><div>每月新增激活用户不低于 <b>2000</b></div></div>
+    </div>
+  </div>
+
+  <div class="sup-block">
+    <div class="block-title">扶持标准</div>
+    <table class="sup-table">
+      <thead><tr><th>月度激活量</th><th>扶持金额</th></tr></thead>
+      <tbody>
+        <tr><td>1,000 激活</td><td class="amount">500 USDT</td></tr>
+        <tr><td>5,000 激活</td><td class="amount">2,500 USDT</td></tr>
+        <tr><td>10,000 激活</td><td class="amount">5,000 USDT</td></tr>
+      </tbody>
+    </table>
+    <div class="note-box">
+      <div class="nt">⚠ 注意事项</div>
+      <p>· 每月新增激活 <b>不低于上月扶持标准</b><br>· 总扶持周期：<b>三个月</b></p>
+    </div>
+  </div>
+
+  <div class="cta"><div class="btn">JOIN AxiX</div></div>
+  <div class="foot">axix.cc · AxiX Exchange</div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+  海报 2: 级别扶持政策
+  ═══════════════════════════════════════════ -->
+<div id="poster2">
+  <div class="wm">LEVEL</div>
+  <div class="brand-row">
+    <img src="assets/brand/logo.png" alt="AxiX">
+    <div class="brand">Axi<b>X</b> Exchange</div>
+  </div>
+
+  <div class="hero">
+    <h1>级别扶持政策</h1>
+    <p>LEVEL SUPPORT POLICY</p>
+  </div>
+
+  <div class="lv-block">
+    <table class="lv-table">
+      <thead><tr><th>级别</th><th>扶持金额</th></tr></thead>
+      <tbody>
+        <tr><td class="lv-name">A1</td><td class="amt">50 USDT</td></tr>
+        <tr><td class="lv-name">A2</td><td class="amt">100 USDT</td></tr>
+        <tr><td class="lv-name">A3</td><td class="amt">200 USDT</td></tr>
+        <tr><td class="lv-name">A4</td><td class="amt">400 USDT</td></tr>
+        <tr><td class="lv-name">A5</td><td class="amt">800 USDT</td></tr>
+        <tr><td class="lv-name">A6</td><td class="amt">1,600 USDT</td></tr>
+        <tr><td class="lv-name">A7</td><td class="amt">3,200 USDT</td></tr>
+        <tr><td class="lv-name">A8</td><td class="amt">6,400 USDT</td></tr>
+        <tr><td class="lv-name">A9</td><td class="amt">12,800 USDT</td></tr>
+      </tbody>
+    </table>
+    <div class="lv-note">每级翻倍 · 最高 A9 扶持 12,800 USDT</div>
+  </div>
+
+  <div class="cta"><div class="btn">JOIN AxiX</div></div>
+  <div class="foot">axix.cc · AxiX Exchange</div>
+</div>
+
+</body>
+</html>

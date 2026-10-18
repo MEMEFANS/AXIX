@@ -1,0 +1,18 @@
+{
+  "isolatedSyntheticData": true,
+  "userCount": 7223,
+  "baseline": {
+    "milliseconds": 14290.61,
+    "bytes": 2152571
+  },
+  "overview": {
+    "milliseconds": 16.33,
+    "bytes": 402
+  },
+  "usersPage": {
+    "milliseconds": 18.17,
+    "bytes": 15361,
+    "rows": 50
+  },
+  "summaryUnchanged": true
+}

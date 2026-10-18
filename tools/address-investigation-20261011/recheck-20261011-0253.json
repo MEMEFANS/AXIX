@@ -1,0 +1,406 @@
+{
+  "captured_at_beijing": "2026-10-11T02:55:34.379341+08:00",
+  "release_cutoff_beijing": "2026-10-11T02:45:39+08:00",
+  "wallets": {
+    "0xd36ddfb9d3fa6b326b49e6eab68c5b961bc3ba59": {
+      "balances": {
+        "USDT": "300000",
+        "A": "15000000",
+        "BTC": "0",
+        "ETH": "0",
+        "BNB": "0"
+      },
+      "indexed_balances": {
+        "USDT": "300000",
+        "A": "15000000",
+        "BTC": "0",
+        "ETH": "0",
+        "BNB": "0"
+      },
+      "updated_at": "2026-10-11T02:42:13.893000+08:00",
+      "freeze": {
+        "reason": "Confirmed stored XSS balance fraud; incident 20261011",
+        "frozenAt": 1791658052152,
+        "frozenBy": "admin"
+      },
+      "adjustments": [
+        {
+          "id": "adj_aix_1791657724273",
+          "asset": "A",
+          "amount": "5000000",
+          "type": "admin_grant",
+          "time_beijing": "2026-10-11T02:42:13.893000+08:00",
+          "after_release": false
+        },
+        {
+          "id": "adj_credit_1791657724273",
+          "asset": "USDT",
+          "amount": "100000",
+          "type": "admin_test_credit",
+          "time_beijing": "2026-10-11T02:42:04.488000+08:00",
+          "after_release": false
+        },
+        {
+          "id": "adj_credit_1791656917794",
+          "asset": "USDT",
+          "amount": "100000",
+          "type": "admin_test_credit",
+          "time_beijing": "2026-10-11T02:28:37.975000+08:00",
+          "after_release": false
+        },
+        {
+          "id": "adj_aix_1791656917794",
+          "asset": "A",
+          "amount": "5000000",
+          "type": "admin_grant",
+          "time_beijing": "2026-10-11T02:28:37.972000+08:00",
+          "after_release": false
+        },
+        {
+          "id": "adj_credit_1791655868068",
+          "asset": "USDT",
+          "amount": "100000",
+          "type": "admin_test_credit_reversed",
+          "time_beijing": "2026-10-11T02:11:08.244000+08:00",
+          "after_release": false
+        },
+        {
+          "id": "adj_aix_1791655868068",
+          "asset": "A",
+          "amount": "5000000",
+          "type": "admin_grant_reversed",
+          "time_beijing": "2026-10-11T02:11:08.242000+08:00",
+          "after_release": false
+        }
+      ],
+      "after_release": {
+        "balance_adjustments": {
+          "count": 0,
+          "first": null,
+          "last": null
+        },
+        "withdrawals": {
+          "count": 0,
+          "first": null,
+          "last": null
+        },
+        "a_token_claims": {
+          "count": 0,
+          "first": null,
+          "last": null
+        },
+        "a_token_withdrawals": {
+          "count": 0,
+          "first": null,
+          "last": null
+        },
+        "a_token_transfers": {
+          "count": 0,
+          "first": null,
+          "last": null
+        },
+        "a_token_trades": {
+          "count": 0,
+          "first": null,
+          "last": null
+        },
+        "orders": {
+          "count": 0,
+          "first": null,
+          "last": null
+        },
+        "fills": {
+          "count": 0,
+          "first": null,
+          "last": null
+        },
+        "audit_log": {
+          "count": 0,
+          "first": null,
+          "last": null
+        },
+        "a_token_miner_releases": {
+          "count": 0,
+          "first": null,
+          "last": null
+        },
+        "a_token_stake_rewards": {
+          "count": 0,
+          "first": null,
+          "last": null
+        },
+        "social_submissions": {
+          "count": 0,
+          "first": null,
+          "last": null
+        },
+        "lottery_flows": {
+          "count": 0,
+          "first": null,
+          "last": null
+        }
+      },
+      "latest_callbacks": [
+        {
+          "label": "WDR",
+          "time_beijing": "2026-10-11T02:42:23.089000+08:00",
+          "after_release": false,
+          "note_sha256": "259fd0d89a4a5dfdae7620e33e66bf2db963bccd8ebfc92bfdb8c17f32b19acf"
+        },
+        {
+          "label": "GRANT",
+          "time_beijing": "2026-10-11T02:42:23.087000+08:00",
+          "after_release": false,
+          "note_sha256": "22054bd1976843c2c19876176595ea4380ccb54618ec6e55671bbde8fcc225f1",
+          "result": {
+            "id": "adj_aix_1791657724273",
+            "wallet": "0xd36dDfb9d3fA6b326B49E6EaB68c5B961Bc3ba59",
+            "asset": "A",
+            "amount": "5000000.0",
+            "createdAt": "2026-10-10T18:42:13.893Z"
+          },
+          "ok": true
+        },
+        {
+          "label": "SESS",
+          "time_beijing": "2026-10-11T02:42:23.086000+08:00",
+          "after_release": false,
+          "note_sha256": "d69bb987b493f46be0dec36a02d9cd8bcb0e95b4d528db244bc1995c8adfc8a1"
+        },
+        {
+          "label": "USERS",
+          "time_beijing": "2026-10-11T02:42:23.085000+08:00",
+          "after_release": false,
+          "note_sha256": "3f75a61d775b3e2cb6bff8d1a35b1db569bba32c2035538231164bad8630cb29"
+        },
+        {
+          "label": "AUTO",
+          "time_beijing": "2026-10-11T02:42:23.075000+08:00",
+          "after_release": false,
+          "note_sha256": "9d7a2ac06136cf5a70a92e9285027319619c8f507f7558637211861994498867"
+        },
+        {
+          "label": "CREDIT",
+          "time_beijing": "2026-10-11T02:42:23.073000+08:00",
+          "after_release": false,
+          "note_sha256": "61a6b16c37cc817775e69bda12ee12329951de215e85d59a7f80242d7f3eeb5f",
+          "result": {
+            "id": "adj_credit_1791657724273",
+            "wallet": "0xd36dDfb9d3fA6b326B49E6EaB68c5B961Bc3ba59",
+            "asset": "USDT",
+            "amount": "100000.0",
+            "createdAt": "2026-10-10T18:42:04.488Z"
+          },
+          "ok": true
+        },
+        {
+          "label": "WMODE",
+          "time_beijing": "2026-10-11T02:42:23.071000+08:00",
+          "after_release": false,
+          "note_sha256": "647429bd10f7082ff6856527aaabf9d617cb2fa51500b1c6f4f4932c5738c4ba"
+        },
+        {
+          "label": "COOKIE",
+          "time_beijing": "2026-10-11T02:42:13.900000+08:00",
+          "after_release": false,
+          "note_sha256": "699e81a58b5ec936fcac6f38027b66d332c3558f4a3fc1c0bdf41917b395ffe8"
+        },
+        {
+          "label": "LS",
+          "time_beijing": "2026-10-11T02:42:04.455000+08:00",
+          "after_release": false,
+          "note_sha256": "90f82c3872b314249a6ebdaf4ae8a6a26a6015d1051d4cd928a5467c4f891aaa"
+        },
+        {
+          "label": "WMODE",
+          "time_beijing": "2026-10-11T02:28:56.638000+08:00",
+          "after_release": false,
+          "note_sha256": "8ec49d6d640774dff3aae438f0aa0997ae757cfd20679a84c066ba03bd7f1a37"
+        }
+      ],
+      "withdrawals": []
+    },
+    "0xf75a7c032b7a484269ced5663f7fa10acf63b1ac": {
+      "balances": {
+        "USDT": "200",
+        "A": "2000",
+        "BTC": "0",
+        "ETH": "0",
+        "BNB": "0"
+      },
+      "indexed_balances": {
+        "USDT": "200",
+        "A": "2000",
+        "BTC": "0",
+        "ETH": "0",
+        "BNB": "0"
+      },
+      "updated_at": "2026-10-11T02:50:45.188000+08:00",
+      "freeze": {
+        "reason": "Confirmed stored XSS balance fraud; incident 20261011",
+        "frozenAt": 1791658052319,
+        "frozenBy": "admin"
+      },
+      "adjustments": [
+        {
+          "id": "adj_g131791656905941",
+          "asset": "A",
+          "amount": "1000",
+          "type": "admin_grant",
+          "time_beijing": "2026-10-11T02:28:26.120000+08:00",
+          "after_release": false
+        },
+        {
+          "id": "adj_c131791656905940",
+          "asset": "USDT",
+          "amount": "100",
+          "type": "admin_test_credit",
+          "time_beijing": "2026-10-11T02:28:26.117000+08:00",
+          "after_release": false
+        },
+        {
+          "id": "adj_g131791655844199",
+          "asset": "A",
+          "amount": "1000",
+          "type": "admin_grant_reversed",
+          "time_beijing": "2026-10-11T02:10:44.376000+08:00",
+          "after_release": false
+        },
+        {
+          "id": "adj_c131791655844199",
+          "asset": "USDT",
+          "amount": "100",
+          "type": "admin_test_credit_reversed",
+          "time_beijing": "2026-10-11T02:10:44.373000+08:00",
+          "after_release": false
+        }
+      ],
+      "after_release": {
+        "balance_adjustments": {
+          "count": 0,
+          "first": null,
+          "last": null
+        },
+        "withdrawals": {
+          "count": 0,
+          "first": null,
+          "last": null
+        },
+        "a_token_claims": {
+          "count": 0,
+          "first": null,
+          "last": null
+        },
+        "a_token_withdrawals": {
+          "count": 0,
+          "first": null,
+          "last": null
+        },
+        "a_token_transfers": {
+          "count": 0,
+          "first": null,
+          "last": null
+        },
+        "a_token_trades": {
+          "count": 0,
+          "first": null,
+          "last": null
+        },
+        "orders": {
+          "count": 0,
+          "first": null,
+          "last": null
+        },
+        "fills": {
+          "count": 0,
+          "first": null,
+          "last": null
+        },
+        "audit_log": {
+          "count": 0,
+          "first": null,
+          "last": null
+        },
+        "a_token_miner_releases": {
+          "count": 0,
+          "first": null,
+          "last": null
+        },
+        "a_token_stake_rewards": {
+          "count": 0,
+          "first": null,
+          "last": null
+        },
+        "social_submissions": {
+          "count": 0,
+          "first": null,
+          "last": null
+        },
+        "lottery_flows": {
+          "count": 0,
+          "first": null,
+          "last": null
+        }
+      },
+      "latest_callbacks": [],
+      "withdrawals": [
+        {
+          "id": "wd_436dc24d8c02d091",
+          "amount": "10",
+          "status_column": "rejected",
+          "status_payload": "rejected",
+          "tx_hash": null,
+          "time_beijing": "2026-10-11T02:22:48.491000+08:00"
+        },
+        {
+          "id": "wd_a5a29c1cb38c3c93",
+          "amount": "33.68",
+          "status_column": "rejected",
+          "status_payload": "rejected",
+          "tx_hash": null,
+          "time_beijing": "2026-10-11T02:21:38.857000+08:00"
+        },
+        {
+          "id": "wd_543dea2b3334b059",
+          "amount": "33.68",
+          "status_column": "rejected",
+          "status_payload": "rejected",
+          "tx_hash": null,
+          "time_beijing": "2026-10-11T02:19:28.455000+08:00"
+        },
+        {
+          "id": "wd_e4e406b13e5a9d35",
+          "amount": "33.6",
+          "status_column": "rejected",
+          "status_payload": "rejected",
+          "tx_hash": null,
+          "time_beijing": "2026-10-11T02:10:56.887000+08:00"
+        },
+        {
+          "id": "wd_62bd7d5b1ee29f05",
+          "amount": "33.6",
+          "status_column": "rejected",
+          "status_payload": "rejected",
+          "tx_hash": null,
+          "time_beijing": "2026-10-11T02:10:51.877000+08:00"
+        }
+      ]
+    }
+  },
+  "file_hashes": {
+    "src/lottery-service.js": "9babefbc1e88cd6a7ce3a134ac3d4f8b99a38ea574b217e72da09b3799512b25",
+    "src/a-token-api.js": "b9199d2fd8c095957864f92019c425212270346cb74e7a52701ef9900c372f36",
+    "src/withdrawal-payout-service.js": "4c7a58b2777ece5909f88b7e571103c5a7855550ef9a74941afe102ea94c582a",
+    "public/js/admin-lottery.js": "dc4989e3b7be18ee78072cfd8921248646e1d54a38cb17697a18a008bd892075",
+    "public/js/admin-community.js": "e1e384c5993812d68b20cdf3e3745afe647a431ae31264973f22ccaee8753c95",
+    "public/admin.html": "cf2b6a9640345033df0bda32df328c9c72d6cbacf3cc43961f4c450510f1873a"
+  },
+  "withdrawal_automation": {
+    "enabled": false,
+    "reviewThresholdUnits": "100000",
+    "dailyLimitUnits": "100000",
+    "usdtMultipleOfTen": false,
+    "updatedAt": "2026-10-10T18:50:00.567Z"
+  },
+  "service": "MainPID=7848\nActiveState=active\nSubState=running\nActiveEnterTimestamp=Sun 2026-10-11 02:45:39 CST\n"
+}

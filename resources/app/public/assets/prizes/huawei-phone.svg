@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 400" role="img" aria-labelledby="t d">
+  <title id="t">华为手机</title>
+  <desc id="d">青绿色玻璃后盖的华为手机，居中圆形摄像头模组</desc>
+  <defs>
+    <linearGradient id="hp-frame" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#e9f0ee"/><stop offset=".4" stop-color="#9fb0ad"/>
+      <stop offset=".7" stop-color="#5f6c6b"/><stop offset="1" stop-color="#c8d3d1"/>
+    </linearGradient>
+    <linearGradient id="hp-glass" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1a463f"/><stop offset=".45" stop-color="#0d2226"/><stop offset="1" stop-color="#071214"/>
+    </linearGradient>
+    <radialGradient id="hp-glow" cx=".28" cy=".18" r=".9">
+      <stop offset="0" stop-color="#50d2c2" stop-opacity=".5"/><stop offset=".5" stop-color="#2c8f88" stop-opacity=".12"/><stop offset="1" stop-color="#50d2c2" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="hp-ring" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#e6efed"/><stop offset=".5" stop-color="#7d8c8a"/><stop offset="1" stop-color="#b8c5c3"/>
+    </linearGradient>
+    <radialGradient id="hp-lens" cx=".35" cy=".3" r=".85">
+      <stop offset="0" stop-color="#3a5a60"/><stop offset=".35" stop-color="#111a1e"/><stop offset="1" stop-color="#000"/>
+    </radialGradient>
+    <linearGradient id="hp-sheen" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fff" stop-opacity=".26"/><stop offset=".45" stop-color="#fff" stop-opacity=".05"/><stop offset="1" stop-color="#fff" stop-opacity="0"/>
+    </linearGradient>
+    <clipPath id="hp-clip"><rect x="78" y="22" width="164" height="356" rx="28"/></clipPath>
+  </defs>
+
+  <!-- 中框 -->
+  <rect x="70" y="14" width="180" height="372" rx="36" fill="url(#hp-frame)"/>
+  <rect x="70" y="14" width="180" height="372" rx="36" fill="none" stroke="#f4faf8" stroke-opacity=".5" stroke-width="1.4"/>
+  <!-- 侧边按键 -->
+  <rect x="248" y="118" width="4" height="30" rx="2" fill="#aab8b6"/>
+  <rect x="248" y="156" width="4" height="22" rx="2" fill="#aab8b6"/>
+  <rect x="68" y="140" width="4" height="44" rx="2" fill="#aab8b6"/>
+
+  <!-- 玻璃后盖 -->
+  <rect x="78" y="22" width="164" height="356" rx="28" fill="url(#hp-glass)"/>
+  <g clip-path="url(#hp-clip)">
+    <rect x="78" y="22" width="164" height="356" fill="url(#hp-glow)"/>
+    <path d="M78 22 H150 L118 378 H78 Z" fill="url(#hp-sheen)"/>
+    <path d="M150 250 C200 220 240 250 246 300 C250 340 226 372 196 378 H120 C150 350 128 300 150 250 Z" fill="#50d2c2" opacity=".07"/>
+  </g>
+
+  <!-- 圆形影像模组 -->
+  <circle cx="160" cy="112" r="58" fill="#0b1617" stroke="url(#hp-ring)" stroke-width="3.5"/>
+  <circle cx="160" cy="112" r="47" fill="none" stroke="#27433f" stroke-width="1.5"/>
+  <!-- 三颗镜头 -->
+  <g>
+    <circle cx="160" cy="78" r="12" fill="#05090b" stroke="#3b5554" stroke-width="1.5"/>
+    <circle cx="160" cy="78" r="8" fill="url(#hp-lens)"/>
+    <circle cx="157.5" cy="75.5" r="2.2" fill="#9fe9ff" opacity=".7"/>
+  </g>
+  <g>
+    <circle cx="133" cy="128" r="11" fill="#05090b" stroke="#3b5554" stroke-width="1.5"/>
+    <circle cx="133" cy="128" r="7.4" fill="url(#hp-lens)"/>
+    <circle cx="130.5" cy="125.5" r="2" fill="#9fe9ff" opacity=".7"/>
+  </g>
+  <g>
+    <circle cx="187" cy="128" r="11" fill="#05090b" stroke="#3b5554" stroke-width="1.5"/>
+    <circle cx="187" cy="128" r="7.4" fill="url(#hp-lens)"/>
+    <circle cx="184.5" cy="125.5" r="2" fill="#9fe9ff" opacity=".7"/>
+  </g>
+  <!-- 闪光灯与传感器 -->
+  <circle cx="160" cy="146" r="3.4" fill="#ffe9b0"/>
+  <circle cx="160" cy="112" r="4.2" fill="#101c1e" stroke="#35504d" stroke-width="1"/>
+  <!-- 红色品牌点缀 -->
+  <circle cx="172" cy="146" r="2.6" fill="#d83a44"/>
+
+  <text x="160" y="192" text-anchor="middle" fill="#8fe6d8" font-family="Arial, sans-serif" font-size="10" letter-spacing="3" opacity=".85">XMAGE</text>
+  <text x="160" y="330" text-anchor="middle" fill="#d7e4e1" font-family="Arial, sans-serif" font-size="15" letter-spacing="4" opacity=".75">HUAWEI</text>
+</svg>

@@ -1,0 +1,64 @@
+--- public/js/wallet.js before
++++ public/js/wallet.js after
+@@ -182,7 +182,11 @@
+ }
+ 
+ function refreshWalletDependents() {
+-  if (window.__tradeDeferredReady && typeof setTradeProduct === 'function') setTradeProduct(typeof tradeProduct === 'string' ? tradeProduct : 'perp');
++  if ($('account-uid-row')) $('account-uid-row').hidden = true;
++  if ($('account-uid')) $('account-uid').textContent = '';
++  window.ExchangeAssets?.renderWallet(window.currentWalletProfile);
++  if (!window.currentWalletProfile?.authenticated && typeof platformProfile !== 'undefined') platformProfile = null;
++  if ($('tab-trade')?.classList.contains('active') && window.__tradeDeferredReady && typeof setTradeProduct === 'function') setTradeProduct(typeof tradeProduct === 'string' ? tradeProduct : 'perp');
+   if (typeof renderTradeAccount === 'function') renderTradeAccount();
+   if (window.__tradeDeferredReady && $('trade-order-btn') && typeof updateTradeOrderButton === 'function') updateTradeOrderButton();
+   window.resetInternalStrategiesForWallet?.();
+@@ -190,10 +194,15 @@
+   if ($('tab-ai-managed')?.classList.contains('active') && window.currentWalletProfile?.authenticated) {
+     window.AiManaged?.refresh();
+   }
+-  Object.values(window.Portal?.pages || {}).forEach(page => { page.loaded = false; });
++  if (window.Portal?.invalidate) window.Portal.invalidate();
++  else Object.values(window.Portal?.pages || {}).forEach(page => { page.loaded = false; });
+   const activePortal = document.querySelector('.portal-page.active')?.id?.replace('tab-', '');
+   if (activePortal) window.Portal?.load(activePortal, true);
+   if ($('tab-overview')?.classList.contains('active')) window.InternalStrategyOverview?.activate?.();
++  for (const name of ['de', 'ex', 'rs']) {
++    if ($('tab-' + name)?.classList.contains('active')) window.exchangeCtrls?.[name]?.activate?.();
++  }
++  if ($('tab-ledger')?.classList.contains('active') && typeof loadLedger === 'function') loadLedger(true);
+ }
+ 
+ function renderWalletDisconnected() {
+@@ -274,6 +283,7 @@
+ }
+ 
+ function renderWalletProfile(profile) {
++  const changed = !walletProfile?.authenticated || walletProfile?.address?.toLowerCase() !== profile.address?.toLowerCase();
+   walletProfile = profile;
+   window.currentWalletProfile = profile;
+   connectedWalletAddress = profile.address;
+@@ -286,8 +296,8 @@
+   setWalletMenuAuthVisibility(false);   // 态 ③：已登录 → 隐藏「身份验证」菜单
+   if ($('account-connect-btn')) $('account-connect-btn').textContent = '钱包已连接';
+   if (profile.balances && typeof renderWalletFunds === 'function') renderWalletFunds(profile);
+-  if (typeof loadPlatformProfile === 'function') loadPlatformProfile().catch(() => {});
+-  refreshWalletDependents();
++  if (changed && $('tab-trade')?.classList.contains('active') && typeof loadPlatformProfile === 'function') loadPlatformProfile().catch(() => {});
++  if (changed) refreshWalletDependents();
+   bindPendingReferral();
+   if ($('tab-account')?.classList.contains('active')) {
+     if (profile.balances) loadAccountUid();
+@@ -298,8 +308,10 @@
+ 
+ // 加载并显示用户ID（8位平台用户ID，用于互转/推荐）
+ async function loadAccountUid() {
+-  try {
+-    const prof = await walletApi('/api/a-token/profile');
++  const address = connectedWalletAddress.toLowerCase(), revision = walletStateRevision;
++  try {
++    const prof = await (window.Portal?.readJSON ? Portal.readJSON('/api/a-token/profile') : walletApi('/api/a-token/profile'));
++    if (revision !== walletStateRevision || address !== connectedWalletAddress.toLowerCase() || !walletProfile?.authenticated) return;
+     const uid = prof?.userId || '';
+     const row = $('account-uid-row');
+     const el = $('account-uid');

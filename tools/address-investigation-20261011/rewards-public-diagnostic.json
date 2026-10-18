@@ -1,0 +1,45 @@
+[
+  {
+    "uri": "/",
+    "status": 200,
+    "size": 117867,
+    "sha256": "1c150f662f66fb2e2bbeed16ddb89149e582f2a2216c8096f15f769230500ee1",
+    "cache": "DYNAMIC",
+    "age": null
+  },
+  {
+    "uri": "/api/wallet/session",
+    "status": 200,
+    "size": 23,
+    "sha256": "3e58c6fcf10a31770582814c2babfd1ff71bb1a72cae32cdb1c1a428f406d47f",
+    "cache": "DYNAMIC",
+    "age": null
+  },
+  {
+    "uri": "/admin.html",
+    "status": 200,
+    "size": 25515,
+    "sha256": "18dcc4a2de72752cf4b9e2c10600115cab6f4ab868a150c62fbc57f77f84ebdd",
+    "cache": "DYNAMIC",
+    "age": null,
+    "expected_sha": "58beb8c9d07796da431d48916a6011a3701810ee8045af487fbc47d0107543ec",
+    "new_version": true,
+    "old_version": false,
+    "changes": [
+      {
+        "kind": "insert",
+        "old": "",
+        "new": "script type=\"module\" src=\"https://static.cloudflareinsights.com/beacon.min.js/v4bc70e2c01a94c73b74392e4234840661791215815920\" integrity=\"sha512-L0ha0OXavK/8okipN9F8BtP84dg9DUhPERbBXzwI6dgTA55d2+yweo3pn5CSFYs45/r8md2+xvUPtTdvTNRfjA==\" data-cf-beacon='{\"version\":\"2024.11.0\",\"token\":\"a7dcb5479141483f818d5a470adffb01\",\"r\":1,\"spa\":2}' crossorigin=\"anonymous\"></script>\n<"
+      }
+    ]
+  },
+  {
+    "uri": "/js/operator-admin.js?v=45-assets-20261011",
+    "status": 200,
+    "size": 82346,
+    "sha256": "87fdf127acf19c17b65be64ed8e346c4be4f78016b080e170de8ddc52a308d0d",
+    "cache": "HIT",
+    "age": "80",
+    "expected_sha": "87fdf127acf19c17b65be64ed8e346c4be4f78016b080e170de8ddc52a308d0d"
+  }
+]

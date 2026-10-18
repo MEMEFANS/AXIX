@@ -1,0 +1,55 @@
+{
+  "before": {
+    "scripts": 31,
+    "sourceBytes": 753191,
+    "sources": [
+      "/js/theme.js",
+      "/js/i18n.js",
+      "/js/core.js",
+      "/js/portal-shared.js",
+      "/js/earn.js",
+      "/js/wallet-funds.js",
+      "/js/wallet.js",
+      "/vendor/wallet/connector.js",
+      "/vendor/lightweight-charts.js",
+      "/js/platform-client.js",
+      "/js/trade-chart.js",
+      "/js/trade-history.js",
+      "/js/trade-account.js",
+      "/js/trade-funding.js",
+      "/js/trade-favorites.js",
+      "/js/trade-trades.js",
+      "/js/trade-depth.js",
+      "/js/trade-book-tabs.js",
+      "/js/trade-alerts.js",
+      "/js/assets.js",
+      "/js/a-token-withdrawal.js",
+      "/js/a-token-transfer.js",
+      "/js/strategy.js",
+      "/js/ai-managed.js",
+      "/js/lottery.js",
+      "/js/referrals.js",
+      "/js/leaderboard.js",
+      "/js/a-token-trade.js",
+      "/js/mobile-trade.js",
+      "/js/community-links.js",
+      "/js/support-chat.js"
+    ]
+  },
+  "after": {
+    "scripts": 9,
+    "sourceBytes": 207178,
+    "sources": [
+      "/js/theme.js",
+      "/js/i18n.js",
+      "/js/core.js",
+      "/js/portal-shared.js",
+      "/js/page-loader.js",
+      "/js/earn.js",
+      "/js/wallet-funds.js",
+      "/js/wallet.js",
+      "/vendor/wallet/connector.js"
+    ]
+  },
+  "note": "Uncompressed script source sizes for Chinese startup; not real-phone loading time."
+}

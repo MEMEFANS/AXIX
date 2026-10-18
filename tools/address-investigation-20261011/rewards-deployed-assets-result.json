@@ -1,0 +1,33 @@
+{
+  "captured_at_utc": "2026-10-10T20:26:58.328365+00:00",
+  "isolated_live_source_asset_check": {
+    "price_USDT": "0.103146",
+    "accounts": [
+      {
+        "wallet": "0x968acf8d6111b7668d730641d86efaec0f6b48a6",
+        "spot_AIX_value_USDT": "1.320189",
+        "staked_AIX_principal": "3200.0",
+        "staked_AIX_value_USDT": "330.0672",
+        "no_double_counting": true
+      },
+      {
+        "wallet": "0xc6da1e64eca3cb29e160fd72a1787a6e9e40a11d",
+        "spot_AIX_value_USDT": "170.392862",
+        "staked_AIX_principal": "8562.178276489153266673",
+        "staked_AIX_value_USDT": "883.15444",
+        "no_double_counting": true
+      },
+      {
+        "wallet": "0x436252b4759eee30066a0d1101911caa7a63ccf2",
+        "spot_AIX_value_USDT": "171.768454",
+        "staked_AIX_principal": "2302.0",
+        "staked_AIX_value_USDT": "237.442092",
+        "no_double_counting": true
+      }
+    ]
+  },
+  "deleted_attack_accounts_present": 0,
+  "automatic_withdrawal_enabled": false,
+  "service": "MainPID=9731\nActiveState=active\nSubState=running\n",
+  "release_runtime_error_hashes": []
+}

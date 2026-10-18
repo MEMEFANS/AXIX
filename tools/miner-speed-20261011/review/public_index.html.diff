@@ -1,0 +1,11 @@
+--- public/index.html before
++++ public/index.html after
+@@ -1406,7 +1406,7 @@
+ <script defer src="/js/wallet.js?v=67"></script>
+ <script defer src="/js/portal-shared.js?v=11"></script>
+ <script defer src="/js/page-loader.js?v=5-assets"></script>
+-<script defer src="/js/earn.js?v=20261011-mobile-auth-4"></script>
++<script defer src="/js/earn.js?v=20261011-team-fast-2"></script>
+ <!-- Wallet scripts are independent of the chart/trading download queue. -->
+ <script>
+ window.loadWalletConnector = function() {

@@ -1,0 +1,100 @@
+--- before/public/js/admin-lottery.js
++++ after/public/js/admin-lottery.js
+@@ -2,6 +2,7 @@
+ window.AdminLottery = (() => {
+   let api, toast;
+   let tab = 'prob';
++  let selectedSeq = 0, socialSeq = 0, physicalSeq = 0;
+   let prizes = [];
+   let socialList = [], socialStatus = 'pending';
+   let physicalList = [], physicalStatus = 'pending_address';
+@@ -88,7 +89,7 @@
+       </div>
+       <div id="al-content"></div>`;
+     root.querySelectorAll('[data-al-tab]').forEach(btn => {
+-      btn.addEventListener('click', () => { tab = btn.dataset.alTab; renderShell(); refreshTab(); });
++      btn.addEventListener('click', () => { tab = btn.dataset.alTab; load(); });
+     });
+   }
+ 
+@@ -101,11 +102,11 @@
+   }
+ 
+   // ── 概率配置 ──────────────────────────────────────────────
+-  async function loadPrizes() {
++  async function loadPrizes(paint = true) {
+     try {
+       const result = await api('/api/admin/lottery/prizes');
+       prizes = result.prizes || [];
+-      if (tab === 'prob') renderProb();
++      if (paint && tab === 'prob') renderProb();
+     } catch (e) { toast(e.message); }
+   }
+ 
+@@ -227,11 +228,13 @@
+   }
+ 
+   // ── 社交审核 ──────────────────────────────────────────────
+-  async function loadSocial() {
+-    try {
+-      const result = await api(`/api/admin/lottery/social?status=${encodeURIComponent(socialStatus)}`);
++  async function loadSocial(paint = true) {
++    const seq = ++socialSeq, status = socialStatus;
++    try {
++      const result = await api(`/api/admin/lottery/social?status=${encodeURIComponent(status)}`);
++      if (seq !== socialSeq || status !== socialStatus) return;
+       socialList = result.list || [];
+-      if (tab === 'social') renderSocial();
++      if (paint && tab === 'social') renderSocial();
+     } catch (e) { toast(e.message); }
+   }
+ 
+@@ -297,11 +300,13 @@
+   }
+ 
+   // ── 实物发货 ──────────────────────────────────────────────
+-  async function loadPhysical() {
+-    try {
+-      const result = await api(`/api/admin/lottery/physical?status=${encodeURIComponent(physicalStatus)}`);
++  async function loadPhysical(paint = true) {
++    const seq = ++physicalSeq, status = physicalStatus;
++    try {
++      const result = await api(`/api/admin/lottery/physical?status=${encodeURIComponent(status)}`);
++      if (seq !== physicalSeq || status !== physicalStatus) return;
+       physicalList = result.list || [];
+-      if (tab === 'physical') renderPhysical();
++      if (paint && tab === 'physical') renderPhysical();
+     } catch (e) { toast(e.message); }
+   }
+ 
+@@ -354,11 +359,11 @@
+   }
+ 
+   // ── 指定中奖 ──────────────────────────────────────────────
+-  async function loadAssigned() {
++  async function loadAssigned(paint = true) {
+     try {
+       const result = await api('/api/admin/lottery/assigned?status=pending');
+       assignedList = result.list || [];
+-      if (tab === 'assigned') renderAssigned();
++      if (paint && tab === 'assigned') renderAssigned();
+     } catch (e) { toast(e.message); }
+   }
+ 
+@@ -458,8 +463,15 @@
+   function init({ api: apiFn, toast: toastFn }) { api = apiFn; toast = toastFn; }
+   async function load() {
+     if (!api) return;
++    const seq = ++selectedSeq, selectedTab = tab;
+     renderShell();
+-    await Promise.all([loadPrizes(), loadSocial(), loadPhysical(), loadAssigned()]);
++    if (selectedTab === 'topup') return renderTopup();
++    document.getElementById('al-content').textContent = '正在加载…';
++    if (selectedTab === 'prob') await loadPrizes(false);
++    else if (selectedTab === 'social') await loadSocial(false);
++    else if (selectedTab === 'physical') await loadPhysical(false);
++    else await Promise.all([loadPrizes(false), loadAssigned(false)]);
++    if (seq === selectedSeq && tab === selectedTab) refreshTab();
+   }
+ 
+   return { init, load };

@@ -1,0 +1,87 @@
+--- test/admin-security-browser.test.js before
++++ test/admin-security-browser.test.js after
+@@ -10,7 +10,7 @@
+ import { closeDatabase } from '../src/database.js';
+ 
+ const app = path.resolve(import.meta.dirname,'..');
+-const artifact = path.resolve(app,'../../tools/admin-security-20261011');
++const artifact = path.resolve(app,'../../tools/funds-permissions-20261011');
+ fs.mkdirSync(artifact,{ recursive:true });
+ const root = fs.mkdtempSync(path.join(os.tmpdir(),'wg-admin-browser-'));
+ const wallet = '0x' + '8'.repeat(40);
+@@ -48,11 +48,17 @@
+   await admin.type('#admin-username','audit-operator'); await admin.type('#admin-password','TEST_ONLY_OPERATOR_PASSWORD'); await admin.click('#admin-login-button');
+   await admin.waitForFunction(() => !document.getElementById('admin-app').hidden && document.getElementById('admin-updated').textContent.startsWith('更新于'));
+   assert.equal(await admin.$('[data-admin-page="withdrawals"]'),null); assert.equal(await admin.$('[data-admin-page="test-credits"]'),null);
+-  for (const [uri,method] of [['/api/admin/test-credits','POST'],['/api/admin/withdrawals/one','POST'],['/api/admin/withdrawal-automation','PATCH']]) {
++  assert.equal(await admin.$('#admin-aix-credit-form'),null);
++  for (const [uri,method] of [['/api/admin/test-credits','POST'],['/api/admin/withdrawals/one','POST'],['/api/admin/withdrawal-automation','PATCH'],...['grant','debit','grant-miner','grant-stake','activations/confirm'].map(route => ['/api/admin/a-token/'+route,'POST'])]) {
+     const checked = await admin.evaluate(async ({uri,method}) => { const response = await fetch(uri,{ method,headers:{'Content-Type':'application/json'},body:'{}' }); return { status:response.status, payload:await response.json() }; },{uri,method});
+     assert.equal(checked.status,403); assert.equal(checked.payload.code,'FUNDS_ADMIN_REQUIRED');
+   }
+   assert.equal(await admin.evaluate(async () => (await fetch('/api/wallet/admin/test-credits')).status),401);
++  for (const uri of ['/api/wallet/admin/asset-adjustments','/api/wallet/admin/miner-grants']) {
++    assert.equal(await admin.evaluate(async uri => (await fetch(uri,{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'})).status,uri),401);
++  }
++  await admin.click('[data-admin-page="a-miner"]'); await admin.waitForSelector('#am-open-funds');
++  assert.equal(await admin.$('#am-grant'),null);
+   const legacy = await fetch(base + '/withdraw-admin.html',{ redirect:'manual' }); assert.equal(legacy.status,302); assert.equal(legacy.headers.get('location'),'/funds-admin.html');
+   const encoded = await fetch(base + '/%61dmin.html'); assert(!encoded.headers.get('content-security-policy').match(/script-src[^;]*unsafe-inline/));
+   mark('actual server blocks operator funding/review endpoints, denies cookie access to funds API and redirects legacy console');
+@@ -108,11 +114,28 @@
+   await funds.evaluateOnNewDocument(() => sessionStorage.setItem('wd_admin_token','TEST_ONLY_LEGACY_SECRET'));
+   funds.on('dialog',dialog => dialog.accept(dialog.type() === 'prompt' ? '测试拒绝' : undefined));
+   const mutations = []; let attempts = 0, heldWithdrawal = null, holdWithdrawal = false, hasHistory = false, adversarialRecord = true;
++  const assetMutations = [], minerMutations = []; let assetAttempts = 0, minerAttempts = 0;
+   await funds.setRequestInterception(true);
+   funds.on('request',request => {
+     const url = new URL(request.url());
+     if (url.origin !== base) return request.abort();
+     const respond = (data,status=200) => request.respond({status,contentType:'application/json',body:JSON.stringify(data)});
++    if (url.pathname === '/api/wallet/admin/asset-adjustments') {
++      if (request.method() === 'POST') {
++        assetMutations.push(JSON.parse(request.postData()));
++        if (++assetAttempts === 1) return respond({error:'资产调整网络失败'},503);
++        return respond({ok:true,adjustment:{amount:'2.000000000000000001'}});
++      }
++      return respond({items:[{wallet,asset:'A',amount:'2.000000000000000001',type:'funds_grant',reason:attack,adminUsername:'funds-admin',createdAt:Date.now()}]});
++    }
++    if (url.pathname === '/api/wallet/admin/miner-grants') {
++      if (request.method() === 'POST') {
++        minerMutations.push(JSON.parse(request.postData()));
++        if (++minerAttempts === 1) return respond({error:'矿机赠送网络失败'},503);
++        return respond({ok:true,miner:{id:'test-miner'}});
++      }
++      return respond({items:minerAttempts > 1 ? [{wallet,plan:'mini120',miner:{id:'test-miner'},reason:attack,adminUsername:'funds-admin',createdAt:Date.now()}] : []});
++    }
+     if (url.pathname === '/api/wallet/admin/withdrawals' && request.method() === 'GET') {
+       if (holdWithdrawal) { heldWithdrawal=request; return; }
+       return respond({items:[{id:'test-id',wallet:adversarialRecord ? attack : wallet,networkName:adversarialRecord ? attack : 'BNB Smart Chain',asset:'USDT',amount:'1.2',status:'pending_review',createdAt:Date.now()}]});
+@@ -142,12 +165,27 @@
+   await funds.waitForFunction(() => document.querySelector('#funds-credits-body tr td:nth-child(4)')?.textContent.includes('window.auditPwned'));
+   assert.equal(await funds.$('#funds-credits-body img, #funds-credits-body script, #funds-credits-body svg'),null);
+   mark('mobile funds console uses independent auth without storing the token; safe records and retry retain the same request ID');
++  await funds.click('#funds-tab-assets');
++  await funds.type('#funds-asset-wallet',wallet);await funds.type('#funds-asset-amount','2.000000000000000001');await funds.type('#funds-asset-reason','资产权限回归');
++  await funds.click('#funds-asset-form button');await funds.waitForFunction(()=>document.getElementById('funds-status').textContent.includes('资产调整网络失败'));
++  await funds.click('#funds-asset-form button');await funds.waitForFunction(()=>document.getElementById('funds-status').textContent.includes('已赠送'));
++  assert.equal(assetMutations.length,2);assert.equal(assetMutations[0].requestId,assetMutations[1].requestId);
++  assert.equal(assetMutations[1].amount,'2.000000000000000001');
++  assert.equal(await funds.$('#funds-assets-body img, #funds-assets-body svg, #funds-assets-body script'),null);
++  await funds.click('#funds-tab-miners');await funds.type('#funds-miner-wallet',wallet);await funds.type('#funds-miner-reason','矿机权限回归');
++  await funds.click('#funds-miner-form button');await funds.waitForFunction(()=>document.getElementById('funds-status').textContent.includes('矿机赠送网络失败'));
++  await funds.click('#funds-miner-form button');await funds.waitForFunction(()=>document.getElementById('funds-status').textContent.includes('矿机已赠送'));
++  assert.equal(minerMutations.length,2);assert.equal(minerMutations[0].requestId,minerMutations[1].requestId);
++  await funds.waitForSelector('#funds-miners-body td.wallet');
++  assert.equal(await funds.$('#funds-miners-body img, #funds-miners-body svg, #funds-miners-body script'),null);
++  mark('funds-only asset/miner forms work on mobile, keep full AIX precision and retry with one request ID');
+   await funds.click('#funds-tab-withdrawals'); await funds.waitForFunction(() => document.getElementById('funds-withdrawal-count').textContent.includes('1 条'));
+   holdWithdrawal=true; await funds.click('#funds-refresh'); await funds.waitForFunction(() => document.getElementById('funds-app').hidden === false);
+   const deadline = Date.now()+3000; while (!heldWithdrawal && Date.now()<deadline) await new Promise(resolve=>setTimeout(resolve,25)); assert(heldWithdrawal);
+   await funds.click('#funds-lock'); await heldWithdrawal.respond({contentType:'application/json',body:JSON.stringify({items:[{id:'stale',wallet,amount:'999'}]})});
+   await funds.waitForFunction(() => document.getElementById('funds-status').textContent.includes('锁定'));
+   assert.equal(await funds.$eval('#funds-app',node=>node.hidden),true); assert.equal(await funds.$eval('#funds-withdrawals-body',node=>node.childElementCount),0);
++  assert.equal(await funds.$eval('#funds-assets-body',node=>node.childElementCount),0);assert.equal(await funds.$eval('#funds-miners-body',node=>node.childElementCount),0);
+   mark('locking clears sensitive data and rejects an old in-flight response');
+   assert.deepEqual(result.runtimeErrors,[]);
+   result.passed=true;

@@ -1,0 +1,38 @@
+[
+  {
+    "path": "src/wallet-service.js",
+    "patch_groups": 4,
+    "production_equals_local_before": true,
+    "candidate_equals_local_after": true
+  },
+  {
+    "path": "src/server.js",
+    "patch_groups": 2,
+    "production_equals_local_before": true,
+    "candidate_equals_local_after": true
+  },
+  {
+    "path": "public/js/operator-admin.js",
+    "patch_groups": 16,
+    "production_equals_local_before": true,
+    "candidate_equals_local_after": true
+  },
+  {
+    "path": "public/js/admin-lottery.js",
+    "patch_groups": 7,
+    "production_equals_local_before": true,
+    "candidate_equals_local_after": true
+  },
+  {
+    "path": "public/js/admin-agents.js",
+    "patch_groups": 1,
+    "production_equals_local_before": true,
+    "candidate_equals_local_after": true
+  },
+  {
+    "path": "public/admin.html",
+    "patch_groups": 2,
+    "production_equals_local_before": true,
+    "candidate_equals_local_after": true
+  }
+]

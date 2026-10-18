@@ -1,0 +1,135 @@
+{
+  "captured_at_utc": "2026-10-11T01:44:03.746430+00:00",
+  "passed": true,
+  "checks": [
+    {
+      "uri": "/",
+      "passed": true,
+      "status": 200,
+      "cache_control": "no-cache",
+      "cf_cache_status": "DYNAMIC",
+      "cloudflare_beacon_inserted": true
+    },
+    {
+      "uri": "/admin.html",
+      "passed": true,
+      "status": 200,
+      "cache_control": "no-store",
+      "cf_cache_status": "DYNAMIC",
+      "cloudflare_beacon_inserted": true,
+      "strict_script_csp": true
+    },
+    {
+      "uri": "/funds-admin.html",
+      "passed": true,
+      "status": 200,
+      "cache_control": "no-store",
+      "cf_cache_status": "DYNAMIC",
+      "cloudflare_beacon_inserted": true,
+      "strict_script_csp": true
+    },
+    {
+      "uri": "/js/operator-admin.js?v=20261011-security-2",
+      "passed": true,
+      "status": 200,
+      "cache_control": "public, max-age=2592000, s-maxage=2592000, immutable",
+      "cf_cache_status": "MISS",
+      "cloudflare_beacon_inserted": false
+    },
+    {
+      "uri": "/js/admin-lottery.js?v=20261011-security-2",
+      "passed": true,
+      "status": 200,
+      "cache_control": "public, max-age=2592000, s-maxage=2592000, immutable",
+      "cf_cache_status": "MISS",
+      "cloudflare_beacon_inserted": false
+    },
+    {
+      "uri": "/js/admin-dialogs.js?v=20261011-security-1",
+      "passed": true,
+      "status": 200,
+      "cache_control": "public, max-age=2592000, s-maxage=2592000, immutable",
+      "cf_cache_status": "MISS",
+      "cloudflare_beacon_inserted": false
+    },
+    {
+      "uri": "/js/funds-admin.js?v=20261011-security-1",
+      "passed": true,
+      "status": 200,
+      "cache_control": "public, max-age=2592000, s-maxage=2592000, immutable",
+      "cf_cache_status": "MISS",
+      "cloudflare_beacon_inserted": false
+    },
+    {
+      "uri": "/styles/funds-admin.css?v=20261011-security-1",
+      "passed": true,
+      "status": 200,
+      "cache_control": "public, max-age=2592000, s-maxage=2592000, immutable",
+      "cf_cache_status": "MISS",
+      "cloudflare_beacon_inserted": false
+    },
+    {
+      "uri": "/js/support-chat.js?v=20261011-security-2",
+      "passed": true,
+      "status": 200,
+      "cache_control": "public, max-age=2592000, s-maxage=2592000, immutable",
+      "cf_cache_status": "MISS",
+      "cloudflare_beacon_inserted": false
+    },
+    {
+      "uri": "/js/page-loader.js?v=20261011-pages-security-2",
+      "passed": true,
+      "status": 200,
+      "cache_control": "public, max-age=2592000, s-maxage=2592000, immutable",
+      "cf_cache_status": "MISS",
+      "cloudflare_beacon_inserted": false
+    },
+    {
+      "uri": "/sw.js?v=9",
+      "passed": true,
+      "status": 200,
+      "cache_control": "max-age=14400",
+      "cf_cache_status": "MISS",
+      "cloudflare_beacon_inserted": false
+    },
+    {
+      "uri": "/%61dmin.html",
+      "passed": true,
+      "status": 200,
+      "cache_control": "no-store",
+      "cf_cache_status": "DYNAMIC",
+      "cloudflare_beacon_inserted": true,
+      "strict_script_csp": true
+    },
+    {
+      "uri": "/%66unds-admin.html",
+      "passed": true,
+      "status": 200,
+      "cache_control": "no-store",
+      "cf_cache_status": "DYNAMIC",
+      "cloudflare_beacon_inserted": true,
+      "strict_script_csp": true
+    },
+    {
+      "uri": "/withdraw-admin.html",
+      "passed": true,
+      "status": 302,
+      "cache_control": "no-store",
+      "cf_cache_status": "DYNAMIC"
+    },
+    {
+      "uri": "/api/wallet/session",
+      "passed": true,
+      "status": 200,
+      "cache_control": "no-store",
+      "cf_cache_status": "DYNAMIC"
+    },
+    {
+      "uri": "/api/wallet/admin/session",
+      "passed": true,
+      "status": 401,
+      "cache_control": "no-store",
+      "cf_cache_status": "DYNAMIC"
+    }
+  ]
+}

@@ -1,0 +1,127 @@
+--- public/withdraw-admin.html before
++++ public/withdraw-admin.html after
+@@ -1,120 +1,5 @@
+-<!DOCTYPE html>
+-<html lang="zh">
+-<head>
+-<meta charset="UTF-8" />
+-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+-<title>提现审核</title>
+-<meta name="robots" content="noindex,nofollow" />
+-<style>
+-:root{--bg:#0d1519;--panel:#142024;--border:#26363d;--text:#dce5e8;--muted:#7a9199;--up:#3ec88f;--down:#e05c5c;--accent:#35bfa8}
+-*{box-sizing:border-box;margin:0;padding:0}
+-body{background:var(--bg);color:var(--text);font:14px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;min-height:100vh;padding:24px 16px}
+-.wrap{max-width:1100px;margin:0 auto}
+-h1{font-size:18px;margin-bottom:16px;color:var(--accent)}
+-.panel{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:20px}
+-.toolbar{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin-bottom:16px}
+-.toolbar label{display:block;font-size:12px;color:var(--muted);margin-bottom:4px}
+-input[type=text],input[type=password]{background:#0d1519;border:1px solid var(--border);border-radius:6px;color:var(--text);padding:8px 12px;font-size:14px;min-width:320px}
+-input:focus{outline:none;border-color:var(--accent)}
+-.btn{background:var(--accent);border:none;color:#0d1519;border-radius:6px;padding:9px 18px;font-size:14px;font-weight:600;cursor:pointer}
+-.btn:hover{opacity:.85}
+-.status{margin-bottom:12px;min-height:20px;font-size:13px;color:var(--muted)}
+-.status.ok{color:var(--up)}
+-.status.error{color:var(--down)}
+-table{width:100%;border-collapse:collapse;font-size:13px}
+-th,td{padding:10px 8px;text-align:left;border-bottom:1px solid var(--border)}
+-th{color:var(--muted);font-weight:500;font-size:12px;white-space:nowrap}
+-td{word-break:break-all}
+-.hash-input{background:#0d1519;border:1px solid var(--border);border-radius:4px;color:var(--text);padding:6px 8px;font-size:12px;width:200px;min-width:0}
+-.hash-input:focus{outline:none;border-color:var(--accent)}
+-.act{display:flex;gap:6px}
+-.act button{border:none;border-radius:4px;padding:6px 12px;font-size:12px;cursor:pointer;font-weight:600}
+-.act .ok{background:var(--up);color:#0d1519}
+-.act .no{background:var(--down);color:#fff}
+-.empty{text-align:center;color:var(--muted);padding:24px}
+-@media(max-width:720px){input[type=text]{min-width:0;width:100%}table{font-size:12px}.hash-input{width:120px}}
+-</style>
+-</head>
+-<body>
+-<div class="wrap">
+-  <h1>提现审核</h1>
+-  <div class="panel">
+-    <div class="toolbar">
+-      <div>
+-        <label for="adm-token">管理员令牌</label>
+-        <input id="adm-token" type="password" autocomplete="off" spellcheck="false" placeholder="WALLET_ADMIN_TOKEN" />
+-      </div>
+-      <button class="btn" type="button" id="load-btn">读取待审核申请</button>
+-    </div>
+-    <div id="status" class="status"></div>
+-    <table>
+-      <thead><tr><th>时间</th><th>网络</th><th>钱包</th><th>资产</th><th>数量</th><th>出款交易哈希</th><th>操作</th></tr></thead>
+-      <tbody id="wd-body"><tr><td colspan="7" class="empty">输入管理员令牌后读取</td></tr></tbody>
+-    </table>
+-  </div>
+-</div>
+-<script>
+-(() => {
+-  const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+-  const tokenInput = document.getElementById('adm-token');
+-  const statusEl = document.getElementById('status');
+-  const bodyEl = document.getElementById('wd-body');
+-  const status = (msg, type = '') => { statusEl.textContent = msg; statusEl.className = 'status' + (type ? ' ' + type : ''); };
+-  const token = () => tokenInput.value.trim();
+-  tokenInput.value = sessionStorage.getItem('wd_admin_token') || '';
+-
+-  async function api(path, options = {}) {
+-    if (!token()) throw new Error('请输入管理员令牌');
+-    const res = await fetch(path, { credentials:'same-origin', ...options,
+-      headers:{ 'Content-Type':'application/json', 'X-Wallet-Admin-Token':token(), ...(options.headers || {}) } });
+-    const data = await res.json().catch(() => ({}));
+-    if (!res.ok) throw new Error(data.error || `请求失败（${res.status}）`);
+-    return data;
+-  }
+-
+-  async function load() {
+-    try {
+-      const data = await api('/api/wallet/admin/withdrawals?status=pending_review');
+-      sessionStorage.setItem('wd_admin_token', token());
+-      bodyEl.innerHTML = (data.items || []).map(item => `<tr>
+-        <td>${esc(new Date(item.createdAt).toLocaleString('zh-CN', { hour12:false }))}</td>
+-        <td>${esc(item.networkName || item.network)}</td>
+-        <td title="${esc(item.wallet)}">${esc(item.wallet)}</td>
+-        <td>${esc(item.asset)}</td><td>${esc(item.amount)}</td>
+-        <td><input class="hash-input" id="hash-${esc(item.id)}" placeholder="0x 出款交易哈希"></td>
+-        <td><div class="act"><button class="ok" data-id="${esc(item.id)}" data-act="approve">验链完成</button><button class="no" data-id="${esc(item.id)}" data-act="reject">拒绝退款</button></div></td>
+-      </tr>`).join('') || '<tr><td colspan="7" class="empty">暂无待审核提现</td></tr>';
+-      status(`已读取 ${data.items?.length || 0} 笔待审核申请`, 'ok');
+-    } catch (e) { status(e.message, 'error'); }
+-  }
+-
+-  async function process(id, payload) {
+-    try {
+-      await api(`/api/wallet/admin/withdrawals/${encodeURIComponent(id)}`, { method:'POST', body:JSON.stringify(payload) });
+-      status(payload.action === 'approve' ? '链上交易核验通过，提现已完成' : '提现已拒绝，余额已原额退回', 'ok');
+-      await load();
+-    } catch (e) { status(e.message, 'error'); }
+-  }
+-
+-  bodyEl.addEventListener('click', e => {
+-    const btn = e.target.closest('button[data-id]');
+-    if (!btn) return;
+-    const id = btn.dataset.id;
+-    if (btn.dataset.act === 'approve') {
+-      const txHash = document.getElementById(`hash-${id}`)?.value.trim();
+-      if (!txHash) return status('请输入出款交易哈希', 'error');
+-      process(id, { action:'approve', txHash });
+-    } else {
+-      const reason = prompt('请输入拒绝原因（余额将原额退回）', '人工审核未通过');
+-      if (reason === null) return;
+-      process(id, { action:'reject', reason });
+-    }
+-  });
+-
+-  document.getElementById('load-btn').addEventListener('click', load);
+-  tokenInput.addEventListener('keydown', e => { if (e.key === 'Enter') load(); });
+-  if (token()) load();
+-})();
+-</script>
+-</body>
++<!doctype html>
++<html lang="zh-CN">
++<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><meta http-equiv="refresh" content="0;url=/funds-admin.html"><title>AxiX 资金后台</title></head>
++<body><p>提现审核与测试入账已移至<a href="/funds-admin.html">资金管理后台</a>。</p></body>
+ </html>

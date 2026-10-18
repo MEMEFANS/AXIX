@@ -1,0 +1,6 @@
+{
+  "Finished": true,
+  "ExitCode": 0,
+  "Output": "0",
+  "DiagnosticTail": "debug2: channel 0: output drain -> closed\r\ndebug2: channel 0: almost dead\r\ndebug2: channel 0: gc: notify user\r\ndebug2: channel 0: gc: user detached\r\ndebug2: channel 0: send close\r\ndebug2: channel 0: is dead\r\ndebug2: channel 0: garbage collecting\r\ndebug1: channel 0: free: client-session, nchannels 1\r\nTransferred: sent 1948, received 2808 bytes, in 0.9 seconds\r\nBytes per second: sent 2267.8, received 3268.9\r\ndebug1: Exit status 0\r\n"
+}

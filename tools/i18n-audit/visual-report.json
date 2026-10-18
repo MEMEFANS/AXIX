@@ -1,0 +1,141 @@
+{
+  "social": [
+    {
+      "lang": "zh",
+      "display": "加入 AxiX Exchange，激活矿机每日产出 AIX！ http://127.0.0.1:8082/?ref=TEST #AxiX #AIX",
+      "copy": "加入 AxiX Exchange，激活矿机每日产出 AIX！ http://127.0.0.1:8082/?ref=TEST #AxiX #AIX",
+      "link": "加入 AxiX Exchange，激活矿机每日产出 AIX！ http://127.0.0.1:8082/?ref=TEST #AxiX #AIX"
+    },
+    {
+      "lang": "en",
+      "display": "Join AxiX Exchange and activate a miner to earn AIX daily! http://127.0.0.1:8082/?ref=TEST #AxiX #AIX",
+      "copy": "Join AxiX Exchange and activate a miner to earn AIX daily! http://127.0.0.1:8082/?ref=TEST #AxiX #AIX",
+      "link": "Join AxiX Exchange and activate a miner to earn AIX daily! http://127.0.0.1:8082/?ref=TEST #AxiX #AIX"
+    },
+    {
+      "lang": "zh-TW",
+      "display": "加入 AxiX Exchange，啟用礦機每日產出 AIX！ http://127.0.0.1:8082/?ref=TEST #AxiX #AIX",
+      "copy": "加入 AxiX Exchange，啟用礦機每日產出 AIX！ http://127.0.0.1:8082/?ref=TEST #AxiX #AIX",
+      "link": "加入 AxiX Exchange，啟用礦機每日產出 AIX！ http://127.0.0.1:8082/?ref=TEST #AxiX #AIX"
+    },
+    {
+      "lang": "ja",
+      "display": "AxiX Exchangeに参加し、マイナーを有効化して毎日AIXを獲得しましょう！ http://127.0.0.1:8082/?ref=TEST #AxiX #AIX",
+      "copy": "AxiX Exchangeに参加し、マイナーを有効化して毎日AIXを獲得しましょう！ http://127.0.0.1:8082/?ref=TEST #AxiX #AIX",
+      "link": "AxiX Exchangeに参加し、マイナーを有効化して毎日AIXを獲得しましょう！ http://127.0.0.1:8082/?ref=TEST #AxiX #AIX"
+    },
+    {
+      "lang": "ko",
+      "display": "AxiX Exchange에 가입하고 마이너를 활성화하여 매일 AIX를 받으세요! http://127.0.0.1:8082/?ref=TEST #AxiX #AIX",
+      "copy": "AxiX Exchange에 가입하고 마이너를 활성화하여 매일 AIX를 받으세요! http://127.0.0.1:8082/?ref=TEST #AxiX #AIX",
+      "link": "AxiX Exchange에 가입하고 마이너를 활성화하여 매일 AIX를 받으세요! http://127.0.0.1:8082/?ref=TEST #AxiX #AIX"
+    },
+    {
+      "lang": "ru",
+      "display": "Присоединяйтесь к AxiX Exchange и активируйте майнер, чтобы ежедневно получать AIX! http://127.0.0.1:8082/?ref=TEST #AxiX #AIX",
+      "copy": "Присоединяйтесь к AxiX Exchange и активируйте майнер, чтобы ежедневно получать AIX! http://127.0.0.1:8082/?ref=TEST #AxiX #AIX",
+      "link": "Присоединяйтесь к AxiX Exchange и активируйте майнер, чтобы ежедневно получать AIX! http://127.0.0.1:8082/?ref=TEST #AxiX #AIX"
+    },
+    {
+      "lang": "es",
+      "display": "¡Únete a AxiX Exchange y activa un minero para obtener AIX a diario! http://127.0.0.1:8082/?ref=TEST #AxiX #AIX",
+      "copy": "¡Únete a AxiX Exchange y activa un minero para obtener AIX a diario! http://127.0.0.1:8082/?ref=TEST #AxiX #AIX",
+      "link": "¡Únete a AxiX Exchange y activa un minero para obtener AIX a diario! http://127.0.0.1:8082/?ref=TEST #AxiX #AIX"
+    },
+    {
+      "lang": "zh",
+      "display": "加入 AxiX Exchange，激活矿机每日产出 AIX！ http://127.0.0.1:8082/?ref=TEST #AxiX #AIX",
+      "copy": "加入 AxiX Exchange，激活矿机每日产出 AIX！ http://127.0.0.1:8082/?ref=TEST #AxiX #AIX",
+      "link": "加入 AxiX Exchange，激活矿机每日产出 AIX！ http://127.0.0.1:8082/?ref=TEST #AxiX #AIX"
+    }
+  ],
+  "source": "确认启动现货网格？\n\n方向：做多\n预计占用：123.45 USDT（从平台可用余额扣除）\n网格：12 格（13 条价格线）\n预计初始挂单：11 单\n每单数量：0.002 币\n当前价：60000.50（WebSocket 实时价）",
+  "translated": "Start SpotGrid?\n\nDirection: Long\nEstimated capital: 123.45 USDT (deducted from your available platform balance)\nGrid: 12 intervals (13 price levels)\nEstimated initial orders: 11\nAmount per order: 0.002 coins\nCurrent price: 60000.50 (WebSocket real-time price)",
+  "alert": "\n          Notice\n          This grid requires approximately 123.45 USDT, but your available platform balance is only 12.34 USDT.\n          \n            OK\n          \n        ",
+  "viewports": [
+    {
+      "width": 1440,
+      "lang": "zh",
+      "viewport": 1440,
+      "document": 1440
+    },
+    {
+      "width": 1440,
+      "lang": "zh-TW",
+      "viewport": 1440,
+      "document": 1440
+    },
+    {
+      "width": 1440,
+      "lang": "en",
+      "viewport": 1440,
+      "document": 1440
+    },
+    {
+      "width": 1440,
+      "lang": "ja",
+      "viewport": 1440,
+      "document": 1440
+    },
+    {
+      "width": 1440,
+      "lang": "ko",
+      "viewport": 1440,
+      "document": 1440
+    },
+    {
+      "width": 1440,
+      "lang": "ru",
+      "viewport": 1440,
+      "document": 1440
+    },
+    {
+      "width": 1440,
+      "lang": "es",
+      "viewport": 1440,
+      "document": 1440
+    },
+    {
+      "width": 390,
+      "lang": "zh",
+      "viewport": 390,
+      "document": 390
+    },
+    {
+      "width": 390,
+      "lang": "zh-TW",
+      "viewport": 390,
+      "document": 390
+    },
+    {
+      "width": 390,
+      "lang": "en",
+      "viewport": 390,
+      "document": 390
+    },
+    {
+      "width": 390,
+      "lang": "ja",
+      "viewport": 390,
+      "document": 390
+    },
+    {
+      "width": 390,
+      "lang": "ko",
+      "viewport": 390,
+      "document": 390
+    },
+    {
+      "width": 390,
+      "lang": "ru",
+      "viewport": 390,
+      "document": 390
+    },
+    {
+      "width": 390,
+      "lang": "es",
+      "viewport": 390,
+      "document": 390
+    }
+  ]
+}

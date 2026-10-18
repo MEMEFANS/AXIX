@@ -1,0 +1,9 @@
+{
+  "deployed": false,
+  "release": "funds-permissions-20261011-022031",
+  "backup_directory": "/opt/wg-platform/backups/funds-permissions-20261011-022031",
+  "error": "Unexpected automatic withdrawal state; refusing to alter it",
+  "rolled_back": false,
+  "rollback_errors": [],
+  "database_restored": false
+}

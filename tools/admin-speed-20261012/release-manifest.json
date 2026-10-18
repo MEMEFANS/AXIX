@@ -1,0 +1,26 @@
+{
+  "src/wallet-service.js": {
+    "before": "93c7dca51246d2170ce0c5adb398b38a4af5890ba01f58771c38a767289a4a79",
+    "after": "ff957573709cacbd19dd8ddddc918ced47c136ff870c39060fb98644492dc91d"
+  },
+  "src/server.js": {
+    "before": "e6ff894c2500192380b67de4b41e82892e3494c1057acaf8c63712ef9f2d2baa",
+    "after": "935550a03221c4602558a551bef57005b59ee5edf7c699660f222d8a9c0a28a1"
+  },
+  "public/js/operator-admin.js": {
+    "before": "5fa0ff8672e77c313828a6f56646246d2de51cd84f76c215cd072d4c966a8283",
+    "after": "43b0131b372495dec90dfaad822f4a67e8d6f4d6183fd99f30f469e12653b64c"
+  },
+  "public/js/admin-lottery.js": {
+    "before": "64b00c2e84208ba3b349c94730a812923424214763ac6490378d5e62b424827d",
+    "after": "51f4b8d3dc64e0df0bdc370a568dff37de0cc805182a0bf841f493c4b07f4b3e"
+  },
+  "public/js/admin-agents.js": {
+    "before": "70e986e5fb0ff365dff719bd5e63fd0f09636fea840947073271d1909ed5d7a0",
+    "after": "1e335a174456306f781bd5e85663ebb961fd04c794fb76df126548a9847b4e92"
+  },
+  "public/admin.html": {
+    "before": "154f7c578dc542efc0610fc440e9b62600915d25e3852d67a6b509678bd3fb8a",
+    "after": "78d49c3a01b6f59a8ed81ae03e4e513ff30d673413e50822b2aafc47c1bdae06"
+  }
+}

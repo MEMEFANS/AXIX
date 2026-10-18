@@ -1,0 +1,176 @@
+--- public/js/lottery.js (before)
++++ public/js/lottery.js (after)
+@@ -554,9 +554,12 @@
+   const API = '/api/lottery';
+   let configCache = null;
+   let pointsCache = 0;
++  let mountSeq = 0, pointsReady = false;
++  let subTabSeq = 0;
+   let currentLotteryTab = 'leaderboard';
+ 
+   const api = async (path, options) => {
++    if (!options?.method || options.method === 'GET') return P.readJSON(`${API}/${path}`, options);
+     const res = await fetch(`${API}/${path}`, options);
+     let payload;
+     try { payload = await res.json(); } catch { throw new Error('服务不可用'); }
+@@ -612,7 +615,7 @@
+     try {
+       const data = await authApi('points');
+       return { points: data.points || 0, flows: data.flows || [], authed: true };
+-    } catch { return { points: 0, flows: [], authed: true }; }
++    } catch { return { points: null, flows: [], authed: true, error:true }; }
+   }
+ 
+   function flowItemHtml(f) {
+@@ -639,16 +642,20 @@
+   }
+ 
+   // 「积分」主导航页 = 抽奖单页：积分条 + 中奖公告 + 方形水果机 + 排行榜/记录/明细
+-  window.lotteryMountPointsHome = async function(container) {
++  window.lotteryMountPointsHome = async function(container, context = { isCurrent:() => true }) {
+     if (!container) return;
+     container.innerHTML = '<div class="lottery-loading">加载中...</div>';
+-    try { await loadConfig(); } catch {}
+-    const data = await fetchPoints();
+-    pointsCache = data.points;
++    const seq = ++mountSeq, wallet = P.walletKey();
++    const valid = () => seq === mountSeq && wallet === P.walletKey() && context.isCurrent();
++    pointsReady = false;
++    const configPromise = loadConfig();
++    const pointsPromise = fetchPoints();
++    const data = { points:0, authed:Boolean(window.currentWalletProfile?.authenticated) };
+     const authed = data.authed;
+     spinning = false;
+     container.innerHTML = `
+       <div class="lottery-wrap">
++        <div id="lottery-data-status"></div>
+         ${authed ? '' : '<div style="margin-bottom:12px;font-size:12px;color:#ffd43b">连接钱包后即可抽奖、查看积分明细</div>'}
+         <!-- 积分卡（置顶） -->
+         <div class="points-board">
+@@ -688,11 +695,24 @@
+         </div>
+       </div>`;
+     renderFruitCells();
+-    setFruitDisabled(!authed);
+-    loadMarquee();
+-    startMarqueeTimer();
++    document.getElementById('lottery-pts-num').textContent = '加载中';
++    setFruitDisabled(true);
++    if (P.active('points')) loadMarquee();
+     startIdleBlink();
+     switchLotteryTab(currentLotteryTab);
++    await Promise.all([
++      configPromise.then(() => { if (valid()) { renderFruitCells(); setFruitDisabled(!pointsReady); } }).catch(error => {
++        if (valid()) document.getElementById('lottery-data-status').insertAdjacentHTML('beforeend', P.error(error.message, "Portal.load('points',true)"));
++      }),
++      pointsPromise.then(next => {
++        if (!valid()) return;
++        pointsCache = next.points;
++        pointsReady = next.authed && !next.error;
++        document.getElementById('lottery-pts-num').textContent = next.error ? '加载失败' : Number(next.points).toLocaleString();
++        if (next.error) document.getElementById('lottery-data-status').insertAdjacentHTML('beforeend', P.error('积分加载失败', "Portal.load('points',true)"));
++        setFruitDisabled(!pointsReady || !configCache);
++      }),
++    ]);
+   };
+   window.lotteryRefreshPoints = fetchPoints;
+   window.lotteryFlowsListHtml = flowsListHtml;
+@@ -717,7 +737,7 @@
+ 
+   function startMarqueeTimer() {
+     if (window._marqueeTimer) clearInterval(window._marqueeTimer);
+-    window._marqueeTimer = setInterval(loadMarquee, 10000);
++    window._marqueeTimer = setInterval(() => { if (P.active('points')) loadMarquee(); }, 10000);
+   }
+ 
+   function setFruitDisabled(disabled) {
+@@ -783,18 +803,22 @@
+ 
+   window.switchLotteryTab = function(tab) {
+     currentLotteryTab = tab;
++    const seq = ++subTabSeq, wallet = P.walletKey();
+     document.querySelectorAll('.lottery-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+     const host = document.getElementById('lottery-tab-content');
+     if (!host) return;
+-    if (tab === 'leaderboard') loadLeaderboard(host);
+-    else if (tab === 'points') loadPointsFlows(host);
+-    else loadMyRecords(host);
++    const context = { isCurrent:() => seq === subTabSeq && wallet === P.walletKey() && host.isConnected };
++    if (tab === 'leaderboard') loadLeaderboard(host, context);
++    else if (tab === 'points') loadPointsFlows(host, context);
++    else loadMyRecords(host, context);
+   };
+ 
+   // 积分明细 tab（含直推获得、抽奖消耗等全部流水）
+-  async function loadPointsFlows(host) {
++  async function loadPointsFlows(host, context) {
+     host.innerHTML = '<div class="lottery-loading">加载中...</div>';
+     const data = await fetchPoints();
++    if (!context.isCurrent()) return;
++    if (data.error) { host.innerHTML = P.error('积分加载失败', "switchLotteryTab('points')"); return; }
+     if (!data.authed) { host.innerHTML = '<div class="lottery-empty">连接钱包后查看积分记录</div>'; return; }
+     host.innerHTML = `
+       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+@@ -804,9 +828,10 @@
+       ${flowsListHtml(data.flows)}`;
+   }
+ 
+-  async function loadLeaderboard(host) {
++  async function loadLeaderboard(host, context) {
+     try {
+       const data = await api('leaderboard?days=7');
++      if (!context.isCurrent()) return;
+       const wins = (data.wins || []).slice(0, 10);
+       if (!wins.length) { host.innerHTML = '<div class="lottery-empty">暂无中奖记录</div>'; return; }
+       host.innerHTML = `<table class="lottery-lb-table"><thead><tr><th>#</th><th>钱包</th><th>奖品</th><th>价值</th></tr></thead><tbody>
+@@ -817,12 +842,13 @@
+           <td class="lb-value">$${fmtMoney(w.valueUsdt)}</td>
+         </tr>`).join('')}
+       </tbody></table>`;
+-    } catch (e) { host.innerHTML = '<div class="lottery-empty">加载失败</div>'; }
+-  }
+-
+-  async function loadMyRecords(host) {
++    } catch (e) { if (context.isCurrent()) host.innerHTML = '<div class="lottery-empty">加载失败</div>'; }
++  }
++
++  async function loadMyRecords(host, context) {
+     try {
+       const data = await authApi('wins');
++      if (!context.isCurrent()) return;
+       const wins = data.wins || [];
+       if (!wins.length) { host.innerHTML = '<div class="lottery-empty">暂无中奖记录</div>'; return; }
+       host.innerHTML = `<div class="lottery-records">
+@@ -843,7 +869,7 @@
+           </div>`;
+         }).join('')}
+       </div>`;
+-    } catch (e) { host.innerHTML = '<div class="lottery-empty">加载失败</div>'; }
++    } catch (e) { if (context.isCurrent()) host.innerHTML = '<div class="lottery-empty">加载失败</div>'; }
+   }
+ 
+   // ── 积分任务弹窗 ────────────────────────────────────────────────
+@@ -1061,6 +1087,7 @@
+ 
+   // ── 抽奖（驱动外圈跑马灯） ────────────────────────────────────
+   window.doDraw = async function(count) {
++    if (!pointsReady || !configCache) return showToast('请等待积分和奖品加载完成', 'error');
+     if (spinning) return;
+     spinning = true;
+     setFruitDisabled(true);
+@@ -1197,9 +1224,12 @@
+       if (!panel) return;
+       panel.innerHTML = `<div class="portal-shell">${P.header('积分抽奖', '10 积分抽一次，BTC、ETH、BNB、USDT 与手机大奖等你拿')}<div id="points-content"></div></div>`;
+     },
+-    load() {
++    load(context) {
+       const host = document.getElementById('points-content');
+-      if (host) window.lotteryMountPointsHome(host);
+-    }
++      if (host) return window.lotteryMountPointsHome(host, context);
++    },
++    activate:startMarqueeTimer,
++    deactivate() { clearInterval(window._marqueeTimer); window._marqueeTimer = null; stopIdleBlink(); },
++    reset() { ++subTabSeq; ++mountSeq; pointsReady = false; pointsCache = 0; }
+   });
+ })();

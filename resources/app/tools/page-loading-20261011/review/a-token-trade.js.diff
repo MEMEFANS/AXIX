@@ -1,0 +1,224 @@
+--- public/js/a-token-trade.js (before)
++++ public/js/a-token-trade.js (after)
+@@ -6,7 +6,7 @@
+   let currentOrderType = 'market';       // 'market' | 'limit'
+   let accountTab = 'balances';           // 底部账户面板 tab：balances/positions/orders/history/fills
+   let atradePeriod = '15m';
+-  let atradeChart = null;
++  let atradeChart = null, atradeChartHost = null;
+   let atradeCandleSeries = null;
+   let atradeKlineTimer = null;
+   let atradeChartResizeObserver = null;
+@@ -26,6 +26,7 @@
+   let quoteRequestId = 0;
+ 
+   const api = async (path, options) => {
++    if (!options?.method || options.method === 'GET') return P.readJSON(`/api/a-token/${path}`, options);
+     const response = await fetch(`/api/a-token/${path}`, options);
+     let payload;
+     try { payload = await response.json(); }
+@@ -58,45 +59,76 @@
+     </div>`;
+   }
+ 
+-  async function load() {
++  let loadSeq = 0;
++  const active = () => P.active('a-token-trade');
++  function stopPolling() {
++    for (const timer of [atradeBookTimer, atradeOrdersTimer, atradeKlineTimer]) clearInterval(timer);
++    atradeBookTimer = atradeOrdersTimer = atradeKlineTimer = null;
++    clearTimeout(quoteTimer);
++    ++quoteRequestId;
++  }
++  function activate() {
++    if (!active() || !poolStats || atradeBookTimer) return;
++    window.atradeLoadBook().catch(() => {});
++    atradeBookTimer = setInterval(() => {
++      if (!active()) return;
++      window.atradeLoadBook().catch(() => {});
++      if (document.getElementById('atrade-orders-panel')?.style.display !== 'none') window.atradeLoadOpenOrders().catch(() => {});
++    }, 4000);
++    atradeOrdersTimer = setInterval(() => {
++      if (!active() || !profile) return;
++      if (accountTab === 'orders' || accountTab === 'history') window.atradeRefreshOrders();
++      else atradeRefreshBalances();
++    }, 5000);
++    const chartHost = document.getElementById('atrade-chart');
++    if (atradeCandleSeries && chartHost === atradeChartHost) {
++      window.atradeRefreshKline().catch(() => {});
++      atradeKlineTimer = setInterval(() => { if (active()) window.atradeRefreshKline().catch(() => {}); }, 10000);
++    } else {
++      const seq = loadSeq;
++      window.loadPageCharts?.().then(() => {
++        if (active() && seq === loadSeq) window.atradeInitChart();
++      }).catch(() => { if (active()) chartHost.textContent = '图表加载失败，请刷新重试'; });
++    }
++  }
++  async function load(context = { isCurrent:() => true }) {
+     const host = document.getElementById('atrade-content');
+     if (!host) return;
+-    const statsPromise = api('pool').catch(() => null);
+-    let stats = null, prof = null, authFailed = false;
+-    try {
+-      [stats, prof] = await Promise.all([statsPromise, authApi('profile')]);
+-    } catch (e) {
+-      if (e.message === 'SESSION_REQUIRED') authFailed = true;
+-      stats = stats || await statsPromise.catch(() => null);
+-    }
+-    if (!stats) { host.innerHTML = P.error('AIX 代币池数据加载失败', "Portal.load('a-token-trade',true)"); return; }
+-    poolStats = stats;
+-    if (prof) profile = prof;
+-    host.innerHTML = prof ? renderContent() : renderPoolOnly(authFailed);
+-    // 初始化：买卖 tab 态、滑条、K 线、委托轮询
+-    window.setTimeout(() => {
++    const seq = ++loadSeq, wallet = P.walletKey();
++    const valid = () => seq === loadSeq && context.isCurrent() && wallet === P.walletKey();
++    stopPolling();
++    let drawn = false, accountError = null;
++    const paintAccount = () => {
++      if (!valid() || !drawn || !profile) return;
++      host.querySelector('.atrade-cell-entry').innerHTML = orderPanel();
++      host.querySelector('.balance-bar')?.remove();
++      const mount = document.getElementById('atrade-account-mount');
++      if (mount) mount.innerHTML = accountSection();
+       window.atradeSide(currentSide);
+-      // 如果之前切过限价，现在 DOM 重绘后重新把 switch 切回当前 currentOrderType
+       if (currentOrderType === 'limit') window.atradeOrderType('limit');
+-      // 真实 P2P 盘口：立即拉一次 + 4s 轮询（公开，游客可见）；挂单明细随盘口一起刷新
+-      window.atradeLoadBook();
+-      window.atradeLoadOpenOrders();
+-      if (atradeBookTimer) { clearInterval(atradeBookTimer); atradeBookTimer = null; }
+-      atradeBookTimer = setInterval(() => {
+-        window.atradeLoadBook().catch(() => {});
+-        if (document.getElementById('atrade-orders-panel')?.style.display !== 'none') {
+-          window.atradeLoadOpenOrders().catch(() => {});
+-        }
+-      }, 4000);
+-      try { window.atradeInitChart(); } catch (e) { console.error('[A Trade Chart] init fail', e); }
+-      // 我的委托 5s 轮询
+-      if (atradeOrdersTimer) { clearInterval(atradeOrdersTimer); atradeOrdersTimer = null; }
+-      if (prof) {
+-        window.atradeRefreshOrders();
+-        window.atradeRenderAccount();
+-        atradeOrdersTimer = setInterval(() => window.atradeRefreshOrders().catch(() => {}), 5000);
++      window.atradeRenderAccount();
++    };
++    const account = authApi('profile').then(prof => {
++      if (!valid()) return;
++      profile = prof;
++      paintAccount();
++    }).catch(error => {
++      accountError = error;
++      if (valid() && drawn && error.message !== 'SESSION_REQUIRED') {
++        host.querySelector('.atrade-cell-entry').innerHTML = P.error(error.message, "Portal.load('a-token-trade',true)");
+       }
+-    }, 0);
++    });
++    await api('pool').then(stats => {
++      if (!valid()) return;
++      poolStats = stats;
++      host.innerHTML = renderPoolOnly(false);
++      drawn = true;
++      if (window.currentWalletProfile?.authenticated && !profile) host.querySelector('.atrade-cell-entry').innerHTML = P.loading(2);
++      paintAccount();
++      if (accountError && accountError.message !== 'SESSION_REQUIRED') host.querySelector('.atrade-cell-entry').innerHTML = P.error(accountError.message, "Portal.load('a-token-trade',true)");
++      activate();
++    });
++    await account;
+   }
+ 
+   // ── 价格条 ──
+@@ -322,7 +354,7 @@
+           <aside class="atrade-cell atrade-cell-book">${middlePanel()}</aside>
+           <aside class="atrade-cell atrade-cell-entry">${orderPanel()}</aside>
+         </div>
+-        ${P.walletGate('连接并确认钱包后，即可使用 USDT 买入 AIX 或卖出 AIX 换回 USDT')}
++        <div id="atrade-account-mount">${P.walletGate('连接并确认钱包后，即可使用 USDT 买入 AIX 或卖出 AIX 换回 USDT')}</div>
+       </div>`;
+   }
+ 
+@@ -469,6 +501,7 @@
+ 
+   // ── 拉取挂单明细（逐笔 OPEN 委托） ──
+   window.atradeLoadOpenOrders = async () => {
++    if (!active()) return;
+     const seq = ++atradeOpenOrdersSeq;
+     try {
+       const data = await api('open-orders?limit=50');
+@@ -517,6 +550,7 @@
+ 
+   // ── 拉取真实 P2P 盘口（聚合 OPEN 委托），4s 轮询 ──
+   window.atradeLoadBook = async () => {
++    if (!active()) return;
+     const seq = ++atradeBookSeq;
+     try {
+       const data = await api('orderbook?limit=20&tick=0.0001');
+@@ -752,9 +786,11 @@
+ 
+   // ── 我的委托：拉取列表 + 渲染 ──
+   window.atradeRefreshOrders = async () => {
+-    if (!profile) return;
++    if (!profile || !active()) return;
++    const wallet = P.walletKey(), seq = loadSeq;
+     try {
+       const res = await authApi('orders?limit=200');
++      if (wallet !== P.walletKey() || seq !== loadSeq) return;
+       myOrdersCache = res?.orders || [];
+       window.atradeRenderAccount();
+     } catch (e) {
+@@ -766,10 +802,12 @@
+ 
+   // 委托轮询时轻量刷新 profile（顶部余额四格已移除，这里仅刷新数据与底部账户面板）
+   async function atradeRefreshBalances() {
+-    if (!profile) return;
++    if (!profile || !active()) return;
++    const wallet = P.walletKey(), seq = loadSeq;
+     if (typeof authApi !== 'function') return;
+     try {
+       const p = await authApi('profile');
++      if (wallet !== P.walletKey() || seq !== loadSeq) return;
+       profile = p;
+       // 资产/持仓 tab 激活时同步刷新账户面板
+       if (accountTab === 'balances' || accountTab === 'positions') window.atradeRenderAccount();
+@@ -782,6 +820,7 @@
+       b.classList.toggle('active', b.dataset.aview === accountTab);
+     });
+     window.atradeRenderAccount();
++    if (accountTab === 'orders' || accountTab === 'history') window.atradeRefreshOrders();
+   };
+ 
+   window.atradeRenderAccount = () => {
+@@ -854,7 +893,8 @@
+   // ── K 线交互 ──
+   window.atradeInitChart = () => {
+     const host = document.getElementById('atrade-chart');
+-    if (!host || typeof LightweightCharts === 'undefined') return;
++    if (!host || typeof LightweightCharts === 'undefined' || !active()) return;
++    atradeChartHost = host;
+     // 页面刷新/下单后会重建 K 线实例，先清理旧的观察器与监听器，
+     // 防止每次重载都叠加 resize 回调并持有旧 DOM 闭包。
+     atradeChartResizeObserver?.disconnect?.();
+@@ -915,6 +955,7 @@
+     window.atradeLoadKline(atradePeriod);
+ 
+     atradeKlineTimer = setInterval(() => {
++      if (!active()) return;
+       window.atradeRefreshKline().catch(err => console.warn('[A Trade Chart] refresh fail', err?.message || err));
+     }, 10_000);
+   };
+@@ -947,7 +988,7 @@
+   };
+ 
+   window.atradeRefreshKline = async () => {
+-    if (!atradeCandleSeries) return;
++    if (!atradeCandleSeries || !active()) return;
+     const reqPeriod = atradePeriod;
+     const res = await api(`kline?period=${encodeURIComponent(atradePeriod)}&limit=5`);
+     // 往返期间切了周期/图表被销毁：旧周期响应丢弃，避免 update 早于新数据首根的 bar
+@@ -964,5 +1005,5 @@
+     atradeLastTime = sorted[sorted.length - 1].time;
+   };
+ 
+-  P.register('a-token-trade', { render, load, fail: e => { const h = document.getElementById('atrade-content'); if (h) h.innerHTML = P.error(e.message, "Portal.load('a-token-trade',true)"); } });
++  P.register('a-token-trade', { render, load, activate, deactivate:stopPolling, reset() { stopPolling(); ++loadSeq; profile = null; myOrdersCache = []; const host = document.getElementById('atrade-content'); if (host) host.innerHTML = P.loading(6); }, fail: e => { const h = document.getElementById('atrade-content'); if (h) h.innerHTML = P.error(e.message, "Portal.load('a-token-trade',true)"); } });
+ })();

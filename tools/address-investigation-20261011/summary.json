@@ -1,0 +1,18 @@
+{
+  "address": "0xd36ddfb9d3fa6b326b49e6eab68c5b961bc3ba59",
+  "relatedAddress": "0xf75a7c032b7a484269ced5663f7fa10acf63b1ac",
+  "rootCause": "Stored XSS in admin social screenshot preview",
+  "uniquePrimaryCreditRecords": 20,
+  "observedGrossCredits": {
+    "USDT": "1,000,000",
+    "AIX": "50,000,000"
+  },
+  "currentPrimaryBalance": {
+    "USDT": "300,000",
+    "AIX": "15,000,000"
+  },
+  "primaryFrozen": true,
+  "relatedFrozen": true,
+  "automaticWithdrawalEnabled": false,
+  "deployment": "security-social-xss-20261011-024538"
+}

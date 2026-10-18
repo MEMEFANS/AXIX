@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400" role="img" aria-labelledby="t d">
+  <title id="t">华为折叠屏手机</title>
+  <desc id="d">展开状态的银色折叠屏手机，双屏内屏带青绿色壁纸</desc>
+  <defs>
+    <linearGradient id="hf-frame" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#eef4f2"/><stop offset=".35" stop-color="#aab8b6"/>
+      <stop offset=".62" stop-color="#697574"/><stop offset="1" stop-color="#c4cfcd"/>
+    </linearGradient>
+    <linearGradient id="hf-screenL" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#16403a"/><stop offset=".55" stop-color="#0c222a"/><stop offset="1" stop-color="#08131c"/>
+    </linearGradient>
+    <linearGradient id="hf-screenR" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0e2f38"/><stop offset=".55" stop-color="#0c2027"/><stop offset="1" stop-color="#07131a"/>
+    </linearGradient>
+    <radialGradient id="hf-glowL" cx=".72" cy=".32" r=".75">
+      <stop offset="0" stop-color="#50d2c2" stop-opacity=".55"/><stop offset=".45" stop-color="#2c8f88" stop-opacity=".18"/><stop offset="1" stop-color="#50d2c2" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="hf-glowR" cx=".3" cy=".7" r=".8">
+      <stop offset="0" stop-color="#63e6d4" stop-opacity=".42"/><stop offset=".5" stop-color="#2c8f88" stop-opacity=".14"/><stop offset="1" stop-color="#50d2c2" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="hf-hinge" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#4a5655"/><stop offset=".5" stop-color="#d3dddb"/><stop offset="1" stop-color="#434e4d"/>
+    </linearGradient>
+    <linearGradient id="hf-sheen" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity=".22"/><stop offset=".4" stop-color="#ffffff" stop-opacity=".05"/><stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- 金属外框 -->
+  <rect x="22" y="26" width="596" height="348" rx="32" fill="url(#hf-frame)"/>
+  <rect x="22" y="26" width="596" height="348" rx="32" fill="none" stroke="#f3f9f7" stroke-opacity=".55" stroke-width="1.5"/>
+  <!-- 内屏黑边 -->
+  <rect x="34" y="38" width="572" height="324" rx="24" fill="#05080a"/>
+  <!-- 中轴铰链 -->
+  <rect x="313" y="40" width="14" height="320" rx="4" fill="url(#hf-hinge)"/>
+  <line x1="316.5" y1="52" x2="316.5" y2="348" stroke="#1e2727" stroke-width="1"/>
+  <line x1="323.5" y1="52" x2="323.5" y2="348" stroke="#f2f8f6" stroke-opacity=".5" stroke-width="1"/>
+
+  <!-- 左屏 -->
+  <rect x="42" y="46" width="268" height="308" rx="18" fill="url(#hf-screenL)"/>
+  <rect x="42" y="46" width="268" height="308" rx="18" fill="url(#hf-glowL)"/>
+  <!-- 右屏 -->
+  <rect x="330" y="46" width="268" height="308" rx="18" fill="url(#hf-screenR)"/>
+  <rect x="330" y="46" width="268" height="308" rx="18" fill="url(#hf-glowR)"/>
+
+  <!-- 壁纸极光曲线 -->
+  <g fill="none" stroke-linecap="round">
+    <path d="M70 250 C120 170 180 250 250 170 S330 120 380 150" stroke="#50d2c2" stroke-opacity=".28" stroke-width="10"/>
+    <path d="M380 300 C430 230 500 290 560 220" stroke="#7ff0df" stroke-opacity=".22" stroke-width="8"/>
+    <path d="M64 120 C110 90 150 130 190 100" stroke="#9af7e7" stroke-opacity=".16" stroke-width="6"/>
+  </g>
+  <g fill="#bff7ee" opacity=".55">
+    <circle cx="96" cy="92" r="2.4"/><circle cx="238" cy="300" r="2"/>
+    <circle cx="560" cy="96" r="2.6"/><circle cx="392" cy="130" r="1.8"/>
+  </g>
+
+  <!-- 屏下摄像头 -->
+  <circle cx="176" cy="62" r="5" fill="#030608" stroke="#2c4443" stroke-width="1.2"/>
+  <circle cx="464" cy="62" r="5" fill="#030608" stroke="#2c4443" stroke-width="1.2"/>
+
+  <!-- 玻璃反光 -->
+  <path d="M42 46 h120 L92 354 H42 Z" fill="url(#hf-sheen)" opacity=".5"/>
+  <path d="M330 46 h120 L380 354 h-50 Z" fill="url(#hf-sheen)" opacity=".35"/>
+</svg>

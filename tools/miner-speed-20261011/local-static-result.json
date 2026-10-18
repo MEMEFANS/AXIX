@@ -1,0 +1,17 @@
+[
+  {
+    "uri": "/",
+    "status": 200,
+    "sha256": "983d65fca77fcc5281142100866ccdd1febf5299049c0f942e19f8aa1e4ff1a5"
+  },
+  {
+    "uri": "/js/earn.js?v=20261011-team-fast-2",
+    "status": 200,
+    "sha256": "2f22a3a2939478ab42a6fe6cd08bfddcbd807bca26b3805012af2fd40f61b7bb"
+  },
+  {
+    "uri": "/api/wallet/session",
+    "status": 404,
+    "sha256": "51d0a9e3bd9ffc25483790aaffe7a3597e642edd040dddb16aafc324e6e922ed"
+  }
+]

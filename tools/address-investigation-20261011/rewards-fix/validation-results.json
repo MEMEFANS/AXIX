@@ -1,0 +1,36 @@
+{
+  "recorded_at_utc": "2026-10-10T20:14:20.477867+00:00",
+  "deployed": true,
+  "production_balance_mutations": false,
+  "passes": [
+    "local asset reporting SQLite and admin DOM",
+    "production candidate asset reporting SQLite and admin DOM",
+    "platform-api",
+    "5632 account snapshot verification",
+    "six local JS syntax checks",
+    "six production candidate JS syntax checks",
+    "isolated production parity replay (no missing credits, replay zero)",
+    "live admin API checks for three real accounts",
+    "deployed asset profile estimation on isolated copy",
+    "public HTTP and release content verification",
+    "post-release protected sources and incident containment checks"
+  ],
+  "preexisting_failures": [
+    {
+      "test": "platform-service.test.js:45",
+      "before": "92.99732 !== 0.01",
+      "after": "92.99732 !== 0.01",
+      "reason": "wallet mock ignores asset parameter"
+    },
+    {
+      "test": "a-token-income.test.js:43",
+      "before": "0n !== 1200000000000000000n",
+      "after": "0n !== 1200000000000000000n",
+      "reason": "unqualified upline expected to receive dynamic reward"
+    }
+  ],
+  "release": "aix-reporting-20261010-202302",
+  "backup_directory": "/opt/wg-platform/backups/aix-reporting-20261010-202302",
+  "completed_at_utc": "2026-10-10T20:23:09.937015+00:00",
+  "live_balances_checked": 5635
+}

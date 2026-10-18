@@ -1,0 +1,335 @@
+{
+  "captured_at_utc": "2026-10-10T22:22:44.385808+00:00",
+  "passed": true,
+  "checks": [
+    {
+      "uri": "/",
+      "passed": true,
+      "status": 200,
+      "cf_cache_status": "DYNAMIC",
+      "cache_control": "no-cache",
+      "cloudflare_analytics_inserted": true,
+      "new_page_loader_version": true,
+      "origin_content_sha256": "ea33e1c3f7297b6c2fcbfd5481479b74798c9e2b468871283a2fa5bf1a93c662"
+    },
+    {
+      "uri": "/js/trade-account.js?v=20261011-pages-1",
+      "passed": true,
+      "status": 200,
+      "cf_cache_status": "MISS",
+      "cache_control": "public, max-age=2592000, s-maxage=2592000, immutable",
+      "origin_content_sha256": "e0d2cd02480bfa1792eb832f5ac8daa5c3bc7bd9c57ccfae26dec88cac5028cf"
+    },
+    {
+      "uri": "/js/platform-client.js?v=20261011-pages-1",
+      "passed": true,
+      "status": 200,
+      "cf_cache_status": "MISS",
+      "cache_control": "public, max-age=2592000, s-maxage=2592000, immutable",
+      "origin_content_sha256": "49e5177d017adae9faeb45f747b49ac6e936ae3dd1eb1f63ec0e0f2bfbd064cd"
+    },
+    {
+      "uri": "/js/wallet-funds.js?v=20261011-pages-1",
+      "passed": true,
+      "status": 200,
+      "cf_cache_status": "MISS",
+      "cache_control": "public, max-age=2592000, s-maxage=2592000, immutable",
+      "origin_content_sha256": "0fa683d0e274a93391bb0ddf5e430f293560c326c7603ee5cb311b687d6392f9"
+    },
+    {
+      "uri": "/js/assets.js?v=20261011-pages-1",
+      "passed": true,
+      "status": 200,
+      "cf_cache_status": "MISS",
+      "cache_control": "public, max-age=2592000, s-maxage=2592000, immutable",
+      "origin_content_sha256": "c713d6ff83c178ca4ff2def2171a1714e2a53597ae619518118dfab6e92fcfc9"
+    },
+    {
+      "uri": "/js/ai-managed.js?v=20261011-pages-1",
+      "passed": true,
+      "status": 200,
+      "cf_cache_status": "MISS",
+      "cache_control": "public, max-age=2592000, s-maxage=2592000, immutable",
+      "origin_content_sha256": "6d54f2e979781d6f982af040fa74e89f64cf859ac99db673ea02a7adec18a8eb"
+    },
+    {
+      "uri": "/js/strategy.js?v=20261011-pages-1",
+      "passed": true,
+      "status": 200,
+      "cf_cache_status": "MISS",
+      "cache_control": "public, max-age=2592000, s-maxage=2592000, immutable",
+      "origin_content_sha256": "cd9593f7ece36fb5e6c4a7fb7d5ec89a7cfb06f0339d35cff189bf2705cc2623"
+    },
+    {
+      "uri": "/js/staking.js?v=20261011-pages-1",
+      "passed": true,
+      "status": 200,
+      "cf_cache_status": "MISS",
+      "cache_control": "public, max-age=2592000, s-maxage=2592000, immutable",
+      "origin_content_sha256": "5bad06df996f8ad5b9ed64b9453e6c0bd54d2bef5fb38982f494b74d0b1e12f1"
+    },
+    {
+      "uri": "/js/hyperliquid-client.js?v=20261011-pages-1",
+      "passed": true,
+      "status": 200,
+      "cf_cache_status": "MISS",
+      "cache_control": "public, max-age=2592000, s-maxage=2592000, immutable",
+      "origin_content_sha256": "244d79152bdc2552f58678d88f88b47c24d8b4e43f63d1ee8235c9c62746ffaf"
+    },
+    {
+      "uri": "/js/portfolio.js?v=20261011-pages-1",
+      "passed": true,
+      "status": 200,
+      "cf_cache_status": "MISS",
+      "cache_control": "public, max-age=2592000, s-maxage=2592000, immutable",
+      "origin_content_sha256": "9946d77805dc5083192a229b7e221247f01203afe830312c8b75fd2ed2e077f7"
+    },
+    {
+      "uri": "/js/vaults.js?v=20261011-pages-1",
+      "passed": true,
+      "status": 200,
+      "cf_cache_status": "MISS",
+      "cache_control": "public, max-age=2592000, s-maxage=2592000, immutable",
+      "origin_content_sha256": "5b91f9c13dc49740bca398b83170bb189c1f47e012a87b7b2e8d577c8fc2c276"
+    },
+    {
+      "uri": "/js/mobile-trade.js?v=20261011-pages-1",
+      "passed": true,
+      "status": 200,
+      "cf_cache_status": "MISS",
+      "cache_control": "public, max-age=2592000, s-maxage=2592000, immutable",
+      "origin_content_sha256": "30334665078a4732e5bf040cb99da82f4af53c0f313aada19f012916064cee16"
+    },
+    {
+      "uri": "/js/trade-chart.js?v=20261011-pages-1",
+      "passed": true,
+      "status": 200,
+      "cf_cache_status": "MISS",
+      "cache_control": "public, max-age=2592000, s-maxage=2592000, immutable",
+      "origin_content_sha256": "71927c762e33720508e17aca41d0a7a2fb70dbe706a3a7f60e34edf8692961ca"
+    },
+    {
+      "uri": "/js/trade-alerts.js?v=20261011-pages-1",
+      "passed": true,
+      "status": 200,
+      "cf_cache_status": "MISS",
+      "cache_control": "public, max-age=2592000, s-maxage=2592000, immutable",
+      "origin_content_sha256": "ef61a2cb3d967d3baceb24d7e2981469f70822284151f56d8188517dd7a5bc64"
+    },
+    {
+      "uri": "/js/trade-history.js?v=20261011-pages-1",
+      "passed": true,
+      "status": 200,
+      "cf_cache_status": "MISS",
+      "cache_control": "public, max-age=2592000, s-maxage=2592000, immutable",
+      "origin_content_sha256": "f2d1db1ca4343d3b07ce79b9641d818e5e7d015a2e2949068251ba505f540702"
+    },
+    {
+      "uri": "/js/trade-funding.js?v=20261011-pages-1",
+      "passed": true,
+      "status": 200,
+      "cf_cache_status": "MISS",
+      "cache_control": "public, max-age=2592000, s-maxage=2592000, immutable",
+      "origin_content_sha256": "2988f649a7db4b439626af936742f64b2e9dc9cd64397f47dd8423126d4de75a"
+    },
+    {
+      "uri": "/js/trade-favorites.js?v=20261011-pages-1",
+      "passed": true,
+      "status": 200,
+      "cf_cache_status": "MISS",
+      "cache_control": "public, max-age=2592000, s-maxage=2592000, immutable",
+      "origin_content_sha256": "0a129459d0dd643c8571f8e6f2022186b301915ca4e57e58030f9f400c9399b1"
+    },
+    {
+      "uri": "/js/trade-trades.js?v=20261011-pages-1",
+      "passed": true,
+      "status": 200,
+      "cf_cache_status": "MISS",
+      "cache_control": "public, max-age=2592000, s-maxage=2592000, immutable",
+      "origin_content_sha256": "04ae1e2896686d65a86e2f6cca3758a7cea7ce46498678226878591516f30e2b"
+    },
+    {
+      "uri": "/js/trade-depth.js?v=20261011-pages-1",
+      "passed": true,
+      "status": 200,
+      "cf_cache_status": "MISS",
+      "cache_control": "public, max-age=2592000, s-maxage=2592000, immutable",
+      "origin_content_sha256": "0fd8d6d946381b2b727a703b74a6c77bc3783dea8688113c8faca39876cb25d2"
+    },
+    {
+      "uri": "/js/trade-book-tabs.js?v=20261011-pages-1",
+      "passed": true,
+      "status": 200,
+      "cf_cache_status": "MISS",
+      "cache_control": "public, max-age=2592000, s-maxage=2592000, immutable",
+      "origin_content_sha256": "163234a05d4e8bcf2204a250991703726c33083947d8a4e706443dbe20f21527"
+    },
+    {
+      "uri": "/js/a-token-trade.js?v=20261011-pages-1",
+      "passed": true,
+      "status": 200,
+      "cf_cache_status": "MISS",
+      "cache_control": "public, max-age=2592000, s-maxage=2592000, immutable",
+      "origin_content_sha256": "8251d22f1ee70b65bc2c785c7628b917c53868f4c9fc002f2f8bb248040862b0"
+    },
+    {
+      "uri": "/js/lottery.js?v=20261011-pages-1",
+      "passed": true,
+      "status": 200,
+      "cf_cache_status": "MISS",
+      "cache_control": "public, max-age=2592000, s-maxage=2592000, immutable",
+      "origin_content_sha256": "db6ad3b28e2b6ac84940504ef6f7ce3a7b6ecdf0105bf38762be5a641a6a8e61"
+    },
+    {
+      "uri": "/js/referrals.js?v=20261011-pages-1",
+      "passed": true,
+      "status": 200,
+      "cf_cache_status": "MISS",
+      "cache_control": "public, max-age=2592000, s-maxage=2592000, immutable",
+      "origin_content_sha256": "e52f44835ba4d8fe34caed9a17aaa11b74ee72b03a64a7ca225281ffdb16a3ac"
+    },
+    {
+      "uri": "/js/leaderboard.js?v=20261011-pages-1",
+      "passed": true,
+      "status": 200,
+      "cf_cache_status": "MISS",
+      "cache_control": "public, max-age=2592000, s-maxage=2592000, immutable",
+      "origin_content_sha256": "b250fd97784aaf3fbe6f72a0afe5379d68f37b80744c0ca2d7513e0a9d9eeff4"
+    },
+    {
+      "uri": "/js/community-links.js?v=20261011-pages-1",
+      "passed": true,
+      "status": 200,
+      "cf_cache_status": "MISS",
+      "cache_control": "public, max-age=2592000, s-maxage=2592000, immutable",
+      "origin_content_sha256": "5d28a8da3e5d2af708a87b79f2c7a714d5c935022288060d80af353c02d78c2a"
+    },
+    {
+      "uri": "/js/support-chat.js?v=20261011-pages-1",
+      "passed": true,
+      "status": 200,
+      "cf_cache_status": "MISS",
+      "cache_control": "public, max-age=2592000, s-maxage=2592000, immutable",
+      "origin_content_sha256": "f93dcb075b27f9c933c92c2f153ab0229d3867504262843afb33fba2d33f3b03"
+    },
+    {
+      "uri": "/js/ledger.js?v=20261011-pages-1",
+      "passed": true,
+      "status": 200,
+      "cf_cache_status": "MISS",
+      "cache_control": "public, max-age=2592000, s-maxage=2592000, immutable",
+      "origin_content_sha256": "6cc93a83ede787b94dfed37b3749e0b47a37dddcd987ab9b2bfa288680e4cc4a"
+    },
+    {
+      "uri": "/js/ai.js?v=20261011-pages-1",
+      "passed": true,
+      "status": 200,
+      "cf_cache_status": "MISS",
+      "cache_control": "public, max-age=2592000, s-maxage=2592000, immutable",
+      "origin_content_sha256": "78a27c073aaa6ccff819980ad49632f345ec99f09ffa0212a7e7f678e2e80b44"
+    },
+    {
+      "uri": "/js/a-token-transfer.js?v=20261011-pages-1",
+      "passed": true,
+      "status": 200,
+      "cf_cache_status": "MISS",
+      "cache_control": "public, max-age=2592000, s-maxage=2592000, immutable",
+      "origin_content_sha256": "a83c23816d0931708d0ba5fe56946a244fc5adddec2048a77e671506629f84c8"
+    },
+    {
+      "uri": "/js/a-token-withdrawal.js?v=20261011-pages-1",
+      "passed": true,
+      "status": 200,
+      "cf_cache_status": "MISS",
+      "cache_control": "public, max-age=2592000, s-maxage=2592000, immutable",
+      "origin_content_sha256": "738fafaedbcf36e63ee516350a8366b60cd8ca9dd7e22c7f358d3c9bf47f52ee"
+    },
+    {
+      "uri": "/js/core.js?v=20261011-pages-1",
+      "passed": true,
+      "status": 200,
+      "cf_cache_status": "MISS",
+      "cache_control": "public, max-age=2592000, s-maxage=2592000, immutable",
+      "origin_content_sha256": "af77b6fd1a16bc6a82cf3428ab48e5b386faed9897404e0105a32c0e6347c9f0"
+    },
+    {
+      "uri": "/js/page-loader.js?v=20261011-pages-1",
+      "passed": true,
+      "status": 200,
+      "cf_cache_status": "MISS",
+      "cache_control": "public, max-age=2592000, s-maxage=2592000, immutable",
+      "origin_content_sha256": "f7d2d926c1109da4fd4e8d4784c92d3ec09322f5fb528a682e5cfbea44e4ac19"
+    },
+    {
+      "uri": "/js/portal-shared.js?v=20261011-pages-1",
+      "passed": true,
+      "status": 200,
+      "cf_cache_status": "MISS",
+      "cache_control": "public, max-age=2592000, s-maxage=2592000, immutable",
+      "origin_content_sha256": "f341ebb87ebe81bf48ab4a4c4e6daba7c664fdf75a9efb8e3acb3f56af9a19f2"
+    },
+    {
+      "uri": "/js/wallet.js?v=20261011-pages-1",
+      "passed": true,
+      "status": 200,
+      "cf_cache_status": "MISS",
+      "cache_control": "public, max-age=2592000, s-maxage=2592000, immutable",
+      "origin_content_sha256": "2726e97455b8a13429f2a1aa47062d09a0d64f8d5659a7286bffc79f3a140d8b"
+    },
+    {
+      "uri": "/js/theme.js?v=2",
+      "passed": true,
+      "status": 200,
+      "cf_cache_status": "MISS",
+      "cache_control": "public, max-age=2592000, s-maxage=2592000, immutable",
+      "origin_content_sha256": "fbff3358bc3ce406b9432901d17355aadbbf5927a1061a65d22fdc0547f10258"
+    },
+    {
+      "uri": "/js/i18n.js?v=20261011-1",
+      "passed": true,
+      "status": 200,
+      "cf_cache_status": "HIT",
+      "cache_control": "public, max-age=2592000, s-maxage=2592000, immutable",
+      "origin_content_sha256": "4c78aef737784c76f5fe7b6f60e700ddb165337dac9c3b19f8d135a7daaf00e2"
+    },
+    {
+      "uri": "/js/earn.js?v=20261011-team-fast-2",
+      "passed": true,
+      "status": 200,
+      "cf_cache_status": "HIT",
+      "cache_control": "public, max-age=2592000, s-maxage=2592000, immutable",
+      "origin_content_sha256": "2f22a3a2939478ab42a6fe6cd08bfddcbd807bca26b3805012af2fd40f61b7bb"
+    },
+    {
+      "uri": "/vendor/lightweight-charts.js?v=1",
+      "passed": true,
+      "status": 200,
+      "cf_cache_status": "MISS",
+      "cache_control": "public, max-age=2592000, s-maxage=2592000, immutable",
+      "origin_content_sha256": "e6bd6516d9ab9cb897c0d6438e3fe1126f2fdce07e68c23836e84d527de81f52"
+    },
+    {
+      "uri": "/vendor/wallet/connector.js?v=16",
+      "passed": true,
+      "status": 200,
+      "cf_cache_status": "MISS",
+      "cache_control": "public, max-age=2592000, s-maxage=2592000, immutable",
+      "origin_content_sha256": "a81ada15aa5bd7b424c69ad2c018491fe39d59243f5581a2fe5416aa9d236a55"
+    },
+    {
+      "uri": "/api/wallet/session",
+      "passed": true,
+      "status": 200,
+      "cf_cache_status": "DYNAMIC",
+      "cache_control": "no-store"
+    },
+    {
+      "uri": "/api/a-token/team/summary",
+      "passed": true,
+      "status": 401,
+      "cf_cache_status": "DYNAMIC",
+      "cache_control": null,
+      "requires_wallet_login": true
+    }
+  ]
+}

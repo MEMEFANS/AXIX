@@ -1,0 +1,106 @@
+--- public/js/trade-chart.js (before)
++++ public/js/trade-chart.js (after)
+@@ -1,4 +1,5 @@
+ let tradeChart = null;
++let tradeChartLoading = null, tradeDeferredCandles = null;
+ let tradeCandleSeries = null;
+ let tradeLiveCandle = null;
+ let tradeLiveCandleHistory = [];
+@@ -159,7 +160,22 @@
+ // ── 图表初始化 ───────────────────────────────────────────────────────────
+ 
+ function ensureTradeChart() {
+-  if (tradeChart) return;
++  if (tradeChart) return true;
++  if (!window.Portal?.active('trade')) return false;
++  if (typeof LightweightCharts === 'undefined') {
++    if (!tradeChartLoading) {
++      tradeChartLoading = window.loadPageCharts();
++      tradeChartLoading.then(() => {
++        if (!Portal.active('trade')) return;
++        ensureTradeChart();
++        const pending = tradeDeferredCandles;
++        if (pending && pending.key === `${tradeProduct}:${tradeSymbol}:${tradeIntervalSec}`) renderTradeChartCandles(pending.raw);
++      }).catch(() => {
++        if (Portal.active('trade')) showToast('图表加载失败，请刷新重试', 'error');
++      }).finally(() => { tradeChartLoading = null; });
++    }
++    return false;
++  }
+   const theme = window.WGTheme?.chartOptions?.() || {
+     layout:{ background:{ type:'solid', color:'#0b0f0e' }, textColor:'#91a19b' },
+     grid:{ vertLines:{ color:'#19211f' }, horzLines:{ color:'#19211f' } },
+@@ -225,7 +241,7 @@
+     const series = tradeChart.addSeries(LightweightCharts.LineSeries, {
+       color:tradeEmaColors[period], lineWidth:period === 99 ? 1 : 2, priceLineVisible:false, lastValueVisible:false,
+     });
+-    series.applyOptions({ visible:false });
++    series.applyOptions({ visible:Boolean(tradeEmaVisibility.get(period)) });
+     tradeEmaSeries.set(period, series);
+   }
+ 
+@@ -239,9 +255,10 @@
+   tradeBollLower = tradeChart.addSeries(LightweightCharts.LineSeries, {
+     color:BOLL_COLOR, lineWidth:1, lineStyle:LightweightCharts.LineStyle.Dotted, priceLineVisible:false, lastValueVisible:false,
+   });
+-  tradeBollUpper.applyOptions({ visible:false });
+-  tradeBollMiddle.applyOptions({ visible:false });
+-  tradeBollLower.applyOptions({ visible:false });
++  tradeBollUpper.applyOptions({ visible:tradeBollVisibility });
++  tradeBollMiddle.applyOptions({ visible:tradeBollVisibility });
++  tradeBollLower.applyOptions({ visible:tradeBollVisibility });
++  return true;
+ }
+ 
+ function updateTradeChartPriceFormat(price = 0) {
+@@ -285,7 +302,16 @@
+     volume:Number(c.volume) || 0,
+   })).filter(c => Number.isFinite(c.time) && Number.isFinite(c.close));
+   if (!data.length) return null;
+-  ensureTradeChart();
++  const last = data[data.length - 1], day = data.slice(-24);
++  const metrics = {
++    last, high:Math.max(...day.map(c => c.high)), low:Math.min(...day.map(c => c.low)),
++    change:(last.close / (day[0]?.open || last.open) - 1) * 100,
++    volume:raw.slice(-24).reduce((sum, c) => sum + (Number(c.volume) || 0), 0),
++  };
++  tradeDeferredCandles = { raw, key:`${tradeProduct}:${tradeSymbol}:${tradeIntervalSec}` };
++  // Prices and order entry can work while the optional chart library downloads.
++  if (!ensureTradeChart()) return metrics;
++  tradeDeferredCandles = null;
+   updateTradeChartPriceFormat(data[0]?.close || 0);
+   const hadPreviousData = tradeCandleData.length > 0;
+   tradeCandleData = data;
+@@ -329,15 +355,7 @@
+     tradeChartFollowing = true;
+     tradeChartNeedsFit = false;
+   }
+-  const last = data[data.length - 1];
+-  const day = data.slice(-24);
+-  return {
+-    last,
+-    high:Math.max(...day.map(c => c.high)),
+-    low:Math.min(...day.map(c => c.low)),
+-    change:(last.close / (day[0]?.open || last.open) - 1) * 100,
+-    volume:raw.slice(-24).reduce((sum, c) => sum + (Number(c.volume) || 0), 0),
+-  };
++  return metrics;
+ }
+ 
+ // ── 实时价格更新 ──────────────────────────────────────────────────────────
+@@ -561,6 +579,7 @@
+ // ── VOL 副图切换 ──────────────────────────────────────────────────────────
+ 
+ function setTradeVol(visible = !tradeVolVisibility) {
++  if (!ensureTradeChart()) return;
+   tradeVolVisibility = visible;
+   if (visible) {
+     if (!tradeVolSeries) {
+@@ -586,6 +605,7 @@
+ // ── MACD 副图切换 ─────────────────────────────────────────────────────────
+ 
+ function setTradeMacd(visible = !tradeMacdVisibility) {
++  if (!ensureTradeChart()) return;
+   tradeMacdVisibility = visible;
+   if (visible) {
+     if (!tradeMacdLineSeries) {

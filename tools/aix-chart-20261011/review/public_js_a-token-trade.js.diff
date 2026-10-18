@@ -1,0 +1,78 @@
+--- before/public/js/a-token-trade.js
++++ after/public/js/a-token-trade.js
+@@ -14,6 +14,16 @@
+   let atradeChartViewportHandler = null;
+   let atradeLastTime = 0;
+   let atradeDataSeq = 0; // 请求世代号：丢弃切换周期后才返回的过期响应
++  let atradeLoadedPeriod = null;
++  const atradeBarSpacing = { '1m':12, '5m':12, '15m':12, '1h':11, '4h':10, '1d':9 };
++  // 按像素保持蜡烛宽度：先展示最近行情，历史可向左拖动查看。
++  // 日线历史较少时允许左侧留白，避免 fitContent / fixLeftEdge 将几根蜡烛拉满屏。
++  const atradeTimeScaleOptions = period => ({
++    timeVisible:period !== '1d', secondsVisible:false,
++    rightOffset:4, barSpacing:atradeBarSpacing[period], minBarSpacing:3, maxBarSpacing:32,
++    fixLeftEdge:false, fixRightEdge:false, lockVisibleTimeRangeOnResize:false,
++    shiftVisibleRangeOnNewBar:true,
++  });
+   let atradeOrdersTimer = null;          // 我的委托 5s 轮询
+   let atradeBookTimer = null;            // 真实 P2P 盘口 4s 轮询
+   let atradeBookSeq = 0;                 // 盘口请求序号，忽略过期响应
+@@ -919,7 +929,7 @@
+       grid:theme.grid,
+       crosshair:{ mode: LightweightCharts.CrosshairMode.Normal },
+       rightPriceScale:{ ...theme.rightPriceScale, scaleMargins:{ top:0.08, bottom:0.08 } },
+-      timeScale:{ ...theme.timeScale, ...tzOpts.timeScale, timeVisible:true, secondsVisible:false, rightOffset:4, barSpacing:8, fixLeftEdge:true },
++      timeScale:{ ...theme.timeScale, ...tzOpts.timeScale, ...atradeTimeScaleOptions(atradePeriod) },
+       localization:{ locale:'zh-CN', ...tzOpts.localization },
+     });
+     // base.css turns ordinary mobile tables into stacked cards. Lightweight
+@@ -961,6 +971,7 @@
+   };
+ 
+   window.atradeSwitchPeriod = async (period) => {
++    if (!Object.hasOwn(atradeBarSpacing, period)) return;
+     atradePeriod = period;
+     document.querySelectorAll('.atrade-chart-tabs button').forEach(b => {
+       b.classList.toggle('active', b.dataset.period === period);
+@@ -971,9 +982,11 @@
+   window.atradeLoadKline = async (period) => {
+     if (!atradeCandleSeries) return;
+     const seq = ++atradeDataSeq;
++    const series = atradeCandleSeries;
++    atradeLoadedPeriod = null;
+     const res = await api(`kline?period=${encodeURIComponent(period)}&limit=500`);
+     // 网络往返期间用户又切了周期/图表被销毁：本响应过期，丢弃
+-    if (seq !== atradeDataSeq || !atradeCandleSeries) return;
++    if (seq !== atradeDataSeq || series !== atradeCandleSeries || period !== atradePeriod) return;
+     const candles = (res?.candles || []).map(c => ({
+       time: Number(c.time),
+       open: Number(c.open),
+@@ -981,18 +994,21 @@
+       low: Number(c.low),
+       close: Number(c.close),
+     }));
+-    if (candles.length === 0) return;
+-    atradeCandleSeries.setData(candles);
+-    atradeLastTime = candles[candles.length - 1].time;
+-    try { atradeChart.timeScale().fitContent(); } catch {}
++    series.setData(candles);
++    atradeLastTime = candles[candles.length - 1]?.time || 0;
++    atradeLoadedPeriod = period;
++    const timeScale = atradeChart.timeScale();
++    timeScale.applyOptions(atradeTimeScaleOptions(period));
++    timeScale.scrollToPosition(4, false);
+   };
+ 
+   window.atradeRefreshKline = async () => {
+-    if (!atradeCandleSeries || !active()) return;
++    if (!atradeCandleSeries || !active() || atradeLoadedPeriod !== atradePeriod) return;
+     const reqPeriod = atradePeriod;
+-    const res = await api(`kline?period=${encodeURIComponent(atradePeriod)}&limit=5`);
++    const seq = atradeDataSeq, series = atradeCandleSeries;
++    const res = await api(`kline?period=${encodeURIComponent(reqPeriod)}&limit=5`);
+     // 往返期间切了周期/图表被销毁：旧周期响应丢弃，避免 update 早于新数据首根的 bar
+-    if (reqPeriod !== atradePeriod || !atradeCandleSeries) return;
++    if (seq !== atradeDataSeq || series !== atradeCandleSeries || reqPeriod !== atradeLoadedPeriod) return;
+     const candles = res?.candles || [];
+     if (!candles.length) return;
+     // 增量：最后 1-2 根 update，如有新 bar 则追加

@@ -1,0 +1,57 @@
+--- public/js/referrals.js (before)
++++ public/js/referrals.js (after)
+@@ -2,6 +2,7 @@
+   const P = Portal;
+   let referralLink = '';
+   const request = async (path, options) => {
++    if (!options?.method || options.method === 'GET') return P.readJSON(`/api/referrals/${path}`, options);
+     const response = await fetch(`/api/referrals/${path}`, options);
+     let payload;
+     try { payload = await response.json(); }
+@@ -23,7 +24,7 @@
+     try {
+       const result = await request('claim', { method:'POST', headers:{ 'Content-Type':'application/json' }, body:'{}' });
+       showToast(result.count ? `已领取 ${Number(result.amount || 0).toFixed(2)} USDT` : '暂无可领取奖励', 'ok');
+-      await load();
++      await P.load('referrals', true);
+     } catch (error) {
+       showToast(error.message || '领取失败', 'error');
+       if (button) { button.disabled = false; button.textContent = '立即领取'; }
+@@ -32,10 +33,11 @@
+   function render() {
+     document.getElementById('tab-referrals').innerHTML = `<div class="portal-shell">${P.header('推荐', '邀请用户使用平台交易和合约跟单')}<div id="referrals-content">${P.walletGate('连接钱包后查看推荐链接与奖励')}</div></div>`;
+   }
+-  async function load() {
++  async function load(context = { isCurrent:() => true }) {
+     const host = document.getElementById('referrals-content');
+     if (!window.currentWalletProfile?.authenticated && window.currentWalletConnection?.address
+       && typeof ensurePlatformSession === 'function') await ensurePlatformSession();
++    if (!context.isCurrent()) return;
+     if (!window.currentWalletProfile?.authenticated) {
+       host.innerHTML = P.walletGate('连接并确认钱包后查看推荐数据');
+       return;
+@@ -52,6 +54,7 @@
+     } else {
+       data = await request('profile');
+     }
++    if (!context.isCurrent()) return;
+     referralLink = `${location.origin}${data.link}`;
+     // API 字段在冷启动或旧版本后端下可能缺省；统一归一化，避免页面出现
+     // “undefined 人 / NaN%”这类不专业的空状态。
+@@ -92,13 +95,13 @@
+       <p class="referral-claim-hint">积分规则：现货/合约有效成交量每 1,000 USDT 计 1 积分，AI 跟单结算收益每 10 USDT 计 1 积分；每周一结算上周积分，对倒刷量双向剔除不计分。积分独立于抽奖积分，仅用于后续空投。</p></div>`;
+   }
+   async function loadAirdropBoard() {
++    const wallet = P.walletKey();
+     const host = document.getElementById('airdrop-metrics');
+     if (!host) return;
+     if (!window.currentWalletProfile?.authenticated) { host.innerHTML = '<div style="font-size:12px;color:#81918e">连接钱包后查看空投积分</div>'; return; }
+     try {
+-      const res = await fetch('/api/airdrop/points');
+-      if (!res.ok) throw new Error('load failed');
+-      const pts = await res.json();
++      const pts = await P.readJSON('/api/airdrop/points');
++      if (wallet !== P.walletKey() || !host.isConnected) return;
+       const cw = pts.currentWeek || {};
+       host.innerHTML = [
+         P.metric('空投积分余额', Number(pts.points || 0).toLocaleString()),

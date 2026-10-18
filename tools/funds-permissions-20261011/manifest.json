@@ -1,0 +1,68 @@
+{
+  "deployed": true,
+  "files": [
+    {
+      "path": "src/admin-security.js",
+      "before_sha256": "ab199ebabb9ca030198ab35acc03684c56e04f0d14998641549d0dcf12379e73",
+      "after_sha256": "6296b7dd15cb392ae1ee64f0e4c989e733536a812fd59a987745fcd4bc7c21e8"
+    },
+    {
+      "path": "src/a-token-admin-api.js",
+      "before_sha256": "e8530ce161194e362e04edf0d6ee9d9cae88fa7a642060c2fd01f6f00ccb265c",
+      "after_sha256": "44754382e35841c3135d92fdfd5a6d88ec2b2dc22c82ba682a3cb137f32d804c"
+    },
+    {
+      "path": "src/funds-admin-api.js",
+      "before_sha256": "d2621c8fdeb866fda03c70e83f50dcfc8473f1c2ae986a0947b6de2467b53a00",
+      "after_sha256": "634a0c777da6fe2779964633405a48fe88c0d865495c50fe879cbb41a6f4b5fe"
+    },
+    {
+      "path": "src/server.js",
+      "before_sha256": "513555c7674a3aa7d13ecad63aa2c9ab46599376b44afdd2779b033e7502d709",
+      "after_sha256": "ecce52a30b1abe01ffe0ddd6c21ce8a65ef6b9115898e3e460cdcb496cca30ef"
+    },
+    {
+      "path": "public/admin.html",
+      "before_sha256": "17c48d5c6a71ddb16aaa5e784204143928d170c9d74593c064d85f0f8c25bbf5",
+      "after_sha256": "a6309116a5419e3e5c521446a7442210c39040ab410512f6b2473b36755f775f"
+    },
+    {
+      "path": "public/funds-admin.html",
+      "before_sha256": "66c82c4aca0eea01d25016152fcf1ad83201f87872c61eb323eef3013a6a58ce",
+      "after_sha256": "c42d7a888344e49ed4a8b1a89b56ec86795d90a757f690622c4045542777cc0e"
+    },
+    {
+      "path": "public/js/operator-admin.js",
+      "before_sha256": "3fef20c6f1cce6927ee86618dd8c694aece6058bc34e9c3f2e8f6cb35c68cc3b",
+      "after_sha256": "4529e321e2ac5888a1224249e7dc3fc51a51aca12d3bc21a2785131211dbb745"
+    },
+    {
+      "path": "public/js/funds-admin.js",
+      "before_sha256": "3cc6f416a5709c7bbbcd1153aa62fefa09f87da14c36e011644c496589434c28",
+      "after_sha256": "ed2e22ac0e70cb67aae44451e7b4e05e8ec242a79048fc88056ae545723fc3a1"
+    },
+    {
+      "path": "test/admin-security.test.js",
+      "before_sha256": "63575a630747eb1786eca0fa98da068a97931db08afa3f23d10321372aa57714",
+      "after_sha256": "ff2b9c9bea3ac1625fa3514fa5c2ce806b61782e067bdf29d6467bb03299f3ab"
+    },
+    {
+      "path": "test/admin-security-browser.test.js",
+      "before_sha256": "3265c86025301072500de62e6f87c1764d56f7cce7682989fa8348b017ee643f",
+      "after_sha256": "52f2c9f021137c0b849c351eb41a42ccc2f1bb58c3c0f4d5a976265d7be6c1d2"
+    },
+    {
+      "path": "package.json",
+      "before_sha256": "2319a2f67a4cf5c91976e1a544e061cd1e9368a4f58596261689ab1344b1ec17",
+      "after_sha256": "a452a29d3a99e4212d5b747c29a1226f96fef5a9dfc0819cb33b8fa554ca6fc5"
+    },
+    {
+      "path": "test/funds-permissions.test.js",
+      "before_sha256": null,
+      "after_sha256": "0f8549e5badaf865ae213048440f7b7ddf1ae595775ef3fd42ffdfd3adb2b858"
+    }
+  ],
+  "release": "funds-permissions-20261011-022153",
+  "completed_at_utc": "2026-10-11T02:22:14.374579+00:00",
+  "production_manifest": "release-manifest.json"
+}

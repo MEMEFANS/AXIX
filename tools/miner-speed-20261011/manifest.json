@@ -1,0 +1,18 @@
+{
+  "src/a-token-team-service.js": {
+    "before": "f64e2e2a373d10f8a9126bc339c795592106b13d6efa3fec18e575312f1bdbc3",
+    "after": "bfe56820d3a2b333cc71d855d96ab1acac641e9fb58964649027b34308f3840f"
+  },
+  "src/a-token-api.js": {
+    "before": "b9199d2fd8c095957864f92019c425212270346cb74e7a52701ef9900c372f36",
+    "after": "3711f1bcdf53234d08226c55c5c310be5a699a3603ffe951dc01bb659ef02f4a"
+  },
+  "public/js/earn.js": {
+    "before": "2ea637656c1e0a1a0a7239d459667e7b155b184d826caa3bc443ffcab36d31f9",
+    "after": "2f22a3a2939478ab42a6fe6cd08bfddcbd807bca26b3805012af2fd40f61b7bb"
+  },
+  "public/index.html": {
+    "before": "bd991711460bcfe252d4ef6cc5203e6a34b8c3c101184353434a2fc0e5d60fae",
+    "after": "983d65fca77fcc5281142100866ccdd1febf5299049c0f942e19f8aa1e4ff1a5"
+  }
+}

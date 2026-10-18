@@ -1,0 +1,43 @@
+{
+  "deployed": true,
+  "release": "assets-quantity-20261010-204815",
+  "backup_directory": "/opt/wg-platform/backups/assets-quantity-20261010-204815",
+  "completed_at_utc": "2026-10-10T20:48:15.633634+00:00",
+  "files": [
+    "public/js/assets.js",
+    "public/js/trade-account.js",
+    "public/js/page-loader.js",
+    "public/index.html"
+  ],
+  "protected_sources_unchanged": true,
+  "env_unchanged": true,
+  "service": {
+    "MainPID": "9731",
+    "ActiveState": "active",
+    "SubState": "running"
+  },
+  "service_restarted": false,
+  "database_accessed": false,
+  "static": [
+    {
+      "uri": "/",
+      "status": 200,
+      "sha256": "974440c89b12657f4dd4b36d475c71de0b2d6208d463659a2cbc10b9038c7fc3"
+    },
+    {
+      "uri": "/js/assets.js?v=20261011-aix-quantity",
+      "status": 200,
+      "sha256": "7b6d59d1e1f3c09afc6786fd07f8c9f7c349c76ad8602f7951f357bb00ed6801"
+    },
+    {
+      "uri": "/js/trade-account.js?v=32-assets",
+      "status": 200,
+      "sha256": "99bfa696a81c3dbe6bc676ef7d80a7e639b9280edf7048edd63dd688e128e09d"
+    },
+    {
+      "uri": "/js/page-loader.js?v=5-assets",
+      "status": 200,
+      "sha256": "1b82a25c4ea1f9fa3025d037fe506808eb4516d2b6bf2ddc8d8bc84a2fe1c2de"
+    }
+  ]
+}

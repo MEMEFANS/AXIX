@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>AxiX 产品实况</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html,body { width:1080px; height:1920px; overflow:hidden; }
+  body { font-family:"Microsoft YaHei","PingFang SC",sans-serif; color:#c7d5d2;
+    background:
+      radial-gradient(900px 500px at 50% -5%, rgba(79,209,181,.14), transparent 60%),
+      radial-gradient(700px 400px at 50% 105%, rgba(79,209,181,.08), transparent 60%),
+      linear-gradient(170deg,#07100f 0%,#0a1112 55%,#081211 100%);
+    position:relative; display:flex; flex-direction:column; padding:60px 70px 52px; }
+  .wm { position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    font-size:200px; font-weight:900; letter-spacing:18px; color:rgba(79,209,181,.045); pointer-events:none; }
+  .top { display:flex; align-items:center; gap:20px; }
+  .top img { width:72px; height:72px; border-radius:17px; box-shadow:0 0 30px rgba(79,209,181,.4); }
+  .brand { font-size:35px; font-weight:900; color:#eaf6f3; }
+  .brand b { color:#4fd1b5; }
+  .hero { text-align:center; margin-top:40px; }
+  .hero h1 { font-size:84px; font-weight:900; letter-spacing:5px;
+    background:linear-gradient(100deg,#8ff0dc,#4fd1b5 50%,#b9f4e6);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    text-shadow:0 0 60px rgba(79,209,181,.3); }
+  .hero p { margin-top:16px; font-size:29px; color:#7d9691; letter-spacing:9px; }
+  .shot { margin-top:44px; }
+  .win { background:#0c1517; border:2px solid #29413e; border-radius:22px; overflow:hidden;
+    box-shadow:0 24px 70px rgba(0,0,0,.55), 0 0 50px rgba(79,209,181,.10); }
+  .bar { height:52px; background:#101b1d; border-bottom:1px solid #1f3634; display:flex; align-items:center;
+    gap:10px; padding:0 22px; }
+  .dot { width:16px; height:16px; border-radius:50%; }
+  .d1 { background:#f26c78; } .d2 { background:#f6c454; } .d3 { background:#50d2c2; }
+  .url { margin-left:16px; flex:1; height:32px; border-radius:9px; background:#0a1112; border:1px solid #1f3634;
+    display:flex; align-items:center; padding:0 18px; font-size:19px; color:#5f7a73; }
+  .imgbox { overflow:hidden; position:relative; }
+  .imgbox img { display:block; width:100%; height:100%; object-fit:cover; object-position:top center; }
+  .big .imgbox { height:528px; }
+  .pair { display:flex; gap:32px; margin-top:34px; }
+  .pair .win { flex:1; }
+  .pair .bar { height:44px; }
+  .pair .imgbox { height:300px; }
+  .cap { margin-top:16px; text-align:center; font-size:24px; font-weight:800; color:#9fe8d8; }
+  .pair .cap { font-size:22px; }
+  .strip { margin-top:auto; display:flex; gap:16px; }
+  .st { flex:1; text-align:center; background:#0d2020; border:1px solid #24493f; border-radius:18px; padding:22px 6px 18px; }
+  .st .v { font-size:34px; font-weight:900; color:#4fd1b5; }
+  .st .t { margin-top:6px; font-size:19px; color:#7d9691; }
+  .cta { margin-top:26px; text-align:center; }
+  .cta .btn { display:inline-block; font-size:40px; font-weight:900; color:#04211b; letter-spacing:8px;
+    background:linear-gradient(135deg,#8ff0dc,#4fd1b5); border-radius:999px; padding:26px 100px;
+    box-shadow:0 20px 60px rgba(79,209,181,.35); }
+  .foot { margin-top:32px; text-align:center; font-size:21px; color:#3d5a53; letter-spacing:5px; }
+</style>
+</head>
+<body>
+<div class="wm">LIVE</div>
+<div class="top">
+  <img src="assets/brand/logo.png" alt="AxiX">
+  <div class="brand">Axi<b>X</b> Exchange</div>
+</div>
+
+<div class="hero">
+  <h1>产品实况</h1>
+  <p>真实系统 · 即刻可用</p>
+</div>
+
+<div class="shot">
+  <div class="win big">
+    <div class="bar"><span class="dot d1"></span><span class="dot d2"></span><span class="dot d3"></span>
+      <span class="url">axix.exchange · 交易终端</span></div>
+    <div class="imgbox"><img src="file:///C:/Users/cy020/AppData/Local/Temp/trae/screenshots/live_terminal.png" alt="交易终端"></div>
+  </div>
+  <div class="cap">现货 / 永续交易终端 · 实时 K 线与订单簿</div>
+</div>
+
+<div class="pair">
+  <div>
+    <div class="win">
+      <div class="bar"><span class="dot d1"></span><span class="dot d2"></span><span class="dot d3"></span></div>
+      <div class="imgbox"><img src="file:///C:/Users/cy020/AppData/Local/Temp/trae/screenshots/live_earn.png" alt="赚币"></div>
+    </div>
+    <div class="cap">矿机 · 质押</div>
+  </div>
+  <div>
+    <div class="win">
+      <div class="bar"><span class="dot d1"></span><span class="dot d2"></span><span class="dot d3"></span></div>
+      <div class="imgbox"><img src="file:///C:/Users/cy020/AppData/Local/Temp/trae/screenshots/live_leaderboard.png" alt="排行榜"></div>
+    </div>
+    <div class="cap">收益排行榜</div>
+  </div>
+</div>
+
+<div class="strip">
+  <div class="st"><div class="v">实时</div><div class="t">行情数据刷新</div></div>
+  <div class="st"><div class="v">全功能</div><div class="t">交易/挖矿/跟单</div></div>
+  <div class="st"><div class="v">手机端</div><div class="t">全页面适配</div></div>
+</div>
+
+<div class="cta"><span class="btn">立即体验 AxiX</span></div>
+<div class="foot">AXIX EXCHANGE · BNB SMART CHAIN</div>
+</body>
+</html>

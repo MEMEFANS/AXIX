@@ -1,0 +1,122 @@
+{
+  "deployed": true,
+  "release": "admin-security-20261011-014311",
+  "backup_directory": "/opt/wg-platform/backups/admin-security-20261011-014311",
+  "completed_at_utc": "2026-10-11T01:43:33.448679+00:00",
+  "files": [
+    "public/js/admin-dialogs.js",
+    "public/js/admin-lottery.js",
+    "public/js/funds-admin.js",
+    "public/js/operator-admin.js",
+    "public/js/page-loader.js",
+    "public/js/support-chat.js",
+    "public/js/withdraw-admin.js",
+    "public/styles/funds-admin.css",
+    "public/sw.js",
+    "src/admin-security.js",
+    "src/funds-admin-api.js",
+    "src/lottery-service.js",
+    "src/server.js",
+    "public/admin.html",
+    "public/funds-admin.html",
+    "public/index.html",
+    "public/withdraw-admin.html"
+  ],
+  "service": {
+    "MainPID": "15407",
+    "ActiveState": "active",
+    "SubState": "running"
+  },
+  "service_restarted": true,
+  "protected_files_unchanged": 230,
+  "env_unchanged": true,
+  "wallet_service_unchanged": true,
+  "database_tables_checked": 46,
+  "ledger_unchanged_during_file_switch": true,
+  "database_tables_changed_after_normal_service_resumed": [
+    "a_token_team_levels",
+    "wallet_users"
+  ],
+  "database_restored": false,
+  "withdrawal_settings_and_frozen_accounts_unchanged": true,
+  "candidate_verification": {
+    "isolatedDatabase": true,
+    "readOnlyCandidateApi": true,
+    "adjustmentsChecked": 33,
+    "socialRecordsChecked": 106,
+    "historicalScriptsSuppressed": true
+  },
+  "verification": {
+    "static": [
+      {
+        "uri": "/",
+        "status": 200,
+        "sha256": "d34e879aadc8f8153187037407bff3395e897859ee6376dba36d45af16c75e6a"
+      },
+      {
+        "uri": "/admin.html",
+        "status": 200,
+        "sha256": "17c48d5c6a71ddb16aaa5e784204143928d170c9d74593c064d85f0f8c25bbf5"
+      },
+      {
+        "uri": "/funds-admin.html",
+        "status": 200,
+        "sha256": "66c82c4aca0eea01d25016152fcf1ad83201f87872c61eb323eef3013a6a58ce"
+      },
+      {
+        "uri": "/js/operator-admin.js?v=20261011-security-2",
+        "status": 200,
+        "sha256": "3fef20c6f1cce6927ee86618dd8c694aece6058bc34e9c3f2e8f6cb35c68cc3b"
+      },
+      {
+        "uri": "/js/admin-lottery.js?v=20261011-security-2",
+        "status": 200,
+        "sha256": "64b00c2e84208ba3b349c94730a812923424214763ac6490378d5e62b424827d"
+      },
+      {
+        "uri": "/js/admin-dialogs.js?v=20261011-security-1",
+        "status": 200,
+        "sha256": "13fa76a27f4b40ce57a75be6b8da22d89c0227b809cf0c73bd7103c34460c0bd"
+      },
+      {
+        "uri": "/js/funds-admin.js?v=20261011-security-1",
+        "status": 200,
+        "sha256": "3cc6f416a5709c7bbbcd1153aa62fefa09f87da14c36e011644c496589434c28"
+      },
+      {
+        "uri": "/styles/funds-admin.css?v=20261011-security-1",
+        "status": 200,
+        "sha256": "37347a79b1f7c326e364ac32b38ea1fdbb20add7dad00bd4dcf5adab370c062a"
+      },
+      {
+        "uri": "/js/support-chat.js?v=20261011-security-2",
+        "status": 200,
+        "sha256": "091f167a00c5a67af2e2f0564e04b84914145fcf617a1715104a3b6a91be1906"
+      },
+      {
+        "uri": "/js/page-loader.js?v=20261011-pages-security-2",
+        "status": 200,
+        "sha256": "3dd3cc90c8dca3e5225a6bea302548ef5113849508dec0b9e026145434d52d2e"
+      },
+      {
+        "uri": "/sw.js?v=9",
+        "status": 200,
+        "sha256": "017e8dbd955b37521c81376afac19e53770305944bcb98f7faffc2fbf050cc9b"
+      },
+      {
+        "uri": "/js/withdraw-admin.js",
+        "status": 200,
+        "sha256": "3b32637ed0a38f0f8b8e08ed480f23fdab0b6bad8de771878b9b33068551a3a9"
+      }
+    ],
+    "operator_login_verified": true,
+    "funds_token_verified": true,
+    "operator_cookie_denied_funds_access": true,
+    "legacy_funds_api_denied": true,
+    "cross_site_funds_denied": true,
+    "social_records_checked": 106,
+    "unsafe_images_suppressed": 50,
+    "historical_script_images_blocked": 2,
+    "automatic_withdrawal_enabled": false
+  }
+}

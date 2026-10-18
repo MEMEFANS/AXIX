@@ -1,0 +1,85 @@
+{
+  "captured_at_utc": "2026-10-10T19:37:53.893031+00:00",
+  "day_start_beijing": "2026-10-11T00:00:00+08:00",
+  "today": {
+    "a_token_miner_releases": {
+      "count": 5074,
+      "amount_A": "20017.574518479938269631"
+    },
+    "a_token_stake_rewards": {
+      "count": 43,
+      "amount_A": "377.269203322429347367"
+    },
+    "a_token_team_rewards": {
+      "count": 15965,
+      "amount_A": "10634.411657634300254589"
+    },
+    "a_token_transfers": {
+      "count": 8,
+      "amount_A": "106.66666668"
+    },
+    "a_token_trades": {
+      "count": 2,
+      "amount_A": "0.0"
+    },
+    "a_token_orders": {
+      "count": 2,
+      "amount_A": "0.0"
+    },
+    "a_token_activations": {
+      "count": 116,
+      "amount_A": "0.0"
+    },
+    "a_token_burns": {
+      "count": 9,
+      "amount_A": "26.68166667"
+    },
+    "platform_referral_links": {
+      "count": 73
+    },
+    "ai_managed_rewards": {
+      "count": 2
+    },
+    "lottery_wins": {
+      "count": 133
+    }
+  },
+  "stake_interest": "102.83420332242934737",
+  "stake_principal_returned": "274.434999999999999997",
+  "team_by_kind": {
+    "miner_direct": {
+      "count": 5033,
+      "amount": "2982.669960879629624889"
+    },
+    "miner_indirect": {
+      "count": 4988,
+      "amount": "1973.298067307098763563"
+    },
+    "miner_team": {
+      "count": 4184,
+      "amount": "4331.57534366126542963"
+    },
+    "miner_level_diff": {
+      "count": 1635,
+      "amount": "1306.449193059413579397"
+    },
+    "stake_direct": {
+      "count": 42,
+      "amount": "15.367980498364402105"
+    },
+    "stake_indirect": {
+      "count": 39,
+      "amount": "10.12206995875690314"
+    },
+    "stake_level_diff": {
+      "count": 26,
+      "amount": "12.15969040234139388"
+    },
+    "stake_team": {
+      "count": 18,
+      "amount": "2.769351867430157985"
+    }
+  },
+  "issue_counts": {},
+  "issues": {}
+}

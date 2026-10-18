@@ -1,0 +1,3458 @@
+[
+ {
+  "text": "<label class=\"mt-setting-row\">价格显示<select id=\"mt-price-mode\"><option value=\"last\">最新价格</option><option value=\"mark\">标记价格</option></select></label><label class=\"mt-setting-row\">显示成交量<input id=\"mt-volume-setting\" type=\"checkbox\"></label><label class=\"mt-setting-row\">显示图表网格<input id=\"mt-grid-setting\" type=\"checkbox\"></label>",
+  "files": [
+   "mobile-trade.js"
+  ]
+ },
+ {
+  "text": "<button type=\"button\" data-mt-action=\"fit\">日期范围</button><time id=\"mt-clock\"></time><button type=\"button\" data-mt-action=\"percent\" aria-pressed=\"false\">%</button><button type=\"button\" data-mt-action=\"log\" aria-pressed=\"false\">log</button><button type=\"button\" data-mt-action=\"auto\" class=\"active\">自动</button>",
+  "files": [
+   "mobile-trade.js"
+  ]
+ },
+ {
+  "text": "<ol class=\"mt-help\"><li><b>选择交易市场</b><p>点击交易对可切换币种、现货与永续合约。</p></li><li><b>查看行情或下单</b><p>底部「市场」查看图表，「交易」设置订单类型、方向和数量。</p></li><li><b>管理账户与订单</b><p>连接钱包后，在「账户」查看资产、持仓和委托记录。</p></li></ol><button class=\"mt-sheet-primary\" type=\"button\">开始交易</button>",
+  "files": [
+   "mobile-trade.js"
+  ]
+ },
+ {
+  "text": "<h2>资金费</h2><p>永续合约每 8 小时结算</p><div><span>当前资金费率</span><strong id=\"mt-funding-rate\">—</strong></div><div><span>距下次结算</span><strong id=\"mt-funding-countdown\">—</strong></div><p id=\"mt-funding-note\">暂无资金费数据</p>",
+  "files": [
+   "mobile-trade.js"
+  ]
+ },
+ {
+  "text": "<select id=\"mt-order-type\" aria-label=\"订单类型\"><option value=\"market\">市价</option><option value=\"limit\">限价</option><option value=\"trigger\">条件单</option></select><span class=\"mt-spot-tag\">现货</span>",
+  "files": [
+   "mobile-trade.js"
+  ]
+ },
+ {
+  "text": "平仓数量\" oninput=\"this.parentElement.querySelectorAll('.position-close-percents button').forEach(b=>b.classList.remove('active'))\"><div class=\"position-close-percents\" role=\"group\" aria-label=\"",
+  "files": [
+   "trade-account.js"
+  ]
+ },
+ {
+  "text": "<button onclick=\"window.ATokenTransfer.open()\">互转</button><button onclick=\"window.ATokenWithdrawal.open()\">提现</button><button onclick=\"window.ExchangeAssets.openTrade('A')\">交易</button>",
+  "files": [
+   "assets.js"
+  ]
+ },
+ {
+  "text": "<button onclick=\"window.ExchangeAssets.openFunding('deposit')\">充值</button><button onclick=\"window.ExchangeAssets.openFunding('withdraw')\">提现</button>",
+  "files": [
+   "assets.js"
+  ]
+ },
+ {
+  "text": "<label><input id=\"mt-percent\" type=\"number\" min=\"0\" max=\"100\" value=\"0\" inputmode=\"numeric\" aria-label=\"下单余额百分比\"><span>%</span></label>",
+  "files": [
+   "mobile-trade.js"
+  ]
+ },
+ {
+  "text": "<button type=\"button\" class=\"portal-button primary referral-claim-btn\" onclick=\"claimReferralRewards(this)\">立即领取</button>",
+  "files": [
+   "referrals.js"
+  ]
+ },
+ {
+  "text": "<div class=\"community-empty\"><span aria-hidden=\"true\">↗</span><h3>社群入口即将开放</h3><p>链接发布后将在这里显示，欢迎稍后回来查看。</p></div>",
+  "files": [
+   "community-links.js"
+  ]
+ },
+ {
+  "text": "<div class=\"mt-sheet-head\"><h2 id=\"mt-sheet-title\"></h2><button type=\"button\" aria-label=\"关闭面板\">",
+  "files": [
+   "mobile-trade.js"
+  ]
+ },
+ {
+  "text": "🎯 每日涨跌幅 (%)，正=涨 负=跌<input id=\"a-daily-pct\" type=\"number\" min=\"-95\" max=\"95\" step=\"0.1\" value=\"",
+  "files": [
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": "<th>时间</th><th>方向</th><th>类型</th><th>委托价</th><th>委托量</th><th>成交价</th><th>状态</th><th>操作</th>",
+  "files": [
+   "a-token-trade.js"
+  ]
+ },
+ {
+  "text": "波动率系数 (0.2 极平 ~ 3 剧烈)<input id=\"a-vol\" type=\"number\" min=\"0.1\" max=\"5\" step=\"0.1\" value=\"",
+  "files": [
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": "style=\"background:rgba(80,210,194,.14);border-color:rgba(80,210,194,.35)\">🔗 复制邀请链接",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": "<div style=\"text-align:center;padding:40px;color:var(--admin-muted)\">正在加载...</div>",
+  "files": [
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": "<th>时间</th><th>方向</th><th>类型</th><th>委托价</th><th>委托量</th><th>状态</th><th>操作</th>",
+  "files": [
+   "a-token-trade.js"
+  ]
+ },
+ {
+  "text": "<tr><td colspan=\"6\" class=\"account-empty\">没有符合条件的资产</td></tr>",
+  "files": [
+   "assets.js"
+  ]
+ },
+ {
+  "text": "<tr><td colspan=\"9\" class=\"account-empty\">暂无交易及账户流水</td></tr>",
+  "files": [
+   "assets.js"
+  ]
+ },
+ {
+  "text": "<tr><td colspan=\"7\" class=\"account-empty\">暂无待审核提现</td></tr>",
+  "files": [
+   "withdraw-admin.js"
+  ]
+ },
+ {
+  "text": "<tr><td colspan=\"7\" class=\"account-empty\">暂无提现记录</td></tr>",
+  "files": [
+   "a-token-withdrawal.js"
+  ]
+ },
+ {
+  "text": "<tr><td colspan=\"7\" class=\"account-empty\">暂无互转记录</td></tr>",
+  "files": [
+   "assets.js"
+  ]
+ },
+ {
+  "text": "<tr><td colspan=\"5\" class=\"account-empty\">暂无收益记录</td></tr>",
+  "files": [
+   "assets.js"
+  ]
+ },
+ {
+  "text": "平仓比例\"><button type=\"button\" onclick=\"setPerpClosePercent('",
+  "files": [
+   "trade-account.js"
+  ]
+ },
+ {
+  "text": "<tr><td colspan=\"6\" class=\"account-empty\">暂无跟单收益</td></tr>",
+  "files": [
+   "wallet-funds.js"
+  ]
+ },
+ {
+  "text": "<tr><td colspan=\"7\" class=\"account-empty\">暂无充值记录</td></tr>",
+  "files": [
+   "wallet-funds.js"
+  ]
+ },
+ {
+  "text": "<tr><td colspan=\"6\" class=\"account-empty\">暂无提现记录</td></tr>",
+  "files": [
+   "wallet-funds.js"
+  ]
+ },
+ {
+  "text": "<tr><td colspan=\"5\" class=\"account-empty\">暂无提现记录</td></tr>",
+  "files": [
+   "wallet-funds.js"
+  ]
+ },
+ {
+  "text": "累计净收益 = 已实现毛盈亏 − 交易手续费 + 资金费用净额。手续费包含未平仓已支付的开仓费；未实现盈亏不计入。",
+  "files": [
+   "trade-history.js"
+  ]
+ },
+ {
+  "text": "<tr><td colspan=\"7\" class=\"account-empty\">加载中…</td></tr>",
+  "files": [
+   "assets.js"
+  ]
+ },
+ {
+  "text": "<tr><td colspan=\"5\" class=\"account-empty\">加载中…</td></tr>",
+  "files": [
+   "assets.js"
+  ]
+ },
+ {
+  "text": "<tr><td class=\"empty-row\" colspan=\"9\">正在读取账本…</td></tr>",
+  "files": [
+   "ledger.js"
+  ]
+ },
+ {
+  "text": "<div class=\"admin-empty\">还没有社群链接，从上方选择类型添加第一个入口。</div>",
+  "files": [
+   "admin-community.js"
+  ]
+ },
+ {
+  "text": "<tr><td class=\"empty-row\" colspan=\"9\">暂无成交记录</td></tr>",
+  "files": [
+   "ledger.js"
+  ]
+ },
+ {
+  "text": "<div class=\"th-open-note\">开仓成交 · 手续费已扣除，平仓后结算收益</div>",
+  "files": [
+   "trade-history.js"
+  ]
+ },
+ {
+  "text": "已取消网络切换：平台使用 BNB Smart Chain (BSC)，请在钱包中确认切换到 BSC 后重试",
+  "files": [
+   "wallet.js"
+  ]
+ },
+ {
+  "text": "<tr><td class=\"empty-row\" colspan=\"7\">暂无成交</td></tr>",
+  "files": [
+   "core.js",
+   "strategy.js"
+  ]
+ },
+ {
+  "text": "${P.metric('团队质押业绩', teamAmount(team?.teamStakeA),",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": "${P.metric('团队持币总量', teamAmount(team?.teamHoldA),",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": "<div class=\"aim-analysis-loading\">分析数据获取中…</div>",
+  "files": [
+   "ai-managed.js"
+  ]
+ },
+ {
+  "text": "直推 15% · 间推 10% · A1–A9 级差 / 平级奖励 · A10 均分手续费分红池",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": ")}${P.metric('当前委托', P.number(orders.length, 0),",
+  "files": [
+   "portfolio.js"
+  ]
+ },
+ {
+  "text": "<div class=\"mt-book-display\" aria-label=\"盘口显示\">",
+  "files": [
+   "mobile-trade.js"
+  ]
+ },
+ {
+  "text": "<span class=\"admin-action-note\">请先启用自动提现</span>",
+  "files": [
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": "onclick=\"window.atradeOrderType('limit')\">限价委托",
+  "files": [
+   "a-token-trade.js"
+  ]
+ },
+ {
+  "text": "\" onclick=\"window.earnSwitch('activation')\">激活",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": "<span class=\"badge badge-stop\">连接钱包后查看</span>",
+  "files": [
+   "strategy.js"
+  ]
+ },
+ {
+  "text": "QQ社群推荐上传，支持 PNG/JPG/WEBP（≤2MB）。前台将优先显示二维码卡片。",
+  "files": [
+   "admin.html"
+  ]
+ },
+ {
+  "text": "<div class=\"terminal-empty\">暂无 AIX 持仓</div>",
+  "files": [
+   "a-token-trade.js"
+  ]
+ },
+ {
+  "text": "\" onclick=\"window.earnSwitch('staking')\">质押",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": "<div class=\"terminal-empty\">市价模式无当前委托</div>",
+  "files": [
+   "trade-account.js"
+  ]
+ },
+ {
+  "text": "<td data-label=\"标记价格\" data-position-mark=\"",
+  "files": [
+   "trade-account.js"
+  ]
+ },
+ {
+  "text": "<td data-label=\"未实现盈亏\" data-position-pnl=\"",
+  "files": [
+   "trade-account.js"
+  ]
+ },
+ {
+  "text": "<div class=\"terminal-empty\">没有匹配的市场</div>",
+  "files": [
+   "core.js"
+  ]
+ },
+ {
+  "text": "\" onclick=\"window.earnSwitch('miner')\">矿机",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": "<span class=\"badge badge-stop\">未运行</span>",
+  "files": [
+   "strategy.js"
+  ]
+ },
+ {
+  "text": "<div class=\"terminal-empty\">暂无未成交委托</div>",
+  "files": [
+   "trade-account.js"
+  ]
+ },
+ {
+  "text": "<div class=\"terminal-empty\">暂无成交记录</div>",
+  "files": [
+   "a-token-trade.js"
+  ]
+ },
+ {
+  "text": "<span class=\"aix-tf-badge out\">转出</span>",
+  "files": [
+   "assets.js"
+  ]
+ },
+ {
+  "text": "<span class=\"ts-upline-none\">无推荐人</span>",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": "\" onclick=\"window.earnSwitch('team')\">团队",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": "⚡ 矿机产出由系统每 60 秒自动入账到用户钱包资产（含团队分润），无需手动发放",
+  "files": [
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": "<div class=\"terminal-empty\">暂无永续持仓</div>",
+  "files": [
+   "trade-account.js"
+  ]
+ },
+ {
+  "text": "<span class=\"aix-tf-badge in\">转入</span>",
+  "files": [
+   "assets.js"
+  ]
+ },
+ {
+  "text": "<span style=\"color:#f6c454\">挂单中</span>",
+  "files": [
+   "a-token-trade.js"
+  ]
+ },
+ {
+  "text": "<span style=\"color:#50d2b8\">已成交</span>",
+  "files": [
+   "a-token-trade.js"
+  ]
+ },
+ {
+  "text": "<span style=\"color:#81918e\">已撤单</span>",
+  "files": [
+   "a-token-trade.js"
+  ]
+ },
+ {
+  "text": "${P.metric('我的团队级别', team?.level > 0 ?",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": "<div class=\"log-item muted\">暂无日志</div>",
+  "files": [
+   "strategy.js"
+  ]
+ },
+ {
+  "text": "<div class=\"terminal-empty\">暂无成交</div>",
+  "files": [
+   "trade-trades.js"
+  ]
+ },
+ {
+  "text": "累计收益只统计已到账收益，返还的 AIX 单独展示；团队分润仅按收益计算。",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": "推荐奖励进入可领取余额后，由你点击“立即领取”发放到平台 USDT 余额。",
+  "files": [
+   "referrals.js"
+  ]
+ },
+ {
+  "text": "单笔平仓净收益已扣除对应开仓费及平仓费；资金费用在上方累计统计中单独计入。",
+  "files": [
+   "trade-history.js"
+  ]
+ },
+ {
+  "text": "<td data-label=\"激活矿机数\" style=\"color:",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": "<div class=\"aim-empty\">暂无跟单批次</div>",
+  "files": [
+   "ai-managed.js"
+  ]
+ },
+ {
+  "text": "<div class=\"aim-empty\">暂无执行明细</div>",
+  "files": [
+   "ai-managed.js"
+  ]
+ },
+ {
+  "text": ": ''}；权益期内跟单不重复销毁 AIX，到期后需续费才能继续跟单。",
+  "files": [
+   "ai-managed.js"
+  ]
+ },
+ {
+  "text": "<td data-label=\"直推人数\" style=\"color:",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": "连接钱包即可进入；首次资金操作时再核对一次钱包，无需邮箱或其他账号。",
+  "files": [
+   "wallet.js"
+  ]
+ },
+ {
+  "text": "为防止钓鱼与误转，链上提现只能提到当前连接的钱包地址，不可手动输入",
+  "files": [
+   "a-token-withdrawal.js",
+   "wallet-funds.js"
+  ]
+ },
+ {
+  "text": "可填写邮箱地址或 mailto: 链接；前台将打开访客的邮件应用。",
+  "files": [
+   "admin-community.js"
+  ]
+ },
+ {
+  "text": "<td data-label=\"等级\" style=\"color:",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": "链上确认仍在进行，矿机将在确认完成后自动发放，稍后刷新本页即可查看",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": "<td data-label=\"数量(AIX)\" class=\"",
+  "files": [
+   "assets.js"
+  ]
+ },
+ {
+  "text": "按已到账流水统计产出；北京时间每日结算，首个完整日结束后开始到账",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": "BNB 至平台收款地址后的 BSC 链交易哈希（txHash）：",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": "<td data-label=\"方向 / 数量\" class=\"",
+  "files": [
+   "trade-account.js"
+  ]
+ },
+ {
+  "text": "填写完整的 https:// 链接；邮箱类型可直接填写邮箱地址。",
+  "files": [
+   "admin.html"
+  ]
+ },
+ {
+  "text": "向指定钱包地址充值或扣除平台 AIX 代币余额，操作均有审计记录",
+  "files": [
+   "admin.html"
+  ]
+ },
+ {
+  "text": "人）· 手续费由转让方承担，50% 销毁 + 50% 进分红池",
+  "files": [
+   "a-token-transfer.js"
+  ]
+ },
+ {
+  "text": "<td data-label=\"30D 收益\" class=\"",
+  "files": [
+   "leaderboard.js"
+  ]
+ },
+ {
+  "text": "${P.metric('跟单账户', rows.length,",
+  "files": [
+   "leaderboard.js"
+  ]
+ },
+ {
+  "text": "%），买卖按此价撮合；每天北京时间 00:00 跳到下一档价位",
+  "files": [
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": "<span class=\"muted\">全部停止</span>",
+  "files": [
+   "overview.js",
+   "strategy.js"
+  ]
+ },
+ {
+  "text": "${field(fill ? '成交数量' : '委托数量',",
+  "files": [
+   "trade-history.js"
+  ]
+ },
+ {
+  "text": "配置服务器出款私钥并开启后，小额提现自动转出，大额由管理员放行",
+  "files": [
+   "admin.html"
+  ]
+ },
+ {
+  "text": "AIX 链上提取未启用（平台未部署 AIXPool 合约）",
+  "files": [
+   "a-token-claim.js"
+  ]
+ },
+ {
+  "text": "&nbsp;&nbsp;· A10分红池 (手续费50%)",
+  "files": [
+   "a-token-trade.js"
+  ]
+ },
+ {
+  "text": "${P.metric('榜首 30D 收益', top ?",
+  "files": [
+   "leaderboard.js"
+  ]
+ },
+ {
+  "text": "<td data-label=\"净盈亏\" class=\"",
+  "files": [
+   "assets.js"
+  ]
+ },
+ {
+  "text": "提取到当前连接钱包地址，链上交易需支付 BNB Gas",
+  "files": [
+   "a-token-claim.js"
+  ]
+ },
+ {
+  "text": "<td data-label=\"方向\" class=\"",
+  "files": [
+   "a-token-trade.js",
+   "trade-account.js"
+  ]
+ },
+ {
+  "text": "[AIX提取] 已自动退回账面余额，claimId:",
+  "files": [
+   "a-token-claim.js"
+  ]
+ },
+ {
+  "text": "确认强制过期这台矿机？（会补齐剩余 A 尾差给用户）",
+  "files": [
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": "\" placeholder=\"0x 出款交易哈希\">",
+  "files": [
+   "withdraw-admin.js"
+  ]
+ },
+ {
+  "text": "请确认钱包签名（链上交易，支付 BNB Gas）…",
+  "files": [
+   "a-token-claim.js"
+  ]
+ },
+ {
+  "text": "&nbsp;&nbsp;· 销毁 (手续费50%)",
+  "files": [
+   "a-token-trade.js"
+  ]
+ },
+ {
+  "text": "平仓净收益不含资金费用；资金费用已计入累计净收益。",
+  "files": [
+   "trade-history.js"
+  ]
+ },
+ {
+  "text": "连接钱包并登录平台后，这里只显示你自己的矿机数据",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": "确认赎回该活期质押？质押的 AIX 将返还到余额",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": "确认放行这笔大额提现并由平台出款钱包自动转出吗？",
+  "files": [
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": "例：整体风险怎么样？盈亏表现如何？当前网格区间？",
+  "files": [
+   "index.html"
+  ]
+ },
+ {
+  "text": "数值越小越靠前，也可使用列表中的上移 / 下移。",
+  "files": [
+   "admin.html"
+  ]
+ },
+ {
+  "text": "社群链接暂时无法加载，请点击「刷新链接」重试。",
+  "files": [
+   "community-links.js"
+  ]
+ },
+ {
+  "text": "原图不能超过 8MB（系统会自动压缩为小图）",
+  "files": [
+   "admin-community.js"
+  ]
+ },
+ {
+  "text": "💰 分润收益明细（矿机产出 / 质押收益）",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": "请输入 WALLET_ADMIN_TOKEN",
+  "files": [
+   "withdraw-admin.js"
+  ]
+ },
+ {
+  "text": "暂无矿机记录（请先赠送矿机或切换筛选条件）",
+  "files": [
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": "请先保存或清空表单中的修改，再操作列表。",
+  "files": [
+   "admin-community.js"
+  ]
+ },
+ {
+  "text": "档位越高 · 月化越高 · 每日自动结算",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": ")}${P.metric('无效直推',",
+  "files": [
+   "referrals.js"
+  ]
+ },
+ {
+  "text": "${P.metric('可领取的奖励',",
+  "files": [
+   "referrals.js"
+  ]
+ },
+ {
+  "text": ")}${P.metric('累计收益',",
+  "files": [
+   "staking.js"
+  ]
+ },
+ {
+  "text": "：若沿链第一个够级别的上级是 A10 →",
+  "files": [
+   "index.html"
+  ]
+ },
+ {
+  "text": "Telegram Chat ID（可选）",
+  "files": [
+   "index.html"
+  ]
+ },
+ {
+  "text": "请先安装 MetaMask 等钱包插件",
+  "files": [
+   "a-token-claim.js"
+  ]
+ },
+ {
+  "text": "表单有未保存的修改，确认放弃这些修改？",
+  "files": [
+   "admin-community.js"
+  ]
+ },
+ {
+  "text": "${signal === '做多' ?",
+  "files": [
+   "ai-managed.js"
+  ]
+ },
+ {
+  "text": ": signal === '做空' ?",
+  "files": [
+   "ai-managed.js"
+  ]
+ },
+ {
+  "text": "暂无直推用户，分享邀请链接邀请好友加入",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": "矿机\" loading=\"lazy\">",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": "${P.metric('未实现盈亏',",
+  "files": [
+   "portfolio.js"
+  ]
+ },
+ {
+  "text": ")}${P.metric('已质押',",
+  "files": [
+   "staking.js"
+  ]
+ },
+ {
+  "text": "单笔最小 10 USDT · 无手续费",
+  "files": [
+   "wallet-funds.js"
+  ]
+ },
+ {
+  "text": "管理前台社群与支持入口，保存后即时生效",
+  "files": [
+   "admin.html"
+  ]
+ },
+ {
+  "text": "AIX / USDT · 撮合价 $",
+  "files": [
+   "a-token-trade.js"
+  ]
+ },
+ {
+  "text": "BSC（AIX BEP-20 代币）",
+  "files": [
+   "a-token-withdrawal.js"
+  ]
+ },
+ {
+  "text": "该套餐您已激活，每个钱包仅限激活一次",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": "${P.metric('有效直推',",
+  "files": [
+   "referrals.js"
+  ]
+ },
+ {
+  "text": "${P.metric('可用余额',",
+  "files": [
+   "staking.js"
+  ]
+ },
+ {
+  "text": "${field('对应开仓手续费',",
+  "files": [
+   "trade-history.js"
+  ]
+ },
+ {
+  "text": "${field('本次平仓手续费',",
+  "files": [
+   "trade-history.js"
+  ]
+ },
+ {
+  "text": "请在钱包中确认 USDT 转账...",
+  "files": [
+   "wallet-funds.js"
+  ]
+ },
+ {
+  "text": "交易已广播，等待确认… 交易哈希：",
+  "files": [
+   "a-token-claim.js"
+  ]
+ },
+ {
+  "text": "AIX / USDT · 实时行情",
+  "files": [
+   "a-token-trade.js"
+  ]
+ },
+ {
+  "text": "请填写限价（USDT / AIX）",
+  "files": [
+   "a-token-trade.js"
+  ]
+ },
+ {
+  "text": "请填写接收方用户 ID 和转让数量",
+  "files": [
+   "a-token-transfer.js"
+  ]
+ },
+ {
+  "text": "加载超时，请点击「刷新链接」重试。",
+  "files": [
+   "community-links.js"
+  ]
+ },
+ {
+  "text": "该套餐正在链上确认中，无需重复支付",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": "A · 90 天共 1500 A）",
+  "files": [
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": "👤 设置用户等级（A1-A10）",
+  "files": [
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": "${field('本次平仓数量',",
+  "files": [
+   "trade-history.js"
+  ]
+ },
+ {
+  "text": "USDT · 开平仓明细暂不可核实",
+  "files": [
+   "trade-history.js"
+  ]
+ },
+ {
+  "text": "输入钱包地址查看当前 AIX 余额",
+  "files": [
+   "admin.html"
+  ]
+ },
+ {
+  "text": "链上交易失败（reverted）",
+  "files": [
+   "a-token-claim.js"
+  ]
+ },
+ {
+  "text": "暂无成交 · 等待首笔交易 🎉",
+  "files": [
+   "a-token-trade.js"
+  ]
+ },
+ {
+  "text": "请先连接钱包再进行 AIX 互转",
+  "files": [
+   "a-token-transfer.js"
+  ]
+ },
+ {
+  "text": "BSC 收款地址（当前连接钱包）",
+  "files": [
+   "a-token-withdrawal.js",
+   "wallet-funds.js"
+  ]
+ },
+ {
+  "text": "请先刷新列表，读取配置后再保存。",
+  "files": [
+   "admin-community.js"
+  ]
+ },
+ {
+  "text": "项并立即生效（已写入 .env）",
+  "files": [
+   "ai.js"
+  ]
+ },
+ {
+  "text": "买多少 USDT → 到手多少币",
+  "files": [
+   "core.js"
+  ]
+ },
+ {
+  "text": "支持最多 18 位小数 · 最小",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": "，确认后将自动发放矿机，请稍候…",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": "USDT，或 24 小时累计达到",
+  "files": [
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": "确认重新尝试自动转出这笔提现吗？",
+  "files": [
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": "A · 30 天共 100 A）",
+  "files": [
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": "${field('平仓毛盈亏',",
+  "files": [
+   "trade-history.js"
+  ]
+ },
+ {
+  "text": "请输入拒绝原因（余额将原额退回）",
+  "files": [
+   "withdraw-admin.js"
+  ]
+ },
+ {
+  "text": "例如：AxiX 官方 TG 社群",
+  "files": [
+   "admin.html"
+  ]
+ },
+ {
+  "text": "最小提取数量为 100 AIX",
+  "files": [
+   "a-token-claim.js"
+  ]
+ },
+ {
+  "text": "交易服务暂时不可用，请稍后重试",
+  "files": [
+   "a-token-trade.js"
+  ]
+ },
+ {
+  "text": "AIX 余额不足 · 当前可用",
+  "files": [
+   "a-token-transfer.js"
+  ]
+ },
+ {
+  "text": "最小提现金额为 100 AIX",
+  "files": [
+   "a-token-withdrawal.js"
+  ]
+ },
+ {
+  "text": "链接数据暂不可用，请稍后重试。",
+  "files": [
+   "community-links.js"
+  ]
+ },
+ {
+  "text": "矿机服务暂时不可用，请稍后重试",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": "激活 Mini(0.002)：",
+  "files": [
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": "🎯 阶梯恒定价：今日全天恒定",
+  "files": [
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": "推荐服务暂时不可用，请稍后重试",
+  "files": [
+   "referrals.js"
+  ]
+ },
+ {
+  "text": "最小提现金额为 10 USDT",
+  "files": [
+   "wallet-funds.js"
+  ]
+ },
+ {
+  "text": "180 天 · 日化 0.8%",
+  "files": [
+   "index.html"
+  ]
+ },
+ {
+  "text": "360 天 · 日化 1.2%",
+  "files": [
+   "index.html"
+  ]
+ },
+ {
+  "text": "合约已暂停提取（平台维护中）",
+  "files": [
+   "a-token-claim.js"
+  ]
+ },
+ {
+  "text": "└ 分红池（手续费 50%）",
+  "files": [
+   "a-token-transfer.js"
+  ]
+ },
+ {
+  "text": "\" alt=\"二维码预览\">",
+  "files": [
+   "admin-community.js"
+  ]
+ },
+ {
+  "text": "👥 团队推荐 · 分润生态",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": "点击图表选择起点，再选择终点",
+  "files": [
+   "mobile-trade.js"
+  ]
+ },
+ {
+  "text": "USDT 后，需要人工放行。",
+  "files": [
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": "30 天 · 日化 0.4%",
+  "files": [
+   "index.html"
+  ]
+ },
+ {
+  "text": "90 天 · 日化 0.6%",
+  "files": [
+   "index.html"
+  ]
+ },
+ {
+  "text": "例如：活动奖励 / 违规扣除",
+  "files": [
+   "admin.html"
+  ]
+ },
+ {
+  "text": "该提取已使用过，请重新申请",
+  "files": [
+   "a-token-claim.js"
+  ]
+ },
+ {
+  "text": "请输入支付 USDT 数量",
+  "files": [
+   "a-token-trade.js"
+  ]
+ },
+ {
+  "text": "AIX 余额不足（当前可用",
+  "files": [
+   "a-token-trade.js"
+  ]
+ },
+ {
+  "text": "└ 销毁（手续费 50%）",
+  "files": [
+   "a-token-transfer.js"
+  ]
+ },
+ {
+  "text": "请输入有效的 AIX 数量",
+  "files": [
+   "a-token-transfer.js",
+   "earn.js"
+  ]
+ },
+ {
+  "text": "已撤销，AIX 余额已返回",
+  "files": [
+   "a-token-withdrawal.js"
+  ]
+ },
+ {
+  "text": "请先连接钱包再进行链上提现",
+  "files": [
+   "a-token-withdrawal.js",
+   "wallet-funds.js"
+  ]
+ },
+ {
+  "text": "」？删除后前台入口将消失。",
+  "files": [
+   "admin-community.js"
+  ]
+ },
+ {
+  "text": "激活 Pro(0.05)：",
+  "files": [
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": "WebSocket 实时价",
+  "files": [
+   "strategy.js"
+  ]
+ },
+ {
+  "text": "',this)\">市价平仓",
+  "files": [
+   "trade-account.js"
+  ]
+ },
+ {
+  "text": "/USDT · 累计净收益",
+  "files": [
+   "trade-history.js"
+  ]
+ },
+ {
+  "text": "AIX 代币充值 / 扣除",
+  "files": [
+   "admin.html"
+  ]
+ },
+ {
+  "text": "加载 ethers 失败",
+  "files": [
+   "a-token-claim.js"
+  ]
+ },
+ {
+  "text": "[AIX提取] 退款失败",
+  "files": [
+   "a-token-claim.js"
+  ]
+ },
+ {
+  "text": "AIX 代币交易请求失败",
+  "files": [
+   "a-token-trade.js"
+  ]
+ },
+ {
+  "text": "请输入卖出 AIX 数量",
+  "files": [
+   "a-token-trade.js"
+  ]
+ },
+ {
+  "text": "USDT 余额不足（当前",
+  "files": [
+   "a-token-trade.js"
+  ]
+ },
+ {
+  "text": "\" alt=\"二维码\">",
+  "files": [
+   "admin-community.js"
+  ]
+ },
+ {
+  "text": "已保存，前台链接已更新。",
+  "files": [
+   "admin-community.js"
+  ]
+ },
+ {
+  "text": "二维码已就绪，保存后生效",
+  "files": [
+   "admin-community.js"
+  ]
+ },
+ {
+  "text": "未填写任何内容，无变更。",
+  "files": [
+   "ai.js"
+  ]
+ },
+ {
+  "text": "点击盘口价格可填入限价单",
+  "files": [
+   "mobile-trade.js"
+  ]
+ },
+ {
+  "text": "USDT 平台测试余额？",
+  "files": [
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": "🎯 当日行程：起点 $",
+  "files": [
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": "· 仅支持原生 USDT",
+  "files": [
+   "wallet-funds.js"
+  ]
+ },
+ {
+  "text": "正在生成平台签名授权…",
+  "files": [
+   "a-token-claim.js"
+  ]
+ },
+ {
+  "text": "AIX 已转入你的钱包",
+  "files": [
+   "a-token-claim.js"
+  ]
+ },
+ {
+  "text": "💥 手续费（50%）",
+  "files": [
+   "a-token-transfer.js"
+  ]
+ },
+ {
+  "text": "互转成功 · 对方实收",
+  "files": [
+   "a-token-transfer.js"
+  ]
+ },
+ {
+  "text": "输入数量后开始产生收益",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": "，确认后将自动发放矿机",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": "起点已选，点击终点完成",
+  "files": [
+   "mobile-trade.js"
+  ]
+ },
+ {
+  "text": "正在核对币安市场...",
+  "files": [
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": "0x... 留空=全部",
+  "files": [
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": "保证金 / 维持保证金",
+  "files": [
+   "trade-account.js"
+  ]
+ },
+ {
+  "text": "买入金额过小，无法成交",
+  "files": [
+   "trade-account.js"
+  ]
+ },
+ {
+  "text": "分析 Extended",
+  "files": [
+   "index.html"
+  ]
+ },
+ {
+  "text": "查询用户 AIX 余额",
+  "files": [
+   "admin.html"
+  ]
+ },
+ {
+  "text": "提取 AIX 到钱包",
+  "files": [
+   "a-token-claim.js"
+  ]
+ },
+ {
+  "text": "+ 50%进A10池",
+  "files": [
+   "a-token-trade.js"
+  ]
+ },
+ {
+  "text": "我的 AIX 余额：",
+  "files": [
+   "a-token-transfer.js"
+  ]
+ },
+ {
+  "text": "获取报价失败，请重试",
+  "files": [
+   "a-token-withdrawal.js"
+  ]
+ },
+ {
+  "text": "加载记录失败，请重试",
+  "files": [
+   "a-token-withdrawal.js"
+  ]
+ },
+ {
+  "text": "已生成可保存的二维码",
+  "files": [
+   "admin-community.js"
+  ]
+ },
+ {
+  "text": "图片读取失败，请重试",
+  "files": [
+   "admin-community.js"
+  ]
+ },
+ {
+  "text": "✅ 已保存，立即生效",
+  "files": [
+   "ai.js"
+  ]
+ },
+ {
+  "text": "')\">立即激活 ·",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": "请长按邀请码全选复制",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": "AIX，开始产生收益",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": ": '暂无数据')}",
+  "files": [
+   "leaderboard.js"
+  ]
+ },
+ {
+  "text": "团队激活 Mini：",
+  "files": [
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": "| USDT 余额：",
+  "files": [
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": "请输入有效的提现金额",
+  "files": [
+   "wallet-funds.js"
+  ]
+ },
+ {
+  "text": "最小 10 USDT",
+  "files": [
+   "wallet-funds.js"
+  ]
+ },
+ {
+  "text": "提现数量（USDT）",
+  "files": [
+   "wallet-funds.js"
+  ]
+ },
+ {
+  "text": "可用 USDT 余额",
+  "files": [
+   "wallet-funds.js"
+  ]
+ },
+ {
+  "text": "分析 Decibel",
+  "files": [
+   "index.html"
+  ]
+ },
+ {
+  "text": "例如 Cardano",
+  "files": [
+   "admin.html"
+  ]
+ },
+ {
+  "text": "提取数量（AIX）",
+  "files": [
+   "a-token-claim.js"
+  ]
+ },
+ {
+  "text": "AIX（50%销毁",
+  "files": [
+   "a-token-trade.js"
+  ]
+ },
+ {
+  "text": "} · 等待对手方",
+  "files": [
+   "a-token-trade.js"
+  ]
+ },
+ {
+  "text": "请先连接钱包再提现",
+  "files": [
+   "a-token-withdrawal.js"
+  ]
+ },
+ {
+  "text": "正在读取社群链接…",
+  "files": [
+   "admin-community.js",
+   "community-links.js"
+  ]
+ },
+ {
+  "text": "），留空表示不修改",
+  "files": [
+   "ai.js"
+  ]
+ },
+ {
+  "text": "累计 AIX 收益",
+  "files": [
+   "assets.js"
+  ]
+ },
+ {
+  "text": "矿机数据加载失败：",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": "📒 我的激活记录",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": "⛏️ 我的矿机列表",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": "📦 选择质押套餐",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": "📊 我的质押记录",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": ": '未达标')}",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": ">📋 复制邀请码",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": "请长按链接全选复制",
+  "files": [
+   "earn.js",
+   "referrals.js"
+  ]
+ },
+ {
+  "text": "AIX 已返回余额",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": "开始使用 AxiX",
+  "files": [
+   "mobile-trade.js"
+  ]
+ },
+ {
+  "text": "请选择另一个时间点",
+  "files": [
+   "mobile-trade.js"
+  ]
+ },
+ {
+  "text": "团队激活 Pro：",
+  "files": [
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": "该钱包在平台无记录",
+  "files": [
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": "Mini 矿机（日",
+  "files": [
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": "USDT · 可用",
+  "files": [
+   "strategy.js"
+  ]
+ },
+ {
+  "text": "USDT · 杠杆",
+  "files": [
+   "strategy.js"
+  ]
+ },
+ {
+  "text": "金库数据暂不可用：",
+  "files": [
+   "vaults.js"
+  ]
+ },
+ {
+  "text": "USDT 链上提现",
+  "files": [
+   "wallet-funds.js"
+  ]
+ },
+ {
+  "text": "已添加但仍未切换…",
+  "files": [
+   "wallet.js"
+  ]
+ },
+ {
+  "text": "0x 出款交易哈希",
+  "files": [
+   "withdraw-admin.js"
+  ]
+ },
+ {
+  "text": "胜 0 / 负 0",
+  "files": [
+   "index.html"
+  ]
+ },
+ {
+  "text": "手续费 (AIX)",
+  "files": [
+   "index.html"
+  ]
+ },
+ {
+  "text": "AxiX 管理后台",
+  "files": [
+   "admin.html"
+  ]
+ },
+ {
+  "text": "平台内部 USDT",
+  "files": [
+   "admin.html"
+  ]
+ },
+ {
+  "text": "互转失败，请重试",
+  "files": [
+   "a-token-transfer.js"
+  ]
+ },
+ {
+  "text": "请求失败，请重试",
+  "files": [
+   "a-token-withdrawal.js",
+   "wallet.js"
+  ]
+ },
+ {
+  "text": "撤销失败，请重试",
+  "files": [
+   "a-token-withdrawal.js"
+  ]
+ },
+ {
+  "text": "投入的 USDT",
+  "files": [
+   "ai-managed.js"
+  ]
+ },
+ {
+  "text": "⛏ 我的矿机总览",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": "')\">立即质押",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": "团队持币 AIX",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": "邀请码已复制 ·",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": "质押全部可用余额",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": "点击图表选择价格",
+  "files": [
+   "mobile-trade.js"
+  ]
+ },
+ {
+  "text": "✓ 已设置为 A",
+  "files": [
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": "价格(USDT)",
+  "files": [
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": "\">放行自动转出",
+  "files": [
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": "\">重试自动转出",
+  "files": [
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": "USDT 已入账",
+  "files": [
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": "Pro 矿机（日",
+  "files": [
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": "AIX 代币管理",
+  "files": [
+   "operator-admin.js",
+   "admin.html"
+  ]
+ },
+ {
+  "text": "平台请求失败 (",
+  "files": [
+   "platform-client.js"
+  ]
+ },
+ {
+  "text": "复制不了推荐链接",
+  "files": [
+   "portal-shared.js"
+  ]
+ },
+ {
+  "text": "REST 实时价",
+  "files": [
+   "strategy.js"
+  ]
+ },
+ {
+  "text": "🟢 运行中 ·",
+  "files": [
+   "strategy.js"
+  ]
+ },
+ {
+  "text": "合约累计收益\">",
+  "files": [
+   "trade-history.js"
+  ]
+ },
+ {
+  "text": "充值功能暂未开放",
+  "files": [
+   "wallet-funds.js"
+  ]
+ },
+ {
+  "text": "提现功能暂未开放",
+  "files": [
+   "wallet-funds.js"
+  ]
+ },
+ {
+  "text": "充值失败，请重试",
+  "files": [
+   "wallet-funds.js"
+  ]
+ },
+ {
+  "text": "提现失败，请重试",
+  "files": [
+   "wallet-funds.js"
+  ]
+ },
+ {
+  "text": "操作失败，请重试",
+  "files": [
+   "wallet.js"
+  ]
+ },
+ {
+  "text": "')\">验链完成",
+  "files": [
+   "withdraw-admin.js"
+  ]
+ },
+ {
+  "text": "')\">拒绝退款",
+  "files": [
+   "withdraw-admin.js"
+  ]
+ },
+ {
+  "text": "⇩ 导出 CSV",
+  "files": [
+   "index.html"
+  ]
+ },
+ {
+  "text": "数量 (AIX)",
+  "files": [
+   "index.html"
+  ]
+ },
+ {
+  "text": "收益 (AIX)",
+  "files": [
+   "index.html"
+  ]
+ },
+ {
+  "text": "分析 RISEx",
+  "files": [
+   "index.html"
+  ]
+ },
+ {
+  "text": "例如 60000",
+  "files": [
+   "index.html"
+  ]
+ },
+ {
+  "text": "例如 70000",
+  "files": [
+   "index.html"
+  ]
+ },
+ {
+  "text": "充值（增加余额）",
+  "files": [
+   "admin.html"
+  ]
+ },
+ {
+  "text": "扣除（减少余额）",
+  "files": [
+   "admin.html"
+  ]
+ },
+ {
+  "text": "加载状态失败：",
+  "files": [
+   "a-token-claim.js"
+  ]
+ },
+ {
+  "text": "请输入提取数量",
+  "files": [
+   "a-token-claim.js"
+  ]
+ },
+ {
+  "text": "🔗 连接钱包",
+  "files": [
+   "a-token-trade.js"
+  ]
+ },
+ {
+  "text": "请输入有效数量",
+  "files": [
+   "a-token-trade.js"
+  ]
+ },
+ {
+  "text": "💥 手续费（",
+  "files": [
+   "a-token-transfer.js"
+  ]
+ },
+ {
+  "text": "AIX，手续费",
+  "files": [
+   "a-token-transfer.js"
+  ]
+ },
+ {
+  "text": "请输入提现金额",
+  "files": [
+   "a-token-withdrawal.js"
+  ]
+ },
+ {
+  "text": "社群链接已保存",
+  "files": [
+   "admin-community.js"
+  ]
+ },
+ {
+  "text": "跟单 USDT",
+  "files": [
+   "ai-managed.js"
+  ]
+ },
+ {
+  "text": "投入 USDT",
+  "files": [
+   "ai-managed.js",
+   "index.html"
+  ]
+ },
+ {
+  "text": "VIP 有效中",
+  "files": [
+   "ai-managed.js"
+  ]
+ },
+ {
+  "text": "❌ 保存失败：",
+  "files": [
+   "ai.js"
+  ]
+ },
+ {
+  "text": "❌ 检测失败：",
+  "files": [
+   "ai.js"
+  ]
+ },
+ {
+  "text": "❌ 测试失败：",
+  "files": [
+   "ai.js"
+  ]
+ },
+ {
+  "text": "分钟 · 日报",
+  "files": [
+   "ai.js"
+  ]
+ },
+ {
+  "text": "❌ 分析失败：",
+  "files": [
+   "ai.js"
+  ]
+ },
+ {
+  "text": "❌ 请求失败：",
+  "files": [
+   "ai.js"
+  ]
+ },
+ {
+  "text": "K 线读取失败",
+  "files": [
+   "core.js"
+  ]
+ },
+ {
+  "text": "USDT 永续",
+  "files": [
+   "core.js"
+  ]
+ },
+ {
+  "text": "获得 USDT",
+  "files": [
+   "core.js"
+  ]
+ },
+ {
+  "text": "📦 质押收益",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": "👥 直推明细",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": "余额不足，可用",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": "下单数量或金额",
+  "files": [
+   "mobile-trade.js"
+  ]
+ },
+ {
+  "text": "买入 / 做多",
+  "files": [
+   "mobile-trade.js"
+  ]
+ },
+ {
+  "text": "卖出 / 做空",
+  "files": [
+   "mobile-trade.js"
+  ]
+ },
+ {
+  "text": "USDT 余额",
+  "files": [
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": "请输入钱包地址",
+  "files": [
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": "AIX 余额：",
+  "files": [
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": "🎯 每日定涨",
+  "files": [
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": "✓ 参数已保存",
+  "files": [
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": "✓ 已设为 A",
+  "files": [
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": "✓ 已强制过期",
+  "files": [
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": "暂无可领取奖励",
+  "files": [
+   "referrals.js"
+  ]
+ },
+ {
+  "text": "质押 USDT",
+  "files": [
+   "staking.js"
+  ]
+ },
+ {
+  "text": "数量格式不正确",
+  "files": [
+   "trade-account.js"
+  ]
+ },
+ {
+  "text": "请选择提现网络",
+  "files": [
+   "wallet-funds.js"
+  ]
+ },
+ {
+  "text": "确认钱包...",
+  "files": [
+   "wallet.js"
+  ]
+ },
+ {
+  "text": "选择钱包...",
+  "files": [
+   "wallet.js"
+  ]
+ },
+ {
+  "text": "平级奖 10%",
+  "files": [
+   "index.html"
+  ]
+ },
+ {
+  "text": "USDT 估值",
+  "files": [
+   "index.html"
+  ]
+ },
+ {
+  "text": "充值 USDT",
+  "files": [
+   "index.html"
+  ]
+ },
+ {
+  "text": "提现 USDT",
+  "files": [
+   "index.html"
+  ]
+ },
+ {
+  "text": "链接 / 邮箱",
+  "files": [
+   "admin.html"
+  ]
+ },
+ {
+  "text": "链上读取失败",
+  "files": [
+   "a-token-claim.js"
+  ]
+ },
+ {
+  "text": "生成签名失败",
+  "files": [
+   "a-token-claim.js"
+  ]
+ },
+ {
+  "text": "📊 订单簿",
+  "files": [
+   "a-token-trade.js"
+  ]
+ },
+ {
+  "text": "')\">撤单",
+  "files": [
+   "a-token-trade.js",
+   "trade-account.js"
+  ]
+ },
+ {
+  "text": "AIX 互转",
+  "files": [
+   "a-token-transfer.js"
+  ]
+ },
+ {
+  "text": "我的手续费率",
+  "files": [
+   "a-token-transfer.js"
+  ]
+ },
+ {
+  "text": "个前台显示中",
+  "files": [
+   "admin-community.js"
+  ]
+ },
+ {
+  "text": "已配置二维码",
+  "files": [
+   "admin-community.js"
+  ]
+ },
+ {
+  "text": "')\">交易",
+  "files": [
+   "assets.js"
+  ]
+ },
+ {
+  "text": "AIX 交易",
+  "files": [
+   "assets.js"
+  ]
+ },
+ {
+  "text": "我的活跃矿机",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": "运行中待产出",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": "累计团队分润",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": "激活确认中…",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": "收益每日到账",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": "质押 AIX",
+  "files": [
+   "earn.js",
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": "AIX 质押",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": "可用余额不足",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": "套餐金额无效",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": "交易显示设置",
+  "files": [
+   "mobile-trade.js"
+  ]
+ },
+ {
+  "text": "请求失败 (",
+  "files": [
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": "用户详情 ·",
+  "files": [
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": "暂无激活记录",
+  "files": [
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": "暂无交易订单",
+  "files": [
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": "暂无团队分润",
+  "files": [
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": "AIX 余额",
+  "files": [
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": ": '无'}",
+  "files": [
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": "\">拒绝退款",
+  "files": [
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": "🛑 纯手动",
+  "files": [
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": "%），已推进",
+  "files": [
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": "已产出/进度",
+  "files": [
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": "%），当前为",
+  "files": [
+   "overview.js"
+  ]
+ },
+ {
+  "text": "⏳ 重连中…",
+  "files": [
+   "overview.js"
+  ]
+ },
+ {
+  "text": "/3 运行中",
+  "files": [
+   "overview.js",
+   "strategy.js"
+  ]
+ },
+ {
+  "text": "币 · 计划",
+  "files": [
+   "strategy.js"
+  ]
+ },
+ {
+  "text": "单 · 跟踪",
+  "files": [
+   "strategy.js"
+  ]
+ },
+ {
+  "text": "市价平仓 ·",
+  "files": [
+   "trade-account.js"
+  ]
+ },
+ {
+  "text": "成交成功 ·",
+  "files": [
+   "trade-account.js"
+  ]
+ },
+ {
+  "text": "已实现毛盈亏",
+  "files": [
+   "trade-history.js"
+  ]
+ },
+ {
+  "text": "资金费用净额",
+  "files": [
+   "trade-history.js"
+  ]
+ },
+ {
+  "text": "收益计算说明",
+  "files": [
+   "trade-history.js"
+  ]
+ },
+ {
+  "text": "交易已提交：",
+  "files": [
+   "wallet-funds.js"
+  ]
+ },
+ {
+  "text": "身份验证失败",
+  "files": [
+   "wallet.js"
+  ]
+ },
+ {
+  "text": "钱包未添加…",
+  "files": [
+   "wallet.js"
+  ]
+ },
+ {
+  "text": "（买方免）。",
+  "files": [
+   "index.html"
+  ]
+ },
+ {
+  "text": "杠杆 (x)",
+  "files": [
+   "index.html"
+  ]
+ },
+ {
+  "text": "AIX 收益",
+  "files": [
+   "index.html"
+  ]
+ },
+ {
+  "text": "资产总览 /",
+  "files": [
+   "index.html"
+  ]
+ },
+ {
+  "text": "查看前台 ↗",
+  "files": [
+   "admin.html"
+  ]
+ },
+ {
+  "text": "已添加的链接",
+  "files": [
+   "admin.html"
+  ]
+ },
+ {
+  "text": "AIX 数量",
+  "files": [
+   "admin.html"
+  ]
+ },
+ {
+  "text": "例如 ADA",
+  "files": [
+   "admin.html"
+  ]
+ },
+ {
+  "text": "提取到钱包",
+  "files": [
+   "a-token-claim.js"
+  ]
+ },
+ {
+  "text": "提取成功！",
+  "files": [
+   "a-token-claim.js"
+  ]
+ },
+ {
+  "text": "提取失败：",
+  "files": [
+   "a-token-claim.js"
+  ]
+ },
+ {
+  "text": "手续费 (",
+  "files": [
+   "a-token-trade.js"
+  ]
+ },
+ {
+  "text": "（直推有效",
+  "files": [
+   "a-token-transfer.js"
+  ]
+ },
+ {
+  "text": "已取消互转",
+  "files": [
+   "a-token-transfer.js"
+  ]
+ },
+ {
+  "text": "未连接钱包",
+  "files": [
+   "a-token-withdrawal.js",
+   "wallet-funds.js"
+  ]
+ },
+ {
+  "text": "已取消提现",
+  "files": [
+   "a-token-withdrawal.js",
+   "wallet-funds.js"
+  ]
+ },
+ {
+  "text": "正在保存…",
+  "files": [
+   "admin-community.js"
+  ]
+ },
+ {
+  "text": "确定删除「",
+  "files": [
+   "admin-community.js"
+  ]
+ },
+ {
+  "text": "正在更新…",
+  "files": [
+   "admin-community.js"
+  ]
+ },
+ {
+  "text": "0 个批次",
+  "files": [
+   "ai-managed.js"
+  ]
+ },
+ {
+  "text": "✅ 已保存",
+  "files": [
+   "ai.js"
+  ]
+ },
+ {
+  "text": "[巡检时间",
+  "files": [
+   "ai.js"
+  ]
+ },
+ {
+  "text": "· 数据源",
+  "files": [
+   "ai.js"
+  ]
+ },
+ {
+  "text": "巡检失败：",
+  "files": [
+   "ai.js"
+  ]
+ },
+ {
+  "text": "· 置信度",
+  "files": [
+   "ai.js"
+  ]
+ },
+ {
+  "text": "· 间距约",
+  "files": [
+   "ai.js"
+  ]
+ },
+ {
+  "text": "加载失败：",
+  "files": [
+   "assets.js",
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": "今日已到账",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": "累计已到账",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": "已激活 ✔",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": "矿机总产出",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": "AIX/天",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": "位直推用户",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": "已到账产出",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": "活期存续中",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": "已到账收益",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": "赎回成功，",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": "支付成功，",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": "预计保证金",
+  "files": [
+   "mobile-trade.js"
+  ]
+ },
+ {
+  "text": "直推·矿机",
+  "files": [
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": "间推·矿机",
+  "files": [
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": "级差·矿机",
+  "files": [
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": "平级·矿机",
+  "files": [
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": "直推·质押",
+  "files": [
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": "间推·质押",
+  "files": [
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": "级差·质押",
+  "files": [
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": "平级·质押",
+  "files": [
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": "已产/总额",
+  "files": [
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": "数量(A)",
+  "files": [
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": "📈 慢牛",
+  "files": [
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": "📉 慢熊",
+  "files": [
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": "（锚定 $",
+  "files": [
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": "数量（台）",
+  "files": [
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": "矿机 ID",
+  "files": [
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": "✅ 已重连",
+  "files": [
+   "overview.js"
+  ]
+ },
+ {
+  "text": "\">收益率",
+  "files": [
+   "overview.js",
+   "strategy.js"
+  ]
+ },
+ {
+  "text": "收益率 —",
+  "files": [
+   "overview.js",
+   "index.html"
+  ]
+ },
+ {
+  "text": "· 上边界",
+  "files": [
+   "overview.js"
+  ]
+ },
+ {
+  "text": "/ 交易所",
+  "files": [
+   "strategy.js"
+  ]
+ },
+ {
+  "text": "⚪ 未运行",
+  "files": [
+   "strategy.js"
+  ]
+ },
+ {
+  "text": "· 交易对",
+  "files": [
+   "strategy.js"
+  ]
+ },
+ {
+  "text": "价格提醒：",
+  "files": [
+   "trade-alerts.js"
+  ]
+ },
+ {
+  "text": "交易手续费",
+  "files": [
+   "trade-history.js"
+  ]
+ },
+ {
+  "text": "平仓净收益",
+  "files": [
+   "trade-history.js"
+  ]
+ },
+ {
+  "text": "成交毛盈亏",
+  "files": [
+   "trade-history.js"
+  ]
+ },
+ {
+  "text": "已取消充值",
+  "files": [
+   "wallet-funds.js"
+  ]
+ },
+ {
+  "text": "/ 未实现",
+  "files": [
+   "index.html"
+  ]
+ },
+ {
+  "text": "0 笔到账",
+  "files": [
+   "admin.html"
+  ]
+ },
+ {
+  "text": "0 位用户",
+  "files": [
+   "admin.html"
+  ]
+ },
+ {
+  "text": "在前台显示",
+  "files": [
+   "admin.html"
+  ]
+ },
+ {
+  "text": "🔄 刷新",
+  "files": [
+   "admin.html"
+  ]
+ },
+ {
+  "text": "账面余额",
+  "files": [
+   "a-token-claim.js"
+  ]
+ },
+ {
+  "text": "合约储备",
+  "files": [
+   "a-token-claim.js"
+  ]
+ },
+ {
+  "text": "链上提取",
+  "files": [
+   "a-token-claim.js"
+  ]
+ },
+ {
+  "text": "交易失败",
+  "files": [
+   "a-token-trade.js"
+  ]
+ },
+ {
+  "text": "· 冻结",
+  "files": [
+   "a-token-trade.js"
+  ]
+ },
+ {
+  "text": "下单成功",
+  "files": [
+   "a-token-trade.js"
+  ]
+ },
+ {
+  "text": "买入失败",
+  "files": [
+   "a-token-trade.js"
+  ]
+ },
+ {
+  "text": "卖出失败",
+  "files": [
+   "a-token-trade.js"
+  ]
+ },
+ {
+  "text": "持仓数量",
+  "files": [
+   "a-token-trade.js"
+  ]
+ },
+ {
+  "text": "撤单失败",
+  "files": [
+   "a-token-trade.js"
+  ]
+ },
+ {
+  "text": "\">撤销",
+  "files": [
+   "a-token-withdrawal.js"
+  ]
+ },
+ {
+  "text": "邮箱投递",
+  "files": [
+   "admin-community.js",
+   "admin.html"
+  ]
+ },
+ {
+  "text": "保存修改",
+  "files": [
+   "admin-community.js"
+  ]
+ },
+ {
+  "text": "取消编辑",
+  "files": [
+   "admin-community.js"
+  ]
+ },
+ {
+  "text": "正常 ·",
+  "files": [
+   "ai.js"
+  ]
+ },
+ {
+  "text": "已保存（",
+  "files": [
+   "ai.js"
+  ]
+ },
+ {
+  "text": "巡检中…",
+  "files": [
+   "ai.js"
+  ]
+ },
+ {
+  "text": "· 现价",
+  "files": [
+   "ai.js"
+  ]
+ },
+ {
+  "text": "· 区间",
+  "files": [
+   "ai.js"
+  ]
+ },
+ {
+  "text": "开仓数量",
+  "files": [
+   "core.js"
+  ]
+ },
+ {
+  "text": "直推人数",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": "团队人数",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": "最低质押",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": "质押数量",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": "确认质押",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": "质押失败",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": "赎回失败",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": "激活失败",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": "已提交，",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": "图表周期",
+  "files": [
+   "mobile-trade.js"
+  ]
+ },
+ {
+  "text": "委托价格",
+  "files": [
+   "mobile-trade.js"
+  ]
+ },
+ {
+  "text": "触发价格",
+  "files": [
+   "mobile-trade.js"
+  ]
+ },
+ {
+  "text": "数量 (",
+  "files": [
+   "mobile-trade.js"
+  ]
+ },
+ {
+  "text": "行情详情",
+  "files": [
+   "mobile-trade.js"
+  ]
+ },
+ {
+  "text": "图表指标",
+  "files": [
+   "mobile-trade.js"
+  ]
+ },
+ {
+  "text": "\">详情",
+  "files": [
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": "\">设置",
+  "files": [
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": "暂无质押",
+  "files": [
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": "团队业绩",
+  "files": [
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": "待确认：",
+  "files": [
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": "已拒绝：",
+  "files": [
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": "直推地址",
+  "files": [
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": "确认扣除",
+  "files": [
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": "⚖ 震荡",
+  "files": [
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": "✓ 推进",
+  "files": [
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": "· 每档",
+  "files": [
+   "overview.js"
+  ]
+ },
+ {
+  "text": "笔样本）",
+  "files": [
+   "overview.js"
+  ]
+ },
+ {
+  "text": "领取失败",
+  "files": [
+   "referrals.js"
+  ]
+ },
+ {
+  "text": "· 无效",
+  "files": [
+   "referrals.js"
+  ]
+ },
+ {
+  "text": "收益方式",
+  "files": [
+   "staking.js"
+  ]
+ },
+ {
+  "text": "震荡 ↔",
+  "files": [
+   "strategy.js"
+  ]
+ },
+ {
+  "text": "当前价：",
+  "files": [
+   "strategy.js"
+  ]
+ },
+ {
+  "text": "币；计划",
+  "files": [
+   "strategy.js"
+  ]
+ },
+ {
+  "text": "单，成功",
+  "files": [
+   "strategy.js"
+  ]
+ },
+ {
+  "text": "运行中（",
+  "files": [
+   "strategy.js"
+  ]
+ },
+ {
+  "text": "卖出平多",
+  "files": [
+   "trade-history.js"
+  ]
+ },
+ {
+  "text": "买入平空",
+  "files": [
+   "trade-history.js"
+  ]
+ },
+ {
+  "text": "买入开多",
+  "files": [
+   "trade-history.js"
+  ]
+ },
+ {
+  "text": "卖出开空",
+  "files": [
+   "trade-history.js"
+  ]
+ },
+ {
+  "text": "强平多仓",
+  "files": [
+   "trade-history.js"
+  ]
+ },
+ {
+  "text": "强平空仓",
+  "files": [
+   "trade-history.js"
+  ]
+ },
+ {
+  "text": "\">查看",
+  "files": [
+   "vaults.js"
+  ]
+ },
+ {
+  "text": "连接失败",
+  "files": [
+   "wallet.js"
+  ]
+ },
+ {
+  "text": "单笔最低",
+  "files": [
+   "index.html"
+  ]
+ },
+ {
+  "text": "↻ 刷新",
+  "files": [
+   "index.html"
+  ]
+ },
+ {
+  "text": "用户详情",
+  "files": [
+   "admin.html"
+  ]
+ },
+ {
+  "text": "入口类型",
+  "files": [
+   "admin.html"
+  ]
+ },
+ {
+  "text": "显示名称",
+  "files": [
+   "admin.html"
+  ]
+ },
+ {
+  "text": "显示顺序",
+  "files": [
+   "admin.html"
+  ]
+ },
+ {
+  "text": "刷新列表",
+  "files": [
+   "admin.html"
+  ]
+ },
+ {
+  "text": "操作类型",
+  "files": [
+   "admin.html"
+  ]
+ },
+ {
+  "text": "查询余额",
+  "files": [
+   "admin.html"
+  ]
+ },
+ {
+  "text": "已更新",
+  "files": [
+   "admin-community.js"
+  ]
+ },
+ {
+  "text": "平仓价",
+  "files": [
+   "ai-managed.js"
+  ]
+ },
+ {
+  "text": "问题：",
+  "files": [
+   "ai.js"
+  ]
+ },
+ {
+  "text": "建议：",
+  "files": [
+   "ai.js"
+  ]
+ },
+ {
+  "text": "理由：",
+  "files": [
+   "ai.js"
+  ]
+ },
+ {
+  "text": "台矿机",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": "天到期",
+  "files": [
+   "earn.js"
+  ]
+ },
+ {
+  "text": "1小时",
+  "files": [
+   "mobile-trade.js"
+  ]
+ },
+ {
+  "text": "4小时",
+  "files": [
+   "mobile-trade.js"
+  ]
+ },
+ {
+  "text": "推荐人",
+  "files": [
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": "矿机数",
+  "files": [
+   "operator-admin.js"
+  ]
+ },
+ {
+  "text": "秒前）",
+  "files": [
+   "overview.js"
+  ]
+ },
+ {
+  "text": "（强度",
+  "files": [
+   "overview.js"
+  ]
+ },
+ {
+  "text": "网格）",
+  "files": [
+   "overview.js"
+  ]
+ },
+ {
+  "text": "推荐：",
+  "files": [
+   "strategy.js"
+  ]
+ },
+ {
+  "text": "方向：",
+  "files": [
+   "strategy.js"
+  ]
+ },
+ {
+  "text": "网格：",
+  "files": [
+   "strategy.js"
+  ]
+ },
+ {
+  "text": "：销毁",
+  "files": [
+   "index.html"
+  ]
+ },
+ {
+  "text": "，赎回",
+  "files": [
+   "index.html"
+  ]
+ },
+ {
+  "text": "请",
+  "files": [
+   "a-token-transfer.js",
+   "a-token-withdrawal.js",
+   "wallet-funds.js",
+   "wallet.js"
+  ]
+ },
+ {
+  "text": "第",
+  "files": [
+   "leaderboard.js"
+  ]
+ },
+ {
+  "text": "名",
+  "files": [
+   "leaderboard.js"
+  ]
+ },
+ {
+  "text": "已",
+  "files": [
+   "operator-admin.js"
+  ]
+ }
+]

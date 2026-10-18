@@ -1,0 +1,96 @@
+--- public/js/portal-shared.js (before)
++++ public/js/portal-shared.js (after)
+@@ -31,7 +31,7 @@
+   const pages = {};
+   const esc = (value) => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+   const number = (value, digits = 2) => Number.isFinite(Number(value)) ? Number(value).toLocaleString('en-US', { maximumFractionDigits:digits }) : '—';
+-  const money = (value, digits = 2) => Number.isFinite(Number(value)) ? `$${Number(value).toLocaleString('en-US', { minimumFractionDigits:2, maximumFractionDigits:digits })}` : '—';
++  const money = (value, digits = 2) => Number.isFinite(Number(value)) ? `$${Number(value).toLocaleString('en-US', { minimumFractionDigits:Math.min(2, digits), maximumFractionDigits:digits })}` : '—';
+   const percent = (value, scale = 100) => Number.isFinite(Number(value)) ? `${(Number(value) * scale).toFixed(2)}%` : '—';
+   const short = (value) => value ? `${String(value).slice(0, 6)}…${String(value).slice(-4)}` : '—';
+   const metric = (label, value, note = '') => `<div class="portal-metric"><span>${esc(label)}</span><strong>${value}</strong>${note ? `<small>${esc(note)}</small>` : ''}</div>`;
+@@ -70,23 +70,79 @@
+     page.render?.();
+   }
+ 
++  const active = name => !document.hidden && Boolean(document.getElementById(`tab-${name}`)?.classList.contains('active'));
++  const walletKey = () => String(window.currentWalletConnection?.address || window.currentWalletProfile?.address || '').toLowerCase();
++  const reads = new Map();
++  // Coalesce simultaneous reads, never transactions; do not cache completed balance responses.
++  function readJSON(url, options = {}) {
++    const { timeoutMs = 10000, dedupe = !options.method || options.method === 'GET', ...init } = options;
++    const key = `${walletKey()}:${window.getWalletStateRevision?.() || 0}:${url}:${init.body || ''}`;
++    if (dedupe && reads.has(key)) return reads.get(key);
++    const promise = (async () => {
++      const controller = new AbortController();
++      const timer = setTimeout(() => controller.abort(), timeoutMs);
++      const abort = () => controller.abort();
++      init.signal?.addEventListener('abort', abort, { once:true });
++      if (init.signal?.aborted) controller.abort();
++      try {
++        const response = await fetch(url, { credentials:'same-origin', ...init, signal:controller.signal });
++        const data = await response.json();
++        if (!response.ok) throw Object.assign(new Error(data.error || `请求失败（${response.status}）`), { status:response.status });
++        return data;
++      } catch (error) {
++        if (error.name === 'AbortError') throw new Error('网络较慢，请求超时，请稍后重试');
++        throw error;
++      } finally { clearTimeout(timer); init.signal?.removeEventListener('abort', abort); }
++    })();
++    if (dedupe) {
++      reads.set(key, promise);
++      promise.finally(() => { if (reads.get(key) === promise) reads.delete(key); }).catch(() => {});
++    }
++    return promise;
++  }
++
++  function invalidate() {
++    Object.values(pages).forEach(page => {
++      ++page.requestId; page.loaded = false; page.loading = false; page.reset?.();
++    });
++    reads.clear();
++  }
++
+   async function load(name, force = false) {
+     const page = pages[name];
+-    if (!page || (!force && (page.loaded || page.loading))) return;
++    if (!page) return;
++    if (!force && (page.loaded || page.loading)) {
++      if (page.loaded && active(name)) page.activate?.();
++      return;
++    }
+     const requestId = ++page.requestId;
++    const wallet = walletKey();
++    const context = { isCurrent:() => requestId === page.requestId && wallet === walletKey() };
+     page.loading = true;
+     page.loaded = false;
+     try {
+-      await page.load?.();
+-      if (requestId === page.requestId) page.loaded = true;
++      await page.load?.(context);
++      if (context.isCurrent()) {
++        page.loaded = true;
++        if (active(name)) page.activate?.();
++      }
+     } catch (cause) {
+-      if (requestId === page.requestId) page.fail?.(cause);
++      if (context.isCurrent()) page.fail?.(cause);
+     } finally {
+       if (requestId === page.requestId) page.loading = false;
+     }
+   }
+ 
+-  window.Portal = { pages, register, load, esc, number, money, percent, short, metric, loading, empty, walletGate, platformGate, error, header, aethonBadge };
++  window.Portal = { pages, register, load, invalidate, active, walletKey, readJSON, esc, number, money, percent, short, metric, loading, empty, walletGate, platformGate, error, header, aethonBadge };
++  window.addEventListener('pagechange', event => {
++    if (event.detail.previous !== event.detail.current) pages[event.detail.previous]?.deactivate?.();
++  });
++  document.addEventListener('visibilitychange', () => {
++    const name = document.querySelector('.tab-panel.active')?.id?.replace('tab-', '');
++    const page = pages[name];
++    if (document.hidden) page?.deactivate?.();
++    else if (page?.loaded) page.activate?.();
++  });
+ 
+   // ── 全局通用复制（兼容各手机端）──────────────────────────────────
+   // 部分手机浏览器/WebView 没有 navigator.clipboard（或 HTTPS 手势校验不通过），

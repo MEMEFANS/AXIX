@@ -1,0 +1,26 @@
+--- production/public/js/operator-admin.js
++++ candidate/public/js/operator-admin.js
+@@ -292,8 +292,10 @@
+       <td>${esc(s.planId || '-')}</td>
+       <td><span class="admin-status ${s.status==='active'?'good':''}">${s.status==='active'?'运行中':s.status}</span></td>
+       <td>${amount(s.principalUnits || 0)} AIX</td>
+-      <td>${amount(s.totalEarnedUnits || 0)} AIX</td>
+-    </tr>`).join('') || emptyRow(5, '暂无质押');
++      <td>${amount(s.interestEarnedUnits || 0)} AIX</td>
++      <td>${amount(s.principalReturnedUnits || 0)} AIX</td>
++      <td>${amount(s.outstandingPrincipalUnits || 0)} AIX</td>
++    </tr>`).join('') || emptyRow(7, '暂无质押');
+     // 激活记录
+     const actRows = (d.activations || []).map(a => `<tr>
+       <td><code>${esc(String(a.id||'').slice(-10))}</code></td>
+@@ -376,8 +378,8 @@
+       </div>
+ 
+       <div class="admin-detail-section">
+-        ${subHead(`质押（${d.stakes?.count || 0} 笔 · 累计收益 ${amount(d.stakes?.totalEarned || 0)} AIX）`)}
+-        <div class="admin-table-scroll"><table><thead><tr><th>ID</th><th>套餐</th><th>状态</th><th>质押 AIX</th><th>累计收益</th></tr></thead><tbody>${stakeRows}</tbody></table></div>
++        ${subHead(`质押（${d.stakes?.count || 0} 笔 · 累计利息 ${amount(d.stakes?.totalEarned || 0)} AIX · 已返本金 ${amount(d.stakes?.principalReturned || 0)} AIX · 累计到账 ${amount(d.stakes?.totalCredited || 0)} AIX）`)}
++        <div class="admin-table-scroll"><table><thead><tr><th>ID</th><th>套餐</th><th>状态</th><th>质押 AIX</th><th>累计利息</th><th>已返本金</th><th>质押中本金</th></tr></thead><tbody>${stakeRows}</tbody></table></div>
+       </div>
+ 
+       <div class="admin-detail-section">

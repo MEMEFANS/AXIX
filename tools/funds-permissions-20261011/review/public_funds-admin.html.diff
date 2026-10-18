@@ -1,0 +1,57 @@
+--- public/funds-admin.html before
++++ public/funds-admin.html after
+@@ -9,18 +9,18 @@
+   <title>AxiX 资金后台</title>
+   <link rel="icon" href="/favicon.ico?v=3">
+   <link rel="stylesheet" href="/styles/funds-admin.css?v=20261011-security-1">
+-  <script defer src="/js/funds-admin.js?v=20261011-security-1"></script>
++  <script defer src="/js/funds-admin.js?v=20261011-permissions-1"></script>
+ </head>
+ <body>
+   <main class="funds-shell">
+-    <header class="funds-header"><div><span class="eyebrow">AxiX Exchange</span><h1>资金管理后台</h1><p>提现审核 · 测试入账</p></div><button id="funds-lock" type="button" class="secondary" hidden>锁定并退出</button></header>
++    <header class="funds-header"><div><span class="eyebrow">AxiX Exchange</span><h1>资金管理后台</h1><p>提现审核 · 资产调整 · 矿机赠送</p></div><button id="funds-lock" type="button" class="secondary" hidden>锁定并退出</button></header>
+     <section id="funds-login" class="card login-card">
+       <h2>验证资金管理权限</h2><p>使用原提现后台的独立管理令牌登录。</p>
+       <form id="funds-login-form"><label>资金管理令牌<input id="funds-token" type="password" autocomplete="off" spellcheck="false" required></label><button type="submit">进入资金后台</button></form>
+     </section>
+     <div id="funds-status" class="status" role="status" aria-live="polite"></div>
+     <section id="funds-app" hidden>
+-      <nav class="tabs" aria-label="资金后台功能"><button id="funds-tab-withdrawals" type="button" class="selected" aria-pressed="true">提现审核</button><button id="funds-tab-credits" type="button" class="secondary" aria-pressed="false">测试入账</button><button id="funds-refresh" type="button" class="secondary refresh">刷新记录</button></nav>
++      <nav class="tabs" aria-label="资金后台功能"><button id="funds-tab-withdrawals" type="button" class="selected" aria-pressed="true">提现审核</button><button id="funds-tab-credits" type="button" class="secondary" aria-pressed="false">测试入账</button><button id="funds-tab-assets" type="button" class="secondary" aria-pressed="false">资产调整</button><button id="funds-tab-miners" type="button" class="secondary" aria-pressed="false">赠送矿机</button><button id="funds-refresh" type="button" class="secondary refresh">刷新记录</button></nav>
+       <section id="funds-withdrawals">
+         <details class="card settings"><summary>提现设置 <span id="funds-auto-state">读取中</span></summary>
+           <form id="funds-settings-form" class="grid-form"><label class="check"><input id="funds-auto-enabled" type="checkbox">开启自动提现</label><label>单笔人工审核金额（USDT）<input id="funds-auto-threshold" type="number" min="0.000001" step="0.000001" required></label><label>24 小时自动额度（USDT）<input id="funds-auto-limit" type="number" min="0.000001" step="0.000001" required></label><label class="check"><input id="funds-auto-ten" type="checkbox">USDT 整十提现</label><button type="submit">保存设置</button></form>
+@@ -30,7 +30,31 @@
+       </section>
+       <section id="funds-credits" hidden>
+         <section class="card"><h2>测试入账</h2><p>增加用户的平台内部 USDT 余额，每笔操作保留记录。</p><form id="funds-credit-form" class="grid-form"><label>用户钱包地址<input id="funds-credit-wallet" placeholder="0x…" autocomplete="off" pattern="0x[a-fA-F0-9]{40}" required></label><label>入账数量（USDT）<input id="funds-credit-amount" type="number" min="0.000001" max="100000000" step="0.000001" required></label><label>操作备注<input id="funds-credit-reason" minlength="2" maxlength="120" placeholder="例如：功能测试" required></label><button type="submit">确认入账</button></form></section>
+-        <section class="card"><h2>测试入账记录</h2><p id="funds-credit-count">尚未读取</p><div class="table-scroll"><table><thead><tr><th>操作时间</th><th>钱包地址</th><th>数量</th><th>备注</th><th>管理员</th></tr></thead><tbody id="funds-credits-body"></tbody></table></div></section>
++        <section class="card"><h2>资产操作记录</h2><p id="funds-credit-count">尚未读取</p><div class="table-scroll"><table><thead><tr><th>操作时间</th><th>钱包地址</th><th>数量</th><th>备注</th><th>管理员</th></tr></thead><tbody id="funds-credits-body"></tbody></table></div></section>
++      </section>
++      <section id="funds-assets" hidden>
++        <section class="card"><h2>USDT / AIX 资产调整</h2><p>增加或扣除用户的平台余额。请核对钱包、币种、数量并填写原因。</p>
++          <form id="funds-asset-form" class="grid-form">
++            <label>用户钱包地址<input id="funds-asset-wallet" placeholder="0x…" autocomplete="off" pattern="0x[a-fA-F0-9]{40}" required></label>
++            <label>币种<select id="funds-asset-symbol"><option value="A">AIX</option><option value="USDT">USDT</option></select></label>
++            <label>操作<select id="funds-asset-action"><option value="grant">赠送（增加余额）</option><option value="debit">扣除（减少余额）</option></select></label>
++            <label>数量<input id="funds-asset-amount" inputmode="decimal" pattern="[0-9]+(\.[0-9]+)?" placeholder="例如：100.25" required></label>
++            <label>操作原因<input id="funds-asset-reason" minlength="2" maxlength="120" placeholder="例如：活动奖励 / 违规扣除" required></label>
++            <button type="submit">确认资产调整</button>
++          </form>
++        </section>
++        <section class="card"><h2>资产调整记录</h2><p id="funds-asset-count">尚未读取</p><div class="table-scroll"><table><thead><tr><th>时间</th><th>钱包</th><th>操作</th><th>数量</th><th>原因</th><th>管理员</th></tr></thead><tbody id="funds-assets-body"></tbody></table></div></section>
++      </section>
++      <section id="funds-miners" hidden>
++        <section class="card"><h2>赠送矿机</h2><p>每次赠送一台，同一钱包的同一套餐限一次。矿机按原规则产出 AIX。</p>
++          <form id="funds-miner-form" class="grid-form">
++            <label>用户钱包地址<input id="funds-miner-wallet" placeholder="0x…" autocomplete="off" pattern="0x[a-fA-F0-9]{40}" required></label>
++            <label>套餐<select id="funds-miner-plan"><option value="mini120">Mini · 30 天共 100 AIX</option><option value="pro1500">Pro · 90 天共 1500 AIX</option></select></label>
++            <label>赠送原因<input id="funds-miner-reason" minlength="2" maxlength="120" placeholder="例如：活动赠送" required></label>
++            <button type="submit">确认赠送矿机</button>
++          </form>
++        </section>
++        <section class="card"><h2>矿机赠送记录</h2><p id="funds-miner-count">尚未读取</p><div class="table-scroll"><table><thead><tr><th>时间</th><th>钱包</th><th>套餐</th><th>矿机编号</th><th>原因</th><th>管理员</th></tr></thead><tbody id="funds-miners-body"></tbody></table></div></section>
+       </section>
+     </section>
+   </main>

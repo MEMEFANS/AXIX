@@ -1,0 +1,26 @@
+{
+  "src/wallet-service.js": {
+    "sha256": "e6e31fc3b97386afa4f23bc153664de13f02846c39a0f1c126e7987c961a3b4a"
+  },
+  "src/server.js": {
+    "sha256": "f829c966a1ffb4af83da8dadb69c2a04f4989b10d948a15ad1c93a1dca6ecc3f"
+  },
+  "public/js/wallet.js": {
+    "sha256": "141d6ac6f20183abc2121fec0a7b74f0d825b5d1ace7917933569c6581f748c1"
+  },
+  "public/js/earn.js": {
+    "sha256": "3ff695a903e08c01bf051f5a2cd67d590f8b33947816f6faceb1551063405aaa"
+  },
+  "public/js/i18n.js": {
+    "sha256": "9990b5ee5020ee04af963fcb3f3f60aa18d562b5eaf659f572eef939a7f9a2fb"
+  },
+  "public/js/page-loader.js": {
+    "sha256": "0cd4bd1bf86b07fbcc97b8a89661d055669564745d55b20955c67da502f7a9a4"
+  },
+  "public/sw.js": {
+    "sha256": "59e07d93941c9f3d0e5aa93f49e2a9c8414cbda8444794f164067554621997e2"
+  },
+  "public/index.html": {
+    "sha256": "64682585cc2174e859d0ee37af197d929044562bcbbe75fd7a2239404a70ffe2"
+  }
+}

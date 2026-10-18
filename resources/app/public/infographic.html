@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>一图看懂 AxiX 经济模型</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html,body { width:1920px; height:1080px; overflow:hidden; }
+  body {
+    font-family:"Microsoft YaHei","PingFang SC",sans-serif;
+    color:#c7d5d2;
+    background:
+      radial-gradient(1200px 600px at 85% -10%, rgba(79,209,181,.10), transparent 60%),
+      radial-gradient(900px 500px at -10% 110%, rgba(79,209,181,.07), transparent 60%),
+      linear-gradient(160deg,#07100f 0%,#0a1112 55%,#081211 100%);
+    position:relative;
+  }
+  .watermark {
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    font-size:300px; font-weight:900; letter-spacing:40px; color:rgba(79,209,181,.045);
+    user-select:none; pointer-events:none;
+  }
+  .wrap { position:relative; width:100%; height:100%; padding:26px 36px 20px; display:flex; flex-direction:column; }
+
+  /* ── 顶栏 ── */
+  .top { display:flex; align-items:center; gap:22px; height:74px; flex:0 0 auto; }
+  .brand { display:flex; align-items:center; gap:12px; min-width:340px; }
+  .brand img { width:54px; height:54px; border-radius:14px; box-shadow:0 0 24px rgba(79,209,181,.35); }
+  .brand-name { font-size:30px; font-weight:900; color:#eaf6f3; letter-spacing:1px; }
+  .brand-name b { color:#4fd1b5; }
+  .brand-sub { font-size:11px; color:#5f7a74; letter-spacing:3px; margin-top:2px; }
+  .title { flex:1; text-align:center; font-size:44px; font-weight:900;
+    background:linear-gradient(100deg,#8ff0dc 10%,#4fd1b5 45%,#b9f4e6 90%);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    text-shadow:0 0 40px rgba(79,209,181,.25); letter-spacing:2px; }
+  .title-en { min-width:340px; text-align:right; font-size:15px; font-weight:700; color:#3d5a53; letter-spacing:4px; }
+
+  /* ── 三列 ── */
+  .cols { flex:1; display:grid; grid-template-columns:1fr 1.04fr 1fr; gap:18px; margin-top:16px; min-height:0; }
+  .col { display:flex; flex-direction:column; gap:14px; min-height:0; }
+  .card {
+    background:linear-gradient(180deg,#101b1d 0%,#0c1517 100%);
+    border:1px solid #29413e; border-radius:14px; padding:14px 18px 15px;
+    box-shadow:0 10px 30px rgba(0,0,0,.35);
+  }
+  .card-t { display:flex; align-items:center; margin-bottom:11px; }
+  .pill {
+    display:inline-flex; align-items:center; gap:8px;
+    background:linear-gradient(135deg,#12403a,#0d2f2b); border:1px solid #2b6157;
+    color:#7fe6d3; border-radius:999px; padding:5px 16px; font-size:16px; font-weight:800; letter-spacing:1px;
+  }
+  .pill::before { content:""; width:7px; height:7px; border-radius:50%; background:#4fd1b5; box-shadow:0 0 8px #4fd1b5; }
+  .card-t .en { margin-left:auto; font-size:10px; color:#3d5a53; letter-spacing:2px; font-weight:700; }
+
+  /* 通用文本 */
+  p.desc { font-size:13.5px; line-height:1.85; color:#b9cbc7; text-align:justify; }
+  p.desc b { color:#4fd1b5; font-weight:800; }
+  p.desc .red { color:#f26c78; font-weight:800; }
+
+  /* chips */
+  .chips { display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:8px; }
+  .chip { background:#0d2020; border:1px solid #24493f; border-radius:9px; padding:8px 4px;
+    text-align:center; font-size:12.5px; font-weight:700; color:#9fe8d8; }
+
+  /* 代币经济学 */
+  .tok { display:flex; gap:14px; align-items:center; }
+  .tok-info { flex:1; }
+  .tok-row { display:flex; justify-content:space-between; font-size:13px; padding:6px 0; border-bottom:1px dashed #1d332f; }
+  .tok-row:last-child { border-bottom:none; }
+  .tok-row span { color:#7d9691; }
+  .tok-row b { color:#e6f4f1; font-weight:800; }
+  .tok-row b.g { color:#4fd1b5; }
+  .coins { display:flex; gap:10px; align-items:center; }
+  .coin { width:64px; height:64px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-weight:900; font-size:16px; color:#04211b; box-shadow:inset 0 -6px 12px rgba(0,0,0,.35), 0 6px 16px rgba(0,0,0,.4); }
+  .coin.aix { background:radial-gradient(circle at 32% 28%, #b7f7e8, #4fd1b5 55%, #1f8f77); }
+  .coin.usdt { background:radial-gradient(circle at 32% 28%, #d8fbf1, #26a17b 60%, #0f6b4f); color:#eafff8; font-size:13px; }
+
+  /* 表格 */
+  table { width:100%; border-collapse:collapse; }
+  th { background:linear-gradient(180deg,#143c35,#0f2e29); color:#8ceacf; font-size:13px; padding:8px 6px; font-weight:800; border:1px solid #24493f; }
+  td { font-size:13.5px; text-align:center; padding:8px 6px; border:1px solid #1d332f; color:#d7e6e2; font-weight:600; background:rgba(255,255,255,.015); }
+  td b { color:#4fd1b5; font-weight:900; font-size:15px; }
+  td.hot b { color:#5df0cf; font-size:18px; text-shadow:0 0 14px rgba(79,209,181,.5); }
+  .note { margin-top:8px; font-size:11.5px; color:#66827c; text-align:center; letter-spacing:1px; }
+
+  /* 分配机制 flow */
+  .flow { display:flex; align-items:center; gap:10px; }
+  .flow-src { width:150px; flex:0 0 auto; text-align:center; font-size:14.5px; font-weight:800; color:#04211b;
+    background:linear-gradient(135deg,#8ff0dc,#4fd1b5); border-radius:11px; padding:16px 8px; box-shadow:0 0 20px rgba(79,209,181,.3); }
+  .flow-lines { flex:1; display:flex; flex-direction:column; gap:12px; }
+  .flow-branch { display:flex; align-items:center; gap:10px; }
+  .pct { width:86px; flex:0 0 auto; text-align:center; font-size:24px; font-weight:900; }
+  .pct.g { color:#4fd1b5; text-shadow:0 0 16px rgba(79,209,181,.45); }
+  .pct.r { color:#f26c78; text-shadow:0 0 16px rgba(242,108,120,.45); }
+  .flow-arrow { color:#3d5a53; font-size:18px; font-weight:900; }
+  .flow-box { flex:1; border-radius:10px; padding:9px 14px; font-size:13px; line-height:1.5; }
+  .flow-box b { display:block; font-size:14.5px; }
+  .flow-box.burn { background:rgba(242,108,120,.08); border:1px solid #5c3037; }
+  .flow-box.burn b { color:#f898a2; }
+  .flow-box.pool { background:rgba(79,209,181,.07); border:1px solid #27564d; }
+  .flow-box.pool b { color:#7fe6d3; }
+  .flow-box span { color:#7d9691; font-size:12px; }
+
+  /* 推荐收益 */
+  .ref { display:flex; align-items:center; gap:18px; }
+  .ref-big { flex:0 0 auto; font-size:56px; font-weight:900; color:#4fd1b5; text-shadow:0 0 26px rgba(79,209,181,.55); }
+  .ref-big small { font-size:22px; }
+  .ref-txt { font-size:13px; line-height:1.8; color:#b9cbc7; }
+  .ref-txt b { color:#4fd1b5; }
+
+  /* A1~A10 级别表 */
+  .lvl { margin-top:10px; }
+  .lvl th { font-size:11px; padding:5px 3px; }
+  .lvl td { font-size:11.5px; padding:5px 3px; font-weight:600; }
+  .lvl .lv { font-weight:900; }
+  .lvl .lv.g { color:#f6c454; }
+  .lvl .lv.r { color:#f26c78; }
+  .lvl .hot-cell { color:#f898a2; font-weight:900; }
+
+  /* 资金安全 */
+  .sec { display:grid; grid-template-columns:1fr 1fr; gap:9px; }
+  .sec-item { background:#0d2020; border:1px solid #24493f; border-radius:10px; padding:10px 12px; font-size:12.5px; line-height:1.55; color:#b9cbc7; }
+  .sec-item b { display:block; color:#7fe6d3; font-size:13.5px; margin-bottom:2px; }
+  .sec-item .r { color:#f898a2; }
+
+  /* 市场 */
+  .mkt-row { display:flex; align-items:center; gap:12px; padding:8px 0; border-bottom:1px dashed #1d332f; }
+  .mkt-row:last-child { border-bottom:none; }
+  .mkt-tag { flex:0 0 92px; text-align:center; font-size:13px; font-weight:800; color:#04211b; border-radius:8px; padding:5px 0;
+    background:linear-gradient(135deg,#8ff0dc,#4fd1b5); }
+  .mkt-tag.red { background:linear-gradient(135deg,#ffb3ba,#f26c78); }
+  .mkt-tag.dim { background:linear-gradient(135deg,#3d5a53,#2a423d); color:#bfe9de; }
+  .mkt-txt { font-size:12.5px; color:#a9bfb9; }
+  .mkt-txt b { color:#e6f4f1; }
+
+  /* 跟单 2x2 */
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:9px; }
+  .g2 { background:#0d2020; border:1px solid #24493f; border-radius:10px; padding:9px 12px; font-size:12.5px; color:#b9cbc7; }
+  .g2 b { color:#7fe6d3; }
+
+  /* 总结 */
+  .sum li { list-style:none; display:flex; gap:10px; font-size:13px; line-height:1.75; color:#c2d4d0; padding:4px 0; }
+  .sum li::before { content:""; flex:0 0 8px; width:8px; height:8px; border-radius:50%; margin-top:8px;
+    background:linear-gradient(135deg,#8ff0dc,#4fd1b5); box-shadow:0 0 8px rgba(79,209,181,.6); }
+  .sum b { color:#4fd1b5; }
+
+  .foot { flex:0 0 auto; text-align:center; font-size:11px; color:#3d5a53; letter-spacing:3px; margin-top:10px; }
+
+  /* 中列紧凑化（内容最多的一列） */
+  .col:nth-child(2) .card { padding:11px 16px 12px; }
+  .col:nth-child(2) .card-t { margin-bottom:8px; }
+  .col:nth-child(2) .pill { font-size:15px; padding:4px 14px; }
+  .col:nth-child(2) td, .col:nth-child(2) th { padding:6px 4px; }
+  .col:nth-child(2) .note { margin-top:3px; }
+  .col:nth-child(2) .flow-lines { gap:9px; }
+  .col:nth-child(2) .flow-src { padding:11px 8px; font-size:13.5px; }
+  .col:nth-child(2) .pct { font-size:20px; width:74px; }
+  .col:nth-child(2) .flow-box { padding:7px 12px; }
+  .col:nth-child(2) .ref { gap:14px; }
+  .col:nth-child(2) .ref-big { font-size:44px; }
+  .col:nth-child(2) .lvl { margin-top:8px; }
+  .col:nth-child(2) .lvl td, .col:nth-child(2) .lvl th { padding:4px 3px; }
+</style>
+</head>
+<body>
+<div class="watermark">AXIX</div>
+<div class="wrap">
+
+  <div class="top">
+    <div class="brand">
+      <img src="assets/brand/logo.png" alt="AxiX">
+      <div>
+        <div class="brand-name">Axi<b>X</b> Exchange</div>
+        <div class="brand-sub">BNB SMART CHAIN · BSC</div>
+      </div>
+    </div>
+    <div class="title">一图看懂 AxiX 经济模型</div>
+    <div class="title-en">THE AXIX ECONOMIC MODEL AT A GLANCE</div>
+  </div>
+
+  <div class="cols">
+
+    <!-- 左列 -->
+    <div class="col">
+      <div class="card">
+        <div class="card-t"><span class="pill">AxiX 官方简介</span><span class="en">ABOUT</span></div>
+        <p class="desc">AxiX Exchange 是构建于 <b>BNB Smart Chain（BSC）</b>的一站式数字资产交易平台 —— 集现货、永续合约、平台代币 <b>AIX</b> 生态与机构信号跟单于一体。行情对接币安级实时数据源，链上充值提现，资金流转全程可查。</p>
+      </div>
+
+      <div class="card">
+        <div class="card-t"><span class="pill">AxiX 核心优势</span><span class="en">ADVANTAGES</span></div>
+        <div class="chips">
+          <div class="chip">币安级行情</div><div class="chip">P2P 订单簿撮合</div><div class="chip">现货+永续</div><div class="chip">机构信号跟单</div>
+          <div class="chip">分钟级到账</div><div class="chip">链上充提可查</div><div class="chip">7 国语言</div><div class="chip">移动端全适配</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-t"><span class="pill">代币经济学</span><span class="en">TOKENOMICS</span></div>
+        <div class="tok">
+          <div class="tok-info">
+            <div class="tok-row"><span>平台代币</span><b class="g">AIX · 艾克斯币</b></div>
+            <div class="tok-row"><span>结算货币</span><b>USDT</b></div>
+            <div class="tok-row"><span>部署公链</span><b>BNB Smart Chain</b></div>
+            <div class="tok-row"><span>手续费分配</span><b class="g">50% 销毁 · 50% 分红池</b></div>
+          </div>
+          <div class="coins"><div class="coin aix">AIX</div><div class="coin usdt">USDT</div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-t"><span class="pill">矿机产出模型</span><span class="en">MINER</span></div>
+        <table>
+          <tr><th>激活费用</th><th>矿机规格</th><th>周期</th><th>日产出</th></tr>
+          <tr><td>0.002 BNB</td><td><b>100 AIX</b></td><td>30 天</td><td>≈3.3 AIX / 日</td></tr>
+          <tr class="hot"><td>0.05 BNB</td><td><b>1500 AIX</b></td><td>90 天</td><td>≈16.7 AIX / 日</td></tr>
+        </table>
+        <div class="note">每档每人限购 1 份 · 矿机产出直达钱包 · 每分钟自动入账</div>
+      </div>
+    </div>
+
+    <!-- 中列 -->
+    <div class="col">
+      <div class="card">
+        <div class="card-t"><span class="pill">分配机制</span><span class="en">DISTRIBUTION</span></div>
+        <div class="flow">
+          <div class="flow-src">AIX 卖出<br>手续费</div>
+          <div class="flow-lines">
+            <div class="flow-branch">
+              <div class="pct g">50%</div><div class="flow-arrow">→</div>
+              <div class="flow-box burn"><b>链上销毁 · 永久通缩</b><span>每一笔卖出都在减少流通量</span></div>
+            </div>
+            <div class="flow-branch">
+              <div class="pct g">50%</div><div class="flow-arrow">→</div>
+              <div class="flow-box pool"><b>A10 分红池 · 生态激励</b><span>回馈生态长期建设者</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-t"><span class="pill">卖出费率阶梯 · 直推越多越省</span><span class="en">FEE TIERS</span></div>
+        <table>
+          <tr><th>直推 0-1 人</th><th>直推 2-3 人</th><th>直推 4-5 人</th><th>直推 6-7 人</th><th>直推 8-9 人</th><th>直推 ≥10 人</th></tr>
+          <tr><td>50%</td><td>40%</td><td>30%</td><td>20%</td><td>10%</td><td class="hot"><b>3%</b></td></tr>
+        </table>
+        <div class="note">统计有效直推人数 · 最低费率仅 3%</div>
+      </div>
+
+      <div class="card">
+        <div class="card-t"><span class="pill">AIX 质押计划</span><span class="en">STAKING</span></div>
+        <table>
+          <tr><th>计划</th><th>日利率</th><th>周期</th><th>到期收益</th></tr>
+          <tr><td>活期</td><td><b>0.30%</b></td><td>灵活存取</td><td>复利滚动</td></tr>
+          <tr><td>1 号</td><td><b>0.80%</b></td><td>30 天</td><td>+24%</td></tr>
+          <tr><td>2 号</td><td><b>1.00%</b></td><td>60 天</td><td>+60%</td></tr>
+          <tr class="hot"><td>3 号</td><td><b>1.20%</b></td><td>90 天</td><td>+108%</td></tr>
+        </table>
+        <div class="note">质押 AIX · AIX 与收益每日到账</div>
+      </div>
+
+      <div class="card">
+        <div class="card-t"><span class="pill">团队奖励 · A1~A10 级差</span><span class="en">TEAM REWARDS</span></div>
+        <div class="ref">
+          <div class="ref-big">10<small>%</small></div>
+          <div class="ref-txt">直推好友参与合约跟单，长期享受其跟单收益的 <b>10%</b>；<br>直推人数越多，AIX 卖出费率越低（最低 <b>3%</b>）。</div>
+        </div>
+        <table class="lvl">
+          <tr><th>级别</th><th>个人 / 团队持有</th><th>收益比例</th><th>级别</th><th>个人 / 团队持有</th><th>收益比例</th></tr>
+          <tr><td class="lv">A1</td><td>1千 / 5千</td><td>10%</td><td class="lv g">A6</td><td>3.2万 / 100万</td><td>60%</td></tr>
+          <tr><td class="lv">A2</td><td>2千 / 1万</td><td>20%</td><td class="lv g">A7</td><td>6.4万 / 500万</td><td>70%</td></tr>
+          <tr><td class="lv">A3</td><td>4千 / 5万</td><td>30%</td><td class="lv g">A8</td><td>12.8万 / 1000万</td><td>80%</td></tr>
+          <tr><td class="lv">A4</td><td>8千 / 10万</td><td>40%</td><td class="lv r">A9</td><td>25.6万 / 5000万</td><td>90%</td></tr>
+          <tr><td class="lv">A5</td><td>1.6万 / 50万</td><td>50%</td><td class="lv r">A10</td><td>50万 / 1亿</td><td class="hot-cell">手续费分红</td></tr>
+        </table>
+        <div class="note">晋级条件：个人持有 + 团队持有 AIX · A10 专属：均分交易手续费分红池，每日 00:00 自动到账</div>
+      </div>
+    </div>
+
+    <!-- 右列 -->
+    <div class="col">
+      <div class="card">
+        <div class="card-t"><span class="pill">资金安全机制</span><span class="en">SECURITY</span></div>
+        <div class="sec">
+          <div class="sec-item"><b>钱包直连</b>资产自持 · 自主掌控</div>
+          <div class="sec-item"><b>实时行情同步</b>7×24 · 币安级数据源</div>
+          <div class="sec-item"><b>提现 0 手续费</b><span class="r">10 USDT 起提</span> · 快速到账</div>
+          <div class="sec-item"><b>链上全程可查</b>12 区块确认 · 自动入账</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-t"><span class="pill">三大交易市场</span><span class="en">MARKETS</span></div>
+        <div class="mkt-row"><div class="mkt-tag">现货</div><div class="mkt-txt"><b>主流币对</b> · 币安级实时行情 · 专业 K 线 / 订单簿</div></div>
+        <div class="mkt-row"><div class="mkt-tag red">永续合约</div><div class="mkt-txt"><b>多空双向</b> · 杠杆灵活 · 涨跌都有机会</div></div>
+        <div class="mkt-row"><div class="mkt-tag dim">AIX / USDT</div><div class="mkt-txt"><b>P2P 订单簿撮合</b> · 买卖自由挂单 · 规则透明</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-t"><span class="pill">AxiX 合约跟单</span><span class="en">COPY TRADING</span></div>
+        <div class="grid2">
+          <div class="g2"><b>机构信号驱动</b><br>策略明细公开可查</div>
+          <div class="g2"><b>历史胜率透明</b><br>预期管理 · 数据说话</div>
+          <div class="g2"><b>收益定时结算</b><br>自动入账钱包</div>
+          <div class="g2"><b>USDT 随时赎回</b><br>进退自由</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-t"><span class="pill">AxiX 核心优势总结</span><span class="en">SUMMARY</span></div>
+        <ul class="sum">
+          <li><b>双市场引擎：</b>现货 + 永续 + AIX 创新区，一套账户全掌握</li>
+          <li><b>真实撮合：</b>AIX 采用 P2P 订单簿，买卖挂单自由成交</li>
+          <li><b>通缩模型：</b>卖出手续费 50% 永久销毁 + 50% 分红池，长期通缩</li>
+          <li><b>推荐生态：</b>直推 10% 跟单收益分成 + 费率阶梯最低 3%</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">AXIX EXCHANGE · BNB SMART CHAIN · SPOT / PERPETUAL / COPY TRADING / AIX ECOSYSTEM</div>
+</div>
+</body>
+</html>

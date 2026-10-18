@@ -1,0 +1,134 @@
+[
+  {
+    "path": "public/index.html",
+    "patch_groups": 1,
+    "production_equals_local_before": true,
+    "candidate_equals_local_after": true
+  },
+  {
+    "path": "public/js/core.js",
+    "patch_groups": 5,
+    "production_equals_local_before": true,
+    "candidate_equals_local_after": true
+  },
+  {
+    "path": "public/js/page-loader.js",
+    "patch_groups": 1,
+    "production_equals_local_before": true,
+    "candidate_equals_local_after": true
+  },
+  {
+    "path": "public/js/portal-shared.js",
+    "patch_groups": 2,
+    "production_equals_local_before": true,
+    "candidate_equals_local_after": true
+  },
+  {
+    "path": "public/js/portfolio.js",
+    "patch_groups": 1,
+    "production_equals_local_before": true,
+    "candidate_equals_local_after": true
+  },
+  {
+    "path": "public/js/staking.js",
+    "patch_groups": 1,
+    "production_equals_local_before": true,
+    "candidate_equals_local_after": true
+  },
+  {
+    "path": "public/js/vaults.js",
+    "patch_groups": 2,
+    "production_equals_local_before": true,
+    "candidate_equals_local_after": true
+  },
+  {
+    "path": "public/js/lottery.js",
+    "patch_groups": 11,
+    "production_equals_local_before": true,
+    "candidate_equals_local_after": true
+  },
+  {
+    "path": "public/js/assets.js",
+    "patch_groups": 8,
+    "production_equals_local_before": true,
+    "candidate_equals_local_after": true
+  },
+  {
+    "path": "public/js/wallet.js",
+    "patch_groups": 5,
+    "production_equals_local_before": true,
+    "candidate_equals_local_after": true
+  },
+  {
+    "path": "public/js/trade-account.js",
+    "patch_groups": 2,
+    "production_equals_local_before": true,
+    "candidate_equals_local_after": true
+  },
+  {
+    "path": "public/js/ai-managed.js",
+    "patch_groups": 4,
+    "production_equals_local_before": true,
+    "candidate_equals_local_after": true
+  },
+  {
+    "path": "public/js/strategy.js",
+    "patch_groups": 11,
+    "production_equals_local_before": true,
+    "candidate_equals_local_after": true
+  },
+  {
+    "path": "public/js/a-token-trade.js",
+    "patch_groups": 13,
+    "production_equals_local_before": true,
+    "candidate_equals_local_after": true
+  },
+  {
+    "path": "public/js/support-chat.js",
+    "patch_groups": 6,
+    "production_equals_local_before": true,
+    "candidate_equals_local_after": true
+  },
+  {
+    "path": "public/js/referrals.js",
+    "patch_groups": 5,
+    "production_equals_local_before": true,
+    "candidate_equals_local_after": true
+  },
+  {
+    "path": "public/js/leaderboard.js",
+    "patch_groups": 1,
+    "production_equals_local_before": true,
+    "candidate_equals_local_after": true
+  },
+  {
+    "path": "public/js/ledger.js",
+    "patch_groups": 2,
+    "production_equals_local_before": true,
+    "candidate_equals_local_after": true
+  },
+  {
+    "path": "public/js/ai.js",
+    "patch_groups": 3,
+    "production_equals_local_before": true,
+    "candidate_equals_local_after": true
+  },
+  {
+    "path": "public/js/hyperliquid-client.js",
+    "patch_groups": 2,
+    "production_equals_local_before": true,
+    "candidate_equals_local_after": true
+  },
+  {
+    "path": "public/js/platform-client.js",
+    "patch_groups": 2,
+    "production_equals_local_before": true,
+    "candidate_equals_local_after": true
+  },
+  {
+    "path": "public/js/trade-chart.js",
+    "patch_groups": 8,
+    "production_equals_local_before": true,
+    "candidate_equals_local_after": true
+  }
+]

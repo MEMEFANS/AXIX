@@ -1,0 +1,70 @@
+{
+  "src/server.js": {
+    "before": "ba786812fb4e512b272b42b73220aaac8340ef988cff0fb515dde8e733d2339e",
+    "after": "9cf077584442dbafcaed9911dafdd4adc304f76b727d8877130fcab670dc3851"
+  },
+  "src/lottery-service.js": {
+    "before": "9babefbc1e88cd6a7ce3a134ac3d4f8b99a38ea574b217e72da09b3799512b25",
+    "after": "babfa891b1fb2007b113dc8ad169ffa973d27fe447d51b1aacc1aec497b7eacf"
+  },
+  "src/admin-security.js": {
+    "before": null,
+    "after": "ab199ebabb9ca030198ab35acc03684c56e04f0d14998641549d0dcf12379e73"
+  },
+  "src/funds-admin-api.js": {
+    "before": null,
+    "after": "d2621c8fdeb866fda03c70e83f50dcfc8473f1c2ae986a0947b6de2467b53a00"
+  },
+  "public/admin.html": {
+    "before": "58beb8c9d07796da431d48916a6011a3701810ee8045af487fbc47d0107543ec",
+    "after": "17c48d5c6a71ddb16aaa5e784204143928d170c9d74593c064d85f0f8c25bbf5"
+  },
+  "public/withdraw-admin.html": {
+    "before": "8d2a2ff1fb22339c90779e6a43160dcb9dc0c53e127c283415d64ac4096fa7f6",
+    "after": "340d983e9137f8b6c10c7fe6039fedd62de92a2aace2deffff5bba104236b85f"
+  },
+  "public/funds-admin.html": {
+    "before": null,
+    "after": "66c82c4aca0eea01d25016152fcf1ad83201f87872c61eb323eef3013a6a58ce"
+  },
+  "public/js/admin-lottery.js": {
+    "before": "dc4989e3b7be18ee78072cfd8921248646e1d54a38cb17697a18a008bd892075",
+    "after": "64b00c2e84208ba3b349c94730a812923424214763ac6490378d5e62b424827d"
+  },
+  "public/js/operator-admin.js": {
+    "before": "87fdf127acf19c17b65be64ed8e346c4be4f78016b080e170de8ddc52a308d0d",
+    "after": "3fef20c6f1cce6927ee86618dd8c694aece6058bc34e9c3f2e8f6cb35c68cc3b"
+  },
+  "public/js/admin-dialogs.js": {
+    "before": null,
+    "after": "13fa76a27f4b40ce57a75be6b8da22d89c0227b809cf0c73bd7103c34460c0bd"
+  },
+  "public/js/funds-admin.js": {
+    "before": null,
+    "after": "3cc6f416a5709c7bbbcd1153aa62fefa09f87da14c36e011644c496589434c28"
+  },
+  "public/js/withdraw-admin.js": {
+    "before": null,
+    "after": "3b32637ed0a38f0f8b8e08ed480f23fdab0b6bad8de771878b9b33068551a3a9"
+  },
+  "public/js/support-chat.js": {
+    "before": "f93dcb075b27f9c933c92c2f153ab0229d3867504262843afb33fba2d33f3b03",
+    "after": "091f167a00c5a67af2e2f0564e04b84914145fcf617a1715104a3b6a91be1906"
+  },
+  "public/js/page-loader.js": {
+    "before": "f7d2d926c1109da4fd4e8d4784c92d3ec09322f5fb528a682e5cfbea44e4ac19",
+    "after": "3dd3cc90c8dca3e5225a6bea302548ef5113849508dec0b9e026145434d52d2e"
+  },
+  "public/index.html": {
+    "before": "ea33e1c3f7297b6c2fcbfd5481479b74798c9e2b468871283a2fa5bf1a93c662",
+    "after": "d34e879aadc8f8153187037407bff3395e897859ee6376dba36d45af16c75e6a"
+  },
+  "public/sw.js": {
+    "before": "7fa577bbeb4e31c932aa19682cc0ec859a84ea5966803768b89097b4bef5a1e7",
+    "after": "017e8dbd955b37521c81376afac19e53770305944bcb98f7faffc2fbf050cc9b"
+  },
+  "public/styles/funds-admin.css": {
+    "before": null,
+    "after": "37347a79b1f7c326e364ac32b38ea1fdbb20add7dad00bd4dcf5adab370c062a"
+  }
+}

@@ -1,0 +1,4 @@
+{
+  "KeySftpReconnect": true,
+  "DataDirectoryAccessibleToManagement": true
+}

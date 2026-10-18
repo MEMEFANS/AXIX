@@ -1,0 +1,112 @@
+[
+  {
+    "path": "public/index.html",
+    "beforeSha256": "983d65fca77fcc5281142100866ccdd1febf5299049c0f942e19f8aa1e4ff1a5",
+    "afterSha256": "ebf2492cc83d76a8c65c234cb727f566e82a01c6f49e7707647a54ecdb59350f"
+  },
+  {
+    "path": "public/js/core.js",
+    "beforeSha256": "7ec30147b6b7b603ccd776f95643460cc2625688d862836326d253bbbc9513f3",
+    "afterSha256": "af77b6fd1a16bc6a82cf3428ab48e5b386faed9897404e0105a32c0e6347c9f0"
+  },
+  {
+    "path": "public/js/page-loader.js",
+    "beforeSha256": "1b82a25c4ea1f9fa3025d037fe506808eb4516d2b6bf2ddc8d8bc84a2fe1c2de",
+    "afterSha256": "f7d2d926c1109da4fd4e8d4784c92d3ec09322f5fb528a682e5cfbea44e4ac19"
+  },
+  {
+    "path": "public/js/portal-shared.js",
+    "beforeSha256": "9cf789635b9a458e2add0fc47a4bf1f919cdf27017355037b250f78e193cbec1",
+    "afterSha256": "f341ebb87ebe81bf48ab4a4c4e6daba7c664fdf75a9efb8e3acb3f56af9a19f2"
+  },
+  {
+    "path": "public/js/portfolio.js",
+    "beforeSha256": "5d2137eda33c5aede41222964c941292abb0bf82d39c543e07f2f78d42927c64",
+    "afterSha256": "9946d77805dc5083192a229b7e221247f01203afe830312c8b75fd2ed2e077f7"
+  },
+  {
+    "path": "public/js/staking.js",
+    "beforeSha256": "3f603558d2a58db0ec9b5669aacbaea3065764bcd4e212aa1c258d9f5a6feb27",
+    "afterSha256": "5bad06df996f8ad5b9ed64b9453e6c0bd54d2bef5fb38982f494b74d0b1e12f1"
+  },
+  {
+    "path": "public/js/vaults.js",
+    "beforeSha256": "6836836669c4a121dd906a24926f24624400791fc129d3db4e9ac6dd051dbf08",
+    "afterSha256": "5b91f9c13dc49740bca398b83170bb189c1f47e012a87b7b2e8d577c8fc2c276"
+  },
+  {
+    "path": "public/js/lottery.js",
+    "beforeSha256": "bd1ca5fbda468d394991158f55149d78389227de36551df814d685944db621e6",
+    "afterSha256": "db6ad3b28e2b6ac84940504ef6f7ce3a7b6ecdf0105bf38762be5a641a6a8e61"
+  },
+  {
+    "path": "public/js/assets.js",
+    "beforeSha256": "682ec06ab9df9c041d4d0e23df6787a67b9b9af169bee4d25a1f0a1b2766af2e",
+    "afterSha256": "5710d6eb2834fc4fc1d8a812803dc7d6b188a32a96e0f4477d03bb6363b022e1"
+  },
+  {
+    "path": "public/js/wallet.js",
+    "beforeSha256": "44bc774245c85caa4deb29f1c0ab40a2354e365f9655f82180f398a231002285",
+    "afterSha256": "2726e97455b8a13429f2a1aa47062d09a0d64f8d5659a7286bffc79f3a140d8b"
+  },
+  {
+    "path": "public/js/trade-account.js",
+    "beforeSha256": "fdbec94fc26dc89b920fe7f1b65d3cdcc7fb01e376d2810e095addeef44993a3",
+    "afterSha256": "7736be1d8c1407532bc3840f34b46097b5eaf65eef56164e0ed20e62e78d032b"
+  },
+  {
+    "path": "public/js/ai-managed.js",
+    "beforeSha256": "be81dbe4fcd6817f9934c393955d20011bd6b541713b03e8f8200c0820b9345e",
+    "afterSha256": "6d54f2e979781d6f982af040fa74e89f64cf859ac99db673ea02a7adec18a8eb"
+  },
+  {
+    "path": "public/js/strategy.js",
+    "beforeSha256": "2760f8a9d17c4b26e035aba688189f8084ccf9857c0f350124234a1bc6eccaa6",
+    "afterSha256": "cd9593f7ece36fb5e6c4a7fb7d5ec89a7cfb06f0339d35cff189bf2705cc2623"
+  },
+  {
+    "path": "public/js/a-token-trade.js",
+    "beforeSha256": "fdf1d7735a1d0021a1f6e8a72ff93efbec4b511cbf586ca49f31c895c527104b",
+    "afterSha256": "8251d22f1ee70b65bc2c785c7628b917c53868f4c9fc002f2f8bb248040862b0"
+  },
+  {
+    "path": "public/js/support-chat.js",
+    "beforeSha256": "02e2abbe769fd1f1d12a9e7fc6192603499f2ea319eff886aac83d0d0bfcee1d",
+    "afterSha256": "69e5fd8699c4e118d36d8bfbe2fcef8001e8f886b243e2921f64f4a024b5996b"
+  },
+  {
+    "path": "public/js/referrals.js",
+    "beforeSha256": "4ddd15e06cc9a19999531f41e6e47175d734e71e605330088f2296297e1587e1",
+    "afterSha256": "e52f44835ba4d8fe34caed9a17aaa11b74ee72b03a64a7ca225281ffdb16a3ac"
+  },
+  {
+    "path": "public/js/leaderboard.js",
+    "beforeSha256": "4b0a5ea668a27cdfac0ae5b1ce7a28ecaf01eb1f19c5a0461e87d26c6bec7b4f",
+    "afterSha256": "b250fd97784aaf3fbe6f72a0afe5379d68f37b80744c0ca2d7513e0a9d9eeff4"
+  },
+  {
+    "path": "public/js/ledger.js",
+    "beforeSha256": "37160751bee9cd3272bdded8f40ffdba570cef5cf71720894f0cb42bab126e7f",
+    "afterSha256": "6cc93a83ede787b94dfed37b3749e0b47a37dddcd987ab9b2bfa288680e4cc4a"
+  },
+  {
+    "path": "public/js/ai.js",
+    "beforeSha256": "6063b501bd80224e56fad2f1455d0663286100d1dc3f7bedb1dc1cac2b8955d0",
+    "afterSha256": "78a27c073aaa6ccff819980ad49632f345ec99f09ffa0212a7e7f678e2e80b44"
+  },
+  {
+    "path": "public/js/hyperliquid-client.js",
+    "beforeSha256": "ffa14bbbbe073d48f74fbaeca3764a7c4532f04310ed41e484b21be96a50c1a9",
+    "afterSha256": "244d79152bdc2552f58678d88f88b47c24d8b4e43f63d1ee8235c9c62746ffaf"
+  },
+  {
+    "path": "public/js/platform-client.js",
+    "beforeSha256": "3e6107b632d9b1ea0b7a85935136a5d1e315e83fefbd4d055085eea8048f62c9",
+    "afterSha256": "49e5177d017adae9faeb45f747b49ac6e936ae3dd1eb1f63ec0e0f2bfbd064cd"
+  },
+  {
+    "path": "public/js/trade-chart.js",
+    "beforeSha256": "e06e29dc0644ad6b4b85ad9776ea674539b9658ba28080c6c438ded04824c55d",
+    "afterSha256": "71927c762e33720508e17aca41d0a7a2fb70dbe706a3a7f60e34edf8692961ca"
+  }
+]

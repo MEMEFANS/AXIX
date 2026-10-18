@@ -1,0 +1,11 @@
+--- src/server.js before
++++ src/server.js after
+@@ -637,7 +637,7 @@
+ // 在线客服：用户端 + 后台回复
+ const supportService = createSupportService({ database: walletService.database });
+ const supportApi = createSupportApi({ service: supportService, send, readBody, getSession: walletSession });
+-const fundsAdminApi = createFundsAdminApi({ walletService, payoutService:withdrawalPayoutService, send, readBody, isSameOrigin, allowRequest, getToken:() => String(process.env.WALLET_ADMIN_TOKEN || '') });
++const fundsAdminApi = createFundsAdminApi({ walletService, minerService:aTokenMinerService, payoutService:withdrawalPayoutService, send, readBody, isSameOrigin, allowRequest, getToken:() => String(process.env.WALLET_ADMIN_TOKEN || '') });
+ // 60s 定时：矿机产出 + 质押日结 + 每日固定销毁跨日结算
+ const aTokenMinerTimer = setInterval(() => {
+   try { aTokenMinerService.processAll(); } catch (e) { console.error('[A币矿机]', e?.message || e); }

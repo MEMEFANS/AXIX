@@ -1,0 +1,12 @@
+--- before/public/js/page-loader.js
++++ after/public/js/page-loader.js
+@@ -2,7 +2,8 @@
+ (() => {
+   const scripts = new Map(), pages = new Map(), ready = new Set();
+   const version = '20261011-pages-1';
+-  const js = name => `/js/${name}.js?v=${name === 'support-chat' ? '20261011-security-2' : version}`;
++  const versions = { 'support-chat':'20261011-security-2', 'a-token-trade':'20261011-aix-chart-1' };
++  const js = name => `/js/${name}.js?v=${versions[name] || version}`;
+   const chart = '/vendor/lightweight-charts.js?v=1';
+   const deps = {
+     'trade-account': ['platform-client'], assets: ['trade-account', 'wallet-funds'],

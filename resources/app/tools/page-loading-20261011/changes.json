@@ -1,0 +1,90 @@
+[
+  {
+    "path": "public/index.html",
+    "lines": 8
+  },
+  {
+    "path": "public/js/core.js",
+    "lines": 12
+  },
+  {
+    "path": "public/js/page-loader.js",
+    "lines": 46
+  },
+  {
+    "path": "public/js/portal-shared.js",
+    "lines": 68
+  },
+  {
+    "path": "public/js/portfolio.js",
+    "lines": 38
+  },
+  {
+    "path": "public/js/staking.js",
+    "lines": 32
+  },
+  {
+    "path": "public/js/vaults.js",
+    "lines": 3
+  },
+  {
+    "path": "public/js/lottery.js",
+    "lines": 74
+  },
+  {
+    "path": "public/js/assets.js",
+    "lines": 57
+  },
+  {
+    "path": "public/js/wallet.js",
+    "lines": 24
+  },
+  {
+    "path": "public/js/trade-account.js",
+    "lines": 6
+  },
+  {
+    "path": "public/js/ai-managed.js",
+    "lines": 38
+  },
+  {
+    "path": "public/js/strategy.js",
+    "lines": 72
+  },
+  {
+    "path": "public/js/a-token-trade.js",
+    "lines": 123
+  },
+  {
+    "path": "public/js/support-chat.js",
+    "lines": 36
+  },
+  {
+    "path": "public/js/referrals.js",
+    "lines": 13
+  },
+  {
+    "path": "public/js/leaderboard.js",
+    "lines": 7
+  },
+  {
+    "path": "public/js/ledger.js",
+    "lines": 12
+  },
+  {
+    "path": "public/js/ai.js",
+    "lines": 13
+  },
+  {
+    "path": "public/js/hyperliquid-client.js",
+    "lines": 2
+  },
+  {
+    "path": "public/js/platform-client.js",
+    "lines": 13
+  },
+  {
+    "path": "public/js/trade-chart.js",
+    "lines": 50
+  }
+]

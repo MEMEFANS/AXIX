@@ -1,0 +1,77 @@
+{
+  "version": 2,
+  "accounts": {
+    "0xefaa6dcc30411c18c20b3437f5e0c27335b9c6fc": {
+      "address": "0xEfaa6Dcc30411C18C20b3437F5E0c27335b9C6fc",
+      "spotBtcUnits": "0",
+      "perp": {
+        "sizeUnits": "0",
+        "entryPriceUnits": "0",
+        "marginUnits": "0",
+        "realizedPnlUnits": "0",
+        "leverage": 1,
+        "fundingPnlUnits": "0"
+      },
+      "staking": {
+        "principalUnits": "0",
+        "rewardUnits": "0",
+        "updatedAt": 1786507428355,
+        "rewardRemainder": "0"
+      },
+      "strategyBalanceUnits": "0",
+      "internalStrategies": {}
+    },
+    "0xfd420403066249b1f963ba616c7b6661008fb9df": {
+      "address": "0xfD420403066249b1f963ba616C7B6661008FB9dF",
+      "spotBtcUnits": "0",
+      "strategyBalanceUnits": "0",
+      "perp": {
+        "sizeUnits": "0",
+        "entryPriceUnits": "0",
+        "marginUnits": "0",
+        "realizedPnlUnits": "0",
+        "fundingPnlUnits": "0",
+        "leverage": 1
+      },
+      "staking": {
+        "principalUnits": "0",
+        "rewardUnits": "0",
+        "rewardRemainder": "0",
+        "updatedAt": 1786611103193
+      },
+      "internalStrategies": {
+        "de": {
+          "key": "de",
+          "name": "中性网格",
+          "running": false,
+          "config": null,
+          "capitalUnits": "0",
+          "cashUnits": "0",
+          "inventoryUnits": "0",
+          "realizedPnlUnits": "0",
+          "lastPriceUnits": "0",
+          "lastGridIndex": null,
+          "badDebtUnits": "0",
+          "fills": [],
+          "alerts": [],
+          "startedAt": null,
+          "updatedAt": "2026-08-13T07:34:06.365Z"
+        }
+      }
+    }
+  },
+  "orders": [],
+  "fills": [],
+  "audit": [
+    {
+      "id": "evt_1ea7b6707ff2efa8",
+      "address": "0xfD420403066249b1f963ba616C7B6661008FB9dF",
+      "type": "internal_strategy_update",
+      "createdAt": "2026-08-13T07:34:06.366Z",
+      "strategy": "de"
+    }
+  ],
+  "insuranceFundUnits": "0",
+  "badDebtUnits": "0",
+  "lastFundingAt": 1786611679776
+}

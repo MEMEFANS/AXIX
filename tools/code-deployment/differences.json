@@ -1,0 +1,37 @@
+{
+  "changed": [
+    {
+      "path": "frontend/wallet-connector.js",
+      "status": "changed",
+      "local": {
+        "sha256": "bd88b75db987c0f5d101b1089a0844a85a12e1006fd4391bee02a0f1e7e2f037",
+        "bytes": 8287
+      },
+      "remote": {
+        "sha256": "c8cbe3c20f7fb28be3e55dc40de71eb1e092fa5a5c20af9919f698c49c5c41ea",
+        "bytes": 7449
+      }
+    },
+    {
+      "path": "package-lock.json",
+      "status": "changed",
+      "local": {
+        "sha256": "43304432729b1eb08867a929c52bcf5f4dbcad5151a8427dbcbf1436fa18a8c9",
+        "bytes": 46151
+      },
+      "remote": {
+        "sha256": "847e35b2b938fd8b55de9c6ffbb529b389d15dd700c12e0421cf7935f9914666",
+        "bytes": 33483
+      }
+    }
+  ],
+  "missing": [
+    "public/index.html.miner-title-backup",
+    "public/999.png",
+    "public/assets/tokens/aapl.png",
+    "public/assets/tokens/amzn.png",
+    "public/assets/tokens/spcx.png",
+    "public/assets/tokens/intc.png",
+    "public/assets/tokens/msft.png"
+  ]
+}

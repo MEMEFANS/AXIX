@@ -1,0 +1,87 @@
+--- src/a-token-admin-api.js before
++++ src/a-token-admin-api.js after
+@@ -1,14 +1,18 @@
+-import crypto from 'node:crypto';
++import { isLegacyFundsPath } from './admin-security.js';
+ 
+ // A 币后台路由 /api/admin/a-token/*（需后台 operator session,由 server.js 在 admin 块内调用）
+ export function createATokenAdminApi({
+   aTokenService, poolService, minerService, stakingService, activationService, klineService, orderService, walletService,
+   send, readBody,
+ }) {
+-  function okId() { return `adm_${crypto.randomBytes(8).toString('hex')}`; }
+-
+   async function handle(request, res, pathname, ctx = {}) {
+     if (!pathname.startsWith('/api/admin/a-token/')) return false;
++    // Also enforce this inside the router so a future caller cannot bypass the
++    // server's operator guard. Funds credentials only work on the funds API.
++    if (isLegacyFundsPath(pathname)) {
++      send(res, 403, { error:'此操作需要独立资金后台权限', code:'FUNDS_ADMIN_REQUIRED' });
++      return true;
++    }
+     const { url, allowRequest } = ctx;
+     const searchParams = url?.searchParams;
+ 
+@@ -67,10 +71,6 @@
+         if (!record) return send(res, 404, { error:'激活记录不存在' });
+         const result = await activationService.verify(record);
+         return send(res, 200, { ok:true, activation: result });
+-      }
+-      if (request.method === 'POST' && pathname === '/api/admin/a-token/activations/confirm') {
+-        const body = await readBody(request);
+-        return send(res, 200, { ok:true, activation: activationService.adminConfirm(String(body.id || '')) });
+       }
+       if (request.method === 'POST' && pathname === '/api/admin/a-token/activations/reject') {
+         const body = await readBody(request);
+@@ -175,51 +175,6 @@
+         return send(res, 200, { ok:true, ticks: results.length, last: results[results.length - 1] });
+       }
+ 
+-      // 后台赠送资产（USDT/A,带审计）
+-      if (request.method === 'POST' && pathname === '/api/admin/a-token/grant') {
+-        if (allowRequest && !allowRequest(request, res, 'a-token-admin', 30, 60_000)) return true;
+-        const body = await readBody(request);
+-        const result = walletService.adminCreditAsset({
+-          wallet: body.wallet, asset: body.asset || 'A',
+-          amount: String(body.amount ?? ''),
+-          reason: String(body.reason || '后台赠送 A 币'),
+-          requestId: String(body.requestId || okId()),
+-          type: 'admin_grant',
+-        }, ctx.operatorSession?.username || 'admin');
+-        return send(res, 200, { ok:true, adjustment:result });
+-      }
+-
+-      // 后台扣除资产（USDT/A,带审计）
+-      if (request.method === 'POST' && pathname === '/api/admin/a-token/debit') {
+-        if (allowRequest && !allowRequest(request, res, 'a-token-admin', 30, 60_000)) return true;
+-        const body = await readBody(request);
+-        const result = walletService.adminDebitAsset({
+-          wallet: body.wallet, asset: body.asset || 'A',
+-          amount: String(body.amount ?? ''),
+-          reason: String(body.reason || '后台扣除 A 币'),
+-          requestId: String(body.requestId || okId()),
+-          type: 'admin_debit',
+-        }, ctx.operatorSession?.username || 'admin');
+-        return send(res, 200, { ok:true, adjustment:result });
+-      }
+-
+-      // 后台赠送矿机（用户升级）
+-      if (request.method === 'POST' && pathname === '/api/admin/a-token/grant-miner') {
+-        if (allowRequest && !allowRequest(request, res, 'a-token-admin', 30, 60_000)) return true;
+-        const body = await readBody(request);
+-        const plan = String(body.plan || 'mini120');
+-        const miner = minerService.createMiner(String(body.wallet || ''), plan);
+-        return send(res, 200, { ok:true, miner });
+-      }
+-
+-      // 后台赠送质押任务包
+-      if (request.method === 'POST' && pathname === '/api/admin/a-token/grant-stake') {
+-        if (allowRequest && !allowRequest(request, res, 'a-token-admin', 30, 60_000)) return true;
+-        const body = await readBody(request);
+-        const stake = stakingService.stake(String(body.wallet || ''), String(body.planId || 'current'), String(body.principal ?? '100'));
+-        return send(res, 200, { ok:true, stake });
+-      }
+-
+       // ── 矿机管理 ──
+       // 列表 ?wallet= &status= &plan= &limit=500
+       if (pathname === '/api/admin/a-token/miners' && request.method === 'GET') {

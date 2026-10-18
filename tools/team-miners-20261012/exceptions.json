@@ -1,0 +1,94 @@
+{
+  "captured_at_utc": "2026-10-12T07:06:29.029258+00:00",
+  "exceptions": [
+    {
+      "wallet": "0x614c4fba35aae54b40d4db7089521327e88d152c",
+      "activations": [
+        {
+          "id": "ata_2_1791647660565_0x614c4f",
+          "plan": "2",
+          "status": "rejected",
+          "confirmed_at": null,
+          "reject_reason": "收款地址不符",
+          "miner_plan": "pro1500"
+        },
+        {
+          "id": "ata_1_1791647650868_0x614c4f",
+          "plan": "1",
+          "status": "confirmed",
+          "confirmed_at": 1791647659058,
+          "reject_reason": null,
+          "miner_plan": "mini120"
+        }
+      ],
+      "miner_audits": []
+    },
+    {
+      "wallet": "0xd08f17eac2760041c26c93c026dff95cb8b41108",
+      "activations": [
+        {
+          "id": "ata_2_1791645209397_0xd08f17",
+          "plan": "2",
+          "status": "rejected",
+          "confirmed_at": null,
+          "reject_reason": "收款地址不符",
+          "miner_plan": "pro1500"
+        },
+        {
+          "id": "ata_1_1791645199771_0xd08f17",
+          "plan": "1",
+          "status": "confirmed",
+          "confirmed_at": 1791645223209,
+          "reject_reason": null,
+          "miner_plan": "mini120"
+        }
+      ],
+      "miner_audits": []
+    },
+    {
+      "wallet": "0xebd85ce5e40a5ba3da113662b4ad6277e131b7b9",
+      "activations": [
+        {
+          "id": "ata_2_1791644779333_0xebd85c",
+          "plan": "2",
+          "status": "rejected",
+          "confirmed_at": null,
+          "reject_reason": "收款地址不符",
+          "miner_plan": "pro1500"
+        },
+        {
+          "id": "ata_1_1791644768024_0xebd85c",
+          "plan": "1",
+          "status": "confirmed",
+          "confirmed_at": 1791644790877,
+          "reject_reason": null,
+          "miner_plan": "mini120"
+        }
+      ],
+      "miner_audits": []
+    },
+    {
+      "wallet": "0xa26bc28f6b574f8d3fe0bf03b3c5e69e09b46330",
+      "activations": [
+        {
+          "id": "ata_2_1791641645730_0xa26bc2",
+          "plan": "2",
+          "status": "rejected",
+          "confirmed_at": null,
+          "reject_reason": "收款地址不符",
+          "miner_plan": "pro1500"
+        },
+        {
+          "id": "ata_1_1791641637338_0xa26bc2",
+          "plan": "1",
+          "status": "confirmed",
+          "confirmed_at": 1791641670034,
+          "reject_reason": null,
+          "miner_plan": "mini120"
+        }
+      ],
+      "miner_audits": []
+    }
+  ],
+  "database_read_only": true
+}

@@ -1,0 +1,39 @@
+--- test/social-security.test.js before
++++ test/social-security.test.js after
+@@ -1,6 +1,4 @@
+ import assert from 'node:assert/strict';
+-import fs from 'node:fs';
+-import vm from 'node:vm';
+ import { Wallet } from 'ethers';
+ import { createLotteryService, normalizeSocialScreenshot } from '../src/lottery-service.js';
+ import { createATokenApi } from '../src/a-token-api.js';
+@@ -20,22 +18,7 @@
+ assert.equal(lottery.submitSocial('0x'+'1'.repeat(40),'twitter',png).screenshotUrl,png);
+ assert.equal(inserts,1);
+ 
+-// Exercise the actual preview click handler with a canary, without parsing user HTML.
+-let handler, opens=0, preview;
+-const messages=[];
+-const shot={dataset:{shot:'test'},addEventListener:(type,fn)=>handler=fn};
+-const host={innerHTML:'',querySelectorAll:sel=>sel==='[data-shot]'?[shot]:[]};
+-const popup={opener:{},document:{createElement:()=>({style:{}}),body:{replaceChildren:image=>preview=image},write:()=>{throw new Error('Unsafe HTML preview')}}};
+-const context={window:{open:()=>{opens++;return popup;}},document:{getElementById:id=>id==='al-content'?host:{addEventListener:()=>{}}},console};
+-vm.createContext(context);
+-const script=fs.readFileSync(new URL('../public/js/admin-lottery.js',import.meta.url),'utf8').replace('return { init, load };','return { init, load, renderSocial, setSocialForTest: list => socialList = list };');
+-vm.runInContext(script,context);
+-const admin=context.window.AdminLottery;admin.init({api:()=>{},toast:text=>messages.push(text)});
+-admin.setSocialForTest([{id:'test',wallet:'test',platform:'twitter',status:'pending',screenshotUrl:injection}]);admin.renderSocial();handler();
+-assert.equal(opens,0);assert.equal(messages.length,1);
+-admin.setSocialForTest([{id:'test',wallet:'test',platform:'twitter',status:'pending',screenshotUrl:png}]);admin.renderSocial();handler();
+-assert.equal(opens,1);assert.equal(preview.src,png);assert.equal(popup.opener,null);
+-
++// Historical screenshot rendering is verified in admin-security-browser.test.js.
+ const address='0x'+'1'.repeat(40);let frozen=true, reads=0;const responses=[];
+ const api=createATokenApi({walletService:{database:{},adminGetWithdrawalFreeze:()=>frozen?{frozen:true}:null},getSession:()=>({address}),readBody:()=>{reads++;return {};},send:(res,status,body)=>responses.push({status,body}),claimService:{listClaims:()=>[],status:()=>({enabled:true})},poolService:{quote:()=>({ok:true})}});
+ for(const pathname of ['/api/a-token/withdraw','/api/a-token/claim-signature','/api/a-token/transfer','/api/a-token/orders']){
+@@ -50,4 +33,4 @@
+ const payout=createWithdrawalPayoutService({walletService:{payoutRecord:()=>record,claimPayout:()=>{claimed++;return record;},adminGetWithdrawalFreeze:()=>({frozen:true})},privateKey:signer.privateKey,withdrawalAddress:signer.address,enabled:true,networks:[{id:'bsc',chainId:56,tokenContract:'0x'+'2'.repeat(40),provider:{}}]});
+ await payout.enqueue(record.id);assert.equal(claimed,0);
+ record={...record,status:'signed'};await payout.enqueue(record.id);assert.equal(claimed,0);
+-console.log('security regression passed: malicious uploads rejected, historical preview blocked, raster preview works, AIX exits frozen, queued and signed USDT sends blocked');
++console.log('security regression passed: malicious uploads rejected, AIX exits frozen, queued and signed USDT sends blocked');

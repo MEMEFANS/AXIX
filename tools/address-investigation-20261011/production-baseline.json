@@ -1,0 +1,26 @@
+{
+  "src/a-token-api.js": {
+    "sha256": "a51e82ee81c1218f7405c3564334aa6d03af3d1cceadebb8d47a844e0df2d514",
+    "normalizedMatch": false
+  },
+  "src/withdrawal-payout-service.js": {
+    "sha256": "5bfd81d2cd2f718d511c1bd070948e986d6793be3d68dec7dd56f0d45707e0d4",
+    "normalizedMatch": false
+  },
+  "src/lottery-service.js": {
+    "sha256": "0aa5f4a124cd0c4cb06000e7711180a2eb9527f82b51a3d09914965b5e7e88bd",
+    "normalizedMatch": false
+  },
+  "public/admin.html": {
+    "sha256": "6cc7807aded381d1ffca8912cf9c8adff156a4df896addeeef0ecbc82c016404",
+    "normalizedMatch": false
+  },
+  "public/js/admin-community.js": {
+    "sha256": "c0086ca121d50c90e7ea66deda668a856de0bec6c0e197ce057485db9f5fc869",
+    "normalizedMatch": false
+  },
+  "public/js/admin-lottery.js": {
+    "sha256": "3f3e91fb512f4bc2909148f855628ee2976737c4bb30a8b1b05d741075ec7e62",
+    "normalizedMatch": false
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "cleanup_committed": true,
+  "release": "incident-cleanup-20261011-030921",
+  "backup": "/opt/wg-platform/backups/incident-cleanup-20261011-030921",
+  "backup_database_sha256": "2b47e979745546e33e3d545c720d4cf5144c1aa784541f5e1cd608bafe1f06ff",
+  "malicious_deleted": 214,
+  "malicious_statuses": {
+    "approved": 125,
+    "pending": 89
+  },
+  "accounts_deleted": 114,
+  "accounts_with_balance_zeroed": 2,
+  "cleared_units": {
+    "USDT": "300200000000",
+    "A": "15002000000000000000000000",
+    "BTC": "0",
+    "ETH": "0",
+    "BNB": "0"
+  },
+  "lottery_points_cleared": 1251,
+  "deleted_rows": {
+    "wallet_sessions": 317,
+    "withdrawals": 5,
+    "balance_adjustments": 10,
+    "platform_referral_links": 1,
+    "a_token_user_ids": 2,
+    "a_token_team_levels": 1,
+    "lottery_accounts": 72,
+    "lottery_flows": 232,
+    "social_submissions": 214,
+    "agent_accounts": 1,
+    "support_tickets": 1,
+    "support_messages": 13,
+    "wallet_users": 114
+  },
+  "normal_rows_unchanged": true,
+  "normal_accounts_retained": 5592,
+  "normal_social_submissions_retained": 78,
+  "blocked_accounts": 114,
+  "legacy_files_cleaned": [],
+  "deployed_sha256": "93c7dca51246d2170ce0c5adb398b38a4af5890ba01f58771c38a767289a4a79",
+  "started_at_utc": "2026-10-10T19:09:21.182630+00:00",
+  "service": "active",
+  "completed_at_utc": "2026-10-10T19:09:33.716011+00:00"
+}

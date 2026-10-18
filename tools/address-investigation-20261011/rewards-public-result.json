@@ -1,0 +1,37 @@
+{
+  "captured_at_utc": "2026-10-10T20:26:55.887437+00:00",
+  "public_checks": [
+    {
+      "uri": "/",
+      "status": 200,
+      "sha256": "1c150f662f66fb2e2bbeed16ddb89149e582f2a2216c8096f15f769230500ee1",
+      "cf_cache_status": "DYNAMIC",
+      "cache_control": "no-cache"
+    },
+    {
+      "uri": "/api/wallet/session",
+      "status": 200,
+      "sha256": "3e58c6fcf10a31770582814c2babfd1ff71bb1a72cae32cdb1c1a428f406d47f",
+      "cf_cache_status": "DYNAMIC",
+      "cache_control": "no-store"
+    },
+    {
+      "uri": "/admin.html",
+      "status": 200,
+      "sha256": "18dcc4a2de72752cf4b9e2c10600115cab6f4ab868a150c62fbc57f77f84ebdd",
+      "cf_cache_status": "DYNAMIC",
+      "cache_control": "no-cache",
+      "cloudflare_analytics_inserted": true,
+      "new_admin_script_version": true,
+      "origin_content_sha256": "58beb8c9d07796da431d48916a6011a3701810ee8045af487fbc47d0107543ec"
+    },
+    {
+      "uri": "/js/operator-admin.js?v=45-assets-20261011",
+      "status": 200,
+      "sha256": "87fdf127acf19c17b65be64ed8e346c4be4f78016b080e170de8ddc52a308d0d",
+      "cf_cache_status": "HIT",
+      "cache_control": "public, max-age=2592000, s-maxage=2592000, immutable",
+      "origin_content_sha256": "87fdf127acf19c17b65be64ed8e346c4be4f78016b080e170de8ddc52a308d0d"
+    }
+  ]
+}

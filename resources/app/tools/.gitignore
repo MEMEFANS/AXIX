@@ -1,0 +1,6 @@
+# Encrypted SSH credential (DPAPI, tied to this Windows user + machine)
+_cred.enc.xml
+
+# One-time setup helper — keep if you want to regenerate credentials later,
+# or delete it after first run (it uses Read-Host, no plaintext password).
+# _make-cred.ps1

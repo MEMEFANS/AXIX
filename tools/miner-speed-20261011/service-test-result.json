@@ -1,0 +1,12 @@
+{
+  "wallets": 502,
+  "summary_ms": 2.32,
+  "baseline_full_ms": 181.47,
+  "optimized_full_ms": 37.78,
+  "baseline_referral_scans": 105,
+  "optimized_referral_scans": 4,
+  "complete_profile_unchanged": true,
+  "full_history_601_rewards": true,
+  "balances_unchanged": true,
+  "reward_rows_unchanged": true
+}

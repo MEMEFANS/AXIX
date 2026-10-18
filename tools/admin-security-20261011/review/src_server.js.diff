@@ -1,0 +1,154 @@
+--- src/server.js before
++++ src/server.js after
+@@ -24,6 +24,8 @@
+ import { PLATFORM_SYMBOLS, createPlatformService, setPlatformSymbols } from './platform-service.js';
+ import { createMarketCatalog, toBinanceMarketSymbol } from './market-catalog.js';
+ import { createAdminAuth } from './admin-auth.js';
++import { createFundsAdminApi } from './funds-admin-api.js';
++import { OPERATOR_ADMIN_CSP, FUNDS_ADMIN_CSP, adminPageKind, isLegacyFundsPath } from './admin-security.js';
+ import { createAgentAuth, hashPassword } from './agent-auth.js';
+ import { createAgentService } from './agent-service.js';
+ import { createCommunityLinksService } from './community-links.js';
+@@ -635,6 +637,7 @@
+ // 在线客服：用户端 + 后台回复
+ const supportService = createSupportService({ database: walletService.database });
+ const supportApi = createSupportApi({ service: supportService, send, readBody, getSession: walletSession });
++const fundsAdminApi = createFundsAdminApi({ walletService, payoutService:withdrawalPayoutService, send, readBody, isSameOrigin, allowRequest, getToken:() => String(process.env.WALLET_ADMIN_TOKEN || '') });
+ // 60s 定时：矿机产出 + 质押日结 + 每日固定销毁跨日结算
+ const aTokenMinerTimer = setInterval(() => {
+   try { aTokenMinerService.processAll(); } catch (e) { console.error('[A币矿机]', e?.message || e); }
+@@ -912,9 +915,20 @@
+     res.setHeader('Referrer-Policy', 'no-referrer');
+     res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+     res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://bin.bnbstatic.com; connect-src 'self' https://api.hyperliquid.xyz https://stats-data.hyperliquid.xyz https://cloudflareinsights.com; frame-ancestors 'none'; base-uri 'self'; object-src 'none'; form-action 'self'");
++    const adminKind = adminPageKind(p);
++    if (adminKind) {
++      res.setHeader('Content-Security-Policy', adminKind === 'funds' ? FUNDS_ADMIN_CSP : OPERATOR_ADMIN_CSP);
++      res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
++      res.setHeader('Cache-Control', 'no-store');
++    }
++    if (adminKind === 'funds' && decodeURIComponent(p).replace(/\\/g, '/').replace(/\/+/g, '/').toLowerCase() === '/withdraw-admin.html') {
++      res.writeHead(302, { Location:'/funds-admin.html', 'Cache-Control':'no-store' });
++      return res.end();
++    }
+     if (!['GET', 'HEAD', 'OPTIONS'].includes(request.method) && !isSameOrigin(request)) {
+       return send(res, 403, { error:'拒绝跨站修改请求' });
+     }
++    if (p.startsWith('/api/wallet/admin/')) return fundsAdminApi.handle(request, res, p);
+     if (p === '/api/admin/login' && request.method === 'POST') {
+       if (!allowRequest(request, res, 'admin-login', 10, 15 * 60_000)) return;
+       try {
+@@ -976,6 +990,7 @@
+       if (await communityLinksApi.handle(request, res, p)) return;
+       const operatorSession = adminSession(request);
+       if (!adminSession(request)) return send(res, 401, { error:'后台登录已失效，请重新登录', code:'ADMIN_AUTH_REQUIRED' });
++      if (isLegacyFundsPath(p)) return send(res, 403, { error:'此操作已移至独立资金后台，请单独验证资金权限', code:'FUNDS_ADMIN_REQUIRED' });
+       if (await supportApi.handleAdmin(request, res, p)) return;
+       if (await aTokenAdminApi.handle(request, res, p, { operatorSession, url, allowRequest })) return;
+       if (await lotteryApi.handle(request, res, p)) return;
+@@ -1056,18 +1071,6 @@
+           recentDeposits:walletService.adminListDeposits().slice(0, 8),
+           recentWithdrawals:walletService.adminListWithdrawals().slice(0, 8),
+         });
+-      }
+-      if (p === '/api/admin/withdrawal-automation' && request.method === 'PATCH') {
+-        try {
+-          const body = await readBody(request, 16_000);
+-          const payoutStatus = withdrawalPayoutService.status();
+-          if (body.enabled === true && !payoutStatus.configured) {
+-            return send(res, 400, { error:'请先在服务器配置匹配的出款地址和私钥，再开启自动提现' });
+-          }
+-          const settings = walletService.updateWithdrawalAutomationSettings(body);
+-          if (settings.enabled) withdrawalPayoutService.scan();
+-          return send(res, 200, { ok:true, ...settings, ...withdrawalPayoutService.status() });
+-        } catch (error) { return send(res, Number(error?.statusCode) || 400, { error:error?.message || String(error) }); }
+       }
+       if (p === '/api/admin/users' && request.method === 'GET') {
+         const dashboard = walletService.adminDashboard();
+@@ -1303,24 +1306,8 @@
+           return send(res, Number(error?.statusCode) || 400, { error: error?.message || String(error) });
+         }
+       }
+-      if (p === '/api/admin/test-credits' && request.method === 'GET') {
+-        return send(res, 200, { items:walletService.adminListBalanceAdjustments(200) });
+-      }
+-      if (p === '/api/admin/test-credits' && request.method === 'POST') {
+-        if (!allowRequest(request, res, 'admin-test-credit', 30, 60_000)) return;
+-        try {
+-          const body = await readBody(request, 16_000);
+-          const result = walletService.adminCreditTestBalance(body, operatorSession.username);
+-          return send(res, 200, { ok:true, adjustment:result });
+-        } catch (error) {
+-          return send(res, Number(error?.statusCode) || 400, { error:error?.message || String(error), code:error?.code || 'TEST_CREDIT_ERROR' });
+-        }
+-      }
+       if (p === '/api/admin/deposits' && request.method === 'GET') {
+         return send(res, 200, { items:walletService.adminListDeposits(url.searchParams.get('status') || '') });
+-      }
+-      if (p === '/api/admin/withdrawals' && request.method === 'GET') {
+-        return send(res, 200, { items:walletService.adminListWithdrawals(url.searchParams.get('status') || '') });
+       }
+       if (p === '/api/admin/wallet-balance' && request.method === 'GET') {
+         try {
+@@ -1341,21 +1328,6 @@
+           const results = await walletService.getWalletTokenBalances(items);
+           return send(res, 200, { items: results });
+         } catch (e) { return send(res, 500, { error: e?.message || String(e) }); }
+-      }
+-      if (p.startsWith('/api/admin/withdrawals/') && request.method === 'POST') {
+-        try {
+-          const id = decodeURIComponent(p.slice('/api/admin/withdrawals/'.length));
+-          const body = await readBody(request);
+-          if (['release', 'retry'].includes(String(body.action || '').toLowerCase()) && !withdrawalPayoutService.status().enabled) {
+-            return send(res, 503, { error:'自动提现尚未启用，请先配置出款私钥并重启服务' });
+-          }
+-          const result = await walletService.adminProcessWithdrawal(id, body);
+-          if (result.status === 'pending_auto') withdrawalPayoutService.enqueue(result.id).catch(() => {});
+-          return send(res, 200, result);
+-        } catch (error) {
+-          console.error('[后台提现审核失败]', id, error);
+-          return send(res, Number(error?.statusCode) || 400, { error:error?.message || String(error) });
+-        }
+       }
+       if (p === '/api/admin/tokens' && request.method === 'POST') {
+         try {
+@@ -1685,21 +1657,6 @@
+       setSessionCookie(request, res, '', 0);
+       return send(res, 200, { ok: true });
+     }
+-    if (p === '/api/wallet/admin/withdrawals' && request.method === 'GET') {
+-      const adminToken = String(process.env.WALLET_ADMIN_TOKEN || '');
+-      if (!safeTokenEqual(request.headers['x-wallet-admin-token'], adminToken)) return send(res, 401, { error: '管理员认证失败' });
+-      return send(res, 200, { items: walletService.adminListWithdrawals(url.searchParams.get('status') || '') });
+-    }
+-    if (p.startsWith('/api/wallet/admin/withdrawals/') && request.method === 'POST') {
+-      const adminToken = String(process.env.WALLET_ADMIN_TOKEN || '');
+-      if (!safeTokenEqual(request.headers['x-wallet-admin-token'], adminToken)) return send(res, 401, { error: '管理员认证失败' });
+-      const id = decodeURIComponent(p.slice('/api/wallet/admin/withdrawals/'.length));
+-      try { return send(res, 200, await walletService.adminProcessWithdrawal(id, await readBody(request))); }
+-      catch (e) {
+-        console.error('[钱包后台提现审核失败]', id, e);
+-        return send(res, 400, { error: e?.message || String(e) });
+-      }
+-    }
+     // Login only needs the cookie identity; funding/RPC reconciliation belongs to the assets page.
+     if (p === '/api/wallet/session' && request.method === 'GET') {
+       res.setHeader('Cache-Control', 'no-store');
+@@ -1985,7 +1942,7 @@
+       const stat = fs.statSync(full);
+       if (ext === '.html') {
+         const ims = request.headers['if-modified-since'];
+-        if (ims) {
++        if (ims && !adminKind) {
+           const since = new Date(ims).getTime();
+           if (Number.isFinite(since) && Math.floor(stat.mtime.getTime() / 1000) * 1000 <= since) {
+             res.writeHead(304, { 'Last-Modified': stat.mtime.toUTCString() });
+@@ -1994,7 +1951,7 @@
+         }
+         res.writeHead(200, {
+           'Content-Type': MIME['.html'] || 'text/html; charset=utf-8',
+-          'Cache-Control': 'no-cache',
++          'Cache-Control': adminKind ? 'no-store' : 'no-cache',
+           'Last-Modified': stat.mtime.toUTCString(),
+         });
+         return fs.createReadStream(full).pipe(res);

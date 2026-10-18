@@ -1,0 +1,102 @@
+{
+  "files": [
+    {
+      "path": "src/platform-service.js",
+      "before_sha256": "e55e4482cd532890b4c7f9058706b98f332fb9c5197ceee95050685cc141562e",
+      "after_sha256": "a07fe7cc4205af41f1484477cf77bddf05eb372817ac8750006a52b1222975a6",
+      "patches": [
+        {
+          "old": "import { formatUnits, getAddress, isAddress, parseUnits } from 'ethers';\nimport { openDatabase } from './database.js';\n\nconst ASSET_DECIMALS = 8;\n",
+          "new": "import { formatUnits, getAddress, isAddress, parseUnits } from 'ethers';\nimport { openDatabase } from './database.js';\nimport { splitStakePayment } from './a-token-income.js';\n\nconst ASSET_DECIMALS = 8;\n"
+        },
+        {
+          "old": "      return [symbol,{symbol,size:formatUnits(size,ASSET_DECIMALS),entryPrice:formatUnits(entry,PRICE_DECIMALS),markPrice:formatUnits(mark>0n?mark:0n,PRICE_DECIMALS),margin:formatUnits(pos.marginUnits,USDT_DECIMALS),marginMode:normalizeMarginMode(pos.marginMode),leverage:pos.leverage,liquidationPrice:String(liquidationPrice),unrealizedPnl:formatUnits(unrealized,USDT_DECIMALS),realizedPnl:formatUnits(pos.realizedPnlUnits,USDT_DECIMALS),totalFee:formatUnits(pos.feeUnits||'0',USDT_DECIMALS),netRealizedPnl:formatUnits(BigInt(pos.realizedPnlUnits)-BigInt(pos.feeUnits||'0'),USDT_DECIMALS),fundingPnl:formatUnits(pos.fundingPnlUnits,USDT_DECIMALS),maintenanceMargin:formatUnits(mark>0n?feeUnits(notionalUnits(size,mark),MAINTENANCE_BPS):0n,USDT_DECIMALS)}];\n    }));\n    const stakingValue=BigInt(user.staking.principalUnits)+BigInt(user.staking.rewardUnits);\n    const internalStrategyValue=Object.values(user.internalStrategies||{}).filter(strategy=>strategy?.running).reduce((sum,strategy)=>{\n      const strategySymbol=marketSymbol(strategy?.config?.symbol||'BTC');\n",
+          "new": "      return [symbol,{symbol,size:formatUnits(size,ASSET_DECIMALS),entryPrice:formatUnits(entry,PRICE_DECIMALS),markPrice:formatUnits(mark>0n?mark:0n,PRICE_DECIMALS),margin:formatUnits(pos.marginUnits,USDT_DECIMALS),marginMode:normalizeMarginMode(pos.marginMode),leverage:pos.leverage,liquidationPrice:String(liquidationPrice),unrealizedPnl:formatUnits(unrealized,USDT_DECIMALS),realizedPnl:formatUnits(pos.realizedPnlUnits,USDT_DECIMALS),totalFee:formatUnits(pos.feeUnits||'0',USDT_DECIMALS),netRealizedPnl:formatUnits(BigInt(pos.realizedPnlUnits)-BigInt(pos.feeUnits||'0'),USDT_DECIMALS),fundingPnl:formatUnits(pos.fundingPnlUnits,USDT_DECIMALS),maintenanceMargin:formatUnits(mark>0n?feeUnits(notionalUnits(size,mark),MAINTENANCE_BPS):0n,USDT_DECIMALS)}];\n    }));\n    let stakingValue=BigInt(user.staking.principalUnits)+BigInt(user.staking.rewardUnits);\n    const aStakedPrincipal=(database.listATokenStakes?.(address)||[]).reduce((sum,stake)=>sum+splitStakePayment(stake,stake.totalEarnedUnits).outstanding,0n);\n    const internalStrategyValue=Object.values(user.internalStrategies||{}).filter(strategy=>strategy?.running).reduce((sum,strategy)=>{\n      const strategySymbol=marketSymbol(strategy?.config?.symbol||'BTC');\n"
+        },
+        {
+          "old": "    marginUsed+=frozenPerpUsdt;\n    // A 币行：可用 = A 钱包余额；冻结中 = OPEN 卖单锁定（含手续费冻结）\n    // AIX 折算：可用余额和锁定余额都按 AIX/USDT 现价（来自 AIX 交易页 priceProvider）折算成 USDT，\n    // 并入总资产。修复点：原代码只折算锁定 AIX，可用 AIX 余额被漏算，导致 totalEquity 缺 AIX 价值。\n    let totalEquity=freeUsdt+frozenUsdt+spotValue+BigInt(user.strategyBalanceUnits)+internalStrategyValue+stakingValue+positionEquity;\n    try {\n      const aBalanceUnits=BigInt(walletService.balanceUnits(address,'A')||'0');\n",
+          "new": "    marginUsed+=frozenPerpUsdt;\n    // A 币行：可用 = A 钱包余额；冻结中 = OPEN 卖单锁定（含手续费冻结）\n    // AIX 现货归入现货市值，尚未返还的质押本金归入质押市值；总资产只汇总一次。\n    try {\n      const aBalanceUnits=BigInt(walletService.balanceUnits(address,'A')||'0');\n"
+        },
+        {
+          "old": "        const aPrice=BigInt(aTokenPriceProvider()||0n);\n        if (aPrice>0n) {\n          if (aBalanceUnits>0n) totalEquity+=aBalanceUnits*aPrice/(10n**BigInt(A_DECIMALS));\n          if (aLockedA>0n) totalEquity+=aLockedA*aPrice/(10n**BigInt(A_DECIMALS));\n        }\n      }\n    } catch {}\n    const collateralEquity=freeUsdt+frozenPerpUsdt+positionEquity;\n    const marginUsage=collateralEquity>0n?Number(marginUsed*1_000_000n/collateralEquity)/1_000_000:0;\n",
+          "new": "        const aPrice=BigInt(aTokenPriceProvider()||0n);\n        if (aPrice>0n) {\n          if (aBalanceUnits>0n) spotValue+=aBalanceUnits*aPrice/(10n**BigInt(A_DECIMALS));\n          if (aLockedA>0n) spotValue+=aLockedA*aPrice/(10n**BigInt(A_DECIMALS));\n          if (aStakedPrincipal>0n) stakingValue+=aStakedPrincipal*aPrice/(10n**BigInt(A_DECIMALS));\n        }\n      }\n    } catch {}\n    const totalEquity=freeUsdt+frozenUsdt+spotValue+BigInt(user.strategyBalanceUnits)+internalStrategyValue+stakingValue+positionEquity;\n    const collateralEquity=freeUsdt+frozenPerpUsdt+positionEquity;\n    const marginUsage=collateralEquity>0n?Number(marginUsed*1_000_000n/collateralEquity)/1_000_000:0;\n"
+        }
+      ]
+    },
+    {
+      "path": "src/server.js",
+      "before_sha256": "92973242567ecc37a818fc585a3bf61cfdbd27f190fe1185d94cf5e1c9906a94",
+      "after_sha256": "ba786812fb4e512b272b42b73220aaac8340ef988cff0fb515dde8e733d2339e",
+      "patches": [
+        {
+          "old": "import path from 'node:path';\nimport { formatUnits } from 'ethers';\nimport { getConfig, ROOT, DATA_ROOT } from './config.js';\nimport { createExchange as createDeExchange } from './exchange/de/index.js';\n",
+          "new": "import path from 'node:path';\nimport { formatUnits } from 'ethers';\nimport { readAdminAixIncome } from './a-token-admin-income.js';\nimport { getConfig, ROOT, DATA_ROOT } from './config.js';\nimport { createExchange as createDeExchange } from './exchange/de/index.js';\n"
+        },
+        {
+          "old": "            dailyTargetUnits: fmtA(m.dailyTargetUnits),\n          }));\n          const minerReleases = db.listATokenMinerReleases(wallet, 500);\n          const minerTotalReleased = minerReleases.reduce((s, r) => s + BigInt(r.amountUnits || '0'), 0n);\n          // 质押（格式化 AIX 18 位小数为可读数值）\n          const stakes = db.listATokenStakes(wallet).map(s => ({ ...s,\n            principalUnits: fmtA(s.principalUnits),\n            totalEarnedUnits: fmtA(s.totalEarnedUnits),\n            dayEarnedUnits: fmtA(s.dayEarnedUnits),\n          }));\n          const stakeRewards = db.listATokenStakeRewards(wallet, 500);\n          const stakeTotalEarned = stakeRewards.reduce((s, r) => s + BigInt(r.amountUnits || '0'), 0n);\n          // 激活记录\n          const activations = db.listATokenActivationsByWallet(wallet);\n",
+          "new": "            dailyTargetUnits: fmtA(m.dailyTargetUnits),\n          }));\n          // 全历史统计；列表单独限制条数，质押利息与返还本金分开。\n          const aixIncome = readAdminAixIncome(db, wallet);\n          // 激活记录\n          const activations = db.listATokenActivationsByWallet(wallet);\n"
+        },
+        {
+          "old": "          // 互转记录 —— 使用 transferService 返回格式化可读字段\n          const transfers = aTokenTransferService.myTransfers(wallet, 100);\n          // 团队收益（分润汇总）\n          const teamRewards = db.listATokenTeamRewards(wallet, 500);\n          const teamRewardTotal = teamRewards.reduce((s, r) => s + BigInt(r.amountUnits || '0'), 0n);\n          const byKind = {};\n          for (const r of teamRewards) {\n            const k = r.kind || 'other';\n            byKind[k] = (byKind[k] || 0n) + BigInt(r.amountUnits || '0');\n          }\n          // 团队展示数据视图（真实值 + 后台手动设置叠加后的生效值，仅前端展示）\n          const teamStatsView = aTokenTeamService.getTeamStatsView(wallet);\n",
+          "new": "          // 互转记录 —— 使用 transferService 返回格式化可读字段\n          const transfers = aTokenTransferService.myTransfers(wallet, 100);\n          // 团队展示数据视图（真实值 + 后台手动设置叠加后的生效值，仅前端展示）\n          const teamStatsView = aTokenTeamService.getTeamStatsView(wallet);\n"
+        },
+        {
+          "old": "            teamHeld,\n            referrerWallet,\n            miners: { count: miners.length, totalReleased: fmtA(minerTotalReleased.toString()), items: miners.slice(0, 100) },\n            minerReleases: minerReleases.slice(0, 100),\n            stakes: { count: stakes.length, totalEarned: fmtA(stakeTotalEarned.toString()), items: stakes },\n            stakeRewards: stakeRewards.slice(0, 100),\n            activations,\n            direct: {\n",
+          "new": "            teamHeld,\n            referrerWallet,\n            miners: { count: miners.length, totalReleased: aixIncome.minerTotalReleased, items: miners.slice(0, 100) },\n            minerReleases: aixIncome.minerReleases.slice(-100).reverse(),\n            stakes: aixIncome.stakes,\n            stakeRewards: aixIncome.stakeRewards.slice(-100).reverse(),\n            activations,\n            direct: {\n"
+        },
+        {
+          "old": "            trades,\n            transfers,\n            teamRewards: { total: fmtA(teamRewardTotal.toString()), byKind: Object.fromEntries(Object.entries(byKind).map(([k, v]) => [k, fmtA(v.toString())])), count: teamRewards.length },\n          });\n        } catch (error) {\n",
+          "new": "            trades,\n            transfers,\n            teamRewards: aixIncome.teamRewards,\n          });\n        } catch (error) {\n"
+        }
+      ]
+    },
+    {
+      "path": "src/a-token-income.js",
+      "before_sha256": "85721544fbbbbf11b8a97011309c87a192b7e54abb30f359bd56042aefd61abe",
+      "after_sha256": "591233a7c6c4385b4a5eefff2c469c6fe0ebd0b261a600587af9761c22edd8cc",
+      "patches": [
+        {
+          "old": "}\n\nexport function minerIncomeSummary(database, wallet, now) {\n  const day = beijingDayStart(now), summaries = new Map();\n",
+          "new": "}\n\n// Use the same principal/interest split in user revenue and admin totals. Legacy\n// rows need cumulative reconstruction; explicit splits remain authoritative.\nexport function readStakePayments(database, wallet, stakes = database.listATokenStakes(wallet)) {\n  const stakesById = new Map(stakes.map(stake => [stake.id, stake]));\n  const paidByStake = new Map();\n  return readAixIncome(database, wallet, 'stake').map(row => {\n    const stake = stakesById.get(row.stakeId);\n    const paid = paidByStake.get(row.stakeId) || 0n;\n    const amount = BigInt(row.amountUnits || '0');\n    let principal = row.principalUnits != null ? BigInt(row.principalUnits) : 0n;\n    if (row.principalUnits == null && stake) {\n      const original = { ...stake, principalReturnedUnits:undefined, interestEarnedUnits:undefined };\n      principal = splitStakePayment(original, paid + amount).principal - splitStakePayment(original, paid).principal;\n    }\n    paidByStake.set(row.stakeId, paid + amount);\n    const interest = row.interestUnits != null ? BigInt(row.interestUnits) : amount - principal;\n    return { ...row, principalUnits:principal.toString(), interestUnits:interest.toString() };\n  });\n}\n\nexport function minerIncomeSummary(database, wallet, now) {\n  const day = beijingDayStart(now), summaries = new Map();\n"
+        }
+      ]
+    },
+    {
+      "path": "src/a-token-revenue-service.js",
+      "before_sha256": "0f9ba5a89289e840c5c459ddce9ecab6c5e8fc292283588a66c5a832ac53f53e",
+      "after_sha256": "793dc4702b41b005fa3c6c63d49823829fd21ea1650e9d18ef139b5b81daa41c",
+      "patches": [
+        {
+          "old": "import { formatUnits } from 'ethers';\nimport { readAixIncome, splitStakePayment } from './a-token-income.js';\n\nconst A_TOKEN_DECIMALS = 18;\n",
+          "new": "import { formatUnits } from 'ethers';\nimport { readAixIncome, readStakePayments } from './a-token-income.js';\n\nconst A_TOKEN_DECIMALS = 18;\n"
+        },
+        {
+          "old": "    let returnedPrincipalUnits = 0n;\n    const stakesById = new Map(db.listATokenStakes(addr).map(stake => [stake.id, stake]));\n    const paidByStake = new Map();\n    for (const r of readAixIncome(db, addr, 'stake')) {\n      const stake = stakesById.get(r.stakeId);\n      const paid = paidByStake.get(r.stakeId) || 0n;\n      const amount = BigInt(r.amountUnits || '0');\n      let principal = r.principalUnits != null ? BigInt(r.principalUnits) : 0n;\n      if (r.principalUnits == null && stake) {\n        const original = {...stake, principalReturnedUnits:undefined, interestEarnedUnits:undefined};\n        principal = splitStakePayment(original, paid + amount).principal - splitStakePayment(original, paid).principal;\n      }\n      paidByStake.set(r.stakeId, paid + amount);\n      const interest = r.interestUnits != null ? BigInt(r.interestUnits) : amount - principal;\n      returnedPrincipalUnits += principal;\n      rows.push({ id:r.id, kind:'stake', label:'质押收益', amount:fmtA(interest), amountUnits:interest.toString(),\n",
+          "new": "    let returnedPrincipalUnits = 0n;\n    const stakesById = new Map(db.listATokenStakes(addr).map(stake => [stake.id, stake]));\n    for (const r of readStakePayments(db, addr, [...stakesById.values()])) {\n      const stake = stakesById.get(r.stakeId);\n      const amount = BigInt(r.amountUnits || '0');\n      const principal = BigInt(r.principalUnits);\n      const interest = BigInt(r.interestUnits);\n      returnedPrincipalUnits += principal;\n      rows.push({ id:r.id, kind:'stake', label:'质押收益', amount:fmtA(interest), amountUnits:interest.toString(),\n"
+        }
+      ]
+    },
+    {
+      "path": "public/js/operator-admin.js",
+      "before_sha256": "83a73780fa7dc00f5d1128da2489e5b0e39d88a94263889ce146b846e071ade7",
+      "after_sha256": "87fdf127acf19c17b65be64ed8e346c4be4f78016b080e170de8ddc52a308d0d",
+      "patches": [
+        {
+          "old": "      <td><span class=\"admin-status ${s.status==='active'?'good':''}\">${s.status==='active'?'运行中':s.status}</span></td>\n      <td>${amount(s.principalUnits || 0)} AIX</td>\n      <td>${amount(s.totalEarnedUnits || 0)} AIX</td>\n    </tr>`).join('') || emptyRow(5, '暂无质押');\n    // 激活记录\n    const actRows = (d.activations || []).map(a => `<tr>\n",
+          "new": "      <td><span class=\"admin-status ${s.status==='active'?'good':''}\">${s.status==='active'?'运行中':s.status}</span></td>\n      <td>${amount(s.principalUnits || 0)} AIX</td>\n      <td>${amount(s.interestEarnedUnits || 0)} AIX</td>\n      <td>${amount(s.principalReturnedUnits || 0)} AIX</td>\n      <td>${amount(s.outstandingPrincipalUnits || 0)} AIX</td>\n    </tr>`).join('') || emptyRow(7, '暂无质押');\n    // 激活记录\n    const actRows = (d.activations || []).map(a => `<tr>\n"
+        },
+        {
+          "old": "\n      <div class=\"admin-detail-section\">\n        ${subHead(`质押（${d.stakes?.count || 0} 笔 · 累计收益 ${amount(d.stakes?.totalEarned || 0)} AIX）`)}\n        <div class=\"admin-table-scroll\"><table><thead><tr><th>ID</th><th>套餐</th><th>状态</th><th>质押 AIX</th><th>累计收益</th></tr></thead><tbody>${stakeRows}</tbody></table></div>\n      </div>\n\n",
+          "new": "\n      <div class=\"admin-detail-section\">\n        ${subHead(`质押（${d.stakes?.count || 0} 笔 · 累计利息 ${amount(d.stakes?.totalEarned || 0)} AIX · 已返本金 ${amount(d.stakes?.principalReturned || 0)} AIX · 累计到账 ${amount(d.stakes?.totalCredited || 0)} AIX）`)}\n        <div class=\"admin-table-scroll\"><table><thead><tr><th>ID</th><th>套餐</th><th>状态</th><th>质押 AIX</th><th>累计利息</th><th>已返本金</th><th>质押中本金</th></tr></thead><tbody>${stakeRows}</tbody></table></div>\n      </div>\n\n"
+        }
+      ]
+    },
+    {
+      "path": "src/a-token-admin-income.js",
+      "before_sha256": null,
+      "after_sha256": "8422c148d7c531689bc7fd71fa2b7450ef47648418b47abd33f790f7846094f7",
+      "new_file": true
+    }
+  ],
+  "note": "Exact changes only; production files retain all existing production-only logic."
+}

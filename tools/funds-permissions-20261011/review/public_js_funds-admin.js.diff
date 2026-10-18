@@ -1,0 +1,96 @@
+--- public/js/funds-admin.js before
++++ public/js/funds-admin.js after
+@@ -2,14 +2,17 @@
+   const byId = id => document.getElementById(id);
+   let credential = '', revision = 0, tab = 'withdrawals', automation = {}, creditRequest = null;
+   let withdrawalsRevision = 0, creditsRevision = 0;
++  const tabs = ['withdrawals','credits','assets','miners'];
++  const operationRequests = new Map();
+   // Remove the former page's saved secret. This console keeps credentials in memory only.
+   try { sessionStorage.removeItem('wd_admin_token'); } catch {}
+   const labels = { pending_review:'待人工审核', pending_funds:'待补款放行', pending_auto:'自动队列', processing:'准备出款', signed:'等待广播', broadcast:'链上确认中', payout_failed:'出款失败', paid:'已支付', rejected:'已拒绝', failed:'失败', refunded:'已退回' };
+   function status(message, type = '') { byId('funds-status').textContent = message; byId('funds-status').className = `status ${type}`; }
+   function lock() {
+-    credential = ''; revision++; withdrawalsRevision++; creditsRevision++; creditRequest = null; automation = {};
++    credential = ''; revision++; withdrawalsRevision++; creditsRevision++; creditRequest = null; automation = {}; operationRequests.clear();
+     byId('funds-token').value = ''; byId('funds-login').hidden = false; byId('funds-app').hidden = true; byId('funds-lock').hidden = true;
+     byId('funds-withdrawals-body').replaceChildren(); byId('funds-credits-body').replaceChildren(); byId('funds-credit-form').reset(); byId('funds-settings-form').reset();
++    byId('funds-assets-body').replaceChildren(); byId('funds-miners-body').replaceChildren(); byId('funds-asset-form').reset(); byId('funds-miner-form').reset();
+   }
+   async function api(path, options = {}) {
+     if (!credential) throw new Error('请先验证资金管理权限');
+@@ -69,7 +72,49 @@
+   }
+   async function refresh() {
+     if (tab === 'credits') await loadCredits();
++    else if (tab === 'assets') await loadAssets();
++    else if (tab === 'miners') await loadMiners();
+     else { await loadSettings(); await loadWithdrawals(); }
++  }
++  async function loadAssets() {
++    const data = await api('asset-adjustments');
++    const body = byId('funds-assets-body'); body.replaceChildren();
++    byId('funds-asset-count').textContent = `${data.items?.length || 0} 条记录`;
++    const operations = { funds_grant:'赠送', funds_debit:'扣除', admin_grant:'历史赠送', admin_debit:'历史扣除', admin_test_credit:'测试入账' };
++    for (const item of data.items || []) {
++      const row = document.createElement('tr'); cell(row,date(item.createdAt)); cell(row,item.wallet,'wallet'); cell(row,operations[item.type] || item.type);
++      cell(row,`${item.amount} ${item.asset === 'A' ? 'AIX' : item.asset}`); cell(row,item.reason); cell(row,item.adminUsername); body.append(row);
++    }
++    if (!data.items?.length) empty(body,6,'暂无资产操作记录');
++  }
++  async function loadMiners() {
++    const data = await api('miner-grants');
++    const body = byId('funds-miners-body'); body.replaceChildren();
++    byId('funds-miner-count').textContent = `${data.items?.length || 0} 条记录`;
++    for (const item of data.items || []) {
++      const row = document.createElement('tr'); cell(row,date(item.createdAt)); cell(row,item.wallet,'wallet'); cell(row,item.plan === 'mini120' ? 'Mini' : 'Pro');
++      cell(row,item.miner?.id); cell(row,item.reason); cell(row,item.adminUsername); body.append(row);
++    }
++    if (!data.items?.length) empty(body,6,'暂无矿机赠送记录');
++  }
++  async function submitOperation(event, kind, payload, confirmation) {
++    event.preventDefault();
++    if (!window.confirm(confirmation)) return;
++    const form = event.currentTarget, button = event.submitter || form.querySelector('button');
++    const fingerprint = JSON.stringify(payload);
++    let pending = operationRequests.get(kind);
++    if (pending?.fingerprint !== fingerprint) {
++      pending = { fingerprint, requestId:`${kind}_${crypto.randomUUID().replaceAll('-','')}` };
++      operationRequests.set(kind,pending);
++    }
++    button.disabled = true;
++    try {
++      const result = await api(kind === 'asset' ? 'asset-adjustments' : 'miner-grants',{ method:'POST',body:JSON.stringify({...payload,requestId:pending.requestId}) });
++      operationRequests.delete(kind); form.reset();
++      status(kind === 'asset' ? `${result.adjustment.amount} ${payload.asset === 'A' ? 'AIX' : payload.asset} 已${payload.action === 'debit' ? '扣除' : '赠送'}` : '矿机已赠送','ok');
++      if (kind === 'asset') await loadAssets(); else await loadMiners();
++    } catch (error) { status(error.message,'error'); }
++    finally { button.disabled = false; }
+   }
+   async function processWithdrawal(item, kind, button, txHash) {
+     const body = { action:kind };
+@@ -96,13 +141,21 @@
+     finally { button.disabled = false; }
+   });
+   byId('funds-lock').addEventListener('click', () => { lock(); status('资金后台已锁定'); });
+-  for (const name of ['withdrawals','credits']) byId(`funds-tab-${name}`).addEventListener('click', async () => {
+-    tab = name; byId('funds-withdrawals').hidden = name !== 'withdrawals'; byId('funds-credits').hidden = name !== 'credits';
+-    for (const target of ['withdrawals','credits']) { const button = byId(`funds-tab-${target}`); button.classList.toggle('secondary', target !== name); button.setAttribute('aria-pressed', String(target === name)); }
++  for (const name of tabs) byId(`funds-tab-${name}`).addEventListener('click', async () => {
++    tab = name;
++    for (const target of tabs) { byId(`funds-${target}`).hidden = target !== name; const button = byId(`funds-tab-${target}`); button.classList.toggle('secondary', target !== name); button.setAttribute('aria-pressed', String(target === name)); }
+     try { await refresh(); } catch (error) { status(error.message, 'error'); }
+   });
+   byId('funds-refresh').addEventListener('click', async () => { try { await refresh(); status('记录已刷新', 'ok'); } catch (error) { status(error.message, 'error'); } });
+   byId('funds-withdrawal-filter').addEventListener('change', () => loadWithdrawals().catch(error => status(error.message, 'error')));
++  byId('funds-asset-form').addEventListener('submit',event => {
++    const payload = { wallet:byId('funds-asset-wallet').value.trim(), asset:byId('funds-asset-symbol').value, action:byId('funds-asset-action').value, amount:byId('funds-asset-amount').value.trim(), reason:byId('funds-asset-reason').value.trim() };
++    submitOperation(event,'asset',payload,`确认给钱包 ${payload.wallet} ${payload.action === 'debit' ? '扣除' : '赠送'} ${payload.amount} ${payload.asset === 'A' ? 'AIX' : payload.asset}？`);
++  });
++  byId('funds-miner-form').addEventListener('submit',event => {
++    const payload = { wallet:byId('funds-miner-wallet').value.trim(), plan:byId('funds-miner-plan').value, reason:byId('funds-miner-reason').value.trim() };
++    submitOperation(event,'miner',payload,`确认给钱包 ${payload.wallet} 赠送一台 ${payload.plan === 'mini120' ? 'Mini' : 'Pro'} 矿机？`);
++  });
+   byId('funds-credit-form').addEventListener('submit', async event => {
+     event.preventDefault(); const form = event.currentTarget; const button = event.submitter || form.querySelector('button');
+     const payload = { wallet:byId('funds-credit-wallet').value.trim(), amount:byId('funds-credit-amount').value.trim(), reason:byId('funds-credit-reason').value.trim() };

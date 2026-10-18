@@ -1,0 +1,419 @@
+{
+  "address": "0xd36ddfb9d3fa6b326b49e6eab68c5b961bc3ba59",
+  "captured_at_utc": "2026-10-10T18:24:07.274549+00:00",
+  "db": "/opt/wg-platform/wg-platform.sqlite",
+  "accounts": {
+    "wallet_users": [
+      {
+        "address": "0xd36dDfb9d3fA6b326B49E6EaB68c5B961Bc3ba59",
+        "balances_json": {
+          "USDT": "0",
+          "A": "0",
+          "BTC": "0",
+          "ETH": "0",
+          "BNB": "0"
+        },
+        "created_at": 1791654946530,
+        "updated_at": 1791655868244,
+        "payload_json": {
+          "address": "0xd36dDfb9d3fA6b326B49E6EaB68c5B961Bc3ba59",
+          "balances": {
+            "USDT": "100000000000",
+            "A": "5000000000000000000000000",
+            "BTC": "0",
+            "ETH": "0",
+            "BNB": "0"
+          },
+          "createdAt": "2026-10-10T17:55:46.530Z",
+          "updatedAt": "2026-10-10T18:11:08.244Z",
+          "level": 1
+        }
+      }
+    ],
+    "platform_accounts": [],
+    "platform_referral_links": [],
+    "a_token_user_ids": [
+      {
+        "wallet": "0xd36ddfb9d3fa6b326b49e6eab68c5b961bc3ba59",
+        "user_id": "B8LXMZY5",
+        "created_at": 1791655007693,
+        "payload_json": {
+          "wallet": "0xd36ddfb9d3fa6b326b49e6eab68c5b961bc3ba59",
+          "userId": "B8LXMZY5",
+          "createdAt": 1791655007693
+        }
+      }
+    ],
+    "a_token_team_levels": [],
+    "lottery_accounts": [
+      {
+        "wallet": "0xd36ddfb9d3fa6b326b49e6eab68c5b961bc3ba59",
+        "points": 3,
+        "updated_at": 1791655844635,
+        "payload_json": {}
+      }
+    ],
+    "airdrop_points_accounts": []
+  },
+  "tables": {
+    "wallet_users": {
+      "count": 1,
+      "address_columns": [
+        "address"
+      ],
+      "first_last_ms": [
+        1791654946530,
+        1791654946530
+      ]
+    },
+    "deposits": {
+      "count": 0,
+      "address_columns": [
+        "wallet"
+      ]
+    },
+    "withdrawals": {
+      "count": 0,
+      "address_columns": [
+        "wallet"
+      ]
+    },
+    "platform_accounts": {
+      "count": 0,
+      "address_columns": [
+        "address"
+      ]
+    },
+    "orders": {
+      "count": 0,
+      "address_columns": [
+        "address"
+      ]
+    },
+    "fills": {
+      "count": 0,
+      "address_columns": [
+        "address"
+      ]
+    },
+    "audit_log": {
+      "count": 0,
+      "address_columns": [
+        "address"
+      ]
+    },
+    "balance_adjustments": {
+      "count": 2,
+      "address_columns": [
+        "wallet"
+      ],
+      "first_last_ms": [
+        1791655868242,
+        1791655868244
+      ],
+      "latest_samples": [
+        {
+          "id": "adj_credit_1791655868068",
+          "wallet": "0xd36dDfb9d3fA6b326B49E6EaB68c5B961Bc3ba59",
+          "asset": "USDT",
+          "amount_units": "100000000000",
+          "adjustment_type": "admin_test_credit_reversed",
+          "reason": "operations test credit",
+          "admin_username": "admin",
+          "created_at": 1791655868244,
+          "payload_json": {
+            "id": "adj_credit_1791655868068",
+            "wallet": "0xd36dDfb9d3fA6b326B49E6EaB68c5B961Bc3ba59",
+            "asset": "USDT",
+            "amountUnits": "100000000000",
+            "type": "admin_test_credit",
+            "reason": "operations test credit",
+            "adminUsername": "admin",
+            "createdAt": "2026-10-10T18:11:08.244Z"
+          }
+        },
+        {
+          "id": "adj_aix_1791655868068",
+          "wallet": "0xd36dDfb9d3fA6b326B49E6EaB68c5B961Bc3ba59",
+          "asset": "A",
+          "amount_units": "5000000000000000000000000",
+          "adjustment_type": "admin_grant_reversed",
+          "reason": "operations adjustment",
+          "admin_username": "admin",
+          "created_at": 1791655868242,
+          "payload_json": {
+            "id": "adj_aix_1791655868068",
+            "wallet": "0xd36dDfb9d3fA6b326B49E6EaB68c5B961Bc3ba59",
+            "asset": "A",
+            "amountUnits": "5000000000000000000000000",
+            "type": "admin_grant",
+            "reason": "operations adjustment",
+            "adminUsername": "admin",
+            "createdAt": "2026-10-10T18:11:08.242Z"
+          }
+        }
+      ]
+    },
+    "ai_managed_batches": {
+      "count": 0,
+      "address_columns": [
+        "wallet"
+      ]
+    },
+    "ai_managed_rewards": {
+      "count": 0,
+      "address_columns": [
+        "wallet"
+      ]
+    },
+    "platform_referral_links": {
+      "count": 0,
+      "address_columns": [
+        "wallet",
+        "referrer_wallet"
+      ]
+    },
+    "referral_rewards": {
+      "count": 0,
+      "address_columns": [
+        "recipient_wallet",
+        "source_wallet"
+      ]
+    },
+    "a_token_activations": {
+      "count": 0,
+      "address_columns": [
+        "wallet"
+      ]
+    },
+    "a_token_miners": {
+      "count": 0,
+      "address_columns": [
+        "wallet"
+      ]
+    },
+    "a_token_miner_releases": {
+      "count": 0,
+      "address_columns": [
+        "wallet"
+      ]
+    },
+    "a_token_stakes": {
+      "count": 0,
+      "address_columns": [
+        "wallet"
+      ]
+    },
+    "a_token_stake_rewards": {
+      "count": 0,
+      "address_columns": [
+        "wallet"
+      ]
+    },
+    "a_token_trades": {
+      "count": 0,
+      "address_columns": [
+        "wallet"
+      ]
+    },
+    "a_token_transfers": {
+      "count": 0,
+      "address_columns": [
+        "from_wallet",
+        "to_wallet"
+      ]
+    },
+    "a_token_user_ids": {
+      "count": 1,
+      "address_columns": [
+        "wallet"
+      ],
+      "first_last_ms": [
+        1791655007693,
+        1791655007693
+      ]
+    },
+    "a_token_team_levels": {
+      "count": 0,
+      "address_columns": [
+        "wallet"
+      ]
+    },
+    "a_token_team_rewards": {
+      "count": 0,
+      "address_columns": [
+        "recipient_wallet",
+        "source_wallet"
+      ]
+    },
+    "a_token_direct_count_rewards": {
+      "count": 0,
+      "address_columns": [
+        "recipient_wallet"
+      ]
+    },
+    "a_token_withdrawals": {
+      "count": 0,
+      "address_columns": [
+        "wallet"
+      ]
+    },
+    "a_token_orders": {
+      "count": 0,
+      "address_columns": [
+        "wallet"
+      ]
+    },
+    "a_token_claims": {
+      "count": 0,
+      "address_columns": [
+        "wallet"
+      ]
+    },
+    "deposit_approvals": {
+      "count": 0,
+      "address_columns": [
+        "wallet"
+      ]
+    },
+    "lottery_accounts": {
+      "count": 1,
+      "address_columns": [
+        "wallet"
+      ],
+      "first_last_ms": [
+        1791655844635,
+        1791655844635
+      ]
+    },
+    "lottery_flows": {
+      "count": 91,
+      "address_columns": [
+        "wallet"
+      ],
+      "first_last_ms": [
+        1791613460441,
+        1791655844635
+      ],
+      "latest_samples": [
+        {
+          "id": "lf_3d0c2a10eeff269d1e6e",
+          "wallet": "0xd36ddfb9d3fa6b326b49e6eab68c5b961bc3ba59",
+          "change": 1,
+          "balance": 3,
+          "type": "admin_topup",
+          "ref_id": "",
+          "note": "V13AUTO {\"ok\":true,\"enabled\":true,\"reviewThresholdUsdt\":\"100.0\",\"dailyLimitUsdt\":\"1000000.0\",\"usdtMultipleOfTen\":false,\"updatedAt\":\"2026-10-10T18:10:44.378Z\",\"requested\":true,\"configured\":true,\"signerAddress\"",
+          "created_at": 1791655844635
+        },
+        {
+          "id": "lf_556310edde82b2bc789f",
+          "wallet": "0xd36ddfb9d3fa6b326b49e6eab68c5b961bc3ba59",
+          "change": 1,
+          "balance": 2,
+          "type": "admin_topup",
+          "ref_id": "",
+          "note": "V13GRANT {\"ok\":true,\"adjustment\":{\"id\":\"adj_g131791655844199\",\"wallet\":\"0xf75a7C032B7A484269ceD5663f7Fa10aCf63B1aC\",\"asset\":\"A\",\"amount\":\"1000.0\",\"type\":\"admin_grant\",\"reason\":\"ops\",\"adminUsername\":\"admin\",\"createdAt\":\"2026-10-10T18:10:44.376Z\"}}",
+          "created_at": 1791655844558
+        }
+      ]
+    },
+    "lottery_wins": {
+      "count": 0,
+      "address_columns": [
+        "wallet"
+      ]
+    },
+    "social_submissions": {
+      "count": 4,
+      "address_columns": [
+        "wallet"
+      ],
+      "first_last_ms": [
+        1791583569551,
+        1791649505129
+      ],
+      "latest_samples": [
+        {
+          "id": "ss_a7c09193ce9f5615c730",
+          "wallet": "0xd36ddfb9d3fa6b326b49e6eab68c5b961bc3ba59",
+          "platform": "twitter",
+          "screenshot_url": {
+            "length": 3474,
+            "sha256": "176b7d4b7d3710f153048b4eb2e3e4cbb6b1b87bda117dc6a89de1e470fbfc0d",
+            "redacted": true
+          },
+          "status": "pending",
+          "reviewer": "",
+          "reviewed_at": null,
+          "points_awarded": 0,
+          "created_at": 1791649505129,
+          "payload_json": {}
+        },
+        {
+          "id": "ss_b7b92876385ebcc96052",
+          "wallet": "0xd36ddfb9d3fa6b326b49e6eab68c5b961bc3ba59",
+          "platform": "moments",
+          "screenshot_url": {
+            "length": 3474,
+            "sha256": "176b7d4b7d3710f153048b4eb2e3e4cbb6b1b87bda117dc6a89de1e470fbfc0d",
+            "redacted": true
+          },
+          "status": "pending",
+          "reviewer": "",
+          "reviewed_at": null,
+          "points_awarded": 0,
+          "created_at": 1791649504378,
+          "payload_json": {}
+        }
+      ]
+    },
+    "assigned_wins": {
+      "count": 0,
+      "address_columns": [
+        "wallet"
+      ]
+    },
+    "a_token_team_stats_overrides": {
+      "count": 0,
+      "address_columns": [
+        "wallet"
+      ]
+    },
+    "airdrop_points_accounts": {
+      "count": 0,
+      "address_columns": [
+        "wallet"
+      ]
+    },
+    "airdrop_points_flows": {
+      "count": 0,
+      "address_columns": [
+        "wallet"
+      ]
+    },
+    "support_tickets": {
+      "count": 1,
+      "address_columns": [
+        "wallet"
+      ],
+      "first_last_ms": [
+        1791644913336,
+        1791644913336
+      ],
+      "latest_samples": [
+        {
+          "id": "271b8920-62e5-4165-9461-e8d4c0ccd5a0",
+          "wallet": "0xd36ddfb9d3fa6b326b49e6eab68c5b961bc3ba59",
+          "status": "closed",
+          "user_unread": 3,
+          "admin_unread": 0,
+          "created_at": 1791644913336,
+          "updated_at": 1791656091634,
+          "last_message_at": 1791655238600,
+          "payload_json": {}
+        }
+      ]
+    }
+  }
+}

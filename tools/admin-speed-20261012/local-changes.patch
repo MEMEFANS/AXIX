@@ -1,0 +1,610 @@
+--- a/src/wallet-service.js
++++ b/src/wallet-service.js
+@@ -873,22 +873,22 @@
+     return Object.entries(state.withdrawalFrozen || {}).map(([key, info]) => ({ wallet: key, frozen: true, ...info }));
+   }
+ 
+-  function adminListWithdrawals(status = '') {
++  function adminListWithdrawals(status = '', { limit = 1000 } = {}) {
+     const filter = String(status || '').trim();
+-    return database.walletRecords('withdrawals', { status:filter, limit:1000 }).map((record) => ({
++    return database.walletRecords('withdrawals', { status:filter, limit }).map((record) => ({
+         ...presentWithdrawal(record),
+         wallet: record.wallet,
+         amountUnits: record.amountUnits,
+       }));
+   }
+ 
+-  function adminListDeposits(status = '') {
++  function adminListDeposits(status = '', { limit = 1000 } = {}) {
+     const filter = String(status || '').trim();
+-    return database.walletRecords('deposits', { status:filter, limit:1000 })
++    return database.walletRecords('deposits', { status:filter, limit })
+       .map(record => ({ ...presentDeposit(record), wallet:record.wallet, amountUnits: record.amountUnits }));
+   }
+ 
+-  function adminDashboard() {
++  function adminDashboard({ includeUsers = true, userQuery = '', realOnly = false, limit, offset = 0 } = {}) {
+     const confirmed = state.deposits.filter(record => (
+       record.status === 'confirmed'
+       && record.asset === 'USDT'
+@@ -910,7 +910,25 @@
+     try {
+       for (const row of database.listActiveATokenStakes()) activeWallets.add(String(row.wallet).toLowerCase());
+     } catch {}
+-    const users = Object.values(state.users).map(user => {
++    const allUsers = Object.values(state.users);
++    const userWallets = new Set(allUsers.map(user => user.address.toLowerCase()));
++    const realWallets = new Set([...depositsByWallet.keys(), ...activeWallets]);
++    const summaryRealUsers = [...realWallets].filter(wallet => userWallets.has(wallet)).length;
++    if (includeUsers) {
++      for (const user of allUsers) if (BigInt(user.balances?.A || '0') > 0n) realWallets.add(user.address.toLowerCase());
++    }
++    const isReal = user => realWallets.has(user.address.toLowerCase());
++    const query = String(userQuery || '').trim().toLowerCase();
++    const paged = limit !== undefined;
++    const pageLimit = paged ? Math.max(1, Math.min(100, Math.floor(Number(limit) || 50))) : allUsers.length;
++    const pageOffset = Number.isFinite(Number(offset)) ? Math.max(0, Math.floor(Number(offset))) : 0;
++    let selected = [];
++    if (includeUsers) {
++      selected = allUsers.filter(user => (!query || user.address.toLowerCase().includes(query)) && (!realOnly || isReal(user)))
++        .sort((a, b) => Number(isReal(b)) - Number(isReal(a)) || String(b.updatedAt).localeCompare(String(a.updatedAt)) || a.address.toLowerCase().localeCompare(b.address.toLowerCase()));
++    }
++    const usersTotal = selected.length;
++    const users = selected.slice(pageOffset, pageOffset + pageLimit).map(user => {
+       const deposit = depositsByWallet.get(user.address.toLowerCase());
+       const hasAix = BigInt(user.balances?.A || '0') > 0n;
+       const isRealUser = Boolean(deposit) || activeWallets.has(user.address.toLowerCase()) || hasAix;
+@@ -926,13 +944,13 @@
+         firstDepositAt:deposit?.firstAt || null,
+         lastDepositAt:deposit?.lastAt || null,
+       };
+-    }).sort((a, b) => Number(b.isRealUser) - Number(a.isRealUser) || String(b.updatedAt).localeCompare(String(a.updatedAt)));
++    });
+     const totalDeposited = confirmed.reduce((sum, record) => sum + BigInt(record.amountUnits), 0n);
+-    const totalPlatformBalance = Object.values(state.users).reduce((sum, user) => sum + BigInt(user.balances?.USDT || '0'), 0n);
++    const totalPlatformBalance = allUsers.reduce((sum, user) => sum + BigInt(user.balances?.USDT || '0'), 0n);
+     return {
+       summary:{
+-        walletUsers:users.length,
+-        realUsers:[...new Set([...depositsByWallet.keys(), ...activeWallets])].filter(w => Object.values(state.users).some(u => u.address.toLowerCase() === w)).length,
++        walletUsers:allUsers.length,
++        realUsers:summaryRealUsers,
+         confirmedDeposits:confirmed.length,
+         pendingDeposits:state.deposits.filter(record => record.status === 'pending').length,
+         pendingWithdrawals:state.withdrawals.filter(record => ['pending_review', 'pending_funds', 'payout_failed'].includes(record.status)).length,
+@@ -948,7 +966,7 @@
+         withdrawalAddress,
+         updatedAt:state.withdrawalAutomation.updatedAt || null,
+       },
+-      users,
++      ...(includeUsers ? { users, ...(paged ? { usersTotal, usersLimit:pageLimit, usersOffset:pageOffset } : {}) } : {}),
+     };
+   }
+ 
+--- a/src/server.js
++++ b/src/server.js
+@@ -1063,18 +1063,23 @@
+         }
+       }
+       if (p === '/api/admin/dashboard' && request.method === 'GET') {
+-        const walletDashboard = walletService.adminDashboard();
++        const walletDashboard = walletService.adminDashboard({ includeUsers:url.searchParams.get('view') !== 'overview' });
+         return send(res, 200, {
+           ...walletDashboard,
+           withdrawalAutomation:{ ...walletDashboard.withdrawalAutomation, ...withdrawalPayoutService.status() },
+           tokens:marketCatalog.list({ includeDisabled:true }),
+-          recentDeposits:walletService.adminListDeposits().slice(0, 8),
+-          recentWithdrawals:walletService.adminListWithdrawals().slice(0, 8),
++          recentDeposits:walletService.adminListDeposits('', { limit:8 }),
++          recentWithdrawals:walletService.adminListWithdrawals('', { limit:8 }),
+         });
+       }
+       if (p === '/api/admin/users' && request.method === 'GET') {
+-        const dashboard = walletService.adminDashboard();
+-        return send(res, 200, { summary:dashboard.summary, users:dashboard.users });
++        const dashboard = walletService.adminDashboard({
++          userQuery:url.searchParams.get('q') || '', realOnly:url.searchParams.get('realOnly') === '1',
++          ...(url.searchParams.has('limit') ? { limit:url.searchParams.get('limit'), offset:url.searchParams.get('offset') } : {}),
++        });
++        return send(res, 200, { summary:dashboard.summary, users:dashboard.users,
++          ...(dashboard.usersTotal !== undefined ? { total:dashboard.usersTotal, limit:dashboard.usersLimit, offset:dashboard.usersOffset } : {}),
++        });
+       }
+       // 用户完整数据详情：矿机/质押/激活/直推间推团队/交易/互转
+       if (p.startsWith('/api/admin/users/') && p.endsWith('/detail') && request.method === 'GET') {
+@@ -1329,6 +1334,9 @@
+           return send(res, 200, { items: results });
+         } catch (e) { return send(res, 500, { error: e?.message || String(e) }); }
+       }
++      if (p === '/api/admin/tokens' && request.method === 'GET') {
++        return send(res, 200, { tokens:marketCatalog.list({ includeDisabled:true }) });
++      }
+       if (p === '/api/admin/tokens' && request.method === 'POST') {
+         try {
+           const body = await readBody(request);
+--- a/public/js/operator-admin.js
++++ b/public/js/operator-admin.js
+@@ -21,6 +21,10 @@
+   let currentPage = 'overview';
+   let dashboard = { summary:{}, users:[], tokens:[], recentDeposits:[], recentWithdrawals:[] };
+   let deposits = [];
++  const USER_PAGE_SIZE = 50;
++  let usersOffset = 0, usersTotal = 0, usersRequestSeq = 0, overviewRequestSeq = 0, depositsRequestSeq = 0, minerRequestSeq = 0, klineRequestSeq = 0;
++  let adminGeneration = 0, userSearchTimer = null;
++  const pendingReads = new Map();
+ 
+   function setLoginError(message = '') { byId('admin-login-error').textContent = message; }
+   function toast(message = '') {
+@@ -42,13 +46,22 @@
+   }
+ 
+   async function api(path, options = {}) {
++    const isRead = !options.method || options.method === 'GET';
++    if (isRead && pendingReads.has(path)) return pendingReads.get(path);
++    const task = requestApi(path, options);
++    if (isRead) pendingReads.set(path, task);
++    try { return await task; }
++    finally { if (pendingReads.get(path) === task) pendingReads.delete(path); }
++  }
++  async function requestApi(path, options) {
++    const generation = adminGeneration;
+     const headers = { ...(options.headers || {}) };
+     if (options.body && !headers['Content-Type']) headers['Content-Type'] = 'application/json';
+     const response = await fetch(path, { credentials:'same-origin', ...options, headers });
+     const payload = await response.json().catch(() => ({}));
+     if (!response.ok) {
+       const isAdminAuthRequired = response.status === 401;
+-      if (isAdminAuthRequired && path !== '/api/admin/login') showLogin();
++      if (isAdminAuthRequired && path !== '/api/admin/login' && generation === adminGeneration) showLogin();
+       throw new Error(
+         (payload && payload.error)
+           ? payload.error
+@@ -59,6 +72,25 @@
+   }
+ 
+   function showLogin() {
++    ++adminGeneration;
++    ++usersRequestSeq;
++    clearTimeout(userSearchTimer);
++    pendingReads.clear();
++    if (supportBadgeTimer) clearInterval(supportBadgeTimer);
++    supportBadgeTimer = null;
++    deactivateSupport();
++    dashboard = { summary:{}, users:[], tokens:[], recentDeposits:[], recentWithdrawals:[] };
++    deposits = [];
++    usersOffset = 0; usersTotal = 0;
++    supportTickets = []; supportConv = null; supportActiveTicketId = null; supportListSig = '';
++    byId('admin-support-ticket-list').replaceChildren();
++    byId('admin-support-conv').replaceChildren();
++    aMinerData = null; aKlineStatus = null;
++    byId('admin-a-miner-root').replaceChildren();
++    byId('admin-a-kline-root').replaceChildren();
++    byId('admin-users-body').replaceChildren();
++    byId('admin-deposits-body').replaceChildren();
++    byId('admin-user-detail-modal').hidden = true;
+     byId('admin-app').hidden = true;
+     byId('admin-login-view').hidden = false;
+     byId('admin-password').value = '';
+@@ -66,6 +98,7 @@
+   }
+ 
+   async function showApp(session) {
++    ++adminGeneration;
+     byId('admin-login-view').hidden = true;
+     byId('admin-app').hidden = false;
+     byId('admin-current-user').textContent = session.username || 'admin';
+@@ -73,7 +106,7 @@
+     refreshSupportBadge();
+     if (supportBadgeTimer) clearInterval(supportBadgeTimer);
+     supportBadgeTimer = setInterval(refreshSupportBadge, 15000);
+-    await loadAll();
++    await navigate('overview');
+   }
+ 
+   function emptyRow(columns, message = '暂无数据') {
+@@ -103,23 +136,22 @@
+   }
+ 
+   function renderUsers() {
+-    const query = String(byId('admin-user-search').value || '').trim().toLowerCase();
+-    const realOnly = byId('admin-real-only').checked;
+-    const items = (dashboard.users || []).filter(user => (
+-      (!query || String(user.address).toLowerCase().includes(query)) && (!realOnly || user.isRealUser)
+-    ));
+-    byId('admin-user-count').textContent = `${items.length} 位用户`;
++    const items = dashboard.users || [];
++    byId('admin-user-count').textContent = `${usersTotal} 位用户`;
++    byId('admin-users-page-status').textContent = usersTotal ? `第 ${usersOffset + 1}–${usersOffset + items.length} 位，共 ${usersTotal} 位` : '暂无符合条件的用户';
++    byId('admin-users-prev').disabled = usersOffset === 0;
++    byId('admin-users-next').disabled = usersOffset + items.length >= usersTotal;
+     const levelColor = lv => lv >= 9 ? '#f06b78' : lv >= 7 ? '#f6c454' : lv >= 4 ? '#4fd1b5' : '#82908c';
+     const levelPill = lv => `<span style="padding:2px 8px;border-radius:10px;font-size:11px;background:${levelColor(lv)}22;color:${levelColor(lv)};border:1px solid ${levelColor(lv)}55;font-weight:700">A${lv}</span>`;
+     const levelOptions = (cur) => Array.from({length:10},(_,i)=>i+1).map(n=>`<option value="${n}" ${Number(cur)===n?'selected':''}>A${n}</option>`).join('');
+     byId('admin-users-body').innerHTML = items.map(user => `<tr>
+-      <td><code>${esc(user.address)}</code></td>
+-      <td>${levelPill(user.level || 1)}</td>
+-      <td><span class="admin-status ${user.isRealUser ? 'good' : ''}">${user.isRealUser ? '真实充值用户' : '钱包用户'}</span></td>
+-      <td>${amount(user.confirmedDepositTotal)} USDT (${Number(user.confirmedDepositCount) || 0} 笔)</td>
+-      <td>${amount(user.platformUsdtBalance)} USDT</td>
+-      <td>${date(user.createdAt)}</td><td>${date(user.lastDepositAt)}</td>
+-      <td style="white-space:nowrap">
++      <td data-label="钱包地址"><code>${esc(user.address)}</code></td>
++      <td data-label="等级">${levelPill(user.level || 1)}</td>
++      <td data-label="用户类型"><span class="admin-status ${user.isRealUser ? 'good' : ''}">${user.isRealUser ? '真实充值用户' : '钱包用户'}</span></td>
++      <td data-label="确认充值">${amount(user.confirmedDepositTotal)} USDT (${Number(user.confirmedDepositCount) || 0} 笔)</td>
++      <td data-label="平台余额">${amount(user.platformUsdtBalance)} USDT</td>
++      <td data-label="首次连接">${date(user.createdAt)}</td><td data-label="最近充值">${date(user.lastDepositAt)}</td>
++      <td data-label="操作" style="white-space:nowrap">
+         <button type="button" class="admin-table-action" data-detail-btn="${esc(user.address)}">详情</button>
+         <select class="admin-level-select" data-level-wallet="${esc(user.address)}" style="height:30px;padding:0 6px;font-size:11px">${levelOptions(user.level || 1)}</select> <button type="button" class="admin-table-action" data-level-btn="${esc(user.address)}">设置</button>
+       </td>
+@@ -471,34 +503,71 @@
+   }
+ 
+   async function loadAll() {
+-    // 还在登录页时任何遗留定时器/刷新按钮触发的 loadAll 都直接 abort，避免控制台连刷 401
+     if (byId('admin-app').hidden) return;
+     try {
+-      dashboard = await api('/api/admin/dashboard');
+-      renderOverview();
+-      renderUsers();
+-      renderTokens();
+-      renderStocks();
+-      await loadDeposits();
++      const generation = adminGeneration, page = currentPage;
++      if (page === 'overview') {
++        const seq = ++overviewRequestSeq;
++        const result = await api('/api/admin/dashboard?view=overview');
++        if (generation !== adminGeneration || currentPage !== page || seq !== overviewRequestSeq) return;
++        dashboard = { ...dashboard, ...result };
++        renderOverview();
++      } else if (page === 'users') await loadUsers();
++      else if (page === 'deposits') await loadDeposits();
++      else if (page === 'tokens' || page === 'stocks') {
++        const result = await api('/api/admin/tokens');
++        if (generation !== adminGeneration || currentPage !== page) return;
++        dashboard.tokens = result.tokens || [];
++        if (page === 'tokens') renderTokens(); else renderStocks();
++      } else if (page === 'community') await window.AdminCommunity?.load();
++      else if (page === 'agents') await window.AdminAgents?.load();
++      else if (page === 'lottery') await window.AdminLottery?.load();
++      else if (page === 'a-kline') await loadAKline();
++      else if (page === 'a-miner') await loadAMiner();
++      else if (page === 'support') await loadSupportTickets();
++      if (generation !== adminGeneration || currentPage !== page) return;
+       byId('admin-updated').textContent = `更新于 ${new Date().toLocaleTimeString('zh-CN', { hour12:false })}`;
+     } catch (error) { toast(error.message); }
+   }
+ 
++  async function loadUsers() {
++    const seq = ++usersRequestSeq, generation = adminGeneration;
++    const params = new URLSearchParams({ limit:String(USER_PAGE_SIZE), offset:String(usersOffset), q:byId('admin-user-search').value.trim(), realOnly:byId('admin-real-only').checked ? '1' : '0' });
++    byId('admin-user-count').textContent = '正在读取用户…';
++    byId('admin-users-prev').disabled = byId('admin-users-next').disabled = true;
++    const result = await api('/api/admin/users?' + params);
++    if (seq !== usersRequestSeq || generation !== adminGeneration || currentPage !== 'users') return;
++    usersTotal = Number(result.total) || 0;
++    usersOffset = Number(result.offset) || 0;
++    if (usersOffset >= usersTotal && usersOffset > 0) {
++      usersOffset = Math.max(0, Math.floor((usersTotal - 1) / USER_PAGE_SIZE) * USER_PAGE_SIZE);
++      return loadUsers();
++    }
++    dashboard.users = result.users || [];
++    renderUsers();
++  }
++
+   async function loadDeposits() {
++    const seq = ++depositsRequestSeq, generation = adminGeneration;
+     const filter = byId('admin-deposit-filter').value;
+     const result = await api(`/api/admin/deposits${filter ? `?status=${encodeURIComponent(filter)}` : ''}`);
++    if (generation !== adminGeneration || seq !== depositsRequestSeq || currentPage !== 'deposits') return;
+     deposits = result.items || [];
+     renderDeposits();
+   }
+ 
+   function navigate(page) {
++    if (byId('admin-app').hidden) return;
++    ++usersRequestSeq;
++    clearTimeout(userSearchTimer);
+     currentPage = page;
+-    const titles = { overview:'首页总览', users:'用户管理', deposits:'充值记录', tokens:'代币管理', stocks:'股票管理', agents:'代理管理', support:'在线客服' };
++    const titles = { overview:'首页总览', users:'用户管理', deposits:'充值记录', tokens:'代币管理', stocks:'股票管理', agents:'代理管理', support:'在线客服', community:'社群链接', 'a-kline':'AIX 行情调控', 'a-token-balance':'AIX 代币管理', 'a-miner':'AIX 矿机管理', lottery:'抽奖管理' };
+     document.querySelectorAll('[data-admin-page]').forEach(button => button.classList.toggle('active', button.dataset.adminPage === page));
+     document.querySelectorAll('[data-admin-panel]').forEach(panel => panel.classList.toggle('active', panel.dataset.adminPanel === page));
+     byId('admin-page-title').textContent = titles[page] || '管理后台';
+     window.scrollTo({ top:0, behavior:'auto' });
+     if (page === 'support') activateSupport(); else deactivateSupport();
++    return loadAll();
+   }
+ 
+   async function toggleToken(symbol, enabled) {
+@@ -633,9 +702,16 @@
+     byId('admin-user-detail-modal').hidden = true;
+   }));
+   document.querySelectorAll('[data-open-funds]').forEach(button => button.addEventListener('click', () => window.open('/funds-admin.html', '_blank', 'noopener,noreferrer')));
+-  byId('admin-refresh').addEventListener('click', () => currentPage==='community' ? window.AdminCommunity?.load() : loadAll());
+-  byId('admin-user-search').addEventListener('input', renderUsers);
+-  byId('admin-real-only').addEventListener('change', renderUsers);
++  byId('admin-refresh').addEventListener('click', loadAll);
++  byId('admin-user-search').addEventListener('input', () => {
++    ++usersRequestSeq;
++    usersOffset = 0;
++    clearTimeout(userSearchTimer);
++    userSearchTimer = setTimeout(loadAll, 250);
++  });
++  byId('admin-real-only').addEventListener('change', () => { usersOffset = 0; loadAll(); });
++  byId('admin-users-prev').addEventListener('click', () => { usersOffset = Math.max(0, usersOffset - USER_PAGE_SIZE); loadAll(); });
++  byId('admin-users-next').addEventListener('click', () => { usersOffset += USER_PAGE_SIZE; loadAll(); });
+   byId('admin-deposit-filter').addEventListener('change', () => loadDeposits().catch(error => toast(error.message)));
+   byId('admin-token-form').addEventListener('submit', submitToken);
+   byId('admin-stock-form').addEventListener('submit', submitStock);
+@@ -700,9 +776,11 @@
+ 
+   let supportListSig = '';
+   async function loadSupportTickets() {
++    const generation = adminGeneration;
+     const filterEl = byId('admin-support-filter');
+     const status = filterEl ? filterEl.value : 'open';
+     const data = await api(`/api/admin/support/tickets?status=${encodeURIComponent(status)}&limit=200`);
++    if (generation !== adminGeneration || currentPage !== 'support' || status !== filterEl?.value) return;
+     supportTickets = data.tickets || [];
+     // 列表无变化时跳过重绘，避免 5s 轮询冲掉正要点击的会话项
+     const sig = status + '|' + supportTickets.map(t => `${t.id}:${t.status}:${t.adminUnread}:${t.lastMessageAt}:${String(t.lastBody || '').slice(0, 30)}`).join(',');
+@@ -739,9 +817,11 @@
+   }
+ 
+   async function openSupportTicket(id) {
++    const generation = adminGeneration;
+     supportActiveTicketId = id;
+     renderSupportTickets();
+     const data = await api(`/api/admin/support/tickets/${encodeURIComponent(id)}/messages`);
++    if (generation !== adminGeneration || currentPage !== 'support' || supportActiveTicketId !== id) return;
+     supportConv = data;
+     renderSupportConversation();
+     refreshSupportBadge();
+@@ -824,8 +904,10 @@
+ 
+   async function refreshSupportConvSilent() {
+     if (!supportActiveTicketId) return;
+-    try {
+-      const data = await api(`/api/admin/support/tickets/${encodeURIComponent(supportActiveTicketId)}/messages`);
++    const generation = adminGeneration, id = supportActiveTicketId;
++    try {
++      const data = await api(`/api/admin/support/tickets/${encodeURIComponent(id)}/messages`);
++      if (generation !== adminGeneration || currentPage !== 'support' || supportActiveTicketId !== id) return;
+       const prevLen = supportConv?.messages?.length || 0;
+       supportConv = data;
+       // 仅在消息数变化时重绘，避免输入过程中 DOM 被重置
+@@ -834,8 +916,11 @@
+   }
+ 
+   async function refreshSupportBadge() {
++    if (byId('admin-app').hidden || document.hidden) return;
++    const generation = adminGeneration;
+     try {
+       const data = await api('/api/admin/support/unread-count');
++      if (generation !== adminGeneration) return;
+       const n = Number(data.count || 0);
+       const badge = byId('admin-support-nav-badge');
+       if (badge) {
+@@ -862,12 +947,11 @@
+ 
+   function activateSupport() {
+     bindSupportEvents();
+-    loadSupportTickets().catch(error => toast(error.message));
+     refreshSupportBadge();
+     if (supportListTimer) clearInterval(supportListTimer);
+     if (supportConvTimer) clearInterval(supportConvTimer);
+-    supportListTimer = setInterval(() => { loadSupportTickets().catch(() => {}); refreshSupportBadge(); }, 5000);
+-    supportConvTimer = setInterval(() => { refreshSupportConvSilent(); }, 5000);
++    supportListTimer = setInterval(() => { if (!document.hidden) { loadSupportTickets().catch(() => {}); refreshSupportBadge(); } }, 5000);
++    supportConvTimer = setInterval(() => { if (!document.hidden) refreshSupportConvSilent(); }, 5000);
+   }
+   function deactivateSupport() {
+     if (supportListTimer) { clearInterval(supportListTimer); supportListTimer = null; }
+@@ -882,22 +966,20 @@
+   let aMinerData = null;
+ 
+   async function aApi(path, options = {}) {
+-    const headers = { ...(options.headers || {}) };
+-    if (options.body && !headers['Content-Type']) headers['Content-Type'] = 'application/json';
+     const url = path.startsWith('/') ? `/api/admin/a-token${path}` : `/api/admin/a-token/${path}`;
+-    const res = await fetch(url, { credentials:'same-origin', ...options, headers });
+-    const data = await res.json().catch(() => ({}));
+-    if (res.status === 401) showLogin();
+-    if (!res.ok) throw new Error(data.error || (res.status === 401 ? '后台登录已失效，请重新登录' : `请求失败 (${res.status})`));
+-    return data;
++    return api(url, options);
+   }
+   function aFmt(v, d = 2) { return Number(v || 0).toLocaleString('en-US', { maximumFractionDigits: d, minimumFractionDigits: Math.min(2, d) }); }
+   function aPill(color, text) { return `<span style="padding:2px 8px;border-radius:10px;font-size:11px;background:${color}22;color:${color};border:1px solid ${color}55">${esc(text)}</span>`; }
+   function aBtn(text, { id='', cls='', data='' } = {}) { return `<button type="button" class="admin-primary-button admin-a-btn ${cls}" ${id ? `id="${id}"` : ''} ${data}>${text}</button>`; }
+ 
+   async function loadAKline() {
+-    try { aKlineStatus = await aApi('/kline/status'); renderAKline(); }
+-    catch (e) { const root = byId('admin-a-kline-root'); if (root) root.innerHTML = `<div class="admin-inline-status" style="color:var(--admin-red)">加载失败：${esc(e.message)}</div>`; }
++    const generation = adminGeneration, seq = ++klineRequestSeq;
++    try {
++      const result = await aApi('/kline/status');
++      if (generation !== adminGeneration || seq !== klineRequestSeq || currentPage !== 'a-kline') return;
++      aKlineStatus = result; renderAKline();
++    } catch (e) { const root = byId('admin-a-kline-root'); if (root && generation === adminGeneration && seq === klineRequestSeq && currentPage === 'a-kline') root.innerHTML = `<div class="admin-inline-status" style="color:var(--admin-red)">加载失败：${esc(e.message)}</div>`; }
+   }
+   function renderAKline() {
+     const root = byId('admin-a-kline-root'); if (!root) return;
+@@ -1031,8 +1113,12 @@
+   }
+ 
+   async function loadAMiner(qs = '') {
+-    try { aMinerData = await aApi('/miners' + (qs ? '?'+qs : '')); renderAMiner(); }
+-    catch (e) { const root = byId('admin-a-miner-root'); if (root) root.innerHTML = `<div class="admin-inline-status" style="color:var(--admin-red)">加载失败：${esc(e.message)}</div>`; }
++    const generation = adminGeneration, seq = ++minerRequestSeq;
++    try {
++      const result = await aApi('/miners' + (qs ? '?'+qs : ''));
++      if (generation !== adminGeneration || seq !== minerRequestSeq || currentPage !== 'a-miner') return;
++      aMinerData = result; renderAMiner();
++    } catch (e) { const root = byId('admin-a-miner-root'); if (root && generation === adminGeneration && seq === minerRequestSeq && currentPage === 'a-miner') root.innerHTML = `<div class="admin-inline-status" style="color:var(--admin-red)">加载失败：${esc(e.message)}</div>`; }
+   }
+   function renderAMiner() {
+     const root = byId('admin-a-miner-root'); if (!root) return;
+@@ -1127,17 +1213,6 @@
+     });
+   }
+ 
+-  /* 页面导航标题扩展 + A 模块页面首次加载 */
+-  const __origNavigate = navigate;
+-  navigate = function(page) {
+-    __origNavigate(page);
+-    if (page === 'community') window.AdminCommunity?.load();
+-    if (page === 'lottery') window.AdminLottery?.load();
+-    if (page === 'a-kline' && !aKlineStatus) loadAKline();
+-    if (page === 'a-miner' && !aMinerData) loadAMiner();
+-    const titlesMap = { overview:'首页总览', users:'用户管理', deposits:'充值记录', tokens:'代币管理', stocks:'股票管理', 'a-kline':'AIX 行情调控', 'a-token-balance':'AIX 代币管理', 'a-miner':'AIX 矿机管理', lottery:'抽奖管理' };
+-    byId('admin-page-title').textContent = page==='community' ? '社群链接' : (titlesMap[page] || '管理后台');
+-  };
+   // 刷新按钮
+   byId('admin-a-kline-refresh')?.addEventListener('click', loadAKline);
+   byId('admin-a-miner-refresh')?.addEventListener('click', () => loadAMiner());
+--- a/public/js/admin-lottery.js
++++ b/public/js/admin-lottery.js
+@@ -2,6 +2,7 @@
+ window.AdminLottery = (() => {
+   let api, toast;
+   let tab = 'prob';
++  let selectedSeq = 0, socialSeq = 0, physicalSeq = 0;
+   let prizes = [];
+   let socialList = [], socialStatus = 'pending';
+   let physicalList = [], physicalStatus = 'pending_address';
+@@ -88,7 +89,7 @@
+       </div>
+       <div id="al-content"></div>`;
+     root.querySelectorAll('[data-al-tab]').forEach(btn => {
+-      btn.addEventListener('click', () => { tab = btn.dataset.alTab; renderShell(); refreshTab(); });
++      btn.addEventListener('click', () => { tab = btn.dataset.alTab; load(); });
+     });
+   }
+ 
+@@ -101,11 +102,11 @@
+   }
+ 
+   // ── 概率配置 ──────────────────────────────────────────────
+-  async function loadPrizes() {
++  async function loadPrizes(paint = true) {
+     try {
+       const result = await api('/api/admin/lottery/prizes');
+       prizes = result.prizes || [];
+-      if (tab === 'prob') renderProb();
++      if (paint && tab === 'prob') renderProb();
+     } catch (e) { toast(e.message); }
+   }
+ 
+@@ -227,11 +228,13 @@
+   }
+ 
+   // ── 社交审核 ──────────────────────────────────────────────
+-  async function loadSocial() {
+-    try {
+-      const result = await api(`/api/admin/lottery/social?status=${encodeURIComponent(socialStatus)}`);
++  async function loadSocial(paint = true) {
++    const seq = ++socialSeq, status = socialStatus;
++    try {
++      const result = await api(`/api/admin/lottery/social?status=${encodeURIComponent(status)}`);
++      if (seq !== socialSeq || status !== socialStatus) return;
+       socialList = result.list || [];
+-      if (tab === 'social') renderSocial();
++      if (paint && tab === 'social') renderSocial();
+     } catch (e) { toast(e.message); }
+   }
+ 
+@@ -297,11 +300,13 @@
+   }
+ 
+   // ── 实物发货 ──────────────────────────────────────────────
+-  async function loadPhysical() {
+-    try {
+-      const result = await api(`/api/admin/lottery/physical?status=${encodeURIComponent(physicalStatus)}`);
++  async function loadPhysical(paint = true) {
++    const seq = ++physicalSeq, status = physicalStatus;
++    try {
++      const result = await api(`/api/admin/lottery/physical?status=${encodeURIComponent(status)}`);
++      if (seq !== physicalSeq || status !== physicalStatus) return;
+       physicalList = result.list || [];
+-      if (tab === 'physical') renderPhysical();
++      if (paint && tab === 'physical') renderPhysical();
+     } catch (e) { toast(e.message); }
+   }
+ 
+@@ -354,11 +359,11 @@
+   }
+ 
+   // ── 指定中奖 ──────────────────────────────────────────────
+-  async function loadAssigned() {
++  async function loadAssigned(paint = true) {
+     try {
+       const result = await api('/api/admin/lottery/assigned?status=pending');
+       assignedList = result.list || [];
+-      if (tab === 'assigned') renderAssigned();
++      if (paint && tab === 'assigned') renderAssigned();
+     } catch (e) { toast(e.message); }
+   }
+ 
+@@ -458,8 +463,15 @@
+   function init({ api: apiFn, toast: toastFn }) { api = apiFn; toast = toastFn; }
+   async function load() {
+     if (!api) return;
++    const seq = ++selectedSeq, selectedTab = tab;
+     renderShell();
+-    await Promise.all([loadPrizes(), loadSocial(), loadPhysical(), loadAssigned()]);
++    if (selectedTab === 'topup') return renderTopup();
++    document.getElementById('al-content').textContent = '正在加载…';
++    if (selectedTab === 'prob') await loadPrizes(false);
++    else if (selectedTab === 'social') await loadSocial(false);
++    else if (selectedTab === 'physical') await loadPhysical(false);
++    else await Promise.all([loadPrizes(false), loadAssigned(false)]);
++    if (seq === selectedSeq && tab === selectedTab) refreshTab();
+   }
+ 
+   return { init, load };
+--- a/public/js/admin-agents.js
++++ b/public/js/admin-agents.js
+@@ -108,11 +108,8 @@
+ 
+   byId('admin-agents-refresh')?.addEventListener('click', loadAgents);
+ 
+-  // 点击代理管理导航时加载
+-  document.addEventListener('click', e => {
+-    const btn = e.target.closest('[data-admin-page="agents"]');
+-    if (btn) { bindForm(); bindActions(); loadAgents(); }
+-  });
++  // 由主导航和全局刷新按钮统一调用，避免进入页面时重复读取。
++  window.AdminAgents = { load() { bindForm(); bindActions(); return loadAgents(); } };
+ 
+   // 如果默认就在代理页
+   if (document.querySelector('[data-admin-panel="agents"].active')) {
+--- a/public/admin.html
++++ b/public/admin.html
+@@ -95,6 +95,11 @@
+         <section class="admin-content-block">
+           <header class="admin-list-header"><div><h2>钱包用户</h2><p id="admin-user-count">0 位用户</p></div><div class="admin-filters"><input id="admin-user-search" type="search" placeholder="搜索钱包地址"><label><input id="admin-real-only" type="checkbox"> 只看真实充值用户</label></div></header>
+           <div class="admin-table-scroll"><table><thead><tr><th>钱包地址</th><th>等级</th><th>用户类型</th><th>确认充值</th><th>平台余额</th><th>首次连接</th><th>最近充值</th><th>操作</th></tr></thead><tbody id="admin-users-body"></tbody></table></div>
++          <div class="admin-filters" style="margin-top:14px;justify-content:flex-end">
++            <span id="admin-users-page-status" aria-live="polite"></span>
++            <button id="admin-users-prev" class="admin-secondary-button" type="button" disabled>上一页</button>
++            <button id="admin-users-next" class="admin-secondary-button" type="button" disabled>下一页</button>
++          </div>
+         </section>
+       </section>
+ 
+@@ -250,8 +255,8 @@
+   </div>
+   <script src="/js/admin-dialogs.js?v=20261011-security-1"></script>
+   <script src="/js/admin-community.js?v=7-security-20261011"></script>
+-  <script src="/js/admin-lottery.js?v=20261011-security-2"></script>
+-  <script src="/js/operator-admin.js?v=20261011-permissions-1"></script>
+-  <script src="/js/admin-agents.js?v=1"></script>
++  <script src="/js/admin-lottery.js?v=20261012-admin-speed-1"></script>
++  <script src="/js/operator-admin.js?v=20261012-admin-speed-1"></script>
++  <script src="/js/admin-agents.js?v=20261012-admin-speed-1"></script>
+ </body>
+ </html>

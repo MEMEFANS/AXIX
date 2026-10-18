@@ -1,0 +1,23 @@
+{
+  "scenarios": [
+    "miner startup loads only miner data",
+    "trading price and available balance render before chart library",
+    "slow chart cannot block overview or start other strategies",
+    "wallet balances display while valuation waits; funding/modal code stays lazy",
+    "optional modal download failure can be retried without blocking balances",
+    "AIX price renders before profile/chart; order history loads on its tab",
+    "deferred trading chart receives real candle data when ready",
+    "lottery sections render independently; hidden support/AIX polling stops",
+    "late lottery subtab response cannot overwrite current tab",
+    "referrals render before airdrop; leaderboard isolated; hidden lottery stops",
+    "staking and validator failures are independent; amount input preserved",
+    "portfolio results display progressively; vault failure preserves assets",
+    "copy-trade, ledger, AI, community, whitepaper load on demand; hidden AI polls stop",
+    "only selected strategy opens a stream; leaving closes all strategy streams",
+    "old ledger filter responses cannot overwrite the current result or offset",
+    "pending requests are isolated across wallets; old balances cannot overwrite new ones",
+    "simultaneous reads coalesce; hung reads fail within their deadline"
+  ],
+  "overviewWithChartHeldMs": 88,
+  "scriptCount": 39
+}

@@ -1,0 +1,122 @@
+{
+  "mobileViewport": true,
+  "walletConnected": false,
+  "panels": [
+    {
+      "name": "trade",
+      "moduleLoaded": true,
+      "navigationMs": 333
+    },
+    {
+      "name": "ai-managed",
+      "moduleLoaded": true,
+      "navigationMs": 181
+    },
+    {
+      "name": "portfolio",
+      "moduleLoaded": true,
+      "navigationMs": 167
+    },
+    {
+      "name": "earn",
+      "moduleLoaded": true,
+      "navigationMs": 1
+    },
+    {
+      "name": "points",
+      "moduleLoaded": true,
+      "navigationMs": 206
+    },
+    {
+      "name": "vaults",
+      "moduleLoaded": true,
+      "navigationMs": 114
+    },
+    {
+      "name": "staking",
+      "moduleLoaded": true,
+      "navigationMs": 90
+    },
+    {
+      "name": "referrals",
+      "moduleLoaded": true,
+      "navigationMs": 85
+    },
+    {
+      "name": "community",
+      "moduleLoaded": true,
+      "navigationMs": 82
+    },
+    {
+      "name": "leaderboard",
+      "moduleLoaded": true,
+      "navigationMs": 117
+    },
+    {
+      "name": "whitepaper",
+      "moduleLoaded": true,
+      "navigationMs": 2
+    },
+    {
+      "name": "a-token-trade",
+      "moduleLoaded": true,
+      "navigationMs": 85
+    },
+    {
+      "name": "support",
+      "moduleLoaded": true,
+      "navigationMs": 81
+    },
+    {
+      "name": "overview",
+      "moduleLoaded": true,
+      "navigationMs": 86
+    },
+    {
+      "name": "de",
+      "moduleLoaded": true,
+      "navigationMs": 1
+    },
+    {
+      "name": "ex",
+      "moduleLoaded": true,
+      "navigationMs": 2
+    },
+    {
+      "name": "rs",
+      "moduleLoaded": true,
+      "navigationMs": 1
+    },
+    {
+      "name": "ledger",
+      "moduleLoaded": true,
+      "navigationMs": 79
+    },
+    {
+      "name": "account",
+      "moduleLoaded": true,
+      "navigationMs": 167
+    },
+    {
+      "name": "ai",
+      "moduleLoaded": true,
+      "navigationMs": 81
+    }
+  ],
+  "runtimeErrors": [],
+  "blockedMutations": [
+    {
+      "path": "/cdn-cgi/rum",
+      "method": "POST"
+    }
+  ],
+  "failedScripts": [],
+  "startup": {
+    "activePanel": "tab-earn",
+    "pageLoaderVersion": "https://axix.cc/js/page-loader.js?v=20261011-pages-1",
+    "chartDownloaded": false
+  },
+  "chartLibraryLoadedOnDemand": true,
+  "passed": true,
+  "checkedAtUtc": "2026-10-10T22:23:20.000Z"
+}

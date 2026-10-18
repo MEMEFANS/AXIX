@@ -1,0 +1,593 @@
+/* Mobile layout layer. Loaded after the desktop and page-specific styles so
+   responsive behavior stays isolated from the trading calculations. */
+.mobile-nav-toggle { display: none; }
+.mobile-nav-backdrop { display: none; }
+
+@media (max-width: 768px) {
+  /* overflow-x:hidden 会让 iOS Safari 的 position:sticky 失效；clip 不创建滚动容器，
+     sticky 正常。老内核不支持 clip 时自动回退 hidden（声明顺序：hidden 在前，clip 覆盖） */
+  html, body { width: 100%; max-width: 100%; overflow-x: hidden; overflow-x: clip; }
+
+  /* Keep the app bar compact. The navigation itself lives in a right drawer,
+     so it must never create a second wide row in the page header. */
+  /* 注意：header 不能用 position:fixed —— 抽屉 .main-tabs 也是 fixed 且是 header
+     子元素，iOS WebKit 对 fixed 嵌套 fixed 的包含块处理有 bug（子元素 bottom:0
+     相对 header 计算 → 抽屉高度 0，打开后什么都看不见）。sticky 则一直正常 */
+  .header {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 8px;
+    position: sticky;
+    top: 0;
+    /* 显式最高层级：防止页面内 relative/absolute 区块滚到 header 上方盖住按钮 */
+    z-index: 1005;
+    /* 高度必须包含安全区：viewport-fit=cover 时刘海屏 env(safe-area-inset-top)
+       可达 47-59px，若塞进固定 54px 高度会把按钮挤出 header 底部导致点不到 */
+    height: calc(54px + env(safe-area-inset-top));
+    min-height: calc(54px + env(safe-area-inset-top));
+    padding: calc(8px + env(safe-area-inset-top)) 10px 8px;
+    /* body > * uses overflow-x:hidden as a safety net; on the header that
+       creates a clipping containing block and collapses the fixed nav drawer
+       to the header's 32px content height. Keep the drawer free to span the
+       viewport while the backdrop still prevents page interaction. */
+    overflow: visible !important;
+  }
+  .header-logo { flex: 1 1 auto !important; order: 0 !important; min-width: 0; width: auto; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .header-right { flex: 0 0 auto !important; order: 0 !important; min-width: 0; width: auto; margin-left: auto; gap: 4px; flex-wrap: nowrap; justify-content: flex-end; }
+  .header-right .conn, .header-right #hdr-time { display: none; }
+  .mobile-nav-toggle {
+    display: grid; place-items: center; gap: 4px; width: 36px; min-width: 36px; height: 36px;
+    padding: 8px; border: 1px solid var(--border2); border-radius: 10px;
+    background: transparent; color: var(--txt); cursor: pointer;
+    /* 消除 iOS 双击缩放吞掉连续点击；确保按钮在 header 内容层最上方可命中 */
+    touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+    position: relative; z-index: 2;
+  }
+  .mobile-nav-toggle span { display: block; width: 16px; height: 2px; border-radius: 2px; background: currentColor; transition: transform .18s, opacity .18s; }
+  .mobile-nav-toggle[aria-expanded="true"] span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+  .mobile-nav-toggle[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
+  .mobile-nav-toggle[aria-expanded="true"] span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+  .main-tabs {
+    position: fixed;
+    top: calc(54px + env(safe-area-inset-top)); right: 0; bottom: 0; left: auto; z-index: 1002;
+    display: flex;
+    flex-direction: column; align-items: stretch; gap: 0;
+    /* 宽度自适应内容，刚好包住文字，最大不超过 80vw */
+    width: fit-content; min-width: 160px; max-width: 80vw; height: auto; min-height: 0;
+    margin: 0; padding: 12px 12px max(18px, env(safe-area-inset-bottom));
+    background: var(--panel); border: 1px solid var(--border2); border-right: 0;
+    box-shadow: -16px 0 38px rgba(0,0,0,.35);
+    overflow-x: hidden; overflow-y: auto; scrollbar-width: thin;
+    transform: translateX(105%); transition: transform .22s ease;
+  }
+  .header.mobile-nav-open { z-index: 1003; }
+  .header.mobile-nav-open .main-tabs {
+    transform: translateX(0);
+    /* Explicit height is required in WebKit when a fixed child sits inside a
+       sticky header; top/bottom alone otherwise resolve to the header's
+       32px flex track. */
+    height: calc(100dvh - 54px - env(safe-area-inset-top)) !important;
+    min-height: 240px;
+  }
+  .header.mobile-nav-open ~ .mobile-nav-backdrop {
+    display: block; position: fixed; z-index: 1001;
+    inset: calc(54px + env(safe-area-inset-top)) 0 0;
+    background: rgba(0,0,0,.48);
+  }
+  .tab-btn { flex: 0 0 auto; width: 100%; min-height: 46px; padding: 0 12px; text-align: left; font-size: 13px; border-bottom: 1px solid var(--border); }
+  .wallet-connect { max-width: 138px; min-height: 38px; padding: 6px 10px; overflow: hidden; text-overflow: ellipsis; }
+  .lang-toggle { width: 36px; min-width: 36px; height: 36px; min-height: 36px; }
+
+  /* Compact four-cell ticker: symbol on the first row, price/change/high/low
+     on the second row. The volume field is intentionally omitted on phones. */
+  .terminal-marketbar {
+    display: grid;
+    grid-template-columns: 1.25fr repeat(3, minmax(0, 1fr));
+    align-items: center;
+    gap: 5px;
+    height: auto; min-height: 0;
+    padding: 8px 10px 10px;
+    overflow: visible;
+  }
+  .terminal-marketbar > .terminal-symbol {
+    grid-column: 1 / -1;
+    width: 100%; min-width: 0; padding: 0;
+  }
+  .terminal-marketbar > .ticker-stat { min-width: 0; padding: 2px 1px; }
+  .terminal-marketbar > .ticker-stat span {
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 9px;
+  }
+  .terminal-marketbar > .ticker-stat b {
+    display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px;
+  }
+  .terminal-marketbar > .ticker-stat:nth-child(6),
+  .terminal-marketbar > .ticker-stat:nth-child(7) { display: none; }
+  .terminal-marketbar > .ticker-stat:nth-child(5) { display: block; }
+  .ticker-price-stat select { max-width: 100%; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+
+  /* 手机端交易终端：Hyperliquid 风格 —— 顶部图表，中部「左下单面板 + 右订单簿」横向分栏，底部持仓 */
+  .terminal-grid { display: grid; grid-template-columns: 1.1fr 1fr; grid-template-rows: auto auto auto; min-height: 0; gap: 0; }
+  .terminal-grid > .terminal-chart { grid-column: 1 / -1; grid-row: 1; height: auto; min-height: 0; border-right: 0; }
+  #trade-chart { height: 260px; min-height: 220px; }
+  .terminal-toolbar { min-width: 0; }
+  .chart-indicator-bar { overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .chart-indicator-bar::-webkit-scrollbar { display: none; }
+  /* 左侧下单面板 */
+  .terminal-grid > .order-entry {
+    grid-column: 1; grid-row: 2; width: 100%; min-width: 0; min-height: 0;
+    border-right: 1px solid var(--border); border-left: 0; border-radius: 0;
+    overflow-y: auto; -webkit-overflow-scrolling: touch; max-height: 560px;
+  }
+  .order-entry.aentry > .order-field { min-height: 36px; height: 36px; grid-template-columns: 36px minmax(0,1fr) 36px; margin: 6px 6px; padding: 0 4px; }
+  .order-entry.aentry > .order-field input,
+  .order-entry.aentry > .order-field select,
+  .order-entry.aentry > .order-field .order-select-trigger { height: 34px; line-height: 34px; font-size: 13px; min-width: 0; padding: 0 4px; }
+  .order-entry.aentry > .order-field input::-webkit-outer-spin-button,
+  .order-entry.aentry > .order-field input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .order-entry.aentry > .order-field input[type=number] { -moz-appearance: textfield; }
+  /* 价格字段：字号缩小确保 BTC 价格完整显示（如 78,974.10） */
+  .order-entry.aentry > #trade-order-price-field { grid-template-columns: 34px minmax(0,1fr) 30px; }
+  .order-entry.aentry > #trade-order-price-field input { font-size: 12px; letter-spacing: -0.3px; padding: 0 2px; }
+  .order-entry.aentry > #trade-order-price-field b { font-size: 10px; }
+  .order-entry.aentry > .order-field span { font-size: 11px; }
+  /* 可用保证金标签行紧凑 */
+  .order-entry.aentry > label { margin-left: 6px; margin-right: 6px; font-size: 11px; }
+  .order-entry.aentry > .terminal-order-btn { min-height: 40px; height: 40px; font-size: 13px; }
+  .order-entry.aentry > .amount-slider { height: 18px; margin-top: 8px; }
+  .order-entry.aentry > .slider-labels button { min-height: 28px; height: 28px; font-size: 10px; }
+  .order-entry .order-summary.q-row { padding: 3px 10px; font-size: 11px; }
+  /* 右侧订单簿 */
+  .terminal-grid > .orderbook-panel {
+    grid-column: 2; grid-row: 2; width: 100%; min-width: 0; min-height: 0; max-height: 560px;
+    border-right: 0; display: flex; flex-direction: column; overflow: hidden;
+  }
+  .orderbook-panel > .terminal-section-title { height: 34px; min-height: 34px; flex-shrink: 0; }
+  /* 注意：hidden 面板必须保持 display:none，不能被 flex 覆盖，否则隐藏的成交/深度面板会挤出订单簿 */
+  .orderbook-panel > .book-panel[hidden] { display: none !important; }
+  .orderbook-panel > .book-panel:not([hidden]) { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; overflow: hidden; }
+  #trade-trades-panel:not([hidden]) .trade-trades-list { flex: 1 1 auto; min-height: 0; max-height: none; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  #trade-depth-panel:not([hidden]) canvas { flex: 1 1 auto; min-height: 0; }
+  /* 手机端订单簿：Hyperliquid 风格单列紧凑布局 —— 卖盘在上(红)/中间大价/买盘在下(绿)，仅价格+数量两列 */
+  #trade-book-panel { display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; overflow: hidden; }
+  /* 表头：仅显示价格 + 数量两列，合计列隐藏 */
+  #trade-book-panel > .book-head { display: grid; grid-template-columns: 1fr 1fr; height: 22px; padding: 0 6px; font-size: 9px; color: var(--mut2); flex-shrink: 0; }
+  #trade-book-panel > .book-head span:last-child { display: none; }
+  #trade-book-spread-bar { height: 16px; font-size: 9px; flex-shrink: 0; }
+  /* 买卖盘容器各占剩余空间一半，行高自适应拉伸填满；min-height:0 + overflow:hidden 保证不溢出 */
+  #trade-asks, #trade-bids { display: flex; flex-direction: column; flex: 1 1 0; min-height: 0; overflow: hidden; }
+  #trade-book-panel .book-row {
+    grid-template-columns: 1fr 1fr; font-size: 10px; flex: 1 1 0; min-height: 0;
+    padding: 0 6px; gap: 3px; align-items: center; overflow: hidden;
+  }
+  #trade-book-panel .book-row span:last-child { display: none; }
+  /* 深度条：从右向左，卖盘深红、买盘深绿，与 Hyperliquid 一致 */
+  #trade-book-panel .book-row::before { right: 0; left: auto; }
+  #trade-book-panel .book-row.ask { --depth-color: rgba(240,111,117,0.22); }
+  #trade-book-panel .book-row.bid { --depth-color: rgba(79,209,181,0.22); }
+  /* 中间当前价：大字号居中，粉红色（参考 Hyperliquid 当前价偏红） */
+  .book-mid {
+    flex-direction: row; justify-content: center; align-items: baseline;
+    height: 30px; gap: 4px; padding: 0 6px; flex-shrink: 0;
+    border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+  }
+  .book-mid .book-mid-price { font-size: 15px; font-weight: 700; color: #f06f75; }
+  .book-mid .book-spread { font-size: 9px; opacity: .7; }
+  .book-mid .book-spread em { font-style: normal; }
+  /* 底部持仓/委托跨两列 */
+  .terminal-grid > .terminal-bottom { grid-column: 1 / -1; grid-row: 3; width: 100%; min-height: 220px; border-right: 0; }
+  .terminal-bottom > .terminal-tabs { min-width: 0; height: 46px; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+  .terminal-bottom > .terminal-tabs::-webkit-scrollbar { display: none; }
+  .terminal-bottom > .terminal-tabs button { min-height: 46px; padding: 0 12px; font-size: 12px; white-space: nowrap; }
+  .terminal-account-content { height: auto; min-height: 180px; max-height: none; overflow-x: auto; }
+
+  /* Keep account-history tables horizontally scrollable: their columns are
+     numerous and are more useful as a compact table than unlabeled cards. */
+  .assets-record-block .account-history { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .assets-record-block .account-history table { display: table !important; width: max-content; min-width: 690px; }
+  .assets-record-block .account-history tbody { display: table-row-group !important; }
+  .assets-record-block .account-history tr { display: table-row !important; margin: 0; padding: 0; background: transparent; }
+  .assets-record-block .account-history th,
+  .assets-record-block .account-history td { display: table-cell !important; width: auto !important; min-height: 0; white-space: nowrap; text-align: right !important; }
+  .assets-record-block .account-history td::before { content: none !important; }
+
+  /* Shared mobile touch targets and prevention of accidental page-width growth. */
+  button, select, input { max-width: 100%; }
+  .panel, .portal-section, .portal-metrics, .assets-overview, .assets-main, .assets-distribution { max-width: 100%; }
+  .portal-shell, .aim-page, .account-shell { width: 100%; min-width: 0; }
+  .aim-table-wrap { width: 100%; max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .aim-table-wrap table { width: max-content; min-width: 720px; }
+
+  .portal-button, .assets-primary-action, .assets-secondary-action { min-height: 42px; }
+
+  /* A 币交易页：顶部行情信息用两列紧凑展示，避免交易量/求购额度
+     各占一整行把 K 线推到屏幕下方。 */
+  .atrade-spot-price-strip {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+    padding: 12px !important;
+  }
+  .atrade-spot-price-strip > .atrade-spot-meta {
+    width: 100%; min-width: 0 !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px 12px !important;
+  }
+  .atrade-spot-meta .meta-kv { min-width: 0; overflow: hidden; }
+  .atrade-spot-meta .meta-kv span,
+  .atrade-spot-meta .meta-kv b { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .atrade-spot-meta .meta-kv b { font-size: 11px; }
+  .atrade-chart-card .atrade-chart-host { flex: 1 1 auto; min-height: 0; height: auto !important; }
+
+  .miner-page-hero { min-height: 150px; margin-bottom: 14px; padding: 14px; gap: 6px; }
+  .miner-page-hero-copy { flex: 1 1 56%; }
+  .miner-page-hero h2 { font-size: 18px; margin-top: 6px; }
+  .miner-page-hero p { font-size: 10px; line-height: 1.5; }
+  .miner-page-hero-tags { gap: 4px; margin-top: 10px; }
+  .miner-page-hero-tags span { padding: 3px 6px; font-size: 9px; }
+  .miner-page-hero img { width: 46%; max-height: 128px; }
+
+  /* 矿池分档明细在窄屏改成带标签的双列卡片，避免表格被全局规则
+     拆成一串没有语义的长文字。 */
+  .pool-table-wrap { overflow: visible; padding: 0 8px; }
+  .pool-table { display: block !important; min-width: 0; width: 100% !important; }
+  .pool-table thead { display: none !important; }
+  .pool-table tbody { display: block !important; width: 100% !important; }
+  /* base.css 的通用 table:not(.no-mobile-stack) 规则优先级更高，需明确覆盖，
+     否则 tr/td 会被重新变成 display:block，卡片就会退化为单列长串。 */
+  .pool-table tr { display: grid !important; width: 100% !important; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 10px; padding: 12px; margin-bottom: 8px; border: 1px solid #203536; border-radius: 10px; background: #101a1c; }
+  .pool-table td { display: flex !important; width: auto !important; flex-direction: column; align-items: flex-start; gap: 2px; min-height: 0; padding: 0; border: 0; text-align: left !important; font-size: 12px; }
+  .pool-table td::before { content: attr(data-label); color: #81918e; font-size: 9px; }
+  .pool-table td:first-child { grid-column: 1 / -1; width: auto !important; padding-bottom: 5px; border-bottom: 1px solid #203536; font-size: 14px; }
+  .pool-table td:first-child::before { content: none; }
+
+  /* 子导航在超窄屏保持容器宽度，按钮在内部横向滑动，不能把 body 撑宽。 */
+  .earn-sub-tabs { display: flex !important; width: 100% !important; max-width: 100% !important; min-width: 0; }
+
+  /* 激活套餐卡片：手机端两列并排，紧凑展示 */
+  .act-copy-full { display: none !important; }
+  .act-copy-short { display: inline !important; }
+  .earn-activation-v2-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
+  .act-banner { padding: 10px 10px; }
+  .act-banner-row { gap: 4px; flex-wrap: wrap; }
+  .act-plan-tag { padding: 3px 6px; font-size: 9px; }
+  .act-banner-row .portal-chip { padding: 2px 5px; font-size: 8px; white-space: nowrap; }
+  .act-miner-art { height: 42px; margin: 2px auto 0; }
+  .act-miner-art img { width: min(100%, 130px); }
+  .act-plan-title { margin: 4px 0 2px; font-size: 11px; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .act-bnb { font-size: 18px; }
+  .act-bnb small { font-size: 10px; }
+  .act-arrow { display: none; }
+  .act-body { padding: 8px 10px 10px; gap: 8px; }
+  .act-stats { gap: 4px 6px; }
+  .act-stats .stat-item strong { font-size: 10px; white-space: nowrap; }
+  .act-stats .stat-item span { font-size: 8px; }
+  .act-card .btn-activate { height: 36px; font-size: 11px; padding: 0 8px; }
+}
+
+@media (max-width: 480px) {
+  .header { height: calc(54px + env(safe-area-inset-top)); min-height: calc(54px + env(safe-area-inset-top)); padding-left: 10px; padding-right: 10px; }
+  .header-right { gap: 3px; }
+  .wallet-connect { max-width: 116px; padding-left: 8px; padding-right: 8px; }
+  .tab-btn { padding-left: 11px; padding-right: 11px; }
+  .terminal-marketbar { grid-template-columns: 1.2fr repeat(3, minmax(0, 1fr)); gap: 4px; }
+  .terminal-symbol .coin-mark { width: 28px; height: 28px; }
+  .terminal-symbol b { font-size: 14px; }
+  .terminal-grid > .terminal-chart { min-height: 0; }
+  #trade-chart { height: 240px; min-height: 200px; }
+  /* 左右分栏下单面板和订单簿高度对齐，窄屏内边距收紧 */
+  .terminal-grid > .order-entry,
+  .terminal-grid > .orderbook-panel { max-height: 520px; }
+  .order-entry.aentry > .side-switch { margin-left: 6px; margin-right: 6px; }
+  .order-entry.aentry > .order-type-tabs { margin-left: 6px; margin-right: 6px; }
+  .order-entry.aentry > .order-field,
+  .order-entry.aentry > label:not(.reduce-only-control) { margin-left: 6px; margin-right: 6px; }
+  .order-entry.aentry > .quote-box { margin-left: 6px; margin-right: 6px; }
+  /* 市场搜索列表：窄屏上"现货/合约"角标会溢出市场列、叠在价格上，且弹窗顶部
+     已有 合约/现货/自选 tab 标明当前页面，角标冗余 → 隐藏；市场名加省略号防溢出 */
+  .market-list-row em { display: none; }
+  .market-list-row .market-pair > span:last-child { overflow: hidden; text-overflow: ellipsis; }
+  .assets-header { flex-wrap: wrap; }
+  .assets-header-actions { width: 100%; justify-content: flex-end; }
+  .assets-quick-actions { width: 100%; }
+  .assets-quick-actions > button { min-width: 0; }
+  .portal-shell, .aim-page { padding-left: 10px; padding-right: 10px; }
+  .aim-table-wrap table { min-width: 680px; }
+  .atrade-terminal-grid { display: flex; flex-direction: column; gap: 10px; }
+  .atrade-cell-chart { min-height: 0; }
+  .atrade-cell-chart .atrade-chart-section { height: 300px !important; min-height: 260px !important; margin: 0 !important; }
+}
+
+@media (max-width: 360px) {
+  .terminal-marketbar > .ticker-stat span { font-size: 8px; }
+  .terminal-marketbar > .ticker-stat b { font-size: 10px; }
+  .terminal-tabs button, .timeframe-tabs button { padding-left: 8px; padding-right: 8px; }
+  .order-entry.aentry > .order-field { grid-template-columns: 32px minmax(0, 1fr) 30px; padding-left: 4px; padding-right: 4px; margin-left: 4px; margin-right: 4px; }
+  .order-entry.aentry > #trade-order-price-field input { font-size: 11px; }
+}
+
+/* 推荐页：手机端链接与用户明细采用紧凑卡片，避免八列数据纵向堆叠
+   成一张很高的表格卡片。桌面端仍使用标准表格布局。 */
+@media (max-width: 480px) {
+  .referral-link-body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 8px;
+    padding: 12px;
+  }
+  .referral-link-code {
+    display: block;
+    min-width: 0;
+    max-width: 100%;
+    font-size: 11px;
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+  .referral-copy-btn {
+    min-height: 36px;
+    height: 36px;
+    padding: 0 10px;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+  .referrals-table-wrap { overflow: visible; }
+  .referrals-table,
+  .referrals-table tbody,
+  .referrals-table tr,
+  .referrals-table td {
+    display: block;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+  .referrals-table thead { display: none !important; }
+  .referrals-table tr.referral-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 7px 14px;
+    margin: 8px 0;
+    padding: 11px 12px;
+    border: 1px solid #1d2c2e;
+    border-radius: 8px;
+    background: #0e1719;
+  }
+  .referrals-table tr.referral-row:hover { background: #132023; }
+  .referrals-table tr.referral-row td {
+    display: flex !important;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 2px;
+    min-height: 0;
+    height: auto !important;
+    padding: 0 !important;
+    border: 0;
+    text-align: left !important;
+    font-size: 11px;
+    line-height: 1.35;
+    white-space: normal !important;
+    word-break: break-word;
+  }
+  .referrals-table tr.referral-row td::before {
+    display: block;
+    margin: 0;
+    color: #81918e;
+    font-size: 9px;
+    line-height: 1.2;
+    letter-spacing: .2px;
+  }
+  .referrals-table tr.referral-row td:first-child {
+    grid-column: 1 / -1;
+    padding-bottom: 7px !important;
+    margin-bottom: 1px;
+    border-bottom: 1px solid #1d2c2e;
+    font-size: 12px;
+    white-space: nowrap !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .referrals-table tr.referral-row td:first-child::before { display: none; }
+  .referrals-table tr:not(.referral-row) td[colspan] {
+    display: block !important;
+    grid-column: 1 / -1;
+    padding: 8px 0 !important;
+    text-align: center !important;
+  }
+}
+
+@media (max-width: 360px) {
+  .referral-link-body { grid-template-columns: 1fr; }
+  .referral-copy-btn { width: 100%; }
+}
+
+/* 质押数量弹窗：手机端保留完整输入框与底部安全间距，避免原生 prompt 顶在浏览器上方 */
+@media (max-width: 768px) {
+  .stake-modal { align-items: center; padding: 14px; }
+  .stake-dialog { width: 100%; max-height: calc(100svh - 28px); border-radius: 16px; }
+  .stake-dialog-head { padding: 16px 16px 13px; }
+  .stake-dialog-head h3 { font-size: 18px; }
+  .stake-dialog-body { padding: 14px 16px 8px; }
+  .stake-dialog-actions { padding: 12px 16px 16px; }
+  .stake-dialog-actions button { flex: 1; min-width: 0; }
+  .stake-amount-field input { font-size: 20px; }
+}
+
+/* Earn page: keep every section inside the viewport on phones.  The earn
+   views contain dense cards and metrics, so they get their own compact rhythm
+   instead of relying on the generic portal spacing. */
+@media (max-width: 768px) {
+  #tab-earn .portal-shell { padding-top: 14px; padding-bottom: 32px; }
+  #tab-earn .portal-heading { margin-bottom: 14px; }
+  #tab-earn .earn-v2-head-banner { margin-bottom: 14px; padding: 14px; border-radius: 12px; }
+  #tab-earn .earn-v2-head-banner h2 { font-size: 17px; line-height: 1.35; }
+  #tab-earn .earn-v2-head-banner p { margin-top: 5px; font-size: 11px; }
+  #tab-earn .earn-sub-tabs { display: grid !important; grid-template-columns: repeat(4, minmax(0, 1fr)); width: 100% !important; padding: 3px; margin-bottom: 14px; overflow: visible; }
+  #tab-earn .earn-sub-tab { width: 100%; min-width: 0; height: 36px; padding: 0 4px; font-size: 12px; text-align: center; }
+
+  #tab-earn .cap-wrap { display: block; margin-bottom: 14px; padding: 12px; border-radius: 11px; }
+  #tab-earn .cap-title { min-width: 0; font-size: 12px; }
+  #tab-earn .cap-title small { font-size: 10px; line-height: 1.4; }
+  #tab-earn .cap-bar { width: 100%; min-width: 0; height: 10px; margin-top: 10px; }
+  #tab-earn .cap-pct { width: auto; margin-top: 6px; font-size: 16px; }
+
+  #tab-earn .portal-section { border-radius: 11px !important; }
+  #tab-earn .portal-section-head { min-height: 42px; padding: 9px 12px; gap: 4px 8px; }
+  #tab-earn .portal-section-head h2 { font-size: 12px; }
+  #tab-earn .portal-section-head span { min-width: 0; max-width: 58%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 10px; }
+
+  #tab-earn .ts-hero-card { margin-bottom: 14px; padding: 12px; border-radius: 12px; }
+  #tab-earn .ts-hero-top { justify-content: flex-start; margin-bottom: 10px; }
+  #tab-earn .ts-upline { align-items: flex-start; min-width: 0; }
+  #tab-earn .ts-upline-addr { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #tab-earn .ts-stat-grid { gap: 8px; }
+  #tab-earn .ts-stat-cell { padding: 12px 10px; }
+  #tab-earn .ts-stat-num { font-size: 24px; }
+  #tab-earn .ts-stat-icon { top: 10px; right: 10px; font-size: 18px; }
+  #tab-earn .ts-invite-row { min-width: 0; }
+  #tab-earn .ts-invite-link { min-width: 0; }
+
+  #tab-earn .miner-page-hero { min-height: 132px; padding: 14px; border-radius: 12px; }
+  #tab-earn .miner-page-hero h2 { font-size: 18px; }
+  #tab-earn .miner-page-hero img { width: 42%; max-height: 112px; }
+  #tab-earn .miner-v2-grid { padding: 10px !important; gap: 10px; }
+  #tab-earn .pool-overview { padding: 4px 0 8px; }
+  #tab-earn .pool-grid { padding: 0 4px; gap: 6px; }
+
+  #tab-earn .stake-v2-grid { padding: 10px !important; gap: 10px; margin-bottom: 0; }
+  #tab-earn .stake-card { padding: 14px; gap: 10px; border-radius: 11px; }
+  #tab-earn .stake-rate-big { font-size: 25px; }
+  #tab-earn .stake-meta { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 10px; }
+  #tab-earn .stake-meta .meta-item { min-width: 0; gap: 4px; }
+  #tab-earn .stake-meta .meta-item b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #tab-earn .stake-record-list { padding: 10px !important; gap: 9px !important; }
+  #tab-earn .stake-record-card { padding: 12px; border-radius: 10px; }
+  #tab-earn .stake-record-meta { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  #tab-earn .stake-record-item b { overflow-wrap: anywhere; font-size: 12px; }
+
+  #tab-earn .team-hero { margin-bottom: 14px; padding: 18px 14px; border-radius: 12px; }
+  #tab-earn .team-hero h2 { font-size: 18px; }
+  #tab-earn .team-hero p { font-size: 11px; line-height: 1.55; }
+  #tab-earn .portal-card { max-width: 100%; overflow-x: auto; }
+  #tab-earn .portal-card > .portal-metrics { min-width: 0; }
+  #tab-earn .invite-card { padding: 16px 14px; gap: 12px; border-radius: 11px; }
+  #tab-earn .invite-card > div { min-width: 0; max-width: 100%; }
+  #tab-earn .invite-card h4 { line-height: 1.45; }
+  #tab-earn .invite-card .uid { font-size: 22px; overflow-wrap: anywhere; }
+  #tab-earn .invite-card > div:last-child { width: 100%; }
+  #tab-earn .invite-card .btn-copy { flex: 1 1 130px; min-width: 0; padding: 0 10px; }
+}
+
+@media (max-width: 520px) {
+  /* A single wide card reads better than two compressed cards at phone width. */
+  #tab-earn .earn-activation-v2-grid { grid-template-columns: 1fr !important; gap: 10px !important; }
+  #tab-earn .act-banner { padding: 14px; }
+  #tab-earn .act-miner-art { height: 66px; }
+  #tab-earn .act-plan-title { font-size: 15px; }
+  #tab-earn .act-bnb { font-size: 24px; }
+  #tab-earn .act-arrow { display: flex; }
+  #tab-earn .act-arrow strong { font-size: 12px; }
+  #tab-earn .act-body { padding: 12px 14px 14px; }
+  #tab-earn .act-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+  #tab-earn .act-card .btn-activate { height: 40px; font-size: 12px; }
+  #tab-earn .portal-section-head span { max-width: 52%; }
+}
+
+/* 全站移动端收口：统一窄屏节奏、按钮换行和长文本处理。
+   该层放在所有页面样式之后，避免动态页面的内联布局把视口撑宽。 */
+@media (max-width: 768px) {
+  .portal-shell,
+  .wrap,
+  .trade-terminal,
+  .atrade-terminal,
+  .aim-page,
+  .account-shell { box-sizing: border-box; width: 100%; min-width: 0; max-width: 100%; }
+
+  .portal-heading { align-items: flex-start; gap: 10px; margin-bottom: 16px; }
+  .portal-heading > div:first-child { min-width: 0; flex: 1 1 auto; }
+  .portal-heading h1 { line-height: 1.3; overflow-wrap: anywhere; }
+  .portal-heading p { line-height: 1.45; }
+  .portal-actions { flex: 0 0 auto; max-width: 48%; flex-wrap: wrap; justify-content: flex-end; gap: 6px; }
+  .portal-actions .portal-button { min-height: 40px; height: auto; padding: 8px 11px; white-space: nowrap; }
+
+  .portal-metrics { width: 100%; min-width: 0; }
+  .portal-metric { min-width: 0; overflow: hidden; }
+  .portal-metric strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .portal-section, .panel, .assets-overview, .assets-main { min-width: 0; max-width: 100%; overflow: hidden; }
+  .portal-section-head { min-width: 0; }
+  .portal-section-head h2 { min-width: 0; overflow-wrap: anywhere; }
+  .portal-section-head span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  /* 复杂数据表保留横向滚动，避免无 data-label 的表格在手机上变成无语义长串。 */
+  .portal-table-wrap { width: 100%; max-width: 100%; overflow-x: auto; overscroll-behavior-x: contain; }
+  .portal-table-wrap .portal-table { max-width: none; }
+  .portal-table-wrap .portal-table td,
+  .portal-table-wrap .portal-table th { overflow: hidden; text-overflow: ellipsis; }
+
+  .form-row, .account-form-row, .field-row, .assets-quick-actions { min-width: 0; }
+  .assets-quick-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+  .assets-quick-actions > * { flex: 1 1 120px; min-width: 0; }
+  .wallet-account-menu { max-width: calc(100vw - 20px); }
+  input, select, textarea { font-size: 16px; }
+}
+
+@media (max-width: 480px) {
+  .portal-heading { display: flex; flex-direction: column; }
+  .portal-heading > div:first-child { width: 100%; }
+  .portal-actions { width: 100%; max-width: none; justify-content: stretch; }
+  .portal-actions .portal-button { flex: 1 1 0; min-width: 0; text-align: center; }
+  .portal-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .portal-metric { min-height: 76px; padding: 11px 10px; }
+  .portal-metric strong { margin: 7px 0 3px; font-size: 15px; }
+  .portal-metric span, .portal-metric small { font-size: 9px; }
+  /* 排行榜顶部 3 个指标卡：手机端保持一行 3 个 */
+  .leaderboard-metrics { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .leaderboard-metrics .portal-metric { padding: 9px 7px; min-height: 0; }
+  .leaderboard-metrics .portal-metric:nth-child(2) { border-right: 1px solid #1d2c2e; }
+  .leaderboard-metrics .portal-metric:nth-child(-n+2) { border-bottom: 0; }
+  .leaderboard-metrics strong { margin: 5px 0 2px; font-size: 12px; line-height: 1.3; word-break: break-word; }
+  .leaderboard-metrics span, .leaderboard-metrics small { font-size: 8.5px; line-height: 1.3; }
+  /* 排行榜：手机端改成紧凑信息卡，不横向滚动；排名/账户在顶部，
+     收益指标用 2×2 网格排列，避免长数字被挤成逐字换行。 */
+  .leaderboard-section .portal-table-wrap { overflow: visible; }
+  /* Override portal.css card stacking so the leaderboard keeps the compact
+     comparison table shown in the mobile reference design. */
+  .leaderboard-table { display: block !important; width: 100% !important; min-width: 0 !important; }
+  .leaderboard-table thead { display: none !important; }
+  .leaderboard-table tbody { display: block !important; }
+  .leaderboard-table tr { display: grid !important; grid-template-columns: 1fr 1fr; gap: 0 14px; margin: 8px 0; padding: 12px; border: 1px solid #1d2c2e; border-radius: 10px; background: #0e1719; }
+  .leaderboard-table tr.leaderboard-current { background: #15302e; border-color: #2a504b; }
+  .leaderboard-table th, .leaderboard-table td { display: flex !important; }
+  .leaderboard-table th, .leaderboard-table td {
+    min-width: 0 !important; width: auto; padding: 6px 0; font-size: 11px; height: auto;
+    line-height: 1.3; white-space: nowrap; word-break: normal; text-align: right; justify-content: space-between; align-items: center; border: 0;
+  }
+  .leaderboard-table th:first-child, .leaderboard-table td:first-child { grid-column: 1; width: auto; padding-left: 0; text-align: left; }
+  .leaderboard-table th:nth-child(2), .leaderboard-table td:nth-child(2) { grid-column: 2; width: auto; text-align: right; }
+  .leaderboard-table th:nth-child(n+3), .leaderboard-table td:nth-child(n+3) { width: auto; }
+  .leaderboard-table td:nth-child(n+3)::before { content: attr(data-label); color: #81918e; font-size: 9px; margin-right: 8px; }
+  .leaderboard-table td:first-child::before { content: '排名'; color: #81918e; font-size: 9px; margin-right: 8px; }
+  .leaderboard-table td:nth-child(2)::before { content: '账户'; color: #81918e; font-size: 9px; margin-right: 8px; }
+  .leaderboard-table td strong { font-size: 10px; }
+  .leaderboard-table .portal-chip { display: inline-block; margin-left: 4px; font-size: 7.5px; padding: 1px 3px; }
+  /* 手机端缩小区块标题与说明，避免字太大 */
+  .leaderboard-section .portal-section-head { flex-direction: column; align-items: flex-start; gap: 3px; padding: 10px; }
+  .leaderboard-section .portal-section-head h2 { font-size: 12px; }
+  .leaderboard-section .portal-section-head span { max-width: 100%; font-size: 9px; }
+  .portal-section-head { padding-left: 11px; padding-right: 11px; }
+  .portal-section-head span { max-width: 48%; }
+  .portal-gate { min-height: 230px; padding: 24px 16px; text-align: center; }
+  .portal-gate strong { font-size: 16px; }
+  .portal-button, .btn, .btn-gradient { min-height: 42px; }
+  .copy-btn, .referral-copy-btn { min-height: 38px; }
+}
+
+@media (max-width: 360px) {
+  .portal-shell, .aim-page, .account-shell { padding-left: 8px !important; padding-right: 8px !important; }
+  .portal-metrics { grid-template-columns: 1fr 1fr; }
+  .leaderboard-metrics { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .leaderboard-metrics .portal-metric { padding: 8px 5px; }
+  .leaderboard-metrics strong { font-size: 11px; }
+  .portal-metric { padding-left: 8px; padding-right: 8px; }
+  .portal-metric strong { font-size: 14px; }
+  .portal-heading h1 { font-size: 17px; }
+}

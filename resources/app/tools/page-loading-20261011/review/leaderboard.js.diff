@@ -1,0 +1,19 @@
+--- public/js/leaderboard.js (before)
++++ public/js/leaderboard.js (after)
+@@ -16,13 +16,12 @@
+     document.getElementById('leaderboard-refresh')?.addEventListener('click', () => P.load('leaderboard', true));
+   }
+ 
+-  async function load() {
++  async function load(context = { isCurrent:() => true }) {
+     const host = document.getElementById('leaderboard-content');
+     if (!host) return;
+     host.innerHTML = P.loading(8);
+-    const response = await fetch('/api/platform/leaderboard', { credentials:'same-origin' });
+-    const payload = await response.json().catch(() => ({}));
+-    if (!response.ok) throw new Error(payload.error || '排行榜加载失败');
++    const payload = await P.readJSON('/api/platform/leaderboard');
++    if (!context.isCurrent()) return;
+     const rows = payload.items || [];
+     const top = rows[0];
+     const current = payload.current;

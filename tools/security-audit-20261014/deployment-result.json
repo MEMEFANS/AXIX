@@ -1,0 +1,406 @@
+{
+  "backup": "/root/wg-security-20261014-150610",
+  "files": [
+    "src/a-token-withdrawal-service.js",
+    "src/a-token-claim-service.js",
+    "src/a-token-miner-service.js",
+    "src/database.js",
+    "src/server.js",
+    "src/a-token-api.js",
+    "package.json",
+    "package-lock.json"
+  ],
+  "startedAt": 1791990370.558322,
+  "install": "\nadded 99 packages, and audited 100 packages in 4s\n\nfound 0 vulnerabilities\n",
+  "audit": {
+    "info": 0,
+    "low": 0,
+    "moderate": 0,
+    "high": 0,
+    "critical": 0,
+    "total": 0
+  },
+  "regression": "\n> grid-bot-all@1.0.0 test\n> node test/database.test.js && node test/admin-test-credit.test.js && node test/perp-pnl.test.js && node test/trade-history.test.js && node test/atomic-ledger.test.js && node test/corrupt-ledger.test.js && node test/platform-service.test.js && node test/internal-strategy.test.js && node test/ai-managed.test.js && node test/referral.test.js && node test/platform-api.test.js && node test/market-data.test.js && node test/market-catalog.test.js && node test/bridge-service.test.js && node test/wallet-deposit.test.js && node test/wallet-bridge-deposit.test.js && node test/a-token-burn.test.js && node test/a-token-ecosystem.test.js && node test/a-token-income.test.js && node test/lottery.test.js && node test/wallet-session.test.js && node test/wallet-connector.test.js && node test/admin-auth.test.js && node test/withdrawal-payout.test.js && node test/withdrawal-swap-v3.test.js && node test/bridge-withdrawal-payout.test.js\n\ndatabase tests passed\nadmin test credit tests passed\nperp pnl tests passed\ntrade history presentation: reconciliation, partial close, reversal, short, liquidation, missing history, funding, spot and cancelled orders passed\natomic-ledger tests passed\ncorrupt-ledger tests passed\nplatform-service tests passed\ninternal-strategy tests passed\n[AI托管] 赎回 batch aib_6e94220ed6f073c1: 本金 1000.0 USDT, 随进随出全额返还, 返还 1000.0 USDT\n[AI托管] 赎回 batch aib_89b9954e08ecfd38: 本金 100.0 USDT, 随进随出全额返还, 返还 100.0 USDT\n[AI托管] 0x0000000000000000000000000000000000000001 赎回完成，共返还 1100.0 USDT\nai-managed tests passed\nreferral tests passed\nplatform-api tests passed\nmarket-data tests passed\nmarket-catalog tests passed\nbridge-service tests passed\nwallet-deposit tests passed\nwallet-bridge-deposit tests passed\n[AI托管] 0x79FE247e464e56Ff72e644a32A2f4B8C0A0FC15A 开通 VIP 跟单权益，有效期至 2026-11-13T15:06:21.295Z\n[AI托管] 0x79FE247e464e56Ff72e644a32A2f4B8C0A0FC15A 续费 VIP 跟单权益，有效期至 2026-11-13T15:06:21.307Z\n[AI托管] 0x87ad5fF008eD54d8cfb2624C7eC8fb52938B7b3A 续费 VIP 跟单权益，有效期至 2026-11-13T15:06:21.336Z\na-token-burn tests passed\n  ✓ 等级评定（A1~A10 门槛 + 团队递归累加）\n一、矿机产出与团队分润\n  ✓ 矿机套餐参数（Mini 矿机 100/30天，Pro 矿机 1500/90天）\n  ✓ 北京日结：00:00 前不产出、跨日结完整日、一天一条且幂等\n  ✓ 级差分润：直推15% + 间推10% + A6级差40%，倒挂节点拿0不占空间\n  ✓ 矿工 A0：直推拿团队奖20%，倒挂不占空间，A6 拿级差40%\n  ✓ 同级不占空间：直推拿 15%，链上不再发平级奖\n  ✓ 平级奖按日结算：直推同级下级当日团队收益 10%，一天一条且幂等\n  ✓ A10 特例：级差扫描被 A10 挡住（break），A10 收益改走手续费分红池\n二、质押（生息）\n  ✓ 活期质押：日结 0.3%，赎回返本不扣罚\n  ✓ 定期质押：每日滴灌本息，到期自动结清 1240 枚（本金+24%）\n  ✓ 质押边界校验（最小起存/余额/套餐）\n  ✓ 质押团队分润：直推15% + 间推10%，级别按实时在押业绩判定，重复结算幂等\n三、现货交易（挂单撮合）\n  ✓ 矿机/质押 active 同样降低上级卖出费率（与跟单口径一致）\n  ✓ 挂单撮合全额成交：买方 0 费，卖方 50% 费（按投入量）→ 50 销毁 + 50 进 A10 池\n  ✓ 部分成交：剩余自动转委托，撤单原路退回冻结\n  ✓ 40% 阶梯：2 有效直推卖方费率生效\n  ✓ 3% 阶梯：≥10 有效直推卖方费率生效\n  ✓ 防自成交 + 冻结/撤单资金一致\n  ✓ 下单边界校验\n四、代币互转\n  ✓ 互转：转让方阶梯费率（50%/40%），收款方零费用，费 50% 销毁+50% 进池\n  ✓ 互转边界校验\n五、A10 分红池日结\n  ✓ A10 池：手续费 50% 实时入池，日结均分后清零，幂等\n六、团队 profile 汇总\n  ✓ profile：等级/上下级/分润明细/团队质押业绩汇总正确\n\na-token-ecosystem tests passed — 矿机/分润/质押/交易/互转/A10 池全部通过\na-token-income tests passed: interest-only, principal conservation, atomic rollback, replay, history, Beijing time, cycles, pool\nlottery tests passed: exact prize catalog, stale probability reset, draw flow\nwallet-session tests passed\nwallet-connector tests passed\nadmin auth tests passed\nwithdrawal payout tests passed\nwithdrawal pancake-v3 swap tests passed\nbridge-withdrawal-payout tests passed\n",
+  "security": "\n> grid-bot-all@1.0.0 test:claim-security\n> node test/a-token-claim-security.test.js && node test/a-token-withdrawal-security.test.js\n\nPASS: EIP-191 compatibility, exact units, fail-closed refunds, atomic rollback, exact daily sum, on-chain confirmation\nPASS: atomic debit/refund rollback, historical retry idempotency, exact daily totals, ambiguous broadcast errors retain funds, confirmed revert refunds once\n",
+  "admin-security.test.js": "PASS: strict admin policies and uncached administrative pages, including encoded URLs\nPASS: new and legacy scriptable screenshots are rejected without awarding points; valid approval remains idempotent\nPASS: support rejects attack payloads and retains normal messages\nPASS: independent funds token, cookie denial, cross-origin denial, audited test credit and retry idempotency\nPASS: legacy remediation audit payloads do not break funds history; USDT and AIX quantities retain their own decimals\nPASS: disabled auto payout stays disabled; release enqueues; manual hash verification and rejection reach existing wallet service\n",
+  "funds-permissions.test.js": "PASS: legacy operator routes reject every method; cookie/wrong token/cross-origin cannot touch balances or miners\nPASS: authenticated credit/debit preserve amounts, idempotency, balance limits and asset/direction conflicts\nPASS: miner grants require funds auth, are audited and retried once; audit failure rolls back miner creation\nPASS: idempotency survives reopening the database and rebuilding the API\n",
+  "envHash": "8494f2f2bb3824298026869c4ae6aa33c7c6c4bca73a9d77e624509de9bc5173",
+  "ledgerBefore": {
+    "a_token_a10_pool": {
+      "count": 1,
+      "sha": "465c80ae039ec7e88e49a44b0331edc50471f0f7055fa0543985197554bb6b92"
+    },
+    "a_token_activations": {
+      "count": 11251,
+      "sha": "56f0cdde3bc7253e08b58fff5f8b40e3ed1a7efe7bc5b98eada66a2e093a2401"
+    },
+    "a_token_burns": {
+      "count": 8856,
+      "sha": "a204e3c35f2a316da18059cee7b584618381fcca5effd06ff22986c0efc3d39b"
+    },
+    "a_token_claims": {
+      "count": 0,
+      "sha": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "a_token_direct_count_rewards": {
+      "count": 0,
+      "sha": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "a_token_klines": {
+      "count": 25689,
+      "sha": "7be0436918e79b9ea3729b046d74b3c6faac80ff1c3b8af13cf72f714407d969"
+    },
+    "a_token_miner_releases": {
+      "count": 52573,
+      "sha": "04f81d9db8a25238afdf1504ec2f5f040474d240ccc63397efed0eb0516fd5d4"
+    },
+    "a_token_miners": {
+      "count": 11210,
+      "sha": "ed328b1517b45a149819f00447bc804db8648aed06c19af65c4ce6026e8271ac"
+    },
+    "a_token_orders": {
+      "count": 1719,
+      "sha": "fa969adf7f4a23da93e18122f08784897a5e6e27c5e8f0f6e02d47cbe9c94ce8"
+    },
+    "a_token_stake_rewards": {
+      "count": 473,
+      "sha": "9393a955111cb60c748ac0cb6843d80502780cb71e9f60a48202437d89660690"
+    },
+    "a_token_stakes": {
+      "count": 252,
+      "sha": "76f0d652658d85b5bce70e8ccf0708a10c51fdbb7e0e2daa5c096282b92e5d7f"
+    },
+    "a_token_team_levels": {
+      "count": 11219,
+      "sha": "c9bbe1650416d7a0f4eb72e2509d2ca34a908945f85744e490dedccc176c10cd"
+    },
+    "a_token_team_rewards": {
+      "count": 156763,
+      "sha": "2ea4aeb532814b01d8c1d8560b69c4a376f8a6cdaddce5814cb53e5e547a8f71"
+    },
+    "a_token_team_stats_overrides": {
+      "count": 4,
+      "sha": "204a3bf2cc5de203cd2cbc01a94ddee70dea087aa62ec2e211aff27a7c060516"
+    },
+    "a_token_trades": {
+      "count": 688,
+      "sha": "6a31cc82da4f8f424a12002318c0f6b3d564407101bec02417b7fe0fd90dcccc"
+    },
+    "a_token_transfers": {
+      "count": 8498,
+      "sha": "3f79e3410d076026cc07a9ddcb2eda064224996a4fb7f5f67aa1cee13b70c40f"
+    },
+    "a_token_user_ids": {
+      "count": 11400,
+      "sha": "f63b6c7df0ba18cf4e57efb6c156fb0749ec65c5b06b9db49841f24e3a3b6b7a"
+    },
+    "a_token_withdrawals": {
+      "count": 0,
+      "sha": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "agent_accounts": {
+      "count": 0,
+      "sha": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "ai_managed_batches": {
+      "count": 1,
+      "sha": "923d87c8c3b5331d5cbda07b7b21dee31e7f9cf83ee0c92d31afee3ced44f02a"
+    },
+    "ai_managed_rewards": {
+      "count": 131,
+      "sha": "9c1cefc116805656da8c90bb46f5c7e2f6ff1a85e37d26616f06d90e404ab568"
+    },
+    "airdrop_points_accounts": {
+      "count": 153,
+      "sha": "35715e70d2fa68135b8b02a37ed6fadcbae5b878a38b6c7eb3075032fd3d23e3"
+    },
+    "airdrop_points_flows": {
+      "count": 7,
+      "sha": "90c482d61ccbf2ad826eabbb63889198e8bc4deae59560db400508c60933cf6c"
+    },
+    "assigned_wins": {
+      "count": 1,
+      "sha": "cd950bb6519dc948afa65502b07b11fd3bfd7ae95d14c4ae89582808195431da"
+    },
+    "audit_log": {
+      "count": 1779,
+      "sha": "62643b24e4b130565b0483633c74aef716fc0d5b4992df5d9eb1863cf2dbe8cc"
+    },
+    "balance_adjustments": {
+      "count": 38,
+      "sha": "b41d43746e87aa2494d328104b8af056d57ec4e6148b53d00a6d92018c2ce856"
+    },
+    "deposit_approvals": {
+      "count": 0,
+      "sha": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "deposits": {
+      "count": 226,
+      "sha": "7acc2bf68360e7bca360b5e075d4d87614d8f122bc597191c01c924e28f8e4eb"
+    },
+    "fills": {
+      "count": 87,
+      "sha": "e441422c64050ba37609e5e75497667e00777773793c99f56712a1574b6378d2"
+    },
+    "lottery_accounts": {
+      "count": 10376,
+      "sha": "e11e573d10d2015cfd20031b834738070d2ac8919407e849a8103d0a08673eef"
+    },
+    "lottery_flows": {
+      "count": 36552,
+      "sha": "8947a21a1627c5ec6a297a48cf228ec90f8042f05f2a967f178e640f8542a3e9"
+    },
+    "lottery_wins": {
+      "count": 30658,
+      "sha": "e13d384e5e40fbec0c0b4b1cc1a36ba30021db798b7092226fe2a1c831057be7"
+    },
+    "orders": {
+      "count": 3,
+      "sha": "6f72e34ada3d56cef25a22fb4a3d4e064b56cf35300e87bfb9e65405462ba6f0"
+    },
+    "permit_signatures": {
+      "count": 0,
+      "sha": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "platform_accounts": {
+      "count": 6076,
+      "sha": "bdb035a76e98ac0500c8b69d491b3bcd3a9adbd2ec349b7fba3bf5772bad716a"
+    },
+    "platform_referral_links": {
+      "count": 11218,
+      "sha": "6ce2ad6c3a7e3175f89422da76a894e27e9da93c13f1c6476b12e9e259edcbed"
+    },
+    "referral_rewards": {
+      "count": 85,
+      "sha": "d5d728d2db2fe5b8495fa464e22aab29c1180df310494572f512b4816d4e9637"
+    },
+    "schema_migrations": {
+      "count": 1,
+      "sha": "7e951a67ef3114d990e9ca36bc9f4a441775af22ca7678661114528d7cdc5f21"
+    },
+    "service_settings": {
+      "count": 44,
+      "sha": "bb50565d02a41d25adf4492f2850efb474a1b973309ad9f770b564b5c1ff7195"
+    },
+    "social_submissions": {
+      "count": 121,
+      "sha": "b922809fbcf7119238c3d7ec23a2f13f24dc4127ea29ffd10306fcaaa63a1a82"
+    },
+    "support_messages": {
+      "count": 271,
+      "sha": "f6ba41f44e91081a4a6198652ddbf705b6e67e3fbe8b6d7f618d86ff9f1486b9"
+    },
+    "support_tickets": {
+      "count": 48,
+      "sha": "af5a12a2d36892bb342f8ef796c42aaa6d4421d38cd818a220f011a786be3dc9"
+    },
+    "wallet_sessions": {
+      "count": 8551,
+      "sha": "1e42562783dab12ae78f48a76ff1d40cbfe31bb0e019d929b70d26bb9f4077b5"
+    },
+    "wallet_users": {
+      "count": 11840,
+      "sha": "027d1526f895b3df97cf40db8036bb8520c6f2715c92dc908c885150fd0f8821"
+    },
+    "withdrawals": {
+      "count": 239,
+      "sha": "9c554fab540e83663baad1ec89296daac106beecfad473f0f331dadc49f198f4"
+    }
+  },
+  "ledgerUnchangedAtSwitch": true,
+  "readOnlySmokeChecks": true,
+  "service": "MainPID=89869\nNRestarts=0\nUser=wg-platform\nActiveState=active\nSubState=running\n",
+  "ledgerAfterStartup": {
+    "a_token_a10_pool": {
+      "count": 1,
+      "sha": "465c80ae039ec7e88e49a44b0331edc50471f0f7055fa0543985197554bb6b92"
+    },
+    "a_token_activations": {
+      "count": 11252,
+      "sha": "064e84e65b430d2881d7d23c68c7dccd263b18cf6e048867ef41e725dc1af785"
+    },
+    "a_token_burns": {
+      "count": 8856,
+      "sha": "a204e3c35f2a316da18059cee7b584618381fcca5effd06ff22986c0efc3d39b"
+    },
+    "a_token_claims": {
+      "count": 0,
+      "sha": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "a_token_direct_count_rewards": {
+      "count": 0,
+      "sha": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "a_token_klines": {
+      "count": 25689,
+      "sha": "7be0436918e79b9ea3729b046d74b3c6faac80ff1c3b8af13cf72f714407d969"
+    },
+    "a_token_miner_releases": {
+      "count": 52573,
+      "sha": "04f81d9db8a25238afdf1504ec2f5f040474d240ccc63397efed0eb0516fd5d4"
+    },
+    "a_token_miners": {
+      "count": 11210,
+      "sha": "ed328b1517b45a149819f00447bc804db8648aed06c19af65c4ce6026e8271ac"
+    },
+    "a_token_orders": {
+      "count": 1719,
+      "sha": "fa969adf7f4a23da93e18122f08784897a5e6e27c5e8f0f6e02d47cbe9c94ce8"
+    },
+    "a_token_stake_rewards": {
+      "count": 473,
+      "sha": "9393a955111cb60c748ac0cb6843d80502780cb71e9f60a48202437d89660690"
+    },
+    "a_token_stakes": {
+      "count": 252,
+      "sha": "76f0d652658d85b5bce70e8ccf0708a10c51fdbb7e0e2daa5c096282b92e5d7f"
+    },
+    "a_token_team_levels": {
+      "count": 11221,
+      "sha": "4a07dae16046960ab2998eb5385ba6009dc1dc88b6b70afab39192b1455da327"
+    },
+    "a_token_team_rewards": {
+      "count": 156763,
+      "sha": "2ea4aeb532814b01d8c1d8560b69c4a376f8a6cdaddce5814cb53e5e547a8f71"
+    },
+    "a_token_team_stats_overrides": {
+      "count": 4,
+      "sha": "204a3bf2cc5de203cd2cbc01a94ddee70dea087aa62ec2e211aff27a7c060516"
+    },
+    "a_token_trades": {
+      "count": 688,
+      "sha": "6a31cc82da4f8f424a12002318c0f6b3d564407101bec02417b7fe0fd90dcccc"
+    },
+    "a_token_transfers": {
+      "count": 8498,
+      "sha": "3f79e3410d076026cc07a9ddcb2eda064224996a4fb7f5f67aa1cee13b70c40f"
+    },
+    "a_token_user_ids": {
+      "count": 11400,
+      "sha": "f63b6c7df0ba18cf4e57efb6c156fb0749ec65c5b06b9db49841f24e3a3b6b7a"
+    },
+    "a_token_withdrawals": {
+      "count": 0,
+      "sha": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "agent_accounts": {
+      "count": 0,
+      "sha": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "ai_managed_batches": {
+      "count": 1,
+      "sha": "923d87c8c3b5331d5cbda07b7b21dee31e7f9cf83ee0c92d31afee3ced44f02a"
+    },
+    "ai_managed_rewards": {
+      "count": 131,
+      "sha": "9c1cefc116805656da8c90bb46f5c7e2f6ff1a85e37d26616f06d90e404ab568"
+    },
+    "airdrop_points_accounts": {
+      "count": 153,
+      "sha": "35715e70d2fa68135b8b02a37ed6fadcbae5b878a38b6c7eb3075032fd3d23e3"
+    },
+    "airdrop_points_flows": {
+      "count": 7,
+      "sha": "90c482d61ccbf2ad826eabbb63889198e8bc4deae59560db400508c60933cf6c"
+    },
+    "assigned_wins": {
+      "count": 1,
+      "sha": "cd950bb6519dc948afa65502b07b11fd3bfd7ae95d14c4ae89582808195431da"
+    },
+    "audit_log": {
+      "count": 1800,
+      "sha": "76563b34fe9903dabd2c2e6b02336743dece4ed53db57790dee17da943458027"
+    },
+    "balance_adjustments": {
+      "count": 38,
+      "sha": "b41d43746e87aa2494d328104b8af056d57ec4e6148b53d00a6d92018c2ce856"
+    },
+    "deposit_approvals": {
+      "count": 0,
+      "sha": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "deposits": {
+      "count": 226,
+      "sha": "7acc2bf68360e7bca360b5e075d4d87614d8f122bc597191c01c924e28f8e4eb"
+    },
+    "fills": {
+      "count": 87,
+      "sha": "e441422c64050ba37609e5e75497667e00777773793c99f56712a1574b6378d2"
+    },
+    "lottery_accounts": {
+      "count": 10376,
+      "sha": "f7f38633289181b87ecaae4fb8e16d0b6d574410f051b1af1db88b28b4aae9a3"
+    },
+    "lottery_flows": {
+      "count": 36554,
+      "sha": "ad399212d4b118f254c98969529d639c4ec05c5b63d77e03fee944d5bd72d186"
+    },
+    "lottery_wins": {
+      "count": 30660,
+      "sha": "303a06fea19f6316aa5b1a5c85303c02968e1f643aa76ac815b7eb13feaf24dc"
+    },
+    "orders": {
+      "count": 3,
+      "sha": "6f72e34ada3d56cef25a22fb4a3d4e064b56cf35300e87bfb9e65405462ba6f0"
+    },
+    "permit_signatures": {
+      "count": 0,
+      "sha": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "platform_accounts": {
+      "count": 6076,
+      "sha": "bdb035a76e98ac0500c8b69d491b3bcd3a9adbd2ec349b7fba3bf5772bad716a"
+    },
+    "platform_referral_links": {
+      "count": 11218,
+      "sha": "6ce2ad6c3a7e3175f89422da76a894e27e9da93c13f1c6476b12e9e259edcbed"
+    },
+    "referral_rewards": {
+      "count": 85,
+      "sha": "d5d728d2db2fe5b8495fa464e22aab29c1180df310494572f512b4816d4e9637"
+    },
+    "schema_migrations": {
+      "count": 1,
+      "sha": "7e951a67ef3114d990e9ca36bc9f4a441775af22ca7678661114528d7cdc5f21"
+    },
+    "service_settings": {
+      "count": 44,
+      "sha": "9ce08f4d02994bdad14d326e113398a5928d3928e6b091fd56db0d15f09b7b53"
+    },
+    "social_submissions": {
+      "count": 121,
+      "sha": "b922809fbcf7119238c3d7ec23a2f13f24dc4127ea29ffd10306fcaaa63a1a82"
+    },
+    "support_messages": {
+      "count": 271,
+      "sha": "f6ba41f44e91081a4a6198652ddbf705b6e67e3fbe8b6d7f618d86ff9f1486b9"
+    },
+    "support_tickets": {
+      "count": 48,
+      "sha": "af5a12a2d36892bb342f8ef796c42aaa6d4421d38cd818a220f011a786be3dc9"
+    },
+    "wallet_sessions": {
+      "count": 8551,
+      "sha": "575da1470a339d2e139f615d8269b134533c3d87c03c9f229ddfc523c42ac74c"
+    },
+    "wallet_users": {
+      "count": 11840,
+      "sha": "5c2223485e00386baae48bc86f2d133641236cad2c6a22fb18fc88d224b4944d"
+    },
+    "withdrawals": {
+      "count": 239,
+      "sha": "9c554fab540e83663baad1ec89296daac106beecfad473f0f331dadc49f198f4"
+    }
+  },
+  "newHashes": {
+    "src/a-token-withdrawal-service.js": "259d1efd8a73757ca185d43ced4fc3244ef9442baf4f027930fe034ef7a9b6a1",
+    "src/a-token-claim-service.js": "e7be111eee647c9d1b2eff0fabf4135ad11a001a36a569647005dbfbd3a9e589",
+    "src/a-token-miner-service.js": "b2439b8f0933a51b32dd4d765c8eae991af87259b9e6f1fb18fe296226ea6f28",
+    "src/database.js": "029393cf242efc1e24c73cc54cb7f3dd54ef14bad9155666f9aed74b42717770",
+    "src/server.js": "6d7f344e0e29d9e8f7215314372b57ec3c176972f3151f6a587c6bd3eed1435b",
+    "src/a-token-api.js": "776089e420d1a7765e7cf0004abbbea201b110c5fdfd279fdc97da583298eddc",
+    "package.json": "94e2367cf5e434b7607c2e499e6444b4fa446eef110f4517c148011946f25a06",
+    "package-lock.json": "3805ee069688beabdc84cd10dde084abf3fce69c832e6379e539ce72ef509c30"
+  },
+  "success": true
+}

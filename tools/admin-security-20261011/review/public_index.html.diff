@@ -1,0 +1,20 @@
+--- public/index.html before
++++ public/index.html after
+@@ -1405,7 +1405,7 @@
+ <script defer src="/js/core.js?v=20261011-pages-1"></script>
+ <script defer src="/js/wallet.js?v=20261011-pages-1"></script>
+ <script defer src="/js/portal-shared.js?v=20261011-pages-1"></script>
+-<script defer src="/js/page-loader.js?v=20261011-pages-1"></script>
++<script defer src="/js/page-loader.js?v=20261011-pages-security-2"></script>
+ <script defer src="/js/earn.js?v=20261011-team-fast-2"></script>
+ <!-- Wallet scripts are independent of the chart/trading download queue. -->
+ <script>
+@@ -1423,7 +1423,7 @@
+ <script>
+ // Service Worker：静态资源缓存加速（二次访问），API 永不缓存
+ if ('serviceWorker' in navigator) {
+-  window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js?v=8').catch(() => {}));
++  window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js?v=9').catch(() => {}));
+ }
+ </script>
+ <script>

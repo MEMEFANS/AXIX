@@ -1,0 +1,102 @@
+{
+  "passed": true,
+  "production": true,
+  "financialMutationsPerformed": false,
+  "checks": [
+    "mobile funds console accepts existing token, loads withdrawals and shows the current automatic payout setting",
+    "test-credit history loads in the same independent funds console",
+    "funds-only asset adjustment and miner grant panels load their authenticated records",
+    "locking clears funds data and credential",
+    "operator write forms removed, old asset/miner APIs denied, and operator cookie cannot access new funds endpoints",
+    "historical script images are suppressed through the live operator list and have no preview control",
+    "operator customer-service conversation renders after strict CSP is enabled"
+  ],
+  "runtimeErrors": [],
+  "blockedUnexpectedWrites": [],
+  "apiResponses": [
+    {
+      "path": "/api/admin/session",
+      "status": 200
+    },
+    {
+      "path": "/api/admin/login",
+      "status": 200
+    },
+    {
+      "path": "/api/admin/support/unread-count",
+      "status": 200
+    },
+    {
+      "path": "/api/admin/dashboard",
+      "status": 200
+    },
+    {
+      "path": "/api/admin/deposits",
+      "status": 200
+    },
+    {
+      "path": "/api/admin/a-token/miners",
+      "status": 200
+    },
+    {
+      "path": "/api/admin/a-token/grant",
+      "status": 403
+    },
+    {
+      "path": "/api/admin/a-token/debit",
+      "status": 403
+    },
+    {
+      "path": "/api/admin/a-token/grant-miner",
+      "status": 403
+    },
+    {
+      "path": "/api/admin/a-token/grant-stake",
+      "status": 403
+    },
+    {
+      "path": "/api/admin/a-token/activations/confirm",
+      "status": 403
+    },
+    {
+      "path": "/api/admin/lottery/prizes",
+      "status": 200
+    },
+    {
+      "path": "/api/admin/lottery/social",
+      "status": 200
+    },
+    {
+      "path": "/api/admin/lottery/physical",
+      "status": 200
+    },
+    {
+      "path": "/api/admin/lottery/assigned",
+      "status": 200
+    },
+    {
+      "path": "/api/admin/lottery/social",
+      "status": 200
+    },
+    {
+      "path": "/api/admin/support/tickets",
+      "status": 200
+    },
+    {
+      "path": "/api/admin/support/unread-count",
+      "status": 200
+    },
+    {
+      "path": "/api/admin/support/tickets/86647a3d-7901-4627-963c-daf1b0fc6c9c/messages",
+      "status": 200
+    },
+    {
+      "path": "/api/admin/support/unread-count",
+      "status": 200
+    },
+    {
+      "path": "/api/admin/logout",
+      "status": 200
+    }
+  ]
+}

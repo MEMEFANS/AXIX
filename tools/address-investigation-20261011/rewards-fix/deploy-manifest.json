@@ -1,0 +1,30 @@
+{
+  "src/platform-service.js": {
+    "before": "e55e4482cd532890b4c7f9058706b98f332fb9c5197ceee95050685cc141562e",
+    "after": "a07fe7cc4205af41f1484477cf77bddf05eb372817ac8750006a52b1222975a6"
+  },
+  "src/server.js": {
+    "before": "92973242567ecc37a818fc585a3bf61cfdbd27f190fe1185d94cf5e1c9906a94",
+    "after": "ba786812fb4e512b272b42b73220aaac8340ef988cff0fb515dde8e733d2339e"
+  },
+  "src/a-token-income.js": {
+    "before": "85721544fbbbbf11b8a97011309c87a192b7e54abb30f359bd56042aefd61abe",
+    "after": "591233a7c6c4385b4a5eefff2c469c6fe0ebd0b261a600587af9761c22edd8cc"
+  },
+  "src/a-token-revenue-service.js": {
+    "before": "0f9ba5a89289e840c5c459ddce9ecab6c5e8fc292283588a66c5a832ac53f53e",
+    "after": "793dc4702b41b005fa3c6c63d49823829fd21ea1650e9d18ef139b5b81daa41c"
+  },
+  "public/js/operator-admin.js": {
+    "before": "83a73780fa7dc00f5d1128da2489e5b0e39d88a94263889ce146b846e071ade7",
+    "after": "87fdf127acf19c17b65be64ed8e346c4be4f78016b080e170de8ddc52a308d0d"
+  },
+  "src/a-token-admin-income.js": {
+    "before": null,
+    "after": "8422c148d7c531689bc7fd71fa2b7450ef47648418b47abd33f790f7846094f7"
+  },
+  "public/admin.html": {
+    "before": "cf2b6a9640345033df0bda32df328c9c72d6cbacf3cc43961f4c450510f1873a",
+    "after": "58beb8c9d07796da431d48916a6011a3701810ee8045af487fbc47d0107543ec"
+  }
+}

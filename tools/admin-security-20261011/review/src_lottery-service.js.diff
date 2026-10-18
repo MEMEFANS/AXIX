@@ -1,0 +1,21 @@
+--- src/lottery-service.js before
++++ src/lottery-service.js after
+@@ -485,13 +485,17 @@
+ 
+   // ── 后台 ──────────────────────────────────────────────────────
+   function adminListSocial(status, limit = 100) {
+-    return db.listSocialSubmissions(status, limit);
++    return db.listSocialSubmissions(status, limit).map(sub => {
++      try { normalizeSocialScreenshot(sub.screenshotUrl); return { ...sub, screenshotSafe:true }; }
++      catch { return { ...sub, screenshotUrl:'', screenshotSafe:false, screenshotError:'截图无效或格式不安全，请拒绝后让用户重新提交' }; }
++    });
+   }
+ 
+   function adminReviewSocial(id, approve, reviewer = '') {
+     const sub = db.getSocialSubmission(id);
+     if (!sub) throw new Error('记录不存在');
+     if (sub.status !== 'pending') throw new Error('已审核过');
++    if (approve) normalizeSocialScreenshot(sub.screenshotUrl);
+     sub.status = approve ? 'approved' : 'rejected';
+     sub.reviewer = reviewer;
+     sub.reviewedAt = clock();

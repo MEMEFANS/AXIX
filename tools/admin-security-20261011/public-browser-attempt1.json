@@ -1,0 +1,18 @@
+{
+  "passed": false,
+  "production": true,
+  "financialMutationsPerformed": false,
+  "checks": [
+    "mobile funds console accepts existing token, loads withdrawals and keeps automatic payout disabled",
+    "test-credit history loads in the same independent funds console",
+    "locking clears funds data and credential"
+  ],
+  "runtimeErrors": [],
+  "blockedUnexpectedWrites": [
+    {
+      "path": "/cdn-cgi/rum",
+      "method": "POST"
+    }
+  ],
+  "error": "Waiting failed: 30000ms exceeded"
+}

@@ -1,0 +1,68 @@
+--- production/src/server.js
++++ candidate/src/server.js
+@@ -9,6 +9,7 @@
+ import fs from 'node:fs';
+ import path from 'node:path';
+ import { formatUnits } from 'ethers';
++import { readAdminAixIncome } from './a-token-admin-income.js';
+ import { getConfig, ROOT, DATA_ROOT } from './config.js';
+ import { createExchange as createDeExchange } from './exchange/de/index.js';
+ import { createExchange as createExExchange } from './exchange/ex/index.js';
+@@ -1090,16 +1091,8 @@
+             dayEarnedUnits: fmtA(m.dayEarnedUnits),
+             dailyTargetUnits: fmtA(m.dailyTargetUnits),
+           }));
+-          const minerReleases = db.listATokenMinerReleases(wallet, 500);
+-          const minerTotalReleased = minerReleases.reduce((s, r) => s + BigInt(r.amountUnits || '0'), 0n);
+-          // 质押（格式化 AIX 18 位小数为可读数值）
+-          const stakes = db.listATokenStakes(wallet).map(s => ({ ...s,
+-            principalUnits: fmtA(s.principalUnits),
+-            totalEarnedUnits: fmtA(s.totalEarnedUnits),
+-            dayEarnedUnits: fmtA(s.dayEarnedUnits),
+-          }));
+-          const stakeRewards = db.listATokenStakeRewards(wallet, 500);
+-          const stakeTotalEarned = stakeRewards.reduce((s, r) => s + BigInt(r.amountUnits || '0'), 0n);
++          // 全历史统计；列表单独限制条数，质押利息与返还本金分开。
++          const aixIncome = readAdminAixIncome(db, wallet);
+           // 激活记录
+           const activations = db.listATokenActivationsByWallet(wallet);
+           // 直推列表（带激活统计）
+@@ -1160,14 +1153,6 @@
+           const trades = db.listATokenTradesByWallet ? db.listATokenTradesByWallet(wallet, 100) : [];
+           // 互转记录 —— 使用 transferService 返回格式化可读字段
+           const transfers = aTokenTransferService.myTransfers(wallet, 100);
+-          // 团队收益（分润汇总）
+-          const teamRewards = db.listATokenTeamRewards(wallet, 500);
+-          const teamRewardTotal = teamRewards.reduce((s, r) => s + BigInt(r.amountUnits || '0'), 0n);
+-          const byKind = {};
+-          for (const r of teamRewards) {
+-            const k = r.kind || 'other';
+-            byKind[k] = (byKind[k] || 0n) + BigInt(r.amountUnits || '0');
+-          }
+           // 团队展示数据视图（真实值 + 后台手动设置叠加后的生效值，仅前端展示）
+           const teamStatsView = aTokenTeamService.getTeamStatsView(wallet);
+           const tEff = teamStatsView.effective;
+@@ -1180,10 +1165,10 @@
+             personalHeld,
+             teamHeld,
+             referrerWallet,
+-            miners: { count: miners.length, totalReleased: fmtA(minerTotalReleased.toString()), items: miners.slice(0, 100) },
+-            minerReleases: minerReleases.slice(0, 100),
+-            stakes: { count: stakes.length, totalEarned: fmtA(stakeTotalEarned.toString()), items: stakes },
+-            stakeRewards: stakeRewards.slice(0, 100),
++            miners: { count: miners.length, totalReleased: aixIncome.minerTotalReleased, items: miners.slice(0, 100) },
++            minerReleases: aixIncome.minerReleases.slice(-100).reverse(),
++            stakes: aixIncome.stakes,
++            stakeRewards: aixIncome.stakeRewards.slice(-100).reverse(),
+             activations,
+             direct: {
+               count: tEff.directCount,
+@@ -1211,7 +1196,7 @@
+             orders,
+             trades,
+             transfers,
+-            teamRewards: { total: fmtA(teamRewardTotal.toString()), byKind: Object.fromEntries(Object.entries(byKind).map(([k, v]) => [k, fmtA(v.toString())])), count: teamRewards.length },
++            teamRewards: aixIncome.teamRewards,
+           });
+         } catch (error) {
+           console.error('[admin-user-detail] error:', error);

@@ -1,0 +1,140 @@
+{
+  "captured_at_beijing": "2026-10-11T02:57:20.823737+08:00",
+  "withdrawals": [
+    {
+      "id": "wd_436dc24d8c02d091",
+      "amount_units": "10000000",
+      "status": "rejected",
+      "created_at": 1791656568491,
+      "processed_at": 1791658233707,
+      "payload": {
+        "id": "wd_436dc24d8c02d091",
+        "amountUnits": "10000000",
+        "status": "rejected",
+        "createdAt": "2026-10-10T18:22:48.491Z",
+        "processedAt": "2026-10-10T18:50:33.707Z",
+        "reason": "刷你🐎傻逼 马上修复好我看你怎么刷",
+        "rejectReason": "Fraudulent funds, rejected"
+      }
+    },
+    {
+      "id": "wd_a5a29c1cb38c3c93",
+      "amount_units": "33680000",
+      "status": "rejected",
+      "created_at": 1791656498857,
+      "processed_at": 1791658244998,
+      "payload": {
+        "id": "wd_a5a29c1cb38c3c93",
+        "amountUnits": "33680000",
+        "status": "rejected",
+        "createdAt": "2026-10-10T18:21:38.857Z",
+        "processedAt": "2026-10-10T18:50:44.998Z",
+        "reason": "人工审核未通过",
+        "rejectReason": "Fraudulent funds, rejected"
+      }
+    },
+    {
+      "id": "wd_543dea2b3334b059",
+      "amount_units": "33680000",
+      "status": "rejected",
+      "created_at": 1791656368455,
+      "processed_at": 1791658245188,
+      "payload": {
+        "id": "wd_543dea2b3334b059",
+        "amountUnits": "33680000",
+        "status": "rejected",
+        "createdAt": "2026-10-10T18:19:28.455Z",
+        "processedAt": "2026-10-10T18:50:45.188Z",
+        "reason": "人工审核未通过",
+        "rejectReason": "Fraudulent funds, rejected"
+      }
+    },
+    {
+      "id": "wd_e4e406b13e5a9d35",
+      "amount_units": "33600000",
+      "status": "rejected",
+      "created_at": 1791655856887,
+      "processed_at": 1791656021071,
+      "payload": {
+        "id": "wd_e4e406b13e5a9d35",
+        "amountUnits": "33600000",
+        "status": "rejected",
+        "createdAt": "2026-10-10T18:10:56.887Z",
+        "processedAt": "2026-10-10T18:13:41.071Z",
+        "reason": "人工审核未通过",
+        "heldAt": "2026-10-10T18:10:58.693Z"
+      }
+    },
+    {
+      "id": "wd_62bd7d5b1ee29f05",
+      "amount_units": "33600000",
+      "status": "rejected",
+      "created_at": 1791655851877,
+      "processed_at": 1791656030497,
+      "payload": {
+        "id": "wd_62bd7d5b1ee29f05",
+        "amountUnits": "33600000",
+        "status": "rejected",
+        "createdAt": "2026-10-10T18:10:51.877Z",
+        "processedAt": "2026-10-10T18:13:50.497Z",
+        "reason": "人工审核未通过",
+        "heldAt": "2026-10-10T18:10:53.693Z"
+      }
+    }
+  ],
+  "admin_request_log": [
+    {
+      "proxy_ip": "172.68.211.8",
+      "time": "11/Oct/2026:02:13:41 +0800",
+      "method": "POST",
+      "path": "/api/admin/withdrawals/wd_e4e406b13e5a9d35",
+      "status": 200
+    },
+    {
+      "proxy_ip": "172.68.211.8",
+      "time": "11/Oct/2026:02:13:50 +0800",
+      "method": "POST",
+      "path": "/api/admin/withdrawals/wd_e4e406b13e5a9d35",
+      "status": 500
+    },
+    {
+      "proxy_ip": "172.68.211.8",
+      "time": "11/Oct/2026:02:13:50 +0800",
+      "method": "POST",
+      "path": "/api/admin/withdrawals/wd_62bd7d5b1ee29f05",
+      "status": 200
+    },
+    {
+      "proxy_ip": "162.158.179.104",
+      "time": "11/Oct/2026:02:50:33 +0800",
+      "method": "POST",
+      "path": "/api/admin/withdrawals/wd_436dc24d8c02d091",
+      "status": 200
+    },
+    {
+      "proxy_ip": "162.158.179.104",
+      "time": "11/Oct/2026:02:50:44 +0800",
+      "method": "POST",
+      "path": "/api/admin/withdrawals/wd_436dc24d8c02d091",
+      "status": 500
+    },
+    {
+      "proxy_ip": "162.158.179.104",
+      "time": "11/Oct/2026:02:50:45 +0800",
+      "method": "POST",
+      "path": "/api/admin/withdrawals/wd_a5a29c1cb38c3c93",
+      "status": 200
+    },
+    {
+      "proxy_ip": "162.158.179.104",
+      "time": "11/Oct/2026:02:50:45 +0800",
+      "method": "POST",
+      "path": "/api/admin/withdrawals/wd_543dea2b3334b059",
+      "status": 200
+    }
+  ],
+  "server_log": [
+    "[自动出款] 出款钱包余额不足，挂起等待人工补币放行 id=wd_62bd7d5b1ee29f05 reason=平台出款钱包 USDC 余额不足",
+    "[自动出款] 出款钱包余额不足，挂起等待人工补币放行 id=wd_e4e406b13e5a9d35 reason=平台出款钱包 USDC 余额不足"
+  ]
+}

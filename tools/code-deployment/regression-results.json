@@ -1,0 +1,146 @@
+{
+  "checkedAt": "2026-10-10T16:22:09.069Z",
+  "knownOriginalFailure": "platform-service.test.js balanceUnits mock ignores asset and returns USDT for BTC",
+  "reports": [
+    {
+      "file": "test/internal-strategy.test.js",
+      "passed": true,
+      "status": 0,
+      "stdout": "internal-strategy tests passed\n",
+      "stderr": ""
+    },
+    {
+      "file": "test/ai-managed.test.js",
+      "passed": true,
+      "status": 0,
+      "stdout": "[AI托管] 赎回 batch aib_0507935e58df1d66: 本金 1000.0 USDT, 随进随出全额返还, 返还 1000.0 USDT\n[AI托管] 赎回 batch aib_67c2ed01c2b30623: 本金 100.0 USDT, 随进随出全额返还, 返还 100.0 USDT\n[AI托管] 0x0000000000000000000000000000000000000001 赎回完成，共返还 1100.0 USDT\nai-managed tests passed\n",
+      "stderr": ""
+    },
+    {
+      "file": "test/referral.test.js",
+      "passed": true,
+      "status": 0,
+      "stdout": "referral tests passed\n",
+      "stderr": ""
+    },
+    {
+      "file": "test/platform-api.test.js",
+      "passed": true,
+      "status": 0,
+      "stdout": "platform-api tests passed\n",
+      "stderr": ""
+    },
+    {
+      "file": "test/market-data.test.js",
+      "passed": true,
+      "status": 0,
+      "stdout": "market-data tests passed\n",
+      "stderr": ""
+    },
+    {
+      "file": "test/market-catalog.test.js",
+      "passed": false,
+      "status": 1,
+      "stdout": "",
+      "stderr": "node:internal/modules/run_main:107\r\n    triggerUncaughtException(\r\n    ^\r\n\r\nAssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:\r\n+ actual - expected\r\n\r\n  [\r\n    'BTC',\r\n    'ETH',\r\n    'BNB',\r\n    'SOL',\r\n    'XRP',\r\n    'DOGE',\r\n+   'NVDA',\r\n+   'MU',\r\n+   'SNDK',\r\n+   'AMD'\r\n  ]\r\n\r\n    at file:///C:/Users/cy020/Desktop/WG-Grid-Studio-%E5%AE%8C%E6%95%B4%E6%88%90%E4%BA%A4%E8%B4%A6%E6%9C%AC/resources/app/test/market-catalog.test.js:10:10\r\n    at ModuleJob.run (node:internal/modules/esm/module_job:439:25)\r\n    at async node:internal/modules/esm/loader:643:26\r\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5) {\r\n  generatedMessage: true,\r\n  code: 'ERR_ASSERTION',\r\n  actual: [\r\n    'BTC',  'ETH',\r\n    'BNB',  'SOL',\r\n    'XRP',  'DOGE',\r\n    'NVDA', 'MU',\r\n    'SNDK', 'AMD'\r\n  ],\r\n  expected: [ 'BTC', 'ETH', 'BNB', 'SOL', 'XRP', 'DOGE' ],\r\n  operator: 'deepStrictEqual',\r\n  diff: 'simple'\r\n}\r\n\r\nNode.js v24.18.0\r\n"
+    },
+    {
+      "file": "test/bridge-service.test.js",
+      "passed": true,
+      "status": 0,
+      "stdout": "bridge-service tests passed\n",
+      "stderr": ""
+    },
+    {
+      "file": "test/wallet-deposit.test.js",
+      "passed": true,
+      "status": 0,
+      "stdout": "wallet-deposit tests passed\n",
+      "stderr": ""
+    },
+    {
+      "file": "test/wallet-bridge-deposit.test.js",
+      "passed": true,
+      "status": 0,
+      "stdout": "wallet-bridge-deposit tests passed\n",
+      "stderr": ""
+    },
+    {
+      "file": "test/a-token-burn.test.js",
+      "passed": true,
+      "status": 0,
+      "stdout": "[AI托管] 0xA89DCAf6B8710849C8FAB6742908684f0A923F06 开通 VIP 跟单权益，有效期至 2026-11-09T16:21:36.497Z\n[AI托管] 0xA89DCAf6B8710849C8FAB6742908684f0A923F06 续费 VIP 跟单权益，有效期至 2026-11-09T16:21:36.508Z\n[AI托管] 0x6c4f4514a2fed371CF009429394e067D9D6b81E1 续费 VIP 跟单权益，有效期至 2026-11-09T16:21:36.538Z\na-token-burn tests passed\n",
+      "stderr": ""
+    },
+    {
+      "file": "test/a-token-ecosystem.test.js",
+      "passed": false,
+      "status": 1,
+      "stdout": "  ✓ 等级评定（A1~A10 门槛 + 团队递归累加）\n一、矿机产出与团队分润\n  ✓ 矿机套餐参数（Mini 矿机 100/30天，Pro 矿机 1500/90天）\n  ✓ 北京日结：00:00 前不产出、跨日结完整日、一天一条且幂等\n",
+      "stderr": "node:internal/modules/run_main:107\r\n    triggerUncaughtException(\r\n    ^\r\n\r\nAssertionError [ERR_ASSERTION]: 直推 U2(A1倒挂) 只拿 15%\r\n+ actual - expected\r\n\r\n+ 0n\r\n- 999999999999999999n\r\n\r\n    at file:///C:/Users/cy020/Desktop/WG-Grid-Studio-%E5%AE%8C%E6%95%B4%E6%88%90%E4%BA%A4%E8%B4%A6%E6%9C%AC/resources/app/test/a-token-ecosystem.test.js:148:10\r\n    at ModuleJob.run (node:internal/modules/esm/module_job:439:25)\r\n    at async node:internal/modules/esm/loader:643:26\r\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5) {\r\n  generatedMessage: false,\r\n  code: 'ERR_ASSERTION',\r\n  actual: 0n,\r\n  expected: 999999999999999999n,\r\n  operator: 'strictEqual',\r\n  diff: 'simple'\r\n}\r\n\r\nNode.js v24.18.0\r\n"
+    },
+    {
+      "file": "test/a-token-income.test.js",
+      "passed": false,
+      "status": 1,
+      "stdout": "",
+      "stderr": "node:internal/modules/run_main:107\r\n    triggerUncaughtException(\r\n    ^\r\n\r\nAssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\r\n+ actual - expected\r\n\r\n+ 0n\r\n- 1200000000000000000n\r\n\r\n    at file:///C:/Users/cy020/Desktop/WG-Grid-Studio-%E5%AE%8C%E6%95%B4%E6%88%90%E4%BA%A4%E8%B4%A6%E6%9C%AC/resources/app/test/a-token-income.test.js:43:10\r\n    at fixture (file:///C:/Users/cy020/Desktop/WG-Grid-Studio-%E5%AE%8C%E6%95%B4%E6%88%90%E4%BA%A4%E8%B4%A6%E6%9C%AC/resources/app/test/a-token-income.test.js:31:9)\r\n    at file:///C:/Users/cy020/Desktop/WG-Grid-Studio-%E5%AE%8C%E6%95%B4%E6%88%90%E4%BA%A4%E8%B4%A6%E6%9C%AC/resources/app/test/a-token-income.test.js:35:1\r\n    at ModuleJob.run (node:internal/modules/esm/module_job:439:25)\r\n    at async node:internal/modules/esm/loader:643:26\r\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5) {\r\n  generatedMessage: true,\r\n  code: 'ERR_ASSERTION',\r\n  actual: 0n,\r\n  expected: 1200000000000000000n,\r\n  operator: 'strictEqual',\r\n  diff: 'simple'\r\n}\r\n\r\nNode.js v24.18.0\r\n"
+    },
+    {
+      "file": "test/lottery.test.js",
+      "passed": false,
+      "status": 1,
+      "stdout": "",
+      "stderr": "node:internal/modules/run_main:107\r\n    triggerUncaughtException(\r\n    ^\r\n\r\nAssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:\r\n+ actual - expected\r\n... Skipped lines\r\n\r\n  [\r\n    'btc',\r\n    'eth',\r\n    'bnb',\r\n    'usdt',\r\n...\r\n    'aix',\r\n+   'mystery',\r\n    'none'\r\n  ]\r\n\r\n    at file:///C:/Users/cy020/Desktop/WG-Grid-Studio-%E5%AE%8C%E6%95%B4%E6%88%90%E4%BA%A4%E8%B4%A6%E6%9C%AC/resources/app/test/lottery.test.js:16:10\r\n    at ModuleJob.run (node:internal/modules/esm/module_job:439:25)\r\n    at async node:internal/modules/esm/loader:643:26\r\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5) {\r\n  generatedMessage: true,\r\n  code: 'ERR_ASSERTION',\r\n  actual: [\r\n    'btc',          'eth',\r\n    'bnb',          'usdt',\r\n    'iphone_fold',  'iphone18',\r\n    'huawei_fold',  'huawei_pc',\r\n    'huawei_phone', 'aix',\r\n    'mystery',      'none'\r\n  ],\r\n  expected: [\r\n    'btc',          'eth',\r\n    'bnb',          'usdt',\r\n    'iphone_fold',  'iphone18',\r\n    'huawei_fold',  'huawei_pc',\r\n    'huawei_phone', 'aix',\r\n    'none'\r\n  ],\r\n  operator: 'deepStrictEqual',\r\n  diff: 'simple'\r\n}\r\n\r\nNode.js v24.18.0\r\n"
+    },
+    {
+      "file": "test/wallet-session.test.js",
+      "passed": true,
+      "status": 0,
+      "stdout": "wallet-session tests passed\n",
+      "stderr": ""
+    },
+    {
+      "file": "test/wallet-connector.test.js",
+      "passed": true,
+      "status": 0,
+      "stdout": "wallet-connector tests passed\n",
+      "stderr": ""
+    },
+    {
+      "file": "test/admin-auth.test.js",
+      "passed": true,
+      "status": 0,
+      "stdout": "admin auth tests passed\n",
+      "stderr": ""
+    },
+    {
+      "file": "test/withdrawal-payout.test.js",
+      "passed": true,
+      "status": 0,
+      "stdout": "withdrawal payout tests passed\n",
+      "stderr": "[自动出款] 瞬时失败，15秒后自动重试 attempt=1/5 id=wd_101573a09f6e9ab4 reason=signer unavailable\n[自动出款] 出款钱包余额不足，挂起等待人工补币放行 id=wd_17905ab29db5c47c reason=平台出款钱包 USDT 余额不足\n"
+    },
+    {
+      "file": "test/withdrawal-swap-v3.test.js",
+      "passed": true,
+      "status": 0,
+      "stdout": "withdrawal pancake-v3 swap tests passed\n",
+      "stderr": "[自动出款] 出款钱包余额不足，挂起等待人工补币放行 id=wd_59a4bb34d543cd5a reason=平台出款钱包 USDC 余额不足\n[自动出款] 瞬时失败，15秒后自动重试 attempt=1/5 id=wd_a5bfea67e3509fe5 reason=USDC 闪兑报价失败：链上流动性不足，请稍后重试或联系客服\n"
+    },
+    {
+      "file": "test/bridge-withdrawal-payout.test.js",
+      "passed": true,
+      "status": 0,
+      "stdout": "bridge-withdrawal-payout tests passed\n",
+      "stderr": ""
+    },
+    {
+      "file": "platform-service with asset-aware mock (temporary copy)",
+      "passed": true,
+      "status": 0,
+      "stdout": "platform-service tests passed\n",
+      "stderr": ""
+    }
+  ]
+}

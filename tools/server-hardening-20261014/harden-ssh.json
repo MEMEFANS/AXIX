@@ -1,0 +1,1 @@
+{"at": "2026-10-14T17:42:18.035953", "applied": true, "effective": {"permitrootlogin": "without-password", "pubkeyauthentication": "yes", "passwordauthentication": "no", "kbdinteractiveauthentication": "no", "authenticationmethods": "publickey", "maxauthtries": "3", "logingracetime": "30"}, "rollback_timer": "wg-hardening-ssh-rollback.timer"}

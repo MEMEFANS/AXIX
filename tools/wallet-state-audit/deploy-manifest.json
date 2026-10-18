@@ -1,0 +1,14 @@
+{
+  "public/js/ai-managed.js": "be81dbe4fcd6817f9934c393955d20011bd6b541713b03e8f8200c0820b9345e",
+  "public/js/assets.js": "56cc8c42b09d64f9a41817d387e4d2d6461bd6a429b0e4d2f4a67d24ed069bc1",
+  "public/js/core.js": "bb0abd3e5557c87ece15f018fa900b0fb710fa35edc403b67f129b9baa5bdeb3",
+  "public/js/i18n-zh-en.js": "7875664201fc29043b1d9ca47ea4fa352b58ead6aeed78c76465288d5836fefb",
+  "public/js/wallet.js": "141d6ac6f20183abc2121fec0a7b74f0d825b5d1ace7917933569c6581f748c1",
+  "public/js/platform-client.js": "3e6107b632d9b1ea0b7a85935136a5d1e315e83fefbd4d055085eea8048f62c9",
+  "public/index.html": "db77d40791c2d80f08f3f7ccfc1e85e56aeef7e82c8fe79404cfa1a290f96fe3",
+  "public/js/earn.js": "3ff695a903e08c01bf051f5a2cd67d590f8b33947816f6faceb1551063405aaa",
+  "public/js/page-loader.js": "0cd4bd1bf86b07fbcc97b8a89661d055669564745d55b20955c67da502f7a9a4",
+  "public/js/i18n.js": "9990b5ee5020ee04af963fcb3f3f60aa18d562b5eaf659f572eef939a7f9a2fb",
+  "public/js/i18n-extra.js": "eac1769a76bde929c4e54c2dd12d106dad7a22f80f6ae65abc1031f0dc12b31a",
+  "public/vendor/wallet/connector.js": "a81ada15aa5bd7b424c69ad2c018491fe39d59243f5581a2fe5416aa9d236a55"
+}

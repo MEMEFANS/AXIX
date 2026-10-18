@@ -1,0 +1,116 @@
+--- src/a-token-team-service.js before
++++ src/a-token-team-service.js after
+@@ -152,8 +152,8 @@
+   //   ① 本人被设置 → 本人页面各项直接叠加；
+   //   ② 后代地址被设置 → 沿真实推荐链向上汇总：其虚拟团队成员/团队矿机/团队业绩计入每个真实上级，
+   //      其虚拟直推仅计入它「直推上级」的间推人数。
+-  function virtualStatsAccrual(address, linksArg = null) {
+-    const rows = database.listATokenTeamStatsOverrides?.() || [];
++  function virtualStatsAccrual(address, linksArg = null, context = null) {
++    const rows = context?.rows || database.listATokenTeamStatsOverrides?.() || [];
+     const acc = {
+       dDirect: 0, dIndirect: 0, dTeam: 0,
+       dDirectMini: 0, dDirectPro: 0, dTeamMini: 0, dTeamPro: 0,
+@@ -163,7 +163,7 @@
+     };
+     if (!rows.length) return acc;
+     const links = linksArg || database.listReferralLinks();
+-    const parentMap = parentMapOf(links);
++    const parentMap = context?.parentMap || parentMapOf(links);
+     const target = k(address);
+     for (const o of rows) {
+       const ow = k(o.wallet);
+@@ -644,6 +644,30 @@
+     return { settled: true, settleDate, participantCount: count, perShare: perShare.toString(), total: total.toString() };
+   }
+ 
++  // 人数首屏不需要读取收益流水、持仓或重算等级。
++  function summary(address) {
++    const links = database.listReferralLinks();
++    const childrenMap = buildReferralTree(links);
++    const own = k(address);
++    const direct = new Set((childrenMap.get(own) || []).map(k).filter(w => w && w !== own));
++    const downlines = new Set(direct);
++    const stack = [...direct];
++    while (stack.length) {
++      for (const child of childrenMap.get(stack.pop()) || []) {
++        const key = k(child);
++        if (key && key !== own && !downlines.has(key)) { downlines.add(key); stack.push(key); }
++      }
++    }
++    const acc = virtualStatsAccrual(address, links);
++    const parent = links.find(item => k(item.wallet) === own)?.referrerWallet;
++    const referrer = parent && k(parent) !== own ? links.find(item => k(item.wallet) === k(parent))?.wallet : null;
++    return {
++      directReferrer: referrer || null,
++      directCount: direct.size + acc.dDirect,
++      teamCount: downlines.size + acc.dTeam,
++    };
++  }
++
+   // ── 团队 profile：等级 + 收益 + 下级 ──
+   function profile(address) {
+     snapshot(address);
+@@ -665,16 +689,20 @@
+     const miniMinerWallets = database.listATokenMinerWalletsByPlan?.('mini120') || new Set();
+     const proMinerWallets = database.listATokenMinerWalletsByPlan?.('pro1500') || new Set();
+     // 后台手动设置的团队展示数据叠加量（本人设置 + 后代节点沿真实推荐链向上汇总，仅影响展示）
+-    const statsAcc = virtualStatsAccrual(address, links);
++    const overrideContext = { rows: database.listATokenTeamStatsOverrides?.() || [], parentMap: parentMapOf(links) };
++    const statsAcc = virtualStatsAccrual(address, links, overrideContext);
+     const childrenMap2 = buildReferralTree(links);
++    // 一次请求共用树与持仓缓存，直推明细不再逐人扫描整张推荐关系表。
++    const stakedCache = new Map(), walletCache = new Map(), teamCache = new Map();
++    const teamHeldFor = wallet => teamHeldOf(wallet, childrenMap2, stakedCache, walletCache, teamCache, new Set());
+     let directHoldUnits = 0n;
+     let directHoldUsers = 0;
+     const directs = links.filter((item) => k(item.referrerWallet) === k(address)).map((item) => {
+       const row = database.getATokenTeamLevel?.(item.wallet);
+       const bal = getPersonalHeld(item.wallet);
+-      const teamHeld = getTeamHeld(item.wallet);
++      const teamHeld = teamHeldFor(item.wallet);
+       // 该直推用户的虚拟团队业绩叠加（后台设置的虚拟矿机业绩沿推荐链传播到此直推用户）
+-      const dAcc = virtualStatsAccrual(item.wallet, links);
++      const dAcc = virtualStatsAccrual(item.wallet, links, overrideContext);
+       const effTeamHeld = teamHeld + dAcc.teamHoldUnits;
+       // 保底等级只升不降：max(自动等级, 保底等级)，未设保底则完全按持仓实时计算
+       const lvl = applyFloor(calcLevel(bal, effTeamHeld), row?.manualLevel || 0);
+@@ -709,7 +737,7 @@
+     }
+ 
+     // 整个团队网络（迭代遍历全部下级）中激活过矿机的人数
+-    const childrenMap = buildReferralTree(links);
++    const childrenMap = childrenMap2;
+     const downlines = new Set();
+     const stack = [k(address)];
+     while (stack.length) {
+@@ -732,8 +760,11 @@
+     let teamHoldUsers = 0;
+     for (const w of downlines) {
+       let v = 0n;
+-      try { v += walletService.balanceUnits(w, 'A'); } catch {}
+-      v += getStakedPrincipal(w);
++      if (!walletCache.has(w)) {
++        try { walletCache.set(w, walletService.balanceUnits(w, 'A')); } catch { walletCache.set(w, 0n); }
++      }
++      if (!stakedCache.has(w)) stakedCache.set(w, getStakedPrincipal(w));
++      v += walletCache.get(w) + stakedCache.get(w);
+       if (v > 0n) { teamHoldUnits += v; teamHoldUsers += 1; }
+     }
+     // 虚拟会员业绩叠加（仅展示）：Mini 100 AIX / Pro 1500 AIX
+@@ -771,7 +802,7 @@
+     // 展示等级（仅页面展示，不写快照、不参与真实分润）：真实等级 与 真实+虚拟团队业绩档位 取高
+     let displayLevel = level;
+     try {
+-      const virtualLevel = calcLevel(getPersonalHeld(address), getTeamHeld(address) + statsAcc.teamHoldUnits);
++      const virtualLevel = calcLevel(getPersonalHeld(address), teamHeldFor(address) + statsAcc.teamHoldUnits);
+       displayLevel = Math.max(level, virtualLevel);
+     } catch {}
+     // 本人被设置时，虚拟直推矿机同时计入本人团队矿机（团队口径含直推）
+@@ -814,5 +845,5 @@
+ 
+   return { snapshot, snapshotAll, getLevel, setManualLevel, calcLevel, distributeMinerReward, distributeStakeReward, distributeToA10Pool,
+     settleParityRewards:(...args) => transaction(() => settleParityRewards(...args)),
+-    settleA10Pool:(...args) => transaction(() => settleA10Pool(...args)), profile, getTeamStatsView, TEAM_LEVELS };
++    settleA10Pool:(...args) => transaction(() => settleA10Pool(...args)), profile, summary, getTeamStatsView, TEAM_LEVELS };
+ }

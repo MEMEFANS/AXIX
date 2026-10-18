@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="referrer" content="no-referrer">
+  <meta name="theme-color" content="#0d1719">
+  <title>AxiX 资金后台</title>
+  <link rel="icon" href="/favicon.ico?v=3">
+  <link rel="stylesheet" href="/styles/funds-admin.css?v=20261011-security-1">
+  <script defer src="/js/funds-admin.js?v=20261011-security-1"></script>
+</head>
+<body>
+  <main class="funds-shell">
+    <header class="funds-header"><div><span class="eyebrow">AxiX Exchange</span><h1>资金管理后台</h1><p>提现审核 · 测试入账</p></div><button id="funds-lock" type="button" class="secondary" hidden>锁定并退出</button></header>
+    <section id="funds-login" class="card login-card">
+      <h2>验证资金管理权限</h2><p>使用原提现后台的独立管理令牌登录。</p>
+      <form id="funds-login-form"><label>资金管理令牌<input id="funds-token" type="password" autocomplete="off" spellcheck="false" required></label><button type="submit">进入资金后台</button></form>
+    </section>
+    <div id="funds-status" class="status" role="status" aria-live="polite"></div>
+    <section id="funds-app" hidden>
+      <nav class="tabs" aria-label="资金后台功能"><button id="funds-tab-withdrawals" type="button" class="selected" aria-pressed="true">提现审核</button><button id="funds-tab-credits" type="button" class="secondary" aria-pressed="false">测试入账</button><button id="funds-refresh" type="button" class="secondary refresh">刷新记录</button></nav>
+      <section id="funds-withdrawals">
+        <details class="card settings"><summary>提现设置 <span id="funds-auto-state">读取中</span></summary>
+          <form id="funds-settings-form" class="grid-form"><label class="check"><input id="funds-auto-enabled" type="checkbox">开启自动提现</label><label>单笔人工审核金额（USDT）<input id="funds-auto-threshold" type="number" min="0.000001" step="0.000001" required></label><label>24 小时自动额度（USDT）<input id="funds-auto-limit" type="number" min="0.000001" step="0.000001" required></label><label class="check"><input id="funds-auto-ten" type="checkbox">USDT 整十提现</label><button type="submit">保存设置</button></form>
+          <p id="funds-settings-note"></p>
+        </details>
+        <section class="card"><div class="card-head"><div><h2>提现申请</h2><p id="funds-withdrawal-count">尚未读取</p></div><label>状态<select id="funds-withdrawal-filter"><option value="action_required">待处理</option><option value="">全部</option><option value="pending_review">待人工审核</option><option value="pending_funds">待补款放行</option><option value="payout_failed">出款失败</option><option value="pending_auto">自动队列</option><option value="broadcast">链上确认中</option><option value="paid">已支付</option><option value="rejected">已拒绝</option></select></label></div><div class="table-scroll"><table><thead><tr><th>申请时间</th><th>申请钱包</th><th>网络</th><th>数量</th><th>状态</th><th>审核操作</th></tr></thead><tbody id="funds-withdrawals-body"></tbody></table></div></section>
+      </section>
+      <section id="funds-credits" hidden>
+        <section class="card"><h2>测试入账</h2><p>增加用户的平台内部 USDT 余额，每笔操作保留记录。</p><form id="funds-credit-form" class="grid-form"><label>用户钱包地址<input id="funds-credit-wallet" placeholder="0x…" autocomplete="off" pattern="0x[a-fA-F0-9]{40}" required></label><label>入账数量（USDT）<input id="funds-credit-amount" type="number" min="0.000001" max="100000000" step="0.000001" required></label><label>操作备注<input id="funds-credit-reason" minlength="2" maxlength="120" placeholder="例如：功能测试" required></label><button type="submit">确认入账</button></form></section>
+        <section class="card"><h2>测试入账记录</h2><p id="funds-credit-count">尚未读取</p><div class="table-scroll"><table><thead><tr><th>操作时间</th><th>钱包地址</th><th>数量</th><th>备注</th><th>管理员</th></tr></thead><tbody id="funds-credits-body"></tbody></table></div></section>
+      </section>
+    </section>
+  </main>
+</body>
+</html>

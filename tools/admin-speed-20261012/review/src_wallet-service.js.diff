@@ -1,0 +1,84 @@
+--- before/src/wallet-service.js
++++ after/src/wallet-service.js
+@@ -873,22 +873,22 @@
+     return Object.entries(state.withdrawalFrozen || {}).map(([key, info]) => ({ wallet: key, frozen: true, ...info }));
+   }
+ 
+-  function adminListWithdrawals(status = '') {
++  function adminListWithdrawals(status = '', { limit = 1000 } = {}) {
+     const filter = String(status || '').trim();
+-    return database.walletRecords('withdrawals', { status:filter, limit:1000 }).map((record) => ({
++    return database.walletRecords('withdrawals', { status:filter, limit }).map((record) => ({
+         ...presentWithdrawal(record),
+         wallet: record.wallet,
+         amountUnits: record.amountUnits,
+       }));
+   }
+ 
+-  function adminListDeposits(status = '') {
++  function adminListDeposits(status = '', { limit = 1000 } = {}) {
+     const filter = String(status || '').trim();
+-    return database.walletRecords('deposits', { status:filter, limit:1000 })
++    return database.walletRecords('deposits', { status:filter, limit })
+       .map(record => ({ ...presentDeposit(record), wallet:record.wallet, amountUnits: record.amountUnits }));
+   }
+ 
+-  function adminDashboard() {
++  function adminDashboard({ includeUsers = true, userQuery = '', realOnly = false, limit, offset = 0 } = {}) {
+     const confirmed = state.deposits.filter(record => (
+       record.status === 'confirmed'
+       && record.asset === 'USDT'
+@@ -910,7 +910,25 @@
+     try {
+       for (const row of database.listActiveATokenStakes()) activeWallets.add(String(row.wallet).toLowerCase());
+     } catch {}
+-    const users = Object.values(state.users).map(user => {
++    const allUsers = Object.values(state.users);
++    const userWallets = new Set(allUsers.map(user => user.address.toLowerCase()));
++    const realWallets = new Set([...depositsByWallet.keys(), ...activeWallets]);
++    const summaryRealUsers = [...realWallets].filter(wallet => userWallets.has(wallet)).length;
++    if (includeUsers) {
++      for (const user of allUsers) if (BigInt(user.balances?.A || '0') > 0n) realWallets.add(user.address.toLowerCase());
++    }
++    const isReal = user => realWallets.has(user.address.toLowerCase());
++    const query = String(userQuery || '').trim().toLowerCase();
++    const paged = limit !== undefined;
++    const pageLimit = paged ? Math.max(1, Math.min(100, Math.floor(Number(limit) || 50))) : allUsers.length;
++    const pageOffset = Number.isFinite(Number(offset)) ? Math.max(0, Math.floor(Number(offset))) : 0;
++    let selected = [];
++    if (includeUsers) {
++      selected = allUsers.filter(user => (!query || user.address.toLowerCase().includes(query)) && (!realOnly || isReal(user)))
++        .sort((a, b) => Number(isReal(b)) - Number(isReal(a)) || String(b.updatedAt).localeCompare(String(a.updatedAt)) || a.address.toLowerCase().localeCompare(b.address.toLowerCase()));
++    }
++    const usersTotal = selected.length;
++    const users = selected.slice(pageOffset, pageOffset + pageLimit).map(user => {
+       const deposit = depositsByWallet.get(user.address.toLowerCase());
+       const hasAix = BigInt(user.balances?.A || '0') > 0n;
+       const isRealUser = Boolean(deposit) || activeWallets.has(user.address.toLowerCase()) || hasAix;
+@@ -926,13 +944,13 @@
+         firstDepositAt:deposit?.firstAt || null,
+         lastDepositAt:deposit?.lastAt || null,
+       };
+-    }).sort((a, b) => Number(b.isRealUser) - Number(a.isRealUser) || String(b.updatedAt).localeCompare(String(a.updatedAt)));
++    });
+     const totalDeposited = confirmed.reduce((sum, record) => sum + BigInt(record.amountUnits), 0n);
+-    const totalPlatformBalance = Object.values(state.users).reduce((sum, user) => sum + BigInt(user.balances?.USDT || '0'), 0n);
++    const totalPlatformBalance = allUsers.reduce((sum, user) => sum + BigInt(user.balances?.USDT || '0'), 0n);
+     return {
+       summary:{
+-        walletUsers:users.length,
+-        realUsers:[...new Set([...depositsByWallet.keys(), ...activeWallets])].filter(w => Object.values(state.users).some(u => u.address.toLowerCase() === w)).length,
++        walletUsers:allUsers.length,
++        realUsers:summaryRealUsers,
+         confirmedDeposits:confirmed.length,
+         pendingDeposits:state.deposits.filter(record => record.status === 'pending').length,
+         pendingWithdrawals:state.withdrawals.filter(record => ['pending_review', 'pending_funds', 'payout_failed'].includes(record.status)).length,
+@@ -948,7 +966,7 @@
+         withdrawalAddress,
+         updatedAt:state.withdrawalAutomation.updatedAt || null,
+       },
+-      users,
++      ...(includeUsers ? { users, ...(paged ? { usersTotal, usersLimit:pageLimit, usersOffset:pageOffset } : {}) } : {}),
+     };
+   }
+ 

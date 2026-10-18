@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>AxiX 合约跟单</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html,body { width:1080px; height:1920px; overflow:hidden; }
+  body { font-family:"Microsoft YaHei","PingFang SC",sans-serif; color:#c7d5d2;
+    background:
+      radial-gradient(900px 500px at 50% -5%, rgba(79,209,181,.14), transparent 60%),
+      radial-gradient(700px 400px at 50% 105%, rgba(79,209,181,.08), transparent 60%),
+      linear-gradient(170deg,#07100f 0%,#0a1112 55%,#081211 100%);
+    position:relative; display:flex; flex-direction:column; padding:64px 70px 56px; }
+  .wm { position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    font-size:150px; font-weight:900; letter-spacing:16px; color:rgba(79,209,181,.045); pointer-events:none; }
+  .top { display:flex; align-items:center; gap:20px; }
+  .top img { width:76px; height:76px; border-radius:18px; box-shadow:0 0 30px rgba(79,209,181,.4); }
+  .brand { font-size:36px; font-weight:900; color:#eaf6f3; }
+  .brand b { color:#4fd1b5; }
+  .hero { text-align:center; margin-top:70px; }
+  .hero h1 { font-size:100px; font-weight:900; letter-spacing:6px;
+    background:linear-gradient(100deg,#8ff0dc,#4fd1b5 50%,#b9f4e6);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    text-shadow:0 0 60px rgba(79,209,181,.3); }
+  .hero p { margin-top:22px; font-size:32px; color:#7d9691; letter-spacing:10px; }
+  .steps { margin-top:80px; display:flex; flex-direction:column; gap:36px; }
+  .step { display:flex; align-items:center; gap:36px; background:linear-gradient(180deg,#101b1d,#0c1517);
+    border:1px solid #29413e; border-radius:26px; padding:38px 44px; }
+  .no { flex:0 0 110px; width:110px; height:110px; border-radius:32px; display:flex; align-items:center; justify-content:center;
+    font-size:50px; font-weight:900; color:#04211b; background:linear-gradient(135deg,#8ff0dc,#4fd1b5);
+    box-shadow:0 12px 36px rgba(79,209,181,.35); }
+  .bd { flex:1; }
+  .bd h3 { font-size:38px; font-weight:900; color:#eaf6f3; }
+  .bd h3 em { font-style:normal; color:#4fd1b5; }
+  .bd p { margin-top:14px; font-size:25px; line-height:1.75; color:#a9bfb9; }
+  .bd p b { color:#4fd1b5; }
+  .feats { margin-top:64px; display:grid; grid-template-columns:1fr 1fr; gap:24px; }
+  .ft { display:flex; align-items:center; gap:16px; font-size:26px; color:#b9cbc7; font-weight:700; }
+  .ft::before { content:""; flex:0 0 14px; width:14px; height:14px; border-radius:50%;
+    background:linear-gradient(135deg,#8ff0dc,#4fd1b5); box-shadow:0 0 12px rgba(79,209,181,.6); }
+  .ref { margin-top:52px; background:linear-gradient(180deg,rgba(79,209,181,.08),rgba(79,209,181,.02));
+    border:2px solid #2b6157; border-radius:26px; padding:36px 48px; text-align:center; }
+  .ref .t { font-size:30px; color:#b9cbc7; font-weight:700; }
+  .ref .v { margin-top:10px; font-size:76px; font-weight:900; color:#4fd1b5; line-height:1;
+    text-shadow:0 0 44px rgba(79,209,181,.5); }
+  .ref .v small { font-size:34px; }
+  .ref .s { margin-top:12px; font-size:23px; color:#7d9691; }
+  .cta { margin-top:auto; text-align:center; }
+  .cta .btn { display:inline-block; font-size:44px; font-weight:900; color:#04211b; letter-spacing:8px;
+    background:linear-gradient(135deg,#8ff0dc,#4fd1b5); border-radius:999px; padding:30px 110px;
+    box-shadow:0 20px 60px rgba(79,209,181,.35); }
+  .foot { margin-top:40px; text-align:center; font-size:22px; color:#3d5a53; letter-spacing:5px; }
+</style>
+</head>
+<body>
+<div class="wm">COPY</div>
+<div class="top">
+  <img src="assets/brand/logo.png" alt="AxiX">
+  <div class="brand">Axi<b>X</b> Exchange</div>
+</div>
+
+<div class="hero">
+  <h1>合约跟单</h1>
+  <p>机构信号 · 自动交易</p>
+</div>
+
+<div class="steps">
+  <div class="step">
+    <div class="no">1</div>
+    <div class="bd">
+      <h3>选择策略</h3>
+      <p>策略明细、<b>历史胜率</b>全部公开，跟谁、怎么跟，一目了然</p>
+    </div>
+  </div>
+  <div class="step">
+    <div class="no">2</div>
+    <div class="bd">
+      <h3>投入跟单 USDT</h3>
+      <p>金额自定，<b>随时可赎回</b>，进退自由不锁定</p>
+    </div>
+  </div>
+  <div class="step">
+    <div class="no">3</div>
+    <div class="bd">
+      <h3>系统自动运行</h3>
+      <p>信号驱动<b>自动开平仓</b>，收益定时结算入账，无需盯盘</p>
+    </div>
+  </div>
+</div>
+
+<div class="feats">
+  <div class="ft">历史胜率公开透明</div>
+  <div class="ft">收益定时自动结算</div>
+  <div class="ft">USDT 随时赎回</div>
+  <div class="ft">7×24 机构级信号</div>
+</div>
+
+<div class="ref">
+  <div class="t">邀请好友跟单，你长期拿</div>
+  <div class="v">10<small>%</small></div>
+  <div class="s">好友收益分成 · 永久绑定</div>
+</div>
+
+<div class="cta"><span class="btn">立即开始跟单</span></div>
+<div class="foot">AXIX EXCHANGE · BNB SMART CHAIN</div>
+</body>
+</html>

@@ -1,0 +1,12 @@
+--- src/a-token-api.js before
++++ src/a-token-api.js after
+@@ -144,6 +144,9 @@
+         try { prof.sellFee = orderService?.sellFeeProfile?.(session.address) || null; } catch { prof.sellFee = null; }
+         return send(res, 200, prof);
+       }
++      if (isGet && pathname === '/api/a-token/team/summary') {
++        return send(res, 200, teamService.summary(session.address));
++      }
+       if (isGet && pathname === '/api/a-token/team/profile') {
+         try {
+           const tp = teamService?.profile(session.address);

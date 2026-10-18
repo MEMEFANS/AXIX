@@ -1,0 +1,11 @@
+--- test/admin-security.test.js before
++++ test/admin-security.test.js after
+@@ -16,7 +16,7 @@
+ for (const attack of attacks) assert.throws(() => normalizeSocialScreenshot(attack));
+ for (const uri of ['/admin.html','/%61dmin.html','//admin.html','/ADMIN.html']) assert.equal(adminPageKind(uri), 'operator');
+ assert.equal(adminPageKind('/%66unds-admin.html'), 'funds');
+-for (const uri of ['/api/admin/test-credits', '/api/admin/withdrawals/one', '/api/admin/withdrawal-automation']) assert.equal(isLegacyFundsPath(uri), true);
++for (const uri of ['/api/admin/test-credits', '/api/admin/withdrawals/one', '/api/admin/withdrawal-automation','/api/admin/a-token/grant','/api/admin/a-token/debit','/api/admin/a-token/grant-miner','/api/admin/a-token/grant-stake','/api/admin/a-token/activations/confirm']) assert.equal(isLegacyFundsPath(uri), true);
+ assert.equal(isLegacyFundsPath('/api/admin/support/tickets'), false);
+ assert(!OPERATOR_ADMIN_CSP.match(/script-src[^;]*unsafe-inline/));
+ assert(!FUNDS_ADMIN_CSP.includes('unsafe-inline'));

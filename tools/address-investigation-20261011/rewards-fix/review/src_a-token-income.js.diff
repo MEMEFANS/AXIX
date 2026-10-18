@@ -1,0 +1,29 @@
+--- production/src/a-token-income.js
++++ candidate/src/a-token-income.js
+@@ -47,6 +47,26 @@
+   return { principal:returned, interest:paid - returned, outstanding:stake.status === 'active' ? principal - returned : 0n };
+ }
+ 
++// Use the same principal/interest split in user revenue and admin totals. Legacy
++// rows need cumulative reconstruction; explicit splits remain authoritative.
++export function readStakePayments(database, wallet, stakes = database.listATokenStakes(wallet)) {
++  const stakesById = new Map(stakes.map(stake => [stake.id, stake]));
++  const paidByStake = new Map();
++  return readAixIncome(database, wallet, 'stake').map(row => {
++    const stake = stakesById.get(row.stakeId);
++    const paid = paidByStake.get(row.stakeId) || 0n;
++    const amount = BigInt(row.amountUnits || '0');
++    let principal = row.principalUnits != null ? BigInt(row.principalUnits) : 0n;
++    if (row.principalUnits == null && stake) {
++      const original = { ...stake, principalReturnedUnits:undefined, interestEarnedUnits:undefined };
++      principal = splitStakePayment(original, paid + amount).principal - splitStakePayment(original, paid).principal;
++    }
++    paidByStake.set(row.stakeId, paid + amount);
++    const interest = row.interestUnits != null ? BigInt(row.interestUnits) : amount - principal;
++    return { ...row, principalUnits:principal.toString(), interestUnits:interest.toString() };
++  });
++}
++
+ export function minerIncomeSummary(database, wallet, now) {
+   const day = beijingDayStart(now), summaries = new Map();
+   for (const row of readAixIncome(database, wallet, 'miner')) {

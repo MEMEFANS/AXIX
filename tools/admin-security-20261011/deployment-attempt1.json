@@ -1,0 +1,9 @@
+{
+  "deployed": false,
+  "release": "admin-security-20261011-013513",
+  "backup_directory": "/opt/wg-platform/backups/admin-security-20261011-013513",
+  "error": "Origin check failed (400): /api/wallet/admin/test-credits",
+  "rolled_back": true,
+  "rollback_errors": [],
+  "database_restored": false
+}

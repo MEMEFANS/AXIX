@@ -1,0 +1,63 @@
+--- public/js/support-chat.js before
++++ public/js/support-chat.js after
+@@ -71,7 +71,7 @@
+           <button type="button" data-q="矿机收益什么时候发放？">矿机收益</button>
+           <button type="button" data-q="AIX 交易怎么操作？">AIX 交易</button>
+         </div>
+-        <div class="support-chat-messages" id="support-messages">${messagesHtml()}</div>
++        <div class="support-chat-messages" id="support-messages"></div>
+         <div class="support-chat-input">
+           <textarea id="support-input" rows="1" maxlength="2000" placeholder="请输入您的问题…"></textarea>
+           <button type="button" id="support-send" class="portal-button primary">发送</button>
+@@ -79,18 +79,24 @@
+       </div>`;
+   }
+ 
+-  function messagesHtml() {
++  function messagesFragment() {
++    const fragment = document.createDocumentFragment();
+     const messages = session?.messages || [];
+     if (!messages.length) {
+-      return '<div class="support-chat-empty">还没有消息，发送下面的常见问题或直接输入您的问题，客服会尽快回复。</div>';
+-    }
+-    return messages.map(m => {
+-      const mine = m.sender === 'user';
+-      return `<div class="support-msg ${mine ? 'me' : 'them'}">
+-        <div class="support-msg-bubble">${esc(m.body).replace(/\n/g, '<br>')}</div>
+-        <div class="support-msg-time">${mine ? '我' : '客服'} · ${fmtTime(m.createdAt)}</div>
+-      </div>`;
+-    }).join('');
++      const empty = document.createElement('div'); empty.className = 'support-chat-empty';
++      empty.textContent = '还没有消息，发送下面的常见问题或直接输入您的问题，客服会尽快回复。';
++      fragment.append(empty);
++    }
++    for (const message of messages) {
++      const mine = message.sender === 'user';
++      const row = document.createElement('div'); row.className = `support-msg ${mine ? 'me' : 'them'}`;
++      const bubble = document.createElement('div'); bubble.className = 'support-msg-bubble';
++      bubble.style.whiteSpace = 'pre-wrap'; bubble.textContent = String(message.body ?? '');
++      const time = document.createElement('div'); time.className = 'support-msg-time';
++      time.textContent = `${mine ? '我' : '客服'} · ${fmtTime(message.createdAt)}`;
++      row.append(bubble, time); fragment.append(row);
++    }
++    return fragment;
+   }
+ 
+   function scrollToBottom() {
+@@ -157,7 +163,7 @@
+       const box = document.getElementById('support-messages');
+       if (box) {
+         const nearBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 80;
+-        box.innerHTML = messagesHtml();
++        box.replaceChildren(messagesFragment());
+         if (nearBottom) box.scrollTop = box.scrollHeight;
+       }
+       const status = document.getElementById('support-status-line');
+@@ -170,6 +176,7 @@
+       return;
+     }
+     host.innerHTML = chatHtml();
++    document.getElementById('support-messages')?.replaceChildren(messagesFragment());
+     bindChatEvents();
+     scrollToBottom();
+   }

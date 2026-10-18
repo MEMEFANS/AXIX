@@ -1,0 +1,343 @@
+--- before/public/js/operator-admin.js
++++ after/public/js/operator-admin.js
+@@ -21,6 +21,10 @@
+   let currentPage = 'overview';
+   let dashboard = { summary:{}, users:[], tokens:[], recentDeposits:[], recentWithdrawals:[] };
+   let deposits = [];
++  const USER_PAGE_SIZE = 50;
++  let usersOffset = 0, usersTotal = 0, usersRequestSeq = 0, overviewRequestSeq = 0, depositsRequestSeq = 0, minerRequestSeq = 0, klineRequestSeq = 0;
++  let adminGeneration = 0, userSearchTimer = null;
++  const pendingReads = new Map();
+ 
+   function setLoginError(message = '') { byId('admin-login-error').textContent = message; }
+   function toast(message = '') {
+@@ -42,13 +46,22 @@
+   }
+ 
+   async function api(path, options = {}) {
++    const isRead = !options.method || options.method === 'GET';
++    if (isRead && pendingReads.has(path)) return pendingReads.get(path);
++    const task = requestApi(path, options);
++    if (isRead) pendingReads.set(path, task);
++    try { return await task; }
++    finally { if (pendingReads.get(path) === task) pendingReads.delete(path); }
++  }
++  async function requestApi(path, options) {
++    const generation = adminGeneration;
+     const headers = { ...(options.headers || {}) };
+     if (options.body && !headers['Content-Type']) headers['Content-Type'] = 'application/json';
+     const response = await fetch(path, { credentials:'same-origin', ...options, headers });
+     const payload = await response.json().catch(() => ({}));
+     if (!response.ok) {
+       const isAdminAuthRequired = response.status === 401;
+-      if (isAdminAuthRequired && path !== '/api/admin/login') showLogin();
++      if (isAdminAuthRequired && path !== '/api/admin/login' && generation === adminGeneration) showLogin();
+       throw new Error(
+         (payload && payload.error)
+           ? payload.error
+@@ -59,6 +72,25 @@
+   }
+ 
+   function showLogin() {
++    ++adminGeneration;
++    ++usersRequestSeq;
++    clearTimeout(userSearchTimer);
++    pendingReads.clear();
++    if (supportBadgeTimer) clearInterval(supportBadgeTimer);
++    supportBadgeTimer = null;
++    deactivateSupport();
++    dashboard = { summary:{}, users:[], tokens:[], recentDeposits:[], recentWithdrawals:[] };
++    deposits = [];
++    usersOffset = 0; usersTotal = 0;
++    supportTickets = []; supportConv = null; supportActiveTicketId = null; supportListSig = '';
++    byId('admin-support-ticket-list').replaceChildren();
++    byId('admin-support-conv').replaceChildren();
++    aMinerData = null; aKlineStatus = null;
++    byId('admin-a-miner-root').replaceChildren();
++    byId('admin-a-kline-root').replaceChildren();
++    byId('admin-users-body').replaceChildren();
++    byId('admin-deposits-body').replaceChildren();
++    byId('admin-user-detail-modal').hidden = true;
+     byId('admin-app').hidden = true;
+     byId('admin-login-view').hidden = false;
+     byId('admin-password').value = '';
+@@ -66,6 +98,7 @@
+   }
+ 
+   async function showApp(session) {
++    ++adminGeneration;
+     byId('admin-login-view').hidden = true;
+     byId('admin-app').hidden = false;
+     byId('admin-current-user').textContent = session.username || 'admin';
+@@ -73,7 +106,7 @@
+     refreshSupportBadge();
+     if (supportBadgeTimer) clearInterval(supportBadgeTimer);
+     supportBadgeTimer = setInterval(refreshSupportBadge, 15000);
+-    await loadAll();
++    await navigate('overview');
+   }
+ 
+   function emptyRow(columns, message = '暂无数据') {
+@@ -103,23 +136,22 @@
+   }
+ 
+   function renderUsers() {
+-    const query = String(byId('admin-user-search').value || '').trim().toLowerCase();
+-    const realOnly = byId('admin-real-only').checked;
+-    const items = (dashboard.users || []).filter(user => (
+-      (!query || String(user.address).toLowerCase().includes(query)) && (!realOnly || user.isRealUser)
+-    ));
+-    byId('admin-user-count').textContent = `${items.length} 位用户`;
++    const items = dashboard.users || [];
++    byId('admin-user-count').textContent = `${usersTotal} 位用户`;
++    byId('admin-users-page-status').textContent = usersTotal ? `第 ${usersOffset + 1}–${usersOffset + items.length} 位，共 ${usersTotal} 位` : '暂无符合条件的用户';
++    byId('admin-users-prev').disabled = usersOffset === 0;
++    byId('admin-users-next').disabled = usersOffset + items.length >= usersTotal;
+     const levelColor = lv => lv >= 9 ? '#f06b78' : lv >= 7 ? '#f6c454' : lv >= 4 ? '#4fd1b5' : '#82908c';
+     const levelPill = lv => `<span style="padding:2px 8px;border-radius:10px;font-size:11px;background:${levelColor(lv)}22;color:${levelColor(lv)};border:1px solid ${levelColor(lv)}55;font-weight:700">A${lv}</span>`;
+     const levelOptions = (cur) => Array.from({length:10},(_,i)=>i+1).map(n=>`<option value="${n}" ${Number(cur)===n?'selected':''}>A${n}</option>`).join('');
+     byId('admin-users-body').innerHTML = items.map(user => `<tr>
+-      <td><code>${esc(user.address)}</code></td>
+-      <td>${levelPill(user.level || 1)}</td>
+-      <td><span class="admin-status ${user.isRealUser ? 'good' : ''}">${user.isRealUser ? '真实充值用户' : '钱包用户'}</span></td>
+-      <td>${amount(user.confirmedDepositTotal)} USDT (${Number(user.confirmedDepositCount) || 0} 笔)</td>
+-      <td>${amount(user.platformUsdtBalance)} USDT</td>
+-      <td>${date(user.createdAt)}</td><td>${date(user.lastDepositAt)}</td>
+-      <td style="white-space:nowrap">
++      <td data-label="钱包地址"><code>${esc(user.address)}</code></td>
++      <td data-label="等级">${levelPill(user.level || 1)}</td>
++      <td data-label="用户类型"><span class="admin-status ${user.isRealUser ? 'good' : ''}">${user.isRealUser ? '真实充值用户' : '钱包用户'}</span></td>
++      <td data-label="确认充值">${amount(user.confirmedDepositTotal)} USDT (${Number(user.confirmedDepositCount) || 0} 笔)</td>
++      <td data-label="平台余额">${amount(user.platformUsdtBalance)} USDT</td>
++      <td data-label="首次连接">${date(user.createdAt)}</td><td data-label="最近充值">${date(user.lastDepositAt)}</td>
++      <td data-label="操作" style="white-space:nowrap">
+         <button type="button" class="admin-table-action" data-detail-btn="${esc(user.address)}">详情</button>
+         <select class="admin-level-select" data-level-wallet="${esc(user.address)}" style="height:30px;padding:0 6px;font-size:11px">${levelOptions(user.level || 1)}</select> <button type="button" class="admin-table-action" data-level-btn="${esc(user.address)}">设置</button>
+       </td>
+@@ -471,34 +503,71 @@
+   }
+ 
+   async function loadAll() {
+-    // 还在登录页时任何遗留定时器/刷新按钮触发的 loadAll 都直接 abort，避免控制台连刷 401
+     if (byId('admin-app').hidden) return;
+     try {
+-      dashboard = await api('/api/admin/dashboard');
+-      renderOverview();
+-      renderUsers();
+-      renderTokens();
+-      renderStocks();
+-      await loadDeposits();
++      const generation = adminGeneration, page = currentPage;
++      if (page === 'overview') {
++        const seq = ++overviewRequestSeq;
++        const result = await api('/api/admin/dashboard?view=overview');
++        if (generation !== adminGeneration || currentPage !== page || seq !== overviewRequestSeq) return;
++        dashboard = { ...dashboard, ...result };
++        renderOverview();
++      } else if (page === 'users') await loadUsers();
++      else if (page === 'deposits') await loadDeposits();
++      else if (page === 'tokens' || page === 'stocks') {
++        const result = await api('/api/admin/tokens');
++        if (generation !== adminGeneration || currentPage !== page) return;
++        dashboard.tokens = result.tokens || [];
++        if (page === 'tokens') renderTokens(); else renderStocks();
++      } else if (page === 'community') await window.AdminCommunity?.load();
++      else if (page === 'agents') await window.AdminAgents?.load();
++      else if (page === 'lottery') await window.AdminLottery?.load();
++      else if (page === 'a-kline') await loadAKline();
++      else if (page === 'a-miner') await loadAMiner();
++      else if (page === 'support') await loadSupportTickets();
++      if (generation !== adminGeneration || currentPage !== page) return;
+       byId('admin-updated').textContent = `更新于 ${new Date().toLocaleTimeString('zh-CN', { hour12:false })}`;
+     } catch (error) { toast(error.message); }
+   }
+ 
++  async function loadUsers() {
++    const seq = ++usersRequestSeq, generation = adminGeneration;
++    const params = new URLSearchParams({ limit:String(USER_PAGE_SIZE), offset:String(usersOffset), q:byId('admin-user-search').value.trim(), realOnly:byId('admin-real-only').checked ? '1' : '0' });
++    byId('admin-user-count').textContent = '正在读取用户…';
++    byId('admin-users-prev').disabled = byId('admin-users-next').disabled = true;
++    const result = await api('/api/admin/users?' + params);
++    if (seq !== usersRequestSeq || generation !== adminGeneration || currentPage !== 'users') return;
++    usersTotal = Number(result.total) || 0;
++    usersOffset = Number(result.offset) || 0;
++    if (usersOffset >= usersTotal && usersOffset > 0) {
++      usersOffset = Math.max(0, Math.floor((usersTotal - 1) / USER_PAGE_SIZE) * USER_PAGE_SIZE);
++      return loadUsers();
++    }
++    dashboard.users = result.users || [];
++    renderUsers();
++  }
++
+   async function loadDeposits() {
++    const seq = ++depositsRequestSeq, generation = adminGeneration;
+     const filter = byId('admin-deposit-filter').value;
+     const result = await api(`/api/admin/deposits${filter ? `?status=${encodeURIComponent(filter)}` : ''}`);
++    if (generation !== adminGeneration || seq !== depositsRequestSeq || currentPage !== 'deposits') return;
+     deposits = result.items || [];
+     renderDeposits();
+   }
+ 
+   function navigate(page) {
++    if (byId('admin-app').hidden) return;
++    ++usersRequestSeq;
++    clearTimeout(userSearchTimer);
+     currentPage = page;
+-    const titles = { overview:'首页总览', users:'用户管理', deposits:'充值记录', tokens:'代币管理', stocks:'股票管理', agents:'代理管理', support:'在线客服' };
++    const titles = { overview:'首页总览', users:'用户管理', deposits:'充值记录', tokens:'代币管理', stocks:'股票管理', agents:'代理管理', support:'在线客服', community:'社群链接', 'a-kline':'AIX 行情调控', 'a-token-balance':'AIX 代币管理', 'a-miner':'AIX 矿机管理', lottery:'抽奖管理' };
+     document.querySelectorAll('[data-admin-page]').forEach(button => button.classList.toggle('active', button.dataset.adminPage === page));
+     document.querySelectorAll('[data-admin-panel]').forEach(panel => panel.classList.toggle('active', panel.dataset.adminPanel === page));
+     byId('admin-page-title').textContent = titles[page] || '管理后台';
+     window.scrollTo({ top:0, behavior:'auto' });
+     if (page === 'support') activateSupport(); else deactivateSupport();
++    return loadAll();
+   }
+ 
+   async function toggleToken(symbol, enabled) {
+@@ -633,9 +702,16 @@
+     byId('admin-user-detail-modal').hidden = true;
+   }));
+   document.querySelectorAll('[data-open-funds]').forEach(button => button.addEventListener('click', () => window.open('/funds-admin.html', '_blank', 'noopener,noreferrer')));
+-  byId('admin-refresh').addEventListener('click', () => currentPage==='community' ? window.AdminCommunity?.load() : loadAll());
+-  byId('admin-user-search').addEventListener('input', renderUsers);
+-  byId('admin-real-only').addEventListener('change', renderUsers);
++  byId('admin-refresh').addEventListener('click', loadAll);
++  byId('admin-user-search').addEventListener('input', () => {
++    ++usersRequestSeq;
++    usersOffset = 0;
++    clearTimeout(userSearchTimer);
++    userSearchTimer = setTimeout(loadAll, 250);
++  });
++  byId('admin-real-only').addEventListener('change', () => { usersOffset = 0; loadAll(); });
++  byId('admin-users-prev').addEventListener('click', () => { usersOffset = Math.max(0, usersOffset - USER_PAGE_SIZE); loadAll(); });
++  byId('admin-users-next').addEventListener('click', () => { usersOffset += USER_PAGE_SIZE; loadAll(); });
+   byId('admin-deposit-filter').addEventListener('change', () => loadDeposits().catch(error => toast(error.message)));
+   byId('admin-token-form').addEventListener('submit', submitToken);
+   byId('admin-stock-form').addEventListener('submit', submitStock);
+@@ -700,9 +776,11 @@
+ 
+   let supportListSig = '';
+   async function loadSupportTickets() {
++    const generation = adminGeneration;
+     const filterEl = byId('admin-support-filter');
+     const status = filterEl ? filterEl.value : 'open';
+     const data = await api(`/api/admin/support/tickets?status=${encodeURIComponent(status)}&limit=200`);
++    if (generation !== adminGeneration || currentPage !== 'support' || status !== filterEl?.value) return;
+     supportTickets = data.tickets || [];
+     // 列表无变化时跳过重绘，避免 5s 轮询冲掉正要点击的会话项
+     const sig = status + '|' + supportTickets.map(t => `${t.id}:${t.status}:${t.adminUnread}:${t.lastMessageAt}:${String(t.lastBody || '').slice(0, 30)}`).join(',');
+@@ -739,9 +817,11 @@
+   }
+ 
+   async function openSupportTicket(id) {
++    const generation = adminGeneration;
+     supportActiveTicketId = id;
+     renderSupportTickets();
+     const data = await api(`/api/admin/support/tickets/${encodeURIComponent(id)}/messages`);
++    if (generation !== adminGeneration || currentPage !== 'support' || supportActiveTicketId !== id) return;
+     supportConv = data;
+     renderSupportConversation();
+     refreshSupportBadge();
+@@ -824,8 +904,10 @@
+ 
+   async function refreshSupportConvSilent() {
+     if (!supportActiveTicketId) return;
+-    try {
+-      const data = await api(`/api/admin/support/tickets/${encodeURIComponent(supportActiveTicketId)}/messages`);
++    const generation = adminGeneration, id = supportActiveTicketId;
++    try {
++      const data = await api(`/api/admin/support/tickets/${encodeURIComponent(id)}/messages`);
++      if (generation !== adminGeneration || currentPage !== 'support' || supportActiveTicketId !== id) return;
+       const prevLen = supportConv?.messages?.length || 0;
+       supportConv = data;
+       // 仅在消息数变化时重绘，避免输入过程中 DOM 被重置
+@@ -834,8 +916,11 @@
+   }
+ 
+   async function refreshSupportBadge() {
++    if (byId('admin-app').hidden || document.hidden) return;
++    const generation = adminGeneration;
+     try {
+       const data = await api('/api/admin/support/unread-count');
++      if (generation !== adminGeneration) return;
+       const n = Number(data.count || 0);
+       const badge = byId('admin-support-nav-badge');
+       if (badge) {
+@@ -862,12 +947,11 @@
+ 
+   function activateSupport() {
+     bindSupportEvents();
+-    loadSupportTickets().catch(error => toast(error.message));
+     refreshSupportBadge();
+     if (supportListTimer) clearInterval(supportListTimer);
+     if (supportConvTimer) clearInterval(supportConvTimer);
+-    supportListTimer = setInterval(() => { loadSupportTickets().catch(() => {}); refreshSupportBadge(); }, 5000);
+-    supportConvTimer = setInterval(() => { refreshSupportConvSilent(); }, 5000);
++    supportListTimer = setInterval(() => { if (!document.hidden) { loadSupportTickets().catch(() => {}); refreshSupportBadge(); } }, 5000);
++    supportConvTimer = setInterval(() => { if (!document.hidden) refreshSupportConvSilent(); }, 5000);
+   }
+   function deactivateSupport() {
+     if (supportListTimer) { clearInterval(supportListTimer); supportListTimer = null; }
+@@ -882,22 +966,20 @@
+   let aMinerData = null;
+ 
+   async function aApi(path, options = {}) {
+-    const headers = { ...(options.headers || {}) };
+-    if (options.body && !headers['Content-Type']) headers['Content-Type'] = 'application/json';
+     const url = path.startsWith('/') ? `/api/admin/a-token${path}` : `/api/admin/a-token/${path}`;
+-    const res = await fetch(url, { credentials:'same-origin', ...options, headers });
+-    const data = await res.json().catch(() => ({}));
+-    if (res.status === 401) showLogin();
+-    if (!res.ok) throw new Error(data.error || (res.status === 401 ? '后台登录已失效，请重新登录' : `请求失败 (${res.status})`));
+-    return data;
++    return api(url, options);
+   }
+   function aFmt(v, d = 2) { return Number(v || 0).toLocaleString('en-US', { maximumFractionDigits: d, minimumFractionDigits: Math.min(2, d) }); }
+   function aPill(color, text) { return `<span style="padding:2px 8px;border-radius:10px;font-size:11px;background:${color}22;color:${color};border:1px solid ${color}55">${esc(text)}</span>`; }
+   function aBtn(text, { id='', cls='', data='' } = {}) { return `<button type="button" class="admin-primary-button admin-a-btn ${cls}" ${id ? `id="${id}"` : ''} ${data}>${text}</button>`; }
+ 
+   async function loadAKline() {
+-    try { aKlineStatus = await aApi('/kline/status'); renderAKline(); }
+-    catch (e) { const root = byId('admin-a-kline-root'); if (root) root.innerHTML = `<div class="admin-inline-status" style="color:var(--admin-red)">加载失败：${esc(e.message)}</div>`; }
++    const generation = adminGeneration, seq = ++klineRequestSeq;
++    try {
++      const result = await aApi('/kline/status');
++      if (generation !== adminGeneration || seq !== klineRequestSeq || currentPage !== 'a-kline') return;
++      aKlineStatus = result; renderAKline();
++    } catch (e) { const root = byId('admin-a-kline-root'); if (root && generation === adminGeneration && seq === klineRequestSeq && currentPage === 'a-kline') root.innerHTML = `<div class="admin-inline-status" style="color:var(--admin-red)">加载失败：${esc(e.message)}</div>`; }
+   }
+   function renderAKline() {
+     const root = byId('admin-a-kline-root'); if (!root) return;
+@@ -1031,8 +1113,12 @@
+   }
+ 
+   async function loadAMiner(qs = '') {
+-    try { aMinerData = await aApi('/miners' + (qs ? '?'+qs : '')); renderAMiner(); }
+-    catch (e) { const root = byId('admin-a-miner-root'); if (root) root.innerHTML = `<div class="admin-inline-status" style="color:var(--admin-red)">加载失败：${esc(e.message)}</div>`; }
++    const generation = adminGeneration, seq = ++minerRequestSeq;
++    try {
++      const result = await aApi('/miners' + (qs ? '?'+qs : ''));
++      if (generation !== adminGeneration || seq !== minerRequestSeq || currentPage !== 'a-miner') return;
++      aMinerData = result; renderAMiner();
++    } catch (e) { const root = byId('admin-a-miner-root'); if (root && generation === adminGeneration && seq === minerRequestSeq && currentPage === 'a-miner') root.innerHTML = `<div class="admin-inline-status" style="color:var(--admin-red)">加载失败：${esc(e.message)}</div>`; }
+   }
+   function renderAMiner() {
+     const root = byId('admin-a-miner-root'); if (!root) return;
+@@ -1127,17 +1213,6 @@
+     });
+   }
+ 
+-  /* 页面导航标题扩展 + A 模块页面首次加载 */
+-  const __origNavigate = navigate;
+-  navigate = function(page) {
+-    __origNavigate(page);
+-    if (page === 'community') window.AdminCommunity?.load();
+-    if (page === 'lottery') window.AdminLottery?.load();
+-    if (page === 'a-kline' && !aKlineStatus) loadAKline();
+-    if (page === 'a-miner' && !aMinerData) loadAMiner();
+-    const titlesMap = { overview:'首页总览', users:'用户管理', deposits:'充值记录', tokens:'代币管理', stocks:'股票管理', 'a-kline':'AIX 行情调控', 'a-token-balance':'AIX 代币管理', 'a-miner':'AIX 矿机管理', lottery:'抽奖管理' };
+-    byId('admin-page-title').textContent = page==='community' ? '社群链接' : (titlesMap[page] || '管理后台');
+-  };
+   // 刷新按钮
+   byId('admin-a-kline-refresh')?.addEventListener('click', loadAKline);
+   byId('admin-a-miner-refresh')?.addEventListener('click', () => loadAMiner());

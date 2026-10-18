@@ -1,0 +1,34 @@
+{
+  "src/admin-security.js": {
+    "before": "ab199ebabb9ca030198ab35acc03684c56e04f0d14998641549d0dcf12379e73",
+    "after": "6296b7dd15cb392ae1ee64f0e4c989e733536a812fd59a987745fcd4bc7c21e8"
+  },
+  "src/a-token-admin-api.js": {
+    "before": "e8530ce161194e362e04edf0d6ee9d9cae88fa7a642060c2fd01f6f00ccb265c",
+    "after": "44754382e35841c3135d92fdfd5a6d88ec2b2dc22c82ba682a3cb137f32d804c"
+  },
+  "src/funds-admin-api.js": {
+    "before": "d2621c8fdeb866fda03c70e83f50dcfc8473f1c2ae986a0947b6de2467b53a00",
+    "after": "634a0c777da6fe2779964633405a48fe88c0d865495c50fe879cbb41a6f4b5fe"
+  },
+  "src/server.js": {
+    "before": "9cf077584442dbafcaed9911dafdd4adc304f76b727d8877130fcab670dc3851",
+    "after": "00104cc6cf950b909402ea06bc6a65dbc50af71a6321eb4e0a1b7cd40099eaf7"
+  },
+  "public/admin.html": {
+    "before": "17c48d5c6a71ddb16aaa5e784204143928d170c9d74593c064d85f0f8c25bbf5",
+    "after": "154f7c578dc542efc0610fc440e9b62600915d25e3852d67a6b509678bd3fb8a"
+  },
+  "public/funds-admin.html": {
+    "before": "66c82c4aca0eea01d25016152fcf1ad83201f87872c61eb323eef3013a6a58ce",
+    "after": "c42d7a888344e49ed4a8b1a89b56ec86795d90a757f690622c4045542777cc0e"
+  },
+  "public/js/operator-admin.js": {
+    "before": "3fef20c6f1cce6927ee86618dd8c694aece6058bc34e9c3f2e8f6cb35c68cc3b",
+    "after": "5fa0ff8672e77c313828a6f56646246d2de51cd84f76c215cd072d4c966a8283"
+  },
+  "public/js/funds-admin.js": {
+    "before": "3cc6f416a5709c7bbbcd1153aa62fefa09f87da14c36e011644c496589434c28",
+    "after": "ed2e22ac0e70cb67aae44451e7b4e05e8ec242a79048fc88056ae545723fc3a1"
+  }
+}

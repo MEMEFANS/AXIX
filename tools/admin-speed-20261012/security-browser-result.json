@@ -1,0 +1,17 @@
+{
+  "scenarios": [
+    "actual server blocks operator funding/review endpoints, denies cookie access to funds API and redirects legacy console",
+    "stored malicious support messages render only as text in ticket preview and conversation",
+    "text-safe dialogs and actual CSP prevent injected script tags and inline event handlers",
+    "invalid legacy images cannot be approved; valid screenshot opens in a scriptless frame with no parent access",
+    "customer chat also renders user/admin payloads as plain text and preserves newlines",
+    "mobile funds console uses independent auth without storing the token; safe records and retry retain the same request ID",
+    "funds-only asset/miner forms work on mobile, keep full AIX precision and retry with one request ID",
+    "locking clears sensitive data and rejects an old in-flight response"
+  ],
+  "isolatedDatabase": true,
+  "runtimeErrors": [],
+  "testServer": "http://127.0.0.1:58391",
+  "passed": true,
+  "checkedAtUtc": "2026-10-12T08:19:50.228Z"
+}

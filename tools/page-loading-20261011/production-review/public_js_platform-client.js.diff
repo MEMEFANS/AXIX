@@ -1,0 +1,28 @@
+--- public/js/platform-client.js before
++++ public/js/platform-client.js after
+@@ -1,5 +1,16 @@
+ (function () {
+   const pendingOrders = new Map();
++  const profileReads = new Map();
++
++  async function profile(symbol = 'BTC') {
++    const key = `${window.Portal?.walletKey?.() || window.currentWalletProfile?.address || ''}:${window.getWalletStateRevision?.() || 0}:${symbol}`;
++    if (!profileReads.has(key)) {
++      const promise = request(`/api/platform/profile?symbol=${encodeURIComponent(symbol)}`, { signal:AbortSignal.timeout(10000) });
++      profileReads.set(key, promise);
++      promise.finally(() => { if (profileReads.get(key) === promise) profileReads.delete(key); }).catch(() => {});
++    }
++    return structuredClone(await profileReads.get(key));
++  }
+ 
+   function randomId() {
+     return globalThis.crypto?.randomUUID?.() || `order_${Date.now()}_${Math.random().toString(16).slice(2)}`;
+@@ -59,7 +70,7 @@
+   }
+ 
+   window.PlatformClient = {
+-    profile:(symbol = 'BTC') => request(`/api/platform/profile?symbol=${encodeURIComponent(symbol)}`),
++    profile,
+     placeOrder,
+     cancelOrder:orderId => request(`/api/platform/orders/${encodeURIComponent(orderId)}`, { method:'DELETE' }),
+     staking:(action, amount) => request(`/api/platform/${action}`, {

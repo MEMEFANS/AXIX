@@ -1,0 +1,81 @@
+--- public/js/ai-managed.js (before)
++++ public/js/ai-managed.js (after)
+@@ -188,8 +188,8 @@
+     if (document.hidden || !host.classList.contains('active')) return;
+     try {
+       const pick = ANALYSIS_SYMBOLS[Math.floor(Math.random() * ANALYSIS_SYMBOLS.length)];
+-      const res = await fetch(`/api/market/candles?symbol=${pick.coin}&intervalSec=3600&product=perp`);
+-      const data = await res.json();
++      const data = await Portal.readJSON(`/api/market/candles?symbol=${pick.coin}&intervalSec=3600&product=perp`);
++      if (!Portal.active('ai-managed')) return;
+       const candles = Array.isArray(data?.candles) ? data.candles : [];
+       if (candles.length < 14) throw new Error('数据不足');
+       const closes = candles.map(c => Number(c.close || 0)).filter(v => v > 0);
+@@ -264,12 +264,14 @@
+   }
+ 
+   function reset(message = '请先连接钱包') {
++    ++refreshSeq; refreshRequest = null;
+     render({ running:false, principal:'0', dayEarned:'0', totalEarned:'0', availableBalance:'0', dayTarget:'0', progress:0, batches:[], records:[] });
+     el('aim-status').textContent = message;
+     el('aim-start').disabled = !window.currentWalletConnection?.address;
+   }
+ 
+   async function request(path, options) {
++    if (!options?.method || options.method === 'GET') return Portal.readJSON(`/api/ai-managed/${path}`, options);
+     const response = await fetch(`/api/ai-managed/${path}`, options);
+     const payload = await response.json();
+     if (!response.ok) throw new Error(payload.error || '跟单请求失败');
+@@ -284,19 +286,36 @@
+     return Boolean(window.currentWalletProfile?.authenticated);
+   }
+ 
+-  async function refresh() {
++  let refreshSeq = 0, refreshRequest = null, refreshWallet = '';
++  function refresh() {
++    if (!Portal.active('ai-managed')) return Promise.resolve();
++    const wallet = Portal.walletKey();
++    if (refreshRequest && wallet === refreshWallet) return refreshRequest;
++    refreshWallet = wallet;
++    const promise = refreshData();
++    refreshRequest = promise;
++    promise.finally(() => { if (refreshRequest === promise) refreshRequest = null; }).catch(() => {});
++    return promise;
++  }
++  async function refreshData() {
++    const wallet = Portal.walletKey();
+     if (!window.currentWalletProfile?.authenticated) {
+       const ok = await ensureSession();
++      if (wallet !== Portal.walletKey() || !Portal.active('ai-managed')) return;
+       if (!ok) return reset(window.currentWalletConnection?.address ? '签名验证未完成，请重新进入或点击"加入跟单"触发验证' : '请先连接钱包');
+     }
++    const seq = ++refreshSeq;
++    const valid = () => seq === refreshSeq && wallet === Portal.walletKey() && Portal.active('ai-managed');
+     try {
+-      render(await request('state'));
++      const next = await request('state');
++      if (valid()) render(next);
+     } catch (error) {
+-      // 服务端会话失效（401）：重建会话后重试一次，避免误显示"请先连接钱包"
++      if (!valid()) return;
+       if (/连接钱包/.test(error.message || '') && await ensureSession()) {
+-        try { render(await request('state')); return; } catch (retry) { reset(retry.message); return; }
++        try { const next = await request('state'); if (valid()) render(next); return; }
++        catch (retry) { if (valid()) reset(retry.message); return; }
+       }
+-      reset(error.message);
++      if (valid()) reset(error.message);
+     }
+   }
+ 
+@@ -404,6 +423,9 @@
+   el('aim-redeem').onclick = event => redeem(event.currentTarget);
+   el('aim-vip-btn').onclick = event => unlockVip(event.currentTarget);
+   el('aim-max').onclick = () => { if (state) el('aim-amount').value = state.availableBalance || ''; };
+-  window.AiManaged = { activate, refresh, reset };
++  function deactivate() { clearInterval(timer); timer = null; stopAnalysisTimer(); }
++  window.addEventListener('pagechange', event => { if (event.detail.current !== 'ai-managed') deactivate(); });
++  document.addEventListener('visibilitychange', () => { if (document.hidden) deactivate(); else if (Portal.active('ai-managed')) activate(); });
++  window.AiManaged = { activate, refresh, reset, deactivate };
+   if (new URLSearchParams(location.search).get('page') === 'ai-managed') setTimeout(() => switchTab('ai-managed'), 0);
+ })();

@@ -1,0 +1,162 @@
+{
+  "baseline": true,
+  "scenarios": [],
+  "measurements": [
+    {
+      "viewport": 1440,
+      "period": "1m",
+      "count": 500,
+      "spacing": 1.248,
+      "paneWidth": 624,
+      "range": {
+        "from": 4,
+        "to": 503
+      },
+      "pixelGap": 1.2480000000000473,
+      "lastX": 617.384
+    },
+    {
+      "viewport": 1440,
+      "period": "5m",
+      "count": 500,
+      "spacing": 1.248,
+      "paneWidth": 624,
+      "range": {
+        "from": 4,
+        "to": 503
+      },
+      "pixelGap": 1.2480000000000473,
+      "lastX": 617.384
+    },
+    {
+      "viewport": 1440,
+      "period": "15m",
+      "count": 500,
+      "spacing": 1.248,
+      "paneWidth": 624,
+      "range": {
+        "from": 4,
+        "to": 503
+      },
+      "pixelGap": 1.2480000000000473,
+      "lastX": 617.384
+    },
+    {
+      "viewport": 1440,
+      "period": "1h",
+      "count": 500,
+      "spacing": 1.248,
+      "paneWidth": 624,
+      "range": {
+        "from": 4,
+        "to": 503
+      },
+      "pixelGap": 1.2480000000000473,
+      "lastX": 617.384
+    },
+    {
+      "viewport": 1440,
+      "period": "4h",
+      "count": 500,
+      "spacing": 1.248,
+      "paneWidth": 624,
+      "range": {
+        "from": 4,
+        "to": 503
+      },
+      "pixelGap": 1.2480000000000473,
+      "lastX": 617.384
+    },
+    {
+      "viewport": 1440,
+      "period": "1d",
+      "count": 2,
+      "spacing": 312,
+      "paneWidth": 624,
+      "range": {
+        "from": 0,
+        "to": 1
+      },
+      "pixelGap": 312,
+      "lastX": 467
+    },
+    {
+      "viewport": 390,
+      "period": "1m",
+      "count": 500,
+      "spacing": 0.576,
+      "paneWidth": 288,
+      "range": {
+        "from": 3.999999999999943,
+        "to": 503
+      },
+      "pixelGap": 0.5760000000000218,
+      "lastX": 284.408
+    },
+    {
+      "viewport": 390,
+      "period": "5m",
+      "count": 500,
+      "spacing": 0.576,
+      "paneWidth": 288,
+      "range": {
+        "from": 3.999999999999943,
+        "to": 503
+      },
+      "pixelGap": 0.5760000000000218,
+      "lastX": 284.408
+    },
+    {
+      "viewport": 390,
+      "period": "15m",
+      "count": 500,
+      "spacing": 0.576,
+      "paneWidth": 288,
+      "range": {
+        "from": 3.999999999999943,
+        "to": 503
+      },
+      "pixelGap": 0.5760000000000218,
+      "lastX": 284.408
+    },
+    {
+      "viewport": 390,
+      "period": "1h",
+      "count": 500,
+      "spacing": 0.576,
+      "paneWidth": 288,
+      "range": {
+        "from": 3.999999999999943,
+        "to": 503
+      },
+      "pixelGap": 0.5760000000000218,
+      "lastX": 284.408
+    },
+    {
+      "viewport": 390,
+      "period": "4h",
+      "count": 500,
+      "spacing": 0.576,
+      "paneWidth": 288,
+      "range": {
+        "from": 3.999999999999943,
+        "to": 503
+      },
+      "pixelGap": 0.5760000000000218,
+      "lastX": 284.408
+    },
+    {
+      "viewport": 390,
+      "period": "1d",
+      "count": 2,
+      "spacing": 144,
+      "paneWidth": 288,
+      "range": {
+        "from": 0,
+        "to": 1
+      },
+      "pixelGap": 144,
+      "lastX": 215
+    }
+  ]
+}

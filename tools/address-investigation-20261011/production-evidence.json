@@ -1,0 +1,1914 @@
+{
+  "captured_at_utc": "2026-10-10T18:25:25.471260+00:00",
+  "social_submissions": [
+    {
+      "id": "ss_c589e951a3957aaf1a43",
+      "wallet": "0xd36ddfb9d3fa6b326b49e6eab68c5b961bc3ba59",
+      "platform": "moments",
+      "status": "approved",
+      "created_at": 1791583569551,
+      "time_beijing": "2026-10-10T06:06:09.551000+08:00",
+      "payload_sha256": "660188405ad746186b5f03fba7f20d2ed165780a77cdaf4395472b177467cc84",
+      "payload_length": 1361,
+      "event_handler_injection": true,
+      "target_endpoints": [
+        "/api/admin/a-token/grant",
+        "/api/admin/community-links",
+        "/api/admin/lottery/points",
+        "/api/admin/session",
+        "/api/admin/test-credits",
+        "/api/env"
+      ],
+      "recipient_wallets": [
+        "0xd36dDfb9d3fA6b326B49E6EaB68c5B961Bc3ba59"
+      ],
+      "requested_amounts": [
+        "50000",
+        "1000000"
+      ],
+      "requested_agent_names": []
+    },
+    {
+      "id": "ss_4cdb43e9e50537817e4a",
+      "wallet": "0xd36ddfb9d3fa6b326b49e6eab68c5b961bc3ba59",
+      "platform": "twitter",
+      "status": "approved",
+      "created_at": 1791583569983,
+      "time_beijing": "2026-10-10T06:06:09.983000+08:00",
+      "payload_sha256": "660188405ad746186b5f03fba7f20d2ed165780a77cdaf4395472b177467cc84",
+      "payload_length": 1361,
+      "event_handler_injection": true,
+      "target_endpoints": [
+        "/api/admin/a-token/grant",
+        "/api/admin/community-links",
+        "/api/admin/lottery/points",
+        "/api/admin/session",
+        "/api/admin/test-credits",
+        "/api/env"
+      ],
+      "recipient_wallets": [
+        "0xd36dDfb9d3fA6b326B49E6EaB68c5B961Bc3ba59"
+      ],
+      "requested_amounts": [
+        "50000",
+        "1000000"
+      ],
+      "requested_agent_names": []
+    },
+    {
+      "id": "ss_b7b92876385ebcc96052",
+      "wallet": "0xd36ddfb9d3fa6b326b49e6eab68c5b961bc3ba59",
+      "platform": "moments",
+      "status": "pending",
+      "created_at": 1791649504378,
+      "time_beijing": "2026-10-11T00:25:04.378000+08:00",
+      "payload_sha256": "176b7d4b7d3710f153048b4eb2e3e4cbb6b1b87bda117dc6a89de1e470fbfc0d",
+      "payload_length": 3474,
+      "event_handler_injection": true,
+      "target_endpoints": [
+        "/api/admin/a-token/grant",
+        "/api/admin/a-token/withdraw/mode",
+        "/api/admin/admins",
+        "/api/admin/agents",
+        "/api/admin/community-links",
+        "/api/admin/community-links/",
+        "/api/admin/dashboard",
+        "/api/admin/deposits",
+        "/api/admin/lottery/points",
+        "/api/admin/operators",
+        "/api/admin/session",
+        "/api/admin/settings",
+        "/api/admin/test-credits",
+        "/api/admin/users",
+        "/api/admin/withdrawal-automation",
+        "/api/admin/withdrawals",
+        "/api/env",
+        "/api/ledger/export"
+      ],
+      "recipient_wallets": [
+        "0xd36dDfb9d3fA6b326B49E6EaB68c5B961Bc3ba59"
+      ],
+      "requested_amounts": [
+        "5000000",
+        "100000"
+      ],
+      "requested_agent_names": [
+        "svcops9"
+      ]
+    },
+    {
+      "id": "ss_a7c09193ce9f5615c730",
+      "wallet": "0xd36ddfb9d3fa6b326b49e6eab68c5b961bc3ba59",
+      "platform": "twitter",
+      "status": "pending",
+      "created_at": 1791649505129,
+      "time_beijing": "2026-10-11T00:25:05.129000+08:00",
+      "payload_sha256": "176b7d4b7d3710f153048b4eb2e3e4cbb6b1b87bda117dc6a89de1e470fbfc0d",
+      "payload_length": 3474,
+      "event_handler_injection": true,
+      "target_endpoints": [
+        "/api/admin/a-token/grant",
+        "/api/admin/a-token/withdraw/mode",
+        "/api/admin/admins",
+        "/api/admin/agents",
+        "/api/admin/community-links",
+        "/api/admin/community-links/",
+        "/api/admin/dashboard",
+        "/api/admin/deposits",
+        "/api/admin/lottery/points",
+        "/api/admin/operators",
+        "/api/admin/session",
+        "/api/admin/settings",
+        "/api/admin/test-credits",
+        "/api/admin/users",
+        "/api/admin/withdrawal-automation",
+        "/api/admin/withdrawals",
+        "/api/env",
+        "/api/ledger/export"
+      ],
+      "recipient_wallets": [
+        "0xd36dDfb9d3fA6b326B49E6EaB68c5B961Bc3ba59"
+      ],
+      "requested_amounts": [
+        "5000000",
+        "100000"
+      ],
+      "requested_agent_names": [
+        "svcops9"
+      ]
+    }
+  ],
+  "callback_flows": [
+    {
+      "id": "lf_6a25415a69c6e467ccdf",
+      "change": 1,
+      "balance": 1,
+      "type": "admin_topup",
+      "created_at": 1791613460441,
+      "time_beijing": "2026-10-10T14:24:20.441000+08:00",
+      "note_sha256": "a06413f265501133e27f2bf1970d77ffd39da92b52265ed6eb49e99be78c8390",
+      "note_length": 86,
+      "callback_label": "_SESS",
+      "callback_content": "redacted",
+      "reports_ok": false,
+      "reports_unauthorized": false
+    },
+    {
+      "id": "lf_c6000f5abcee86307b92",
+      "change": 1,
+      "balance": 2,
+      "type": "admin_topup",
+      "created_at": 1791613460745,
+      "time_beijing": "2026-10-10T14:24:20.745000+08:00",
+      "note_sha256": "d2287f5703a713840b795739ece49c63d9bae09d63c3b6196ea0c41c10281c93",
+      "note_length": 56,
+      "callback_label": "_CREDIT",
+      "callback_result": {
+        "error": "请填写测试入账原因",
+        "code": "TEST_CREDIT_ERROR"
+      }
+    },
+    {
+      "id": "lf_1deb4657c7dac9afe653",
+      "change": 1,
+      "balance": 3,
+      "type": "admin_topup",
+      "created_at": 1791613461043,
+      "time_beijing": "2026-10-10T14:24:21.043000+08:00",
+      "note_sha256": "1915687b37e7a270cc8fc8c7e2883b8ab4622fd412e4d9a0742b567f772a3d24",
+      "note_length": 55,
+      "callback_label": "_GRANT",
+      "callback_result": {
+        "error": "请填写赠送原因",
+        "code": "A_TOKEN_ADMIN_ERROR"
+      }
+    },
+    {
+      "id": "lf_d9053326954f4eb88ec2",
+      "change": 1,
+      "balance": 4,
+      "type": "admin_topup",
+      "created_at": 1791613461334,
+      "time_beijing": "2026-10-10T14:24:21.334000+08:00",
+      "note_sha256": "6b3061ffd4ac3a30942711dc19836aecc36bb239901a27e270e617546911b9a7",
+      "note_length": 60,
+      "callback_label": "_ENV",
+      "callback_result": {
+        "error": "运营接口需要管理员认证",
+        "code": "OPERATOR_AUTH_REQUIRED"
+      }
+    },
+    {
+      "id": "lf_8bb65a956bee919444aa",
+      "change": 1,
+      "balance": 5,
+      "type": "admin_topup",
+      "created_at": 1791613461726,
+      "time_beijing": "2026-10-10T14:24:21.726000+08:00",
+      "note_sha256": "b07a25dd307715a811851ddfe6092df58f6be4cc3e1ba338f9e0a9d124616893",
+      "note_length": 32,
+      "callback_label": "_AUTO",
+      "callback_result": {
+        "error": "单笔人工审核金额必须大于 0"
+      }
+    },
+    {
+      "id": "lf_284f852a011ebf6985d0",
+      "change": 1,
+      "balance": 6,
+      "type": "admin_topup",
+      "created_at": 1791613462112,
+      "time_beijing": "2026-10-10T14:24:22.112000+08:00",
+      "note_sha256": "5b7ea945a4db35896db33f3caae45377b844c2f55f8bae8e8bf0a112f8e98ade",
+      "note_length": 507,
+      "callback_label": "_WMODE",
+      "reports_ok": true,
+      "reports_unauthorized": false
+    },
+    {
+      "id": "lf_87dc88724b2961c9bfe5",
+      "change": 1,
+      "balance": 7,
+      "type": "admin_topup",
+      "created_at": 1791613462615,
+      "time_beijing": "2026-10-10T14:24:22.615000+08:00",
+      "note_sha256": "d66710ba7e2405948af07ed54707f1dcb4c79b1b464a942f24602b326d80cc42",
+      "note_length": 63,
+      "callback_label": "_LEDGER",
+      "callback_result": {
+        "error": "运营接口需要管理员认证",
+        "code": "OPERATOR_AUTH_REQUIRED"
+      }
+    },
+    {
+      "id": "lf_c1351a57889de237ab9a",
+      "change": 1,
+      "balance": 8,
+      "type": "admin_topup",
+      "created_at": 1791613474093,
+      "time_beijing": "2026-10-10T14:24:34.093000+08:00",
+      "note_sha256": "6b3061ffd4ac3a30942711dc19836aecc36bb239901a27e270e617546911b9a7",
+      "note_length": 60,
+      "callback_label": "_ENV",
+      "callback_result": {
+        "error": "运营接口需要管理员认证",
+        "code": "OPERATOR_AUTH_REQUIRED"
+      }
+    },
+    {
+      "id": "lf_3716a27d2782a8aeb3fc",
+      "change": 1,
+      "balance": 9,
+      "type": "admin_topup",
+      "created_at": 1791613474390,
+      "time_beijing": "2026-10-10T14:24:34.390000+08:00",
+      "note_sha256": "a06413f265501133e27f2bf1970d77ffd39da92b52265ed6eb49e99be78c8390",
+      "note_length": 86,
+      "callback_label": "_SESS",
+      "callback_content": "redacted",
+      "reports_ok": false,
+      "reports_unauthorized": false
+    },
+    {
+      "id": "lf_f7830ff63365cd0b5fee",
+      "change": 1,
+      "balance": 10,
+      "type": "admin_topup",
+      "created_at": 1791613474838,
+      "time_beijing": "2026-10-10T14:24:34.838000+08:00",
+      "note_sha256": "d2287f5703a713840b795739ece49c63d9bae09d63c3b6196ea0c41c10281c93",
+      "note_length": 56,
+      "callback_label": "_CREDIT",
+      "callback_result": {
+        "error": "请填写测试入账原因",
+        "code": "TEST_CREDIT_ERROR"
+      }
+    },
+    {
+      "id": "lf_12c543992763a331da79",
+      "change": 1,
+      "balance": 11,
+      "type": "admin_topup",
+      "created_at": 1791613475335,
+      "time_beijing": "2026-10-10T14:24:35.335000+08:00",
+      "note_sha256": "1915687b37e7a270cc8fc8c7e2883b8ab4622fd412e4d9a0742b567f772a3d24",
+      "note_length": 55,
+      "callback_label": "_GRANT",
+      "callback_result": {
+        "error": "请填写赠送原因",
+        "code": "A_TOKEN_ADMIN_ERROR"
+      }
+    },
+    {
+      "id": "lf_a305d95d6f088dc42c7b",
+      "change": 1,
+      "balance": 12,
+      "type": "admin_topup",
+      "created_at": 1791613475608,
+      "time_beijing": "2026-10-10T14:24:35.608000+08:00",
+      "note_sha256": "06fe62f8d8996baa9f5026e3ee0759554c06a3b9cd46cfcbb9b3919b3ef6dcf2",
+      "note_length": 507,
+      "callback_label": "_WMODE",
+      "reports_ok": true,
+      "reports_unauthorized": false
+    },
+    {
+      "id": "lf_b7dbb9f303a26930b21f",
+      "change": 1,
+      "balance": 13,
+      "type": "admin_topup",
+      "created_at": 1791613475908,
+      "time_beijing": "2026-10-10T14:24:35.908000+08:00",
+      "note_sha256": "b07a25dd307715a811851ddfe6092df58f6be4cc3e1ba338f9e0a9d124616893",
+      "note_length": 32,
+      "callback_label": "_AUTO",
+      "callback_result": {
+        "error": "单笔人工审核金额必须大于 0"
+      }
+    },
+    {
+      "id": "lf_e8c2b26375d6601ae635",
+      "change": 1,
+      "balance": 14,
+      "type": "admin_topup",
+      "created_at": 1791613476200,
+      "time_beijing": "2026-10-10T14:24:36.200000+08:00",
+      "note_sha256": "d66710ba7e2405948af07ed54707f1dcb4c79b1b464a942f24602b326d80cc42",
+      "note_length": 63,
+      "callback_label": "_LEDGER",
+      "callback_result": {
+        "error": "运营接口需要管理员认证",
+        "code": "OPERATOR_AUTH_REQUIRED"
+      }
+    },
+    {
+      "id": "lf_b0da1a5b558bfa2580e4",
+      "change": 10,
+      "balance": 24,
+      "type": "social_twitter",
+      "created_at": 1791613510275,
+      "time_beijing": "2026-10-10T14:25:10.275000+08:00",
+      "note_sha256": "b1f8acd33d90ebb47a68a0a84bfabff9b882ef71a0f24d78b29fad05e7ae214d",
+      "note_length": 8,
+      "callback_label": "推特推广审核通过",
+      "reports_ok": false,
+      "reports_unauthorized": false
+    },
+    {
+      "id": "lf_b918fbfe28a5bf77a910",
+      "change": 10,
+      "balance": 34,
+      "type": "social_moments",
+      "created_at": 1791613510900,
+      "time_beijing": "2026-10-10T14:25:10.900000+08:00",
+      "note_sha256": "c97c008baad97f92761a6b97195312eaa1ab01f846ffe02a211cdb39626f1282",
+      "note_length": 9,
+      "callback_label": "朋友圈推广审核通过",
+      "reports_ok": false,
+      "reports_unauthorized": false
+    },
+    {
+      "id": "lf_f5dcec450da7fcab9ec5",
+      "change": 1,
+      "balance": 35,
+      "type": "admin_topup",
+      "created_at": 1791646191820,
+      "time_beijing": "2026-10-10T23:29:51.820000+08:00",
+      "note_sha256": "58895adfcd719cdd70390dbdaceba38a2ac71a4d5df23ad1aa42805c394e6d8e",
+      "note_length": 85,
+      "callback_label": "SESS",
+      "callback_content": "redacted",
+      "reports_ok": false,
+      "reports_unauthorized": false
+    },
+    {
+      "id": "lf_ea14cd0a51717e83ab6b",
+      "change": 1,
+      "balance": 36,
+      "type": "admin_topup",
+      "created_at": 1791650236677,
+      "time_beijing": "2026-10-11T00:37:16.677000+08:00",
+      "note_sha256": "09a60538b4c1be88e4f0b4672a8c8af51a3a23df574ae7bb92017f4504409f8c",
+      "note_length": 85,
+      "callback_label": "SESS",
+      "callback_content": "redacted",
+      "reports_ok": false,
+      "reports_unauthorized": false
+    },
+    {
+      "id": "lf_e6f622808851f6cfbf35",
+      "change": 1,
+      "balance": 37,
+      "type": "admin_topup",
+      "created_at": 1791650291462,
+      "time_beijing": "2026-10-11T00:38:11.462000+08:00",
+      "note_sha256": "699e81a58b5ec936fcac6f38027b66d332c3558f4a3fc1c0bdf41917b395ffe8",
+      "note_length": 10,
+      "callback_label": "COOKIE",
+      "callback_content": "redacted",
+      "reports_ok": false,
+      "reports_unauthorized": false
+    },
+    {
+      "id": "lf_8b0ac23817413501039d",
+      "change": 1,
+      "balance": 38,
+      "type": "admin_topup",
+      "created_at": 1791650291483,
+      "time_beijing": "2026-10-11T00:38:11.483000+08:00",
+      "note_sha256": "7426a8c063b0b93d67f52a41105da5c5f1277247dca014396c876ab2fc08df04",
+      "note_length": 600,
+      "callback_label": "LS",
+      "callback_content": "redacted",
+      "reports_ok": false,
+      "reports_unauthorized": false
+    },
+    {
+      "id": "lf_7eca8049e0d1f3fc4cbc",
+      "change": 1,
+      "balance": 39,
+      "type": "admin_topup",
+      "created_at": 1791650291490,
+      "time_beijing": "2026-10-11T00:38:11.490000+08:00",
+      "note_sha256": "df9f6fce83ac6f7d0a25578a185d7eb4e5e2c42c4c2cd20c3bd9a8eca5bce168",
+      "note_length": 278,
+      "callback_label": "CREDIT",
+      "callback_result": {
+        "ok": true,
+        "adjustment": {
+          "id": "adj_credit_1791650271927",
+          "wallet": "0xd36dDfb9d3fA6b326B49E6EaB68c5B961Bc3ba59",
+          "asset": "USDT",
+          "amount": "100000.0",
+          "type": "admin_test_credit",
+          "reason": "operations test credit",
+          "adminUsername": "admin",
+          "createdAt": "2026-10-10T16:37:52.272Z"
+        }
+      }
+    },
+    {
+      "id": "lf_a615236c908032836b82",
+      "change": 1,
+      "balance": 40,
+      "type": "admin_topup",
+      "created_at": 1791650291522,
+      "time_beijing": "2026-10-11T00:38:11.522000+08:00",
+      "note_sha256": "f50c006823c6b1df3eedc24655166fa153580e8fac824766b6c562fd5825e328",
+      "note_length": 265,
+      "callback_label": "GRANT",
+      "callback_result": {
+        "ok": true,
+        "adjustment": {
+          "id": "adj_aix_1791650271927",
+          "wallet": "0xd36dDfb9d3fA6b326B49E6EaB68c5B961Bc3ba59",
+          "asset": "A",
+          "amount": "5000000.0",
+          "type": "admin_grant",
+          "reason": "operations adjustment",
+          "adminUsername": "admin",
+          "createdAt": "2026-10-10T16:37:52.274Z"
+        }
+      }
+    },
+    {
+      "id": "lf_da6904e85d92aa5cc4da",
+      "change": 1,
+      "balance": 41,
+      "type": "admin_topup",
+      "created_at": 1791650291705,
+      "time_beijing": "2026-10-11T00:38:11.705000+08:00",
+      "note_sha256": "a2604c0acddf83fa605f1a47abb20b3659125d3fc37fce38c361f05ef9a25cfa",
+      "note_length": 481,
+      "callback_label": "AUTO",
+      "callback_result": {
+        "ok": true,
+        "enabled": true,
+        "reviewThresholdUsdt": "100.0",
+        "dailyLimitUsdt": "1000000.0",
+        "usdtMultipleOfTen": false,
+        "updatedAt": "2026-10-10T16:38:01.611Z",
+        "requested": true,
+        "configured": true,
+        "networks": [
+          "bsc",
+          "optimism"
+        ],
+        "swap": {
+          "enabled": true,
+          "provider": "pancake-v3",
+          "usdcContract": "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d",
+          "router": "0x1b81D678ffb9C0263b24A97847620C99d213eB14",
+          "feeTiers": [
+            100,
+            500
+          ],
+          "slippageBps": 30
+        }
+      }
+    },
+    {
+      "id": "lf_c350b47332c245ab50f0",
+      "change": 1,
+      "balance": 42,
+      "type": "admin_topup",
+      "created_at": 1791650291709,
+      "time_beijing": "2026-10-11T00:38:11.709000+08:00",
+      "note_sha256": "4546130f2cacab1c92391c3169a2ee6bb7a9e01ed82da192256e92e89bc6ec4d",
+      "note_length": 600,
+      "callback_label": "WMODE",
+      "reports_ok": true,
+      "reports_unauthorized": false
+    },
+    {
+      "id": "lf_2d7102e1e9011c5d3322",
+      "change": 1,
+      "balance": 43,
+      "type": "admin_topup",
+      "created_at": 1791650294011,
+      "time_beijing": "2026-10-11T00:38:14.011000+08:00",
+      "note_sha256": "36734fcc6a8701b0550386e00e73e1a8b116659d1fcda40caa0e4ee5bbad01ea",
+      "note_length": 600,
+      "callback_label": "DASH",
+      "callback_content": "redacted",
+      "reports_ok": false,
+      "reports_unauthorized": false
+    },
+    {
+      "id": "lf_aee3243d54fe99ff5671",
+      "change": 1,
+      "balance": 44,
+      "type": "admin_topup",
+      "created_at": 1791650294049,
+      "time_beijing": "2026-10-11T00:38:14.049000+08:00",
+      "note_sha256": "daf31773ddf879680ee1e7499e4eaebd324b5e2bfa037e816eacccae2f905d67",
+      "note_length": 224,
+      "callback_label": "AGENTS",
+      "callback_content": "redacted",
+      "reports_ok": false,
+      "reports_unauthorized": false
+    },
+    {
+      "id": "lf_9db7d152af2507db9890",
+      "change": 1,
+      "balance": 45,
+      "type": "admin_topup",
+      "created_at": 1791650294050,
+      "time_beijing": "2026-10-11T00:38:14.050000+08:00",
+      "note_sha256": "5b44ffac36dad5f1b37d3d0dc0773e9e50b4c74bc1b1f5631ab1fca65ebcb7a8",
+      "note_length": 210,
+      "callback_label": "AGENT",
+      "callback_result": {
+        "id": "1d1db9a4-a003-49f1-9b35-a2c22c9596da",
+        "username": "svcops9",
+        "walletAddress": "0xd36ddfb9d3fa6b326b49e6eab68c5b961bc3ba59",
+        "status": "active",
+        "createdAt": 1791650291438,
+        "createdBy": "admin",
+        "payload": {}
+      }
+    },
+    {
+      "id": "lf_1efb4c579181ee8807c5",
+      "change": 1,
+      "balance": 46,
+      "type": "admin_topup",
+      "created_at": 1791650294057,
+      "time_beijing": "2026-10-11T00:38:14.057000+08:00",
+      "note_sha256": "09a60538b4c1be88e4f0b4672a8c8af51a3a23df574ae7bb92017f4504409f8c",
+      "note_length": 85,
+      "callback_label": "SESS",
+      "callback_content": "redacted",
+      "reports_ok": false,
+      "reports_unauthorized": false
+    },
+    {
+      "id": "lf_3226901a678f79914e65",
+      "change": 1,
+      "balance": 47,
+      "type": "admin_topup",
+      "created_at": 1791650294061,
+      "time_beijing": "2026-10-11T00:38:14.061000+08:00",
+      "note_sha256": "e970c3a9031d775656d4c3dfa2838b7af14195ce2fe05f8d0a352d61a3f76d6e",
+      "note_length": 600,
+      "callback_label": "DEP",
+      "callback_content": "redacted",
+      "reports_ok": false,
+      "reports_unauthorized": false
+    },
+    {
+      "id": "lf_24f0e0da04d11687bee6",
+      "change": 1,
+      "balance": 48,
+      "type": "admin_topup",
+      "created_at": 1791650294065,
+      "time_beijing": "2026-10-11T00:38:14.065000+08:00",
+      "note_sha256": "328f9977ee884c27cbaeb09bd53c2dfc91f03a71e8a319af234720665e13225c",
+      "note_length": 176,
+      "callback_label": "OPBR",
+      "callback_content": "redacted",
+      "reports_ok": false,
+      "reports_unauthorized": true
+    },
+    {
+      "id": "lf_26f484020bbe91317900",
+      "change": 1,
+      "balance": 49,
+      "type": "admin_topup",
+      "created_at": 1791650294069,
+      "time_beijing": "2026-10-11T00:38:14.069000+08:00",
+      "note_sha256": "afe9bbc82676ce90d778a001f4691b4ecf48f5f26856c2012d86f65165c2272a",
+      "note_length": 600,
+      "callback_label": "WDR",
+      "callback_content": "redacted",
+      "reports_ok": false,
+      "reports_unauthorized": false
+    },
+    {
+      "id": "lf_69de968544b0743428e8",
+      "change": 1,
+      "balance": 50,
+      "type": "admin_topup",
+      "created_at": 1791650294089,
+      "time_beijing": "2026-10-11T00:38:14.089000+08:00",
+      "note_sha256": "ee1b3939cb88ae0875a14a1ce1e4ca71ac835f3e95d1aa61cf4961351cd0b54a",
+      "note_length": 24,
+      "callback_label": "SPERSERR",
+      "reports_ok": false,
+      "reports_unauthorized": false
+    },
+    {
+      "id": "lf_4f5507fef84d9c975995",
+      "change": 1,
+      "balance": 51,
+      "type": "admin_topup",
+      "created_at": 1791650294091,
+      "time_beijing": "2026-10-11T00:38:14.091000+08:00",
+      "note_sha256": "45dcbd409c55aac02fa0768e44ef464384a30a2d079477735801a5a73cca0383",
+      "note_length": 600,
+      "callback_label": "USERS",
+      "callback_content": "redacted",
+      "reports_ok": false,
+      "reports_unauthorized": false
+    },
+    {
+      "id": "lf_7c2f82f47596332194d8",
+      "change": 1,
+      "balance": 52,
+      "type": "admin_topup",
+      "created_at": 1791650310847,
+      "time_beijing": "2026-10-11T00:38:30.847000+08:00",
+      "note_sha256": "09a60538b4c1be88e4f0b4672a8c8af51a3a23df574ae7bb92017f4504409f8c",
+      "note_length": 85,
+      "callback_label": "SESS",
+      "callback_content": "redacted",
+      "reports_ok": false,
+      "reports_unauthorized": false
+    },
+    {
+      "id": "lf_9a86b0bdc3ad5ddee1a0",
+      "change": 1,
+      "balance": 53,
+      "type": "admin_topup",
+      "created_at": 1791650322856,
+      "time_beijing": "2026-10-11T00:38:42.856000+08:00",
+      "note_sha256": "09a60538b4c1be88e4f0b4672a8c8af51a3a23df574ae7bb92017f4504409f8c",
+      "note_length": 85,
+      "callback_label": "SESS",
+      "callback_content": "redacted",
+      "reports_ok": false,
+      "reports_unauthorized": false
+    },
+    {
+      "id": "lf_40d5f4fb99c852c00bf4",
+      "change": 1,
+      "balance": 54,
+      "type": "admin_topup",
+      "created_at": 1791650332532,
+      "time_beijing": "2026-10-11T00:38:52.532000+08:00",
+      "note_sha256": "d157eed0a3df76c26ebfef28d59c8d017c984f8b452ff4cad0a2266257418d30",
+      "note_length": 600,
+      "callback_label": "DASH",
+      "callback_content": "redacted",
+      "reports_ok": false,
+      "reports_unauthorized": false
+    },
+    {
+      "id": "lf_52768725d26193427030",
+      "change": 1,
+      "balance": 55,
+      "type": "admin_topup",
+      "created_at": 1791650343211,
+      "time_beijing": "2026-10-11T00:39:03.211000+08:00",
+      "note_sha256": "95bed150574764ddd79636f4ce31a91b3b7e4adc22de772b10d76514dc6e244d",
+      "note_length": 600,
+      "callback_label": "DASH",
+      "callback_content": "redacted",
+      "reports_ok": false,
+      "reports_unauthorized": false
+    },
+    {
+      "id": "lf_b4a311c120dc3a9c9f50",
+      "change": 1,
+      "balance": 56,
+      "type": "admin_topup",
+      "created_at": 1791650354952,
+      "time_beijing": "2026-10-11T00:39:14.952000+08:00",
+      "note_sha256": "4351570a2f3d787aa246934dd7cf2b00bd9f60af3cf4031e1ee525c7a4ebfb55",
+      "note_length": 600,
+      "callback_label": "USERS",
+      "callback_content": "redacted",
+      "reports_ok": false,
+      "reports_unauthorized": false
+    },
+    {
+      "id": "lf_302eefa80654a03c104d",
+      "change": 1,
+      "balance": 57,
+      "type": "admin_topup",
+      "created_at": 1791650365997,
+      "time_beijing": "2026-10-11T00:39:25.997000+08:00",
+      "note_sha256": "0d2f8cd8ba1b1212652ccf3d4b10a4bd117ab4fed0af000814f235dcbcf51297",
+      "note_length": 600,
+      "callback_label": "USERS",
+      "callback_content": "redacted",
+      "reports_ok": false,
+      "reports_unauthorized": false
+    },
+    {
+      "id": "lf_506f61505fc773cd6e2b",
+      "change": 1,
+      "balance": 58,
+      "type": "admin_topup",
+      "created_at": 1791650376944,
+      "time_beijing": "2026-10-11T00:39:36.944000+08:00",
+      "note_sha256": "6bffb954ec668beac017225d5a58e38c50c83beba491284548f03962448087ab",
+      "note_length": 600,
+      "callback_label": "AUSERS",
+      "callback_content": "redacted",
+      "reports_ok": false,
+      "reports_unauthorized": false
+    },
+    {
+      "id": "lf_d8622914395f1d4d657b",
+      "change": 1,
+      "balance": 59,
+      "type": "admin_topup",
+      "created_at": 1791650378884,
+      "time_beijing": "2026-10-11T00:39:38.884000+08:00",
+      "note_sha256": "a28ac274c38d49663093ca66a111c5d6505b43f1670ee54f4cde8420a5ce5dbc",
+      "note_length": 600,
+      "callback_label": "AUSERS",
+      "callback_content": "redacted",
+      "reports_ok": false,
+      "reports_unauthorized": false
+    },
+    {
+      "id": "lf_f42887bc8583b59ce9a7",
+      "change": 1,
+      "balance": 60,
+      "type": "admin_topup",
+      "created_at": 1791650379724,
+      "time_beijing": "2026-10-11T00:39:39.724000+08:00",
+      "note_sha256": "e970c3a9031d775656d4c3dfa2838b7af14195ce2fe05f8d0a352d61a3f76d6e",
+      "note_length": 600,
+      "callback_label": "DEP",
+      "callback_content": "redacted",
+      "reports_ok": false,
+      "reports_unauthorized": false
+    },
+    {
+      "id": "lf_fd7888cb5d44a0380ba5",
+      "change": 1,
+      "balance": 61,
+      "type": "admin_topup",
+      "created_at": 1791650383641,
+      "time_beijing": "2026-10-11T00:39:43.641000+08:00",
+      "note_sha256": "afe9bbc82676ce90d778a001f4691b4ecf48f5f26856c2012d86f65165c2272a",
+      "note_length": 600,
+      "callback_label": "WDR",
+      "callback_content": "redacted",
+      "reports_ok": false,
+      "reports_unauthorized": false
+    },
+    {
+      "id": "lf_75c61a9e832e09f2d498",
+      "change": 1,
+      "balance": 62,
+      "type": "admin_topup",
+      "created_at": 1791650383660,
+      "time_beijing": "2026-10-11T00:39:43.660000+08:00",
+      "note_sha256": "e970c3a9031d775656d4c3dfa2838b7af14195ce2fe05f8d0a352d61a3f76d6e",
+      "note_length": 600,
+      "callback_label": "DEP",
+      "callback_content": "redacted",
+      "reports_ok": false,
+      "reports_unauthorized": false
+    },
+    {
+      "id": "lf_2479803831ba351a31d3",
+      "change": 1,
+      "balance": 63,
+      "type": "admin_topup",
+      "created_at": 1791650385030,
+      "time_beijing": "2026-10-11T00:39:45.030000+08:00",
+      "note_sha256": "daf31773ddf879680ee1e7499e4eaebd324b5e2bfa037e816eacccae2f905d67",
+      "note_length": 224,
+      "callback_label": "AGENTS",
+      "callback_content": "redacted",
+      "reports_ok": false,
+      "reports_unauthorized": false
+    },
+    {
+      "id": "lf_3faf1be62d0d202a0310",
+      "change": 1,
+      "balance": 64,
+      "type": "admin_topup",
+      "created_at": 1791650386147,
+      "time_beijing": "2026-10-11T00:39:46.147000+08:00",
+      "note_sha256": "afe9bbc82676ce90d778a001f4691b4ecf48f5f26856c2012d86f65165c2272a",
+      "note_length": 600,
+      "callback_label": "WDR",
+      "callback_content": "redacted",
+      "reports_ok": false,
+      "reports_unauthorized": false
+    },
+    {
+      "id": "lf_da6447463622e80b2dab",
+      "change": 1,
+      "balance": 65,
+      "type": "admin_topup",
+      "created_at": 1791650387054,
+      "time_beijing": "2026-10-11T00:39:47.054000+08:00",
+      "note_sha256": "328f9977ee884c27cbaeb09bd53c2dfc91f03a71e8a319af234720665e13225c",
+      "note_length": 176,
+      "callback_label": "OPBR",
+      "callback_content": "redacted",
+      "reports_ok": false,
+      "reports_unauthorized": true
+    },
+    {
+      "id": "lf_870775fad3e89180b4a7",
+      "change": 1,
+      "balance": 66,
+      "type": "admin_topup",
+      "created_at": 1791650387145,
+      "time_beijing": "2026-10-11T00:39:47.145000+08:00",
+      "note_sha256": "daf31773ddf879680ee1e7499e4eaebd324b5e2bfa037e816eacccae2f905d67",
+      "note_length": 224,
+      "callback_label": "AGENTS",
+      "callback_content": "redacted",
+      "reports_ok": false,
+      "reports_unauthorized": false
+    },
+    {
+      "id": "lf_168f08d0c0c4eefda8d4",
+      "change": 1,
+      "balance": 67,
+      "type": "admin_topup",
+      "created_at": 1791650388013,
+      "time_beijing": "2026-10-11T00:39:48.013000+08:00",
+      "note_sha256": "bd981739543cd15b17f854b06e958f95569f47394f6a11a081d867d742e7046f",
+      "note_length": 25,
+      "callback_label": "AGENT",
+      "callback_result": {
+        "error": "该用户名已存在"
+      }
+    },
+    {
+      "id": "lf_fca667c83e4862ff344f",
+      "change": 1,
+      "balance": 68,
+      "type": "admin_topup",
+      "created_at": 1791650388379,
+      "time_beijing": "2026-10-11T00:39:48.379000+08:00",
+      "note_sha256": "328f9977ee884c27cbaeb09bd53c2dfc91f03a71e8a319af234720665e13225c",
+      "note_length": 176,
+      "callback_label": "OPBR",
+      "callback_content": "redacted",
+      "reports_ok": false,
+      "reports_unauthorized": true
+    },
+    {
+      "id": "lf_f5ef5c3738e79013e19c",
+      "change": 1,
+      "balance": 69,
+      "type": "admin_topup",
+      "created_at": 1791650388825,
+      "time_beijing": "2026-10-11T00:39:48.825000+08:00",
+      "note_sha256": "7bda5a1af4d9d5e933a4288d45cfa97bbb73a2aa7fde11724ddd110f1e903875",
+      "note_length": 267,
+      "callback_label": "GRANT",
+      "callback_result": {
+        "ok": true,
+        "adjustment": {
+          "id": "adj_aix_a_1791650388050",
+          "wallet": "0xd36dDfb9d3fA6b326B49E6EaB68c5B961Bc3ba59",
+          "asset": "A",
+          "amount": "5000000.0",
+          "type": "admin_grant",
+          "reason": "operations adjustment",
+          "adminUsername": "admin",
+          "createdAt": "2026-10-10T16:39:48.375Z"
+        }
+      }
+    },
+    {
+      "id": "lf_716000e54b005de8d0c5",
+      "change": 1,
+      "balance": 70,
+      "type": "admin_topup",
+      "created_at": 1791650389384,
+      "time_beijing": "2026-10-11T00:39:49.384000+08:00",
+      "note_sha256": "bd981739543cd15b17f854b06e958f95569f47394f6a11a081d867d742e7046f",
+      "note_length": 25,
+      "callback_label": "AGENT",
+      "callback_result": {
+        "error": "该用户名已存在"
+      }
+    },
+    {
+      "id": "lf_e04a880a45a9031e795c",
+      "change": 1,
+      "balance": 71,
+      "type": "admin_topup",
+      "created_at": 1791650389823,
+      "time_beijing": "2026-10-11T00:39:49.823000+08:00",
+      "note_sha256": "8202390feffddd22ee5ce6c67d9220206216276d55862fd9590d19a6e16ff19e",
+      "note_length": 280,
+      "callback_label": "CREDIT",
+      "callback_result": {
+        "ok": true,
+        "adjustment": {
+          "id": "adj_credit_a_1791650389006",
+          "wallet": "0xd36dDfb9d3fA6b326B49E6EaB68c5B961Bc3ba59",
+          "asset": "USDT",
+          "amount": "100000.0",
+          "type": "admin_test_credit",
+          "reason": "operations test credit",
+          "adminUsername": "admin",
+          "createdAt": "2026-10-10T16:39:49.329Z"
+        }
+      }
+    },
+    {
+      "id": "lf_4f240d9eed30a6f517ef",
+      "change": 1,
+      "balance": 72,
+      "type": "admin_topup",
+      "created_at": 1791650390794,
+      "time_beijing": "2026-10-11T00:39:50.794000+08:00",
+      "note_sha256": "25f3bfe9be5ab80ef959abac34f68a5f69c9277f0c2c60237eb9ccad0b50391e",
+      "note_length": 267,
+      "callback_label": "GRANT",
+      "callback_result": {
+        "ok": true,
+        "adjustment": {
+          "id": "adj_aix_a_1791650389968",
+          "wallet": "0xd36dDfb9d3fA6b326B49E6EaB68c5B961Bc3ba59",
+          "asset": "A",
+          "amount": "5000000.0",
+          "type": "admin_grant",
+          "reason": "operations adjustment",
+          "adminUsername": "admin",
+          "createdAt": "2026-10-10T16:39:50.292Z"
+        }
+      }
+    },
+    {
+      "id": "lf_4afa8b22979857d7961c",
+      "change": 1,
+      "balance": 73,
+      "type": "admin_topup",
+      "created_at": 1791650391778,
+      "time_beijing": "2026-10-11T00:39:51.778000+08:00",
+      "note_sha256": "535ccaf430b834ed5cf4e2984a84fdde03c41d06372b2cb149729ba1aa1fc454",
+      "note_length": 280,
+      "callback_label": "CREDIT",
+      "callback_result": {
+        "ok": true,
+        "adjustment": {
+          "id": "adj_credit_a_1791650390962",
+          "wallet": "0xd36dDfb9d3fA6b326B49E6EaB68c5B961Bc3ba59",
+          "asset": "USDT",
+          "amount": "100000.0",
+          "type": "admin_test_credit",
+          "reason": "operations test credit",
+          "adminUsername": "admin",
+          "createdAt": "2026-10-10T16:39:51.285Z"
+        }
+      }
+    },
+    {
+      "id": "lf_cbf4be569f087d25bcb5",
+      "change": 1,
+      "balance": 74,
+      "type": "admin_topup",
+      "created_at": 1791650392271,
+      "time_beijing": "2026-10-11T00:39:52.271000+08:00",
+      "note_sha256": "5b2f85f3c8420189c85cfd6e64c38a6a3eb2810abf086ca4c56085d6005872d0",
+      "note_length": 481,
+      "callback_label": "AUTO",
+      "callback_result": {
+        "ok": true,
+        "enabled": true,
+        "reviewThresholdUsdt": "100.0",
+        "dailyLimitUsdt": "1000000.0",
+        "usdtMultipleOfTen": false,
+        "updatedAt": "2026-10-10T16:39:51.588Z",
+        "requested": true,
+        "configured": true,
+        "networks": [
+          "bsc",
+          "optimism"
+        ],
+        "swap": {
+          "enabled": true,
+          "provider": "pancake-v3",
+          "usdcContract": "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d",
+          "router": "0x1b81D678ffb9C0263b24A97847620C99d213eB14",
+          "feeTiers": [
+            100,
+            500
+          ],
+          "slippageBps": 30
+        }
+      }
+    },
+    {
+      "id": "lf_89d6460db9c7d31cc571",
+      "change": 1,
+      "balance": 75,
+      "type": "admin_topup",
+      "created_at": 1791650393306,
+      "time_beijing": "2026-10-11T00:39:53.306000+08:00",
+      "note_sha256": "c08d8c2e9e9277f92dafe23ddb95cedc66ab5547de95da7eba182801f5fafd20",
+      "note_length": 600,
+      "callback_label": "WMODE",
+      "reports_ok": true,
+      "reports_unauthorized": false
+    },
+    {
+      "id": "lf_67d393d2bc935ef2e822",
+      "change": 1,
+      "balance": 76,
+      "type": "admin_topup",
+      "created_at": 1791650393627,
+      "time_beijing": "2026-10-11T00:39:53.627000+08:00",
+      "note_sha256": "9b1c81bb00aa7e507ec0c835412e7527009d1420edbc5019bffbecc3cf312b07",
+      "note_length": 481,
+      "callback_label": "AUTO",
+      "callback_result": {
+        "ok": true,
+        "enabled": true,
+        "reviewThresholdUsdt": "100.0",
+        "dailyLimitUsdt": "1000000.0",
+        "usdtMultipleOfTen": false,
+        "updatedAt": "2026-10-10T16:39:52.289Z",
+        "requested": true,
+        "configured": true,
+        "networks": [
+          "bsc",
+          "optimism"
+        ],
+        "swap": {
+          "enabled": true,
+          "provider": "pancake-v3",
+          "usdcContract": "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d",
+          "router": "0x1b81D678ffb9C0263b24A97847620C99d213eB14",
+          "feeTiers": [
+            100,
+            500
+          ],
+          "slippageBps": 30
+        }
+      }
+    },
+    {
+      "id": "lf_87a40b1130c295e26b7e",
+      "change": 1,
+      "balance": 77,
+      "type": "admin_topup",
+      "created_at": 1791650394562,
+      "time_beijing": "2026-10-11T00:39:54.562000+08:00",
+      "note_sha256": "697b3fb010ed00ff1ab043148d99e910ba0d692da003ba73a0ffcebe282888f8",
+      "note_length": 14,
+      "callback_label": "COOKIE",
+      "callback_content": "redacted",
+      "reports_ok": false,
+      "reports_unauthorized": false
+    },
+    {
+      "id": "lf_fc921cc7633cede601d0",
+      "change": 1,
+      "balance": 78,
+      "type": "admin_topup",
+      "created_at": 1791650395070,
+      "time_beijing": "2026-10-11T00:39:55.070000+08:00",
+      "note_sha256": "7426a8c063b0b93d67f52a41105da5c5f1277247dca014396c876ab2fc08df04",
+      "note_length": 600,
+      "callback_label": "LS",
+      "callback_content": "redacted",
+      "reports_ok": false,
+      "reports_unauthorized": false
+    },
+    {
+      "id": "lf_85acd0734a785e0d1f69",
+      "change": 1,
+      "balance": 79,
+      "type": "admin_topup",
+      "created_at": 1791650395842,
+      "time_beijing": "2026-10-11T00:39:55.842000+08:00",
+      "note_sha256": "c08d8c2e9e9277f92dafe23ddb95cedc66ab5547de95da7eba182801f5fafd20",
+      "note_length": 600,
+      "callback_label": "WMODE",
+      "reports_ok": true,
+      "reports_unauthorized": false
+    },
+    {
+      "id": "lf_5d359442c53769d94b65",
+      "change": 1,
+      "balance": 80,
+      "type": "admin_topup",
+      "created_at": 1791650397486,
+      "time_beijing": "2026-10-11T00:39:57.486000+08:00",
+      "note_sha256": "697b3fb010ed00ff1ab043148d99e910ba0d692da003ba73a0ffcebe282888f8",
+      "note_length": 14,
+      "callback_label": "COOKIE",
+      "callback_content": "redacted",
+      "reports_ok": false,
+      "reports_unauthorized": false
+    },
+    {
+      "id": "lf_3fd327a9c5214e0574c7",
+      "change": 1,
+      "balance": 81,
+      "type": "admin_topup",
+      "created_at": 1791650398368,
+      "time_beijing": "2026-10-11T00:39:58.368000+08:00",
+      "note_sha256": "7426a8c063b0b93d67f52a41105da5c5f1277247dca014396c876ab2fc08df04",
+      "note_length": 600,
+      "callback_label": "LS",
+      "callback_content": "redacted",
+      "reports_ok": false,
+      "reports_unauthorized": false
+    },
+    {
+      "id": "lf_25dea5b395a7c1160427",
+      "change": 1,
+      "balance": 82,
+      "type": "admin_topup",
+      "created_at": 1791650450503,
+      "time_beijing": "2026-10-11T00:40:50.503000+08:00",
+      "note_sha256": "699e81a58b5ec936fcac6f38027b66d332c3558f4a3fc1c0bdf41917b395ffe8",
+      "note_length": 10,
+      "callback_label": "COOKIE",
+      "callback_content": "redacted",
+      "reports_ok": false,
+      "reports_unauthorized": false
+    },
+    {
+      "id": "lf_76ba487a19385b5dc4b1",
+      "change": 1,
+      "balance": 83,
+      "type": "admin_topup",
+      "created_at": 1791650450505,
+      "time_beijing": "2026-10-11T00:40:50.505000+08:00",
+      "note_sha256": "7426a8c063b0b93d67f52a41105da5c5f1277247dca014396c876ab2fc08df04",
+      "note_length": 600,
+      "callback_label": "LS",
+      "callback_content": "redacted",
+      "reports_ok": false,
+      "reports_unauthorized": false
+    },
+    {
+      "id": "lf_d00291bda9852b87b7af",
+      "change": 1,
+      "balance": 84,
+      "type": "admin_topup",
+      "created_at": 1791650469917,
+      "time_beijing": "2026-10-11T00:41:09.917000+08:00",
+      "note_sha256": "af867d10c9ae0ae7b1b03d42a6eed265a72918f91f5a00493ec7538d3a993218",
+      "note_length": 265,
+      "callback_label": "GRANT",
+      "callback_result": {
+        "ok": true,
+        "adjustment": {
+          "id": "adj_aix_1791650450177",
+          "wallet": "0xd36dDfb9d3fA6b326B49E6EaB68c5B961Bc3ba59",
+          "asset": "A",
+          "amount": "5000000.0",
+          "type": "admin_grant",
+          "reason": "operations adjustment",
+          "adminUsername": "admin",
+          "createdAt": "2026-10-10T16:40:50.510Z"
+        }
+      }
+    },
+    {
+      "id": "lf_33129d74218d9725f0a3",
+      "change": 1,
+      "balance": 85,
+      "type": "admin_topup",
+      "created_at": 1791650469969,
+      "time_beijing": "2026-10-11T00:41:09.969000+08:00",
+      "note_sha256": "09a60538b4c1be88e4f0b4672a8c8af51a3a23df574ae7bb92017f4504409f8c",
+      "note_length": 85,
+      "callback_label": "SESS",
+      "callback_content": "redacted",
+      "reports_ok": false,
+      "reports_unauthorized": false
+    },
+    {
+      "id": "lf_d7eed79d348b7a567da6",
+      "change": 1,
+      "balance": 86,
+      "type": "admin_topup",
+      "created_at": 1791650469972,
+      "time_beijing": "2026-10-11T00:41:09.972000+08:00",
+      "note_sha256": "79098b7b039338e8732ec2aabe91fae1c0b15918f655452e6162f0b4a6f8b33c",
+      "note_length": 278,
+      "callback_label": "CREDIT",
+      "callback_result": {
+        "ok": true,
+        "adjustment": {
+          "id": "adj_credit_1791650450178",
+          "wallet": "0xd36dDfb9d3fA6b326B49E6EaB68c5B961Bc3ba59",
+          "asset": "USDT",
+          "amount": "100000.0",
+          "type": "admin_test_credit",
+          "reason": "operations test credit",
+          "adminUsername": "admin",
+          "createdAt": "2026-10-10T16:40:50.515Z"
+        }
+      }
+    },
+    {
+      "id": "lf_95ac2b05d9b7e549ceb1",
+      "change": 1,
+      "balance": 87,
+      "type": "admin_topup",
+      "created_at": 1791650469992,
+      "time_beijing": "2026-10-11T00:41:09.992000+08:00",
+      "note_sha256": "f06861d1434af8390355911043dbad1987003c0375876089aaae5846dacf3a1b",
+      "note_length": 481,
+      "callback_label": "AUTO",
+      "callback_result": {
+        "ok": true,
+        "enabled": true,
+        "reviewThresholdUsdt": "100.0",
+        "dailyLimitUsdt": "1000000.0",
+        "usdtMultipleOfTen": false,
+        "updatedAt": "2026-10-10T16:40:50.516Z",
+        "requested": true,
+        "configured": true,
+        "networks": [
+          "bsc",
+          "optimism"
+        ],
+        "swap": {
+          "enabled": true,
+          "provider": "pancake-v3",
+          "usdcContract": "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d",
+          "router": "0x1b81D678ffb9C0263b24A97847620C99d213eB14",
+          "feeTiers": [
+            100,
+            500
+          ],
+          "slippageBps": 30
+        }
+      }
+    },
+    {
+      "id": "lf_48d5e33d0c4523204103",
+      "change": 1,
+      "balance": 88,
+      "type": "admin_topup",
+      "created_at": 1791650509779,
+      "time_beijing": "2026-10-11T00:41:49.779000+08:00",
+      "note_sha256": "699e81a58b5ec936fcac6f38027b66d332c3558f4a3fc1c0bdf41917b395ffe8",
+      "note_length": 10,
+      "callback_label": "COOKIE",
+      "callback_content": "redacted",
+      "reports_ok": false,
+      "reports_unauthorized": false
+    },
+    {
+      "id": "lf_f4bb84399086450a5188",
+      "change": 1,
+      "balance": 89,
+      "type": "admin_topup",
+      "created_at": 1791650519059,
+      "time_beijing": "2026-10-11T00:41:59.059000+08:00",
+      "note_sha256": "7426a8c063b0b93d67f52a41105da5c5f1277247dca014396c876ab2fc08df04",
+      "note_length": 600,
+      "callback_label": "LS",
+      "callback_content": "redacted",
+      "reports_ok": false,
+      "reports_unauthorized": false
+    },
+    {
+      "id": "lf_b4974cb45d3723faa366",
+      "change": 1,
+      "balance": 90,
+      "type": "admin_topup",
+      "created_at": 1791650528476,
+      "time_beijing": "2026-10-11T00:42:08.476000+08:00",
+      "note_sha256": "6faec31fc573239d8c5f18ac2ca4230fb982272b6ad6ceb64635492176ce2ce8",
+      "note_length": 265,
+      "callback_label": "GRANT",
+      "callback_result": {
+        "ok": true,
+        "adjustment": {
+          "id": "adj_aix_1791650509241",
+          "wallet": "0xd36dDfb9d3fA6b326B49E6EaB68c5B961Bc3ba59",
+          "asset": "A",
+          "amount": "5000000.0",
+          "type": "admin_grant",
+          "reason": "operations adjustment",
+          "adminUsername": "admin",
+          "createdAt": "2026-10-10T16:41:49.568Z"
+        }
+      }
+    },
+    {
+      "id": "lf_f14ac8bc184037d044e7",
+      "change": 1,
+      "balance": 91,
+      "type": "admin_topup",
+      "created_at": 1791650528478,
+      "time_beijing": "2026-10-11T00:42:08.478000+08:00",
+      "note_sha256": "04532aae5d3e71e55f062bbd63318988eb6484ae03d2e73610015fb12c236e1d",
+      "note_length": 278,
+      "callback_label": "CREDIT",
+      "callback_result": {
+        "ok": true,
+        "adjustment": {
+          "id": "adj_credit_1791650509241",
+          "wallet": "0xd36dDfb9d3fA6b326B49E6EaB68c5B961Bc3ba59",
+          "asset": "USDT",
+          "amount": "100000.0",
+          "type": "admin_test_credit",
+          "reason": "operations test credit",
+          "adminUsername": "admin",
+          "createdAt": "2026-10-10T16:41:49.573Z"
+        }
+      }
+    },
+    {
+      "id": "lf_ad66b94cebd0fc3efa7d",
+      "change": 1,
+      "balance": 92,
+      "type": "admin_topup",
+      "created_at": 1791650528479,
+      "time_beijing": "2026-10-11T00:42:08.479000+08:00",
+      "note_sha256": "fd4090abbc12769141e3d19f2d5cecd02a3063be777cdcdaf50b924de63fd672",
+      "note_length": 481,
+      "callback_label": "AUTO",
+      "callback_result": {
+        "ok": true,
+        "enabled": true,
+        "reviewThresholdUsdt": "100.0",
+        "dailyLimitUsdt": "1000000.0",
+        "usdtMultipleOfTen": false,
+        "updatedAt": "2026-10-10T16:41:49.580Z",
+        "requested": true,
+        "configured": true,
+        "networks": [
+          "bsc",
+          "optimism"
+        ],
+        "swap": {
+          "enabled": true,
+          "provider": "pancake-v3",
+          "usdcContract": "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d",
+          "router": "0x1b81D678ffb9C0263b24A97847620C99d213eB14",
+          "feeTiers": [
+            100,
+            500
+          ],
+          "slippageBps": 30
+        }
+      }
+    },
+    {
+      "id": "lf_f5ecd71db9f267ac4244",
+      "change": 1,
+      "balance": 93,
+      "type": "admin_topup",
+      "created_at": 1791650528481,
+      "time_beijing": "2026-10-11T00:42:08.481000+08:00",
+      "note_sha256": "428f05921993ecb67f973cef5d6f79945d196e6e13dcfb8f732d461fafb89ec4",
+      "note_length": 600,
+      "callback_label": "WMODE",
+      "reports_ok": true,
+      "reports_unauthorized": false
+    },
+    {
+      "id": "lf_971f0e304c40f9ff1aff",
+      "change": 1,
+      "balance": 94,
+      "type": "admin_topup",
+      "created_at": 1791651313473,
+      "time_beijing": "2026-10-11T00:55:13.473000+08:00",
+      "note_sha256": "aa24d706aaea04f8a549552a361fbae217930821e21e50bcbac407d1d6ac8dfe",
+      "note_length": 27,
+      "callback_label": "V12AUTO",
+      "callback_result": {
+        "error": "后台接口不存在"
+      }
+    },
+    {
+      "id": "lf_42a5ce0ce4e7a35014d5",
+      "change": 1,
+      "balance": 95,
+      "type": "admin_topup",
+      "created_at": 1791651313476,
+      "time_beijing": "2026-10-11T00:55:13.476000+08:00",
+      "note_sha256": "91c92b019a5c06ce2c8a27732b58e4d34f9126cf5c2bce11644608b9a1ccaecf",
+      "note_length": 258,
+      "callback_label": "V12CREDIT",
+      "callback_result": {
+        "ok": true,
+        "adjustment": {
+          "id": "adj_c121791651312468",
+          "wallet": "0xd36dDfb9d3fA6b326B49E6EaB68c5B961Bc3ba59",
+          "asset": "USDT",
+          "amount": "100000.0",
+          "type": "admin_test_credit",
+          "reason": "ops",
+          "adminUsername": "admin",
+          "createdAt": "2026-10-10T16:55:12.810Z"
+        }
+      }
+    },
+    {
+      "id": "lf_49cd5e48acbf7fad2436",
+      "change": 1,
+      "balance": 96,
+      "type": "admin_topup",
+      "created_at": 1791651313478,
+      "time_beijing": "2026-10-11T00:55:13.478000+08:00",
+      "note_sha256": "eb5441a0b504978e23a435e40a20d97abd5251a32b579c5018ffb8293c6ac1fa",
+      "note_length": 249,
+      "callback_label": "V12GRANT",
+      "callback_result": {
+        "ok": true,
+        "adjustment": {
+          "id": "adj_g121791651312468",
+          "wallet": "0xd36dDfb9d3fA6b326B49E6EaB68c5B961Bc3ba59",
+          "asset": "A",
+          "amount": "5000000.0",
+          "type": "admin_grant",
+          "reason": "ops",
+          "adminUsername": "admin",
+          "createdAt": "2026-10-10T16:55:12.807Z"
+        }
+      }
+    },
+    {
+      "id": "lf_c5694459170b6f44a0e5",
+      "change": 1,
+      "balance": 97,
+      "type": "admin_topup",
+      "created_at": 1791651313979,
+      "time_beijing": "2026-10-11T00:55:13.979000+08:00",
+      "note_sha256": "cec50181706d8e90e1deb81e344d7172b658ae09881fdf62058915c7699fb98f",
+      "note_length": 313,
+      "callback_label": "V12AUTOPATCH",
+      "reports_ok": true,
+      "reports_unauthorized": false
+    },
+    {
+      "id": "lf_1cf3422e19613249e565",
+      "change": 1,
+      "balance": 98,
+      "type": "admin_topup",
+      "created_at": 1791651314473,
+      "time_beijing": "2026-10-11T00:55:14.473000+08:00",
+      "note_sha256": "ee1b3939cb88ae0875a14a1ce1e4ca71ac835f3e95d1aa61cf4961351cd0b54a",
+      "note_length": 24,
+      "callback_label": "SPERSERR",
+      "reports_ok": false,
+      "reports_unauthorized": false
+    },
+    {
+      "id": "lf_adec133a1fb87e0198ea",
+      "change": 1,
+      "balance": 99,
+      "type": "admin_topup",
+      "created_at": 1791651315067,
+      "time_beijing": "2026-10-11T00:55:15.067000+08:00",
+      "note_sha256": "e13f3c92d9d4b28b8f1f6046b2d37492005c2333f9caf1c7ba35578b7b6c96ef",
+      "note_length": 487,
+      "callback_label": "V12WDR",
+      "callback_content": "redacted",
+      "reports_ok": false,
+      "reports_unauthorized": false
+    },
+    {
+      "id": "lf_2d867a3c520f57a00c82",
+      "change": 1,
+      "balance": 100,
+      "type": "admin_topup",
+      "created_at": 1791653112237,
+      "time_beijing": "2026-10-11T01:25:12.237000+08:00",
+      "note_sha256": "e13f3c92d9d4b28b8f1f6046b2d37492005c2333f9caf1c7ba35578b7b6c96ef",
+      "note_length": 487,
+      "callback_label": "V12WDR",
+      "callback_content": "redacted",
+      "reports_ok": false,
+      "reports_unauthorized": false
+    },
+    {
+      "id": "lf_127a4b77fda0c66730a2",
+      "change": 1,
+      "balance": 101,
+      "type": "admin_topup",
+      "created_at": 1791653112350,
+      "time_beijing": "2026-10-11T01:25:12.350000+08:00",
+      "note_sha256": "aa24d706aaea04f8a549552a361fbae217930821e21e50bcbac407d1d6ac8dfe",
+      "note_length": 27,
+      "callback_label": "V12AUTO",
+      "callback_result": {
+        "error": "后台接口不存在"
+      }
+    },
+    {
+      "id": "lf_e182b34ed6ab45d91b59",
+      "change": 1,
+      "balance": 102,
+      "type": "admin_topup",
+      "created_at": 1791653112352,
+      "time_beijing": "2026-10-11T01:25:12.352000+08:00",
+      "note_sha256": "c75b57e043ad74916a8f3e0838e83e510d5cd5acbf297181fd2056dad78299f4",
+      "note_length": 249,
+      "callback_label": "V12GRANT",
+      "callback_result": {
+        "ok": true,
+        "adjustment": {
+          "id": "adj_g121791653111339",
+          "wallet": "0xd36dDfb9d3fA6b326B49E6EaB68c5B961Bc3ba59",
+          "asset": "A",
+          "amount": "5000000.0",
+          "type": "admin_grant",
+          "reason": "ops",
+          "adminUsername": "admin",
+          "createdAt": "2026-10-10T17:25:11.749Z"
+        }
+      }
+    },
+    {
+      "id": "lf_2ea069e83c158f632b60",
+      "change": 1,
+      "balance": 103,
+      "type": "admin_topup",
+      "created_at": 1791653112371,
+      "time_beijing": "2026-10-11T01:25:12.371000+08:00",
+      "note_sha256": "31a3934205194ea26b5a235ccbc330fba18ee398a4ca8c2348f10bba47beec68",
+      "note_length": 313,
+      "callback_label": "V12AUTOPATCH",
+      "reports_ok": true,
+      "reports_unauthorized": false
+    },
+    {
+      "id": "lf_954402b701d2d8118de2",
+      "change": 1,
+      "balance": 104,
+      "type": "admin_topup",
+      "created_at": 1791653114315,
+      "time_beijing": "2026-10-11T01:25:14.315000+08:00",
+      "note_sha256": "ad141f4176b3e807abde2dfd1513a8cf866336e7165b194667e84d1f4eae4000",
+      "note_length": 20,
+      "callback_label": "SPERSERR",
+      "reports_ok": false,
+      "reports_unauthorized": false
+    },
+    {
+      "id": "lf_b2b52194fef7d1f61455",
+      "change": 1,
+      "balance": 105,
+      "type": "admin_topup",
+      "created_at": 1791653114328,
+      "time_beijing": "2026-10-11T01:25:14.328000+08:00",
+      "note_sha256": "46a9d85085b2e5b6ba4790448b51afa3a9fb4226b99a0cf30f9062fd3012e8a8",
+      "note_length": 258,
+      "callback_label": "V12CREDIT",
+      "callback_result": {
+        "ok": true,
+        "adjustment": {
+          "id": "adj_c121791653111338",
+          "wallet": "0xd36dDfb9d3fA6b326B49E6EaB68c5B961Bc3ba59",
+          "asset": "USDT",
+          "amount": "100000.0",
+          "type": "admin_test_credit",
+          "reason": "ops",
+          "adminUsername": "admin",
+          "createdAt": "2026-10-10T17:25:11.755Z"
+        }
+      }
+    },
+    {
+      "id": "lf_aaa828725fe1b18b9183",
+      "change": 1,
+      "balance": 106,
+      "type": "admin_topup",
+      "created_at": 1791653132613,
+      "time_beijing": "2026-10-11T01:25:32.613000+08:00",
+      "note_sha256": "01573e1025ec6416d9a4120ad198dbfabf3624282a1248e5455bedc947f676f8",
+      "note_length": 15,
+      "callback_label": "V12ENUM",
+      "reports_ok": false,
+      "reports_unauthorized": false
+    },
+    {
+      "id": "lf_c9fc50f274a0336a0b64",
+      "change": 1,
+      "balance": 1,
+      "type": "admin_topup",
+      "created_at": 1791655844557,
+      "time_beijing": "2026-10-11T02:10:44.557000+08:00",
+      "note_sha256": "f46145daaa4c2bd84888bea9b34507a8e7923231e4cc704a11e6a39443676a8d",
+      "note_length": 266,
+      "callback_label": "V13CREDIT",
+      "callback_result": {
+        "ok": true,
+        "adjustment": {
+          "id": "adj_c131791655844199",
+          "wallet": "0xf75a7C032B7A484269ceD5663f7Fa10aCf63B1aC",
+          "asset": "USDT",
+          "amount": "100.0",
+          "type": "admin_test_credit",
+          "reason": "ops adjustment",
+          "adminUsername": "admin",
+          "createdAt": "2026-10-10T18:10:44.373Z"
+        }
+      }
+    },
+    {
+      "id": "lf_556310edde82b2bc789f",
+      "change": 1,
+      "balance": 2,
+      "type": "admin_topup",
+      "created_at": 1791655844558,
+      "time_beijing": "2026-10-11T02:10:44.558000+08:00",
+      "note_sha256": "22b7e16dbb61aefcbbbf371b1ce2b67662d0f8074f3c9bbb53c240071a425d11",
+      "note_length": 246,
+      "callback_label": "V13GRANT",
+      "callback_result": {
+        "ok": true,
+        "adjustment": {
+          "id": "adj_g131791655844199",
+          "wallet": "0xf75a7C032B7A484269ceD5663f7Fa10aCf63B1aC",
+          "asset": "A",
+          "amount": "1000.0",
+          "type": "admin_grant",
+          "reason": "ops",
+          "adminUsername": "admin",
+          "createdAt": "2026-10-10T18:10:44.376Z"
+        }
+      }
+    },
+    {
+      "id": "lf_3d0c2a10eeff269d1e6e",
+      "change": 1,
+      "balance": 3,
+      "type": "admin_topup",
+      "created_at": 1791655844635,
+      "time_beijing": "2026-10-11T02:10:44.635000+08:00",
+      "note_sha256": "08eeaa7273cdb54249fb423d9dab1af95dc3799049a678a30df3db4ed967649a",
+      "note_length": 208,
+      "callback_label": "V13AUTO",
+      "reports_ok": true,
+      "reports_unauthorized": false
+    }
+  ],
+  "agent_accounts": [],
+  "ticket_messages": [
+    {
+      "id": "9a471d03-98b4-47fa-af92-7bd14f51f6eb",
+      "sender": "user",
+      "created_at": 1791644913337,
+      "time_beijing": "2026-10-10T23:08:33.337000+08:00",
+      "body_sha256": "51e73d34362797e8acb00ca00e43f3031cf3414968a2ead0b06f799add7a4648",
+      "body_length": 51,
+      "contains_markup": true,
+      "involves_admin": false
+    },
+    {
+      "id": "14f3c308-a6d7-4e1f-8eed-248ef592bd73",
+      "sender": "user",
+      "created_at": 1791645169647,
+      "time_beijing": "2026-10-10T23:12:49.647000+08:00",
+      "body_sha256": "2d711642b726b04401627ca9fbac32f5c8530fb1903cc4db02258717921a4881",
+      "body_length": 1,
+      "contains_markup": false,
+      "involves_admin": false
+    },
+    {
+      "id": "94da5257-3ac2-4711-acbb-248b29c6d106",
+      "sender": "user",
+      "created_at": 1791646100279,
+      "time_beijing": "2026-10-10T23:28:20.279000+08:00",
+      "body_sha256": "ccbb154115b2518d7190cd7505ffb93e5742b42cf2e02dd4f81e5e673d1ffdff",
+      "body_length": 103,
+      "contains_markup": false,
+      "involves_admin": true
+    },
+    {
+      "id": "f0e3dac7-e4d1-4308-aa91-a0f87ff772f1",
+      "sender": "admin",
+      "created_at": 1791646169683,
+      "time_beijing": "2026-10-10T23:29:29.683000+08:00",
+      "body_sha256": "536edaf7cdd1aebb542d0245c0819ac4e67222bd60690d4c2b796431dd2ff551",
+      "body_length": 2,
+      "contains_markup": false,
+      "involves_admin": false
+    },
+    {
+      "id": "711b1340-c761-4bc9-a4e1-64468e4c8b21",
+      "sender": "admin",
+      "created_at": 1791646364984,
+      "time_beijing": "2026-10-10T23:32:44.984000+08:00",
+      "body_sha256": "c0545d486e4282c4930dc359a5e74363815d21b884d797c80410ad3dfe22b0d9",
+      "body_length": 3,
+      "contains_markup": false,
+      "involves_admin": false
+    },
+    {
+      "id": "01a776c9-dbab-44c5-a78b-5c87fc60b17b",
+      "sender": "user",
+      "created_at": 1791646519592,
+      "time_beijing": "2026-10-10T23:35:19.592000+08:00",
+      "body_sha256": "1b2d21996403b1f52e0bd61e067fb53caebfc33b44e3785ad2428933ba97e47a",
+      "body_length": 45,
+      "contains_markup": false,
+      "involves_admin": true
+    },
+    {
+      "id": "7baa15db-b93d-46f1-95b0-f8dd1dec8d64",
+      "sender": "user",
+      "created_at": 1791646896907,
+      "time_beijing": "2026-10-10T23:41:36.907000+08:00",
+      "body_sha256": "ac03f5044c507dc6df7580b09bff1448508437b0092050876e2fcdaca01c1898",
+      "body_length": 110,
+      "contains_markup": false,
+      "involves_admin": true
+    },
+    {
+      "id": "72673c05-875b-449f-91c9-f0227f57b177",
+      "sender": "user",
+      "created_at": 1791649071756,
+      "time_beijing": "2026-10-11T00:17:51.756000+08:00",
+      "body_sha256": "ce6e0ca1d873bf82576f56a4752084bce9c4f07907b4ff06c0549f247d77b597",
+      "body_length": 98,
+      "contains_markup": false,
+      "involves_admin": true
+    },
+    {
+      "id": "240c3784-4b97-4e76-898e-1c44475d194d",
+      "sender": "user",
+      "created_at": 1791649633576,
+      "time_beijing": "2026-10-11T00:27:13.576000+08:00",
+      "body_sha256": "235ec355f64f46ebeaa2d95352a099fc2c18efdeb6c5317bf43f4e065fca1ae2",
+      "body_length": 94,
+      "contains_markup": false,
+      "involves_admin": true
+    },
+    {
+      "id": "13be85b7-c7f6-4131-b8f4-9c45f6a451db",
+      "sender": "admin",
+      "created_at": 1791650115528,
+      "time_beijing": "2026-10-11T00:35:15.528000+08:00",
+      "body_sha256": "077c047862d54298310dab583094fff0e01188d25a9c925c7b5b19b42a485f5a",
+      "body_length": 23,
+      "contains_markup": false,
+      "involves_admin": false
+    },
+    {
+      "id": "0dd8002c-11ac-4d0f-9052-0656dacc2495",
+      "sender": "user",
+      "created_at": 1791650186811,
+      "time_beijing": "2026-10-11T00:36:26.811000+08:00",
+      "body_sha256": "417848fbd4286544f5792da1d2d8023ccf3023ee1e7b7472ab316812c8342057",
+      "body_length": 97,
+      "contains_markup": false,
+      "involves_admin": true
+    },
+    {
+      "id": "431a8d3d-8ec9-4c50-a0ed-2ff50d93ad69",
+      "sender": "user",
+      "created_at": 1791654194587,
+      "time_beijing": "2026-10-11T01:43:14.587000+08:00",
+      "body_sha256": "9f41eb1261343b7bda67ecda42c8c40b5c5ecfa82371f60491250134d7f5ca37",
+      "body_length": 98,
+      "contains_markup": false,
+      "involves_admin": true
+    },
+    {
+      "id": "dad75565-7ebe-414e-89d4-0a3a0edddcd0",
+      "sender": "user",
+      "created_at": 1791655238600,
+      "time_beijing": "2026-10-11T02:00:38.600000+08:00",
+      "body_sha256": "ce6e0ca1d873bf82576f56a4752084bce9c4f07907b4ff06c0549f247d77b597",
+      "body_length": 98,
+      "contains_markup": false,
+      "involves_admin": true
+    }
+  ],
+  "settings": [],
+  "all_adjustments_in_incident_window": [
+    {
+      "id": "adj_credit_e7f5dafc73c1478b858fb6e493973701",
+      "wallet": "0xF8ADA5c5052A47dC6E28a07C8a321FB1AD257d70",
+      "asset": "USDT",
+      "amount_units": "300000000000",
+      "adjustment_type": "admin_test_credit",
+      "reason": "内部充值",
+      "admin_username": "admin",
+      "created_at": 1791642195082
+    },
+    {
+      "id": "adj_c131791655844199",
+      "wallet": "0xf75a7C032B7A484269ceD5663f7Fa10aCf63B1aC",
+      "asset": "USDT",
+      "amount_units": "100000000",
+      "adjustment_type": "admin_test_credit_reversed",
+      "reason": "ops adjustment",
+      "admin_username": "admin",
+      "created_at": 1791655844373
+    },
+    {
+      "id": "adj_g131791655844199",
+      "wallet": "0xf75a7C032B7A484269ceD5663f7Fa10aCf63B1aC",
+      "asset": "A",
+      "amount_units": "1000000000000000000000",
+      "adjustment_type": "admin_grant_reversed",
+      "reason": "ops",
+      "admin_username": "admin",
+      "created_at": 1791655844376
+    },
+    {
+      "id": "adj_aix_1791655868068",
+      "wallet": "0xd36dDfb9d3fA6b326B49E6EaB68c5B961Bc3ba59",
+      "asset": "A",
+      "amount_units": "5000000000000000000000000",
+      "adjustment_type": "admin_grant_reversed",
+      "reason": "operations adjustment",
+      "admin_username": "admin",
+      "created_at": 1791655868242
+    },
+    {
+      "id": "adj_credit_1791655868068",
+      "wallet": "0xd36dDfb9d3fA6b326B49E6EaB68c5B961Bc3ba59",
+      "asset": "USDT",
+      "amount_units": "100000000000",
+      "adjustment_type": "admin_test_credit_reversed",
+      "reason": "operations test credit",
+      "admin_username": "admin",
+      "created_at": 1791655868244
+    }
+  ],
+  "nginx_log_files": [
+    {
+      "path": "/var/log/nginx/access.log",
+      "size": 928345877
+    },
+    {
+      "path": "/var/log/nginx/error.log",
+      "size": 2853214
+    }
+  ],
+  "app_log_files": [
+    {
+      "path": "/opt/wg-platform/logs/server.stdout.log",
+      "size": 4369563
+    },
+    {
+      "path": "/opt/wg-platform/logs/server.stderr.log",
+      "size": 79129
+    }
+  ],
+  "server_files": {
+    "src/server.js": {
+      "size": 119650,
+      "mtime": 1791653382.7406073,
+      "sha256": "92973242567ecc37a818fc585a3bf61cfdbd27f190fe1185d94cf5e1c9906a94"
+    },
+    "src/database.js": {
+      "size": 120336,
+      "mtime": 1791638986.8045712,
+      "sha256": "e580b2cfce20493c5fa7335bdee6de667f38df26173e1788cf4fdf1fef0f24db"
+    },
+    "src/lottery-service.js": {
+      "size": 26442,
+      "mtime": 1791128871.1304958,
+      "sha256": "0aa5f4a124cd0c4cb06000e7711180a2eb9527f82b51a3d09914965b5e7e88bd"
+    },
+    "public/admin.html": {
+      "size": 25096,
+      "mtime": 1791636301.0,
+      "sha256": "6cc7807aded381d1ffca8912cf9c8adff156a4df896addeeef0ecbc82c016404"
+    }
+  }
+}

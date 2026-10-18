@@ -1,0 +1,54 @@
+{
+  "checkedAt": "2026-10-10T16:25:00.485Z",
+  "verified": true,
+  "assets": [
+    {
+      "file": "public/index.html",
+      "status": 200,
+      "bytes": 119055,
+      "match": true
+    },
+    {
+      "file": "public/js/core.js",
+      "status": 200,
+      "bytes": 60586,
+      "match": true
+    },
+    {
+      "file": "public/js/wallet.js",
+      "status": 200,
+      "bytes": 28923,
+      "match": true
+    },
+    {
+      "file": "public/js/page-loader.js",
+      "status": 200,
+      "bytes": 2667,
+      "match": true
+    },
+    {
+      "file": "public/js/earn.js",
+      "status": 200,
+      "bytes": 67704,
+      "match": true
+    },
+    {
+      "file": "public/vendor/wallet/connector.js",
+      "status": 200,
+      "bytes": 4717,
+      "match": true
+    }
+  ],
+  "apis": [
+    {
+      "endpoint": "/api/wallet/config",
+      "status": 200,
+      "valid": true
+    },
+    {
+      "endpoint": "/api/a-token/plans",
+      "status": 200,
+      "valid": true
+    }
+  ]
+}

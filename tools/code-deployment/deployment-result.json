@@ -1,0 +1,13 @@
+{
+  "release": "code-sync-20261011-002332",
+  "deployedAt": "2026-10-11T00:23:42.2355973+08:00",
+  "backup": "/opt/wg-platform/backups/code-sync-20261011-002332/previous.tar.gz",
+  "files": [
+    "frontend/wallet-connector.js",
+    "package-lock.json"
+  ],
+  "verified": true,
+  "backendAlreadyCurrent": true,
+  "runtimeBundleAlreadyCurrent": true,
+  "productionDependenciesChanged": false
+}

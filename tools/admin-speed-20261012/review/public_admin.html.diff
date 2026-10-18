@@ -1,0 +1,26 @@
+--- before/public/admin.html
++++ after/public/admin.html
+@@ -95,6 +95,11 @@
+         <section class="admin-content-block">
+           <header class="admin-list-header"><div><h2>钱包用户</h2><p id="admin-user-count">0 位用户</p></div><div class="admin-filters"><input id="admin-user-search" type="search" placeholder="搜索钱包地址"><label><input id="admin-real-only" type="checkbox"> 只看真实充值用户</label></div></header>
+           <div class="admin-table-scroll"><table><thead><tr><th>钱包地址</th><th>等级</th><th>用户类型</th><th>确认充值</th><th>平台余额</th><th>首次连接</th><th>最近充值</th><th>操作</th></tr></thead><tbody id="admin-users-body"></tbody></table></div>
++          <div class="admin-filters" style="margin-top:14px;justify-content:flex-end">
++            <span id="admin-users-page-status" aria-live="polite"></span>
++            <button id="admin-users-prev" class="admin-secondary-button" type="button" disabled>上一页</button>
++            <button id="admin-users-next" class="admin-secondary-button" type="button" disabled>下一页</button>
++          </div>
+         </section>
+       </section>
+ 
+@@ -250,8 +255,8 @@
+   </div>
+   <script src="/js/admin-dialogs.js?v=20261011-security-1"></script>
+   <script src="/js/admin-community.js?v=7-security-20261011"></script>
+-  <script src="/js/admin-lottery.js?v=20261011-security-2"></script>
+-  <script src="/js/operator-admin.js?v=20261011-permissions-1"></script>
+-  <script src="/js/admin-agents.js?v=1"></script>
++  <script src="/js/admin-lottery.js?v=20261012-admin-speed-1"></script>
++  <script src="/js/operator-admin.js?v=20261012-admin-speed-1"></script>
++  <script src="/js/admin-agents.js?v=20261012-admin-speed-1"></script>
+ </body>
+ </html>

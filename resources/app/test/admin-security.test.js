@@ -1,0 +1,128 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import vm from 'node:vm';
+import { closeDatabase } from '../src/database.js';
+import { createWalletService } from '../src/wallet-service.js';
+import { createLotteryService, normalizeSocialScreenshot } from '../src/lottery-service.js';
+import { createSupportService } from '../src/support-service.js';
+import { createFundsAdminApi } from '../src/funds-admin-api.js';
+import { adminPageKind, isLegacyFundsPath, OPERATOR_ADMIN_CSP, FUNDS_ADMIN_CSP } from '../src/admin-security.js';
+
+const png = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Y9ZCZsAAAAASUVORK5CYII=';
+const attacks = [ '<img src=x onerror="fetch(\'/api/admin/test-credits\')">', 'javascript:alert(1)', 'data:image/svg+xml;base64,' + Buffer.from('<svg onload="alert(1)"></svg>').toString('base64'), 'data:text/html;base64,' + Buffer.from('<script>alert(1)</script>').toString('base64'), png + '" onerror="alert(1)', 'data:image/png;base64,' + Buffer.from('<html><script>alert(1)</script>').toString('base64') ];
+assert.equal(normalizeSocialScreenshot(png), png);
+for (const attack of attacks) assert.throws(() => normalizeSocialScreenshot(attack));
+for (const uri of ['/admin.html','/%61dmin.html','//admin.html','/ADMIN.html']) assert.equal(adminPageKind(uri), 'operator');
+assert.equal(adminPageKind('/%66unds-admin.html'), 'funds');
+for (const uri of ['/api/admin/test-credits', '/api/admin/withdrawals/one', '/api/admin/withdrawal-automation','/api/admin/a-token/grant','/api/admin/a-token/debit','/api/admin/a-token/grant-miner','/api/admin/a-token/grant-stake','/api/admin/a-token/activations/confirm']) assert.equal(isLegacyFundsPath(uri), true);
+assert.equal(isLegacyFundsPath('/api/admin/support/tickets'), false);
+assert(!OPERATOR_ADMIN_CSP.match(/script-src[^;]*unsafe-inline/));
+assert(!FUNDS_ADMIN_CSP.includes('unsafe-inline'));
+const listeners = {};
+vm.runInNewContext(fs.readFileSync(new URL('../public/sw.js',import.meta.url),'utf8'), { self:{addEventListener:(type,fn)=>listeners[type]=fn}, location:{origin:'https://admin.test'}, URL });
+for (const uri of ['/admin.html','/%61dmin.html','/funds-admin.html','/%66unds-admin.html','/withdraw-admin.html','/api/wallet/admin/test-credits']) {
+  let intercepted = false;
+  listeners.fetch({ request:{method:'GET',url:'https://admin.test' + uri,mode:'navigate'}, respondWith:()=>{intercepted=true;} });
+  assert.equal(intercepted,false,uri + ' must bypass the shared offline cache');
+}
+console.log('PASS: strict admin policies and uncached administrative pages, including encoded URLs');
+
+const root = fs.mkdtempSync(path.join(os.tmpdir(), 'wg-admin-security-'));
+const wallet = '0x' + '7'.repeat(40);
+try {
+  const service = createWalletService({ dataRoot:root, depositAddress:'0x' + 'd'.repeat(40), networks:[] });
+  service.ensureUser(wallet);
+  const lottery = createLotteryService({ database:service.database, walletService:service });
+  const submission = (id, screenshotUrl) => ({ id, wallet, platform:'twitter', screenshotUrl, status:'pending', reviewer:'', reviewedAt:null, pointsAwarded:0, createdAt:Date.now() });
+  service.database.insertSocialSubmission(submission('legacy_bad', attacks[0]));
+  assert.throws(() => lottery.adminReviewSocial('legacy_bad', true, 'operator'));
+  assert.equal(service.database.getSocialSubmission('legacy_bad').status, 'pending');
+  assert.equal(lottery.getPoints(wallet), 0);
+  const legacy = lottery.adminListSocial('pending').find(item => item.id === 'legacy_bad');
+  assert.equal(legacy.screenshotSafe, false); assert.equal(legacy.screenshotUrl, '');
+  service.database.insertSocialSubmission({ ...submission('approved_legacy_bad', attacks[2]), status:'approved' });
+  const approvedLegacy = lottery.adminListSocial('approved').find(item => item.id === 'approved_legacy_bad');
+  assert.equal(approvedLegacy.screenshotSafe, false); assert.equal(approvedLegacy.screenshotUrl, '');
+  lottery.adminReviewSocial('legacy_bad', false, 'operator');
+  assert.equal(service.database.getSocialSubmission('legacy_bad').status, 'rejected');
+  service.database.insertSocialSubmission(submission('valid_png', png));
+  assert.equal(lottery.adminReviewSocial('valid_png', true, 'operator').pointsAwarded, 10);
+  assert.equal(lottery.getPoints(wallet), 10);
+  assert.throws(() => lottery.adminReviewSocial('valid_png', true));
+  assert.equal(lottery.getPoints(wallet), 10);
+  console.log('PASS: new and legacy scriptable screenshots are rejected without awarding points; valid approval remains idempotent');
+
+  const support = createSupportService({ database:service.database });
+  assert.throws(() => support.userPost(wallet, attacks[0] + '\n普通咨询'), /封禁/);
+  const session = support.userPost(wallet, '普通咨询');
+  assert(support.adminTicket(session.ticket.id).messages.some(message => message.body === '普通咨询'));
+  console.log('PASS: support rejects attack payloads and retains normal messages');
+
+  const credential = 'TEST_ONLY_INDEPENDENT_FUNDS_TOKEN';
+  const processed = [], enqueued = [];
+  let enabled = false, configured = false, scanned = 0;
+  const api = createFundsAdminApi({
+    walletService:{ ...service, adminProcessWithdrawal:async (id, body) => { processed.push({ id, ...body }); return { id, status:body.action === 'release' || body.action === 'retry' ? 'pending_auto' : body.action === 'approve' ? 'paid' : 'rejected' }; } },
+    payoutService:{ status:() => ({ enabled, configured }), enqueue:async id => enqueued.push(id), scan:() => scanned++ },
+    getToken:() => credential, readBody:async req => req.body,
+    isSameOrigin:req => !req.headers.origin || req.headers.origin === 'https://funds.test',
+    allowRequest:() => true, send:(res, status, payload) => Object.assign(res, { status, payload }),
+  });
+  async function request(url, method = 'GET', body, headers = { 'x-wallet-admin-token':credential }) {
+    const res = { headers:{}, setHeader(name,value) { this.headers[name] = value; } };
+    assert.equal(await api.handle({ url, method, body, headers }, res, new URL(url,'http://localhost').pathname), true);
+    return res;
+  }
+  for (const url of ['/api/wallet/admin/test-credits','/api/wallet/admin/withdrawals','/api/wallet/admin/withdrawal-automation']) {
+    const denied = await request(url, 'POST', { wallet, amount:'999', reason:'TEST', requestId:'credit_test' }, { cookie:'wg_admin_session=operator-session' });
+    assert.equal(denied.status, 401); assert.equal(denied.payload.code,'FUNDS_AUTH_REQUIRED');
+  }
+  assert.equal(service.balanceUnits(wallet, 'USDT'), 0n);
+  assert.equal((await request('/api/wallet/admin/session','GET',null,{ 'x-wallet-admin-token':credential, origin:'https://evil.test' })).status, 403);
+  assert.equal((await request('/api/wallet/admin/session','GET',null,{ 'x-wallet-admin-token':credential + 'x' })).status, 401);
+  assert.equal((await request('/api/wallet/admin/session')).status, 200);
+  const input = { wallet, amount:'12.345678', reason:'隔离测试', requestId:'credit_security_123456' };
+  const credited = await request('/api/wallet/admin/test-credits','POST',input);
+  assert.equal(credited.status, 200); assert.equal(credited.payload.adjustment.adminUsername,'funds-admin');
+  assert.equal((await request('/api/wallet/admin/test-credits','POST',input)).status, 200);
+  assert.equal(service.balanceUnits(wallet,'USDT'), 12345678n);
+  assert.equal((await request('/api/wallet/admin/test-credits','POST',{ ...input, amount:'13' })).status, 409);
+  assert.equal((await request('/api/wallet/admin/test-credits')).payload.items.length, 1);
+  console.log('PASS: independent funds token, cookie denial, cross-origin denial, audited test credit and retry idempotency');
+
+  service.database.db.prepare(`INSERT INTO balance_adjustments
+    (id,wallet,asset,amount_units,adjustment_type,reason,admin_username,created_at,payload_json)
+    VALUES(?,?,?,?,?,?,?,?,?)`).run('legacy_remediation_audit', wallet, 'USDT', '0', 'security_remediation', '历史安全处置', 'incident-admin', Date.now(), JSON.stringify({note:'历史批量审计',rows:[{asset:'USDT'}]}));
+  service.adminCreditAsset({wallet,asset:'A',amount:'2.000000000000000001',reason:'资产精度回归',requestId:'asset_history_precision'},'precision-admin');
+  assert.throws(() => service.adminListBalanceAdjustments());
+  const history = await request('/api/wallet/admin/test-credits');
+  assert.equal(history.status,200);
+  const restoredAudit = history.payload.items.find(item => item.id === 'legacy_remediation_audit');
+  assert.equal(restoredAudit.amount,'0.0'); assert.equal(restoredAudit.wallet,wallet);
+  assert.equal(restoredAudit.reason,'历史安全处置'); assert.equal(restoredAudit.adminUsername,'incident-admin');
+  assert.equal(history.payload.items.find(item => item.id === 'adj_asset_history_precision').amount,'2.000000000000000001');
+  assert.equal(history.payload.items.find(item => item.id === 'adj_credit_security_123456').amount,'12.345678');
+  assert.equal(service.balanceUnits(wallet,'USDT'),12345678n);
+  console.log('PASS: legacy remediation audit payloads do not break funds history; USDT and AIX quantities retain their own decimals');
+
+  assert.equal((await request('/api/wallet/admin/withdrawals/one','POST',{ action:'release' })).status, 503);
+  assert.deepEqual(processed, []); assert.deepEqual(enqueued, []);
+  assert.equal((await request('/api/wallet/admin/withdrawal-automation','PATCH',{ enabled:true })).status, 400);
+  configured = true; enabled = true;
+  assert.equal((await request('/api/wallet/admin/withdrawals/one','POST',{ action:'release' })).status, 200);
+  assert.deepEqual(enqueued, ['one']);
+  assert.equal((await request('/api/wallet/admin/withdrawals/two','POST',{ action:'approve', txHash:'TEST_ONLY_CHAIN_HASH' })).status, 200);
+  assert.equal(processed.at(-1).txHash,'TEST_ONLY_CHAIN_HASH');
+  assert.equal((await request('/api/wallet/admin/withdrawals/three','POST',{ action:'reject', reason:'人工审核未通过' })).status, 200);
+  assert.equal((await request('/api/wallet/admin/withdrawals/three','POST',{ action:'unknown' })).status, 400);
+  assert.equal((await request('/api/wallet/admin/withdrawal-automation','PATCH',{ enabled:false, reviewThresholdUsdt:'100', dailyLimitUsdt:'1000' })).status, 200);
+  assert.equal(scanned, 0);
+  console.log('PASS: disabled auto payout stays disabled; release enqueues; manual hash verification and rejection reach existing wallet service');
+} finally {
+  closeDatabase(root);
+  const absolute = fs.realpathSync(root);
+  assert(absolute.startsWith(fs.realpathSync(os.tmpdir()) + path.sep));
+  fs.rmSync(absolute, { recursive:true, force:true });
+}

@@ -1,0 +1,29 @@
+{
+  "checkedAt": "2026-10-10T18:48:20.664Z",
+  "checks": [
+    {
+      "uri": "/admin.html",
+      "status": 200,
+      "sha256": "cf2b6a9640345033df0bda32df328c9c72d6cbacf3cc43961f4c450510f1873a",
+      "expected": "cf2b6a9640345033df0bda32df328c9c72d6cbacf3cc43961f4c450510f1873a",
+      "matches": true,
+      "cacheStatus": "DYNAMIC"
+    },
+    {
+      "uri": "/js/admin-lottery.js?v=4-security-20261011",
+      "status": 200,
+      "sha256": "dc4989e3b7be18ee78072cfd8921248646e1d54a38cb17697a18a008bd892075",
+      "expected": "dc4989e3b7be18ee78072cfd8921248646e1d54a38cb17697a18a008bd892075",
+      "matches": true,
+      "cacheStatus": "MISS"
+    },
+    {
+      "uri": "/js/admin-community.js?v=7-security-20261011",
+      "status": 200,
+      "sha256": "e1e384c5993812d68b20cdf3e3745afe647a431ae31264973f22ccaee8753c95",
+      "expected": "e1e384c5993812d68b20cdf3e3745afe647a431ae31264973f22ccaee8753c95",
+      "matches": true,
+      "cacheStatus": "MISS"
+    }
+  ]
+}

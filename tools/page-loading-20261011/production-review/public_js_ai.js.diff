@@ -1,0 +1,33 @@
+--- public/js/ai.js before
++++ public/js/ai.js after
+@@ -42,8 +42,10 @@
+ function aiFmtTime(t) { return t ? new Date(t).toLocaleString('zh-CN', { hour12:false }) : ''; }
+ 
+ async function aiRefreshStatus() {
+-  try {
+-    const r = await fetch('/api/ai/status');
++  if (document.hidden || !$('tab-ai')?.classList.contains('active') || window._aiStatusBusy) return;
++  window._aiStatusBusy = true;
++  try {
++    const r = await fetch('/api/ai/status', { signal:AbortSignal.timeout(10000) });
+     const s = await r.json();
+     // ── 已保存的本地配置回填（仅页面加载后执行一次）──
+     if (!window._aiCfgFilled) {
+@@ -119,6 +121,7 @@
+       $('ai-report-box').textContent = `[${aiFmtTime(s.report.t)}]\n${s.report.text}`;
+     }
+   } catch { /* 后端未就绪 */ }
++  finally { window._aiStatusBusy = false; }
+ }
+ 
+ async function aiSentinelRun(btn) {
+@@ -235,8 +238,4 @@
+ }
+ 
+ // AI 状态全局轮询（总览页板块 + AI 助手页共用）
+-aiRefreshStatus();
+-setInterval(aiRefreshStatus, 30000);
+-
+-// 钱包配置与已登录会话恢复
+-loadWalletConfig().then(loadWalletProfile);
++setInterval(() => aiRefreshStatus(), 30000);

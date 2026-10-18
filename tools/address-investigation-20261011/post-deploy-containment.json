@@ -1,0 +1,15 @@
+{
+  "containment": [
+    {
+      "wallet": "0xd36ddfb9d3fa6b326b49e6eab68c5b961bc3ba59",
+      "frozen": true,
+      "ok": true
+    },
+    {
+      "wallet": "0xf75a7c032b7a484269ced5663f7fa10acf63b1ac",
+      "frozen": true,
+      "ok": true
+    }
+  ],
+  "automation_enabled": false
+}

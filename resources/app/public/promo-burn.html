@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>AIX 通缩模型</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html,body { width:1080px; height:1920px; overflow:hidden; }
+  body { font-family:"Microsoft YaHei","PingFang SC",sans-serif; color:#c7d5d2;
+    background:
+      radial-gradient(900px 500px at 50% -5%, rgba(79,209,181,.14), transparent 60%),
+      radial-gradient(700px 400px at 50% 105%, rgba(79,209,181,.08), transparent 60%),
+      linear-gradient(170deg,#07100f 0%,#0a1112 55%,#081211 100%);
+    position:relative; display:flex; flex-direction:column; padding:64px 70px 56px; }
+  .wm { position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    font-size:230px; font-weight:900; letter-spacing:20px; color:rgba(79,209,181,.045); pointer-events:none; }
+  .top { display:flex; align-items:center; gap:20px; }
+  .top img { width:76px; height:76px; border-radius:18px; box-shadow:0 0 30px rgba(79,209,181,.4); }
+  .brand { font-size:36px; font-weight:900; color:#eaf6f3; }
+  .brand b { color:#4fd1b5; }
+  .hero { text-align:center; margin-top:70px; }
+  .hero h1 { font-size:96px; font-weight:900; letter-spacing:6px;
+    background:linear-gradient(100deg,#8ff0dc,#4fd1b5 50%,#b9f4e6);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    text-shadow:0 0 60px rgba(79,209,181,.3); }
+  .hero p { margin-top:22px; font-size:32px; color:#7d9691; letter-spacing:10px; }
+  .flow { margin-top:80px; display:flex; flex-direction:column; align-items:center; }
+  .node { background:linear-gradient(180deg,#101b1d,#0c1517); border:1px solid #29413e;
+    border-radius:22px; padding:28px 60px; text-align:center; min-width:560px; }
+  .node .t { font-size:34px; font-weight:900; color:#eaf6f3; }
+  .node .s { margin-top:8px; font-size:23px; color:#7d9691; }
+  .arrow { font-size:44px; color:#4fd1b5; line-height:1.5; margin:10px 0; }
+  .split { display:flex; gap:36px; margin-top:14px; width:100%; }
+  .half { flex:1; border-radius:26px; padding:44px 30px; text-align:center; position:relative; overflow:hidden; }
+  .half.burn { background:linear-gradient(180deg,rgba(242,108,120,.10),rgba(242,108,120,.03));
+    border:2px solid #5c3037; }
+  .half.pool { background:linear-gradient(180deg,rgba(79,209,181,.10),rgba(79,209,181,.03));
+    border:2px solid #2b6157; }
+  .half .pct { font-size:110px; font-weight:900; line-height:1; }
+  .burn .pct { color:#f26c78; text-shadow:0 0 50px rgba(242,108,120,.5); }
+  .pool .pct { color:#4fd1b5; text-shadow:0 0 50px rgba(79,209,181,.5); }
+  .half .pct small { font-size:44px; }
+  .half .nm { margin-top:16px; font-size:38px; font-weight:900; color:#eaf6f3; }
+  .half .ds { margin-top:14px; font-size:24px; line-height:1.7; color:#a9bfb9; }
+  .loop { margin-top:64px; background:linear-gradient(180deg,#101b1d,#0c1517);
+    border:1px solid #29413e; border-radius:26px; padding:40px 48px; }
+  .loop h3 { font-size:30px; font-weight:900; color:#7fe6d3; display:flex; align-items:center; gap:14px; }
+  .loop h3::before { content:""; width:12px; height:12px; border-radius:50%; background:#4fd1b5; box-shadow:0 0 12px #4fd1b5; }
+  .loop p { margin-top:20px; font-size:26px; line-height:1.9; color:#b9cbc7; }
+  .loop p b { color:#4fd1b5; }
+  .cta { margin-top:auto; text-align:center; }
+  .cta .btn { display:inline-block; font-size:44px; font-weight:900; color:#04211b; letter-spacing:8px;
+    background:linear-gradient(135deg,#8ff0dc,#4fd1b5); border-radius:999px; padding:30px 110px;
+    box-shadow:0 20px 60px rgba(79,209,181,.35); }
+  .foot { margin-top:40px; text-align:center; font-size:22px; color:#3d5a53; letter-spacing:5px; }
+</style>
+</head>
+<body>
+<div class="wm">BURN</div>
+<div class="top">
+  <img src="assets/brand/logo.png" alt="AxiX">
+  <div class="brand">Axi<b>X</b> Exchange</div>
+</div>
+
+<div class="hero">
+  <h1>AIX 通缩模型</h1>
+  <p>每笔卖出 · 持续销毁</p>
+</div>
+
+<div class="flow">
+  <div class="node">
+    <div class="t">每笔 AIX 卖出交易</div>
+    <div class="s">手续费按持有直推人数阶梯收取（50% ~ 3%）</div>
+  </div>
+  <div class="arrow">↓</div>
+  <div class="split">
+    <div class="half burn">
+      <div class="pct">50<small>%</small></div>
+      <div class="nm">当场销毁</div>
+      <div class="ds">代币永久退出流通<br>流通量只减不增</div>
+    </div>
+    <div class="half pool">
+      <div class="pct">50<small>%</small></div>
+      <div class="nm">A10 分红池</div>
+      <div class="ds">每日 00:00 自动结算<br>A10 级别均分</div>
+    </div>
+  </div>
+</div>
+
+<div class="loop">
+  <h3>为什么这是价值飞轮</h3>
+  <p>交易越多 → 销毁越多 → <b>流通量持续收缩</b> → 分红池越滚越大。<br>通缩不是口号，是<b>写进每笔交易的机制</b>。</p>
+</div>
+
+<div class="cta"><span class="btn">持有一份通缩资产</span></div>
+<div class="foot">AXIX EXCHANGE · BNB SMART CHAIN</div>
+</body>
+</html>

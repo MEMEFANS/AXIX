@@ -1,0 +1,33 @@
+{
+  "captured_at_utc": "2026-10-11T02:47:21.363767+00:00",
+  "passed": true,
+  "checks": [
+    {
+      "uri": "/",
+      "passed": true,
+      "status": 200,
+      "cf_cache_status": "DYNAMIC",
+      "sha256": "9fc33b60efb0dcc20a6f1917a1d1c44af8c219821d8219e8131a28648fd9710f"
+    },
+    {
+      "uri": "/js/page-loader.js?v=20261011-aix-chart-1",
+      "passed": true,
+      "status": 200,
+      "cf_cache_status": "MISS",
+      "sha256": "9e750cf728d285a1f26651b95ca35ccb647541e0c773ccfca449acbc2ebf2d6e"
+    },
+    {
+      "uri": "/js/a-token-trade.js?v=20261011-aix-chart-1",
+      "passed": true,
+      "status": 200,
+      "cf_cache_status": "MISS",
+      "sha256": "3acf645ea4577ff4ba94330e7f587d84471c9198bef475fc419f73295bae70e1"
+    },
+    {
+      "uri": "/api/wallet/session",
+      "passed": true,
+      "status": 200,
+      "cf_cache_status": "DYNAMIC"
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "deployed": true,
+  "release": "security-social-xss-20261011-024538",
+  "backup": "/opt/wg-platform/backups/security-social-xss-20261011-024538/previous.tar.gz",
+  "files": [
+    "src/lottery-service.js",
+    "src/a-token-api.js",
+    "src/withdrawal-payout-service.js",
+    "public/js/admin-lottery.js",
+    "public/js/admin-community.js",
+    "public/admin.html"
+  ],
+  "admin_sessions_reset_on_restart": true,
+  "previous_pid": "5928",
+  "current_pid": "7848",
+  "service": "MainPID=7848\nActiveState=active\nSubState=running\n",
+  "completed_at_utc": "2026-10-10T18:45:43.228310+00:00"
+}

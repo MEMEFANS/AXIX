@@ -1,0 +1,328 @@
+{
+  "captured_at_utc": "2026-10-10T18:47:35.918306+00:00",
+  "http": {
+    "/api/wallet/session": {
+      "status": 200,
+      "sha256": "3e58c6fcf10a31770582814c2babfd1ff71bb1a72cae32cdb1c1a428f406d47f",
+      "cache_control": "no-store",
+      "data": {
+        "authenticated": false
+      }
+    },
+    "/api/admin/session": {
+      "status": 200,
+      "sha256": "3e58c6fcf10a31770582814c2babfd1ff71bb1a72cae32cdb1c1a428f406d47f",
+      "cache_control": null,
+      "data": {
+        "authenticated": false
+      }
+    },
+    "/admin.html": {
+      "status": 200,
+      "sha256": "cf2b6a9640345033df0bda32df328c9c72d6cbacf3cc43961f4c450510f1873a",
+      "cache_control": "no-cache",
+      "new_script_versions": true
+    },
+    "/js/admin-lottery.js?v=4-security-20261011": {
+      "status": 200,
+      "sha256": "dc4989e3b7be18ee78072cfd8921248646e1d54a38cb17697a18a008bd892075",
+      "cache_control": "public, max-age=2592000"
+    },
+    "/js/admin-community.js?v=7-security-20261011": {
+      "status": 200,
+      "sha256": "e1e384c5993812d68b20cdf3e3745afe647a431ae31264973f22ccaee8753c95",
+      "cache_control": "public, max-age=2592000"
+    }
+  },
+  "wallets": {
+    "0xd36ddfb9d3fa6b326b49e6eab68c5b961bc3ba59": {
+      "balances_column": {
+        "USDT": "300000000000",
+        "A": "15000000000000000000000000",
+        "BTC": "0",
+        "ETH": "0",
+        "BNB": "0"
+      },
+      "balances_payload": {
+        "USDT": "300000000000",
+        "A": "15000000000000000000000000",
+        "BTC": "0",
+        "ETH": "0",
+        "BNB": "0"
+      },
+      "frozen": true,
+      "withdrawals": []
+    },
+    "0xf75a7c032b7a484269ced5663f7fa10acf63b1ac": {
+      "balances_column": {
+        "USDT": "122640000",
+        "A": "2000000000000000000000",
+        "BTC": "0",
+        "ETH": "0",
+        "BNB": "0"
+      },
+      "balances_payload": {
+        "USDT": "122640000",
+        "A": "2000000000000000000000",
+        "BTC": "0",
+        "ETH": "0",
+        "BNB": "0"
+      },
+      "frozen": true,
+      "withdrawals": [
+        {
+          "status": "rejected",
+          "amount_units": "10000000",
+          "created_at": 1791656568491,
+          "has_tx_hash": false,
+          "payload_status": "pending_review"
+        },
+        {
+          "status": "rejected",
+          "amount_units": "33680000",
+          "created_at": 1791656498857,
+          "has_tx_hash": false,
+          "payload_status": "pending_review"
+        },
+        {
+          "status": "rejected",
+          "amount_units": "33680000",
+          "created_at": 1791656368455,
+          "has_tx_hash": false,
+          "payload_status": "pending_review"
+        },
+        {
+          "status": "rejected",
+          "amount_units": "33600000",
+          "created_at": 1791655856887,
+          "has_tx_hash": false,
+          "payload_status": "rejected"
+        },
+        {
+          "status": "rejected",
+          "amount_units": "33600000",
+          "created_at": 1791655851877,
+          "has_tx_hash": false,
+          "payload_status": "rejected"
+        }
+      ]
+    }
+  },
+  "latest_callbacks": [
+    {
+      "time_ms": 1791657743089,
+      "label": "WDR",
+      "reports_ok": false,
+      "note_sha256": "259fd0d89a4a5dfdae7620e33e66bf2db963bccd8ebfc92bfdb8c17f32b19acf"
+    },
+    {
+      "time_ms": 1791657743087,
+      "label": "GRANT",
+      "reports_ok": true,
+      "note_sha256": "22054bd1976843c2c19876176595ea4380ccb54618ec6e55671bbde8fcc225f1",
+      "result": {
+        "id": "adj_aix_1791657724273",
+        "wallet": "0xd36dDfb9d3fA6b326B49E6EaB68c5B961Bc3ba59",
+        "asset": "A",
+        "amount": "5000000.0",
+        "createdAt": "2026-10-10T18:42:13.893Z"
+      }
+    },
+    {
+      "time_ms": 1791657743086,
+      "label": "SESS",
+      "reports_ok": false,
+      "note_sha256": "d69bb987b493f46be0dec36a02d9cd8bcb0e95b4d528db244bc1995c8adfc8a1"
+    },
+    {
+      "time_ms": 1791657743085,
+      "label": "USERS",
+      "reports_ok": false,
+      "note_sha256": "3f75a61d775b3e2cb6bff8d1a35b1db569bba32c2035538231164bad8630cb29"
+    },
+    {
+      "time_ms": 1791657743075,
+      "label": "AUTO",
+      "reports_ok": true,
+      "note_sha256": "9d7a2ac06136cf5a70a92e9285027319619c8f507f7558637211861994498867"
+    },
+    {
+      "time_ms": 1791657743073,
+      "label": "CREDIT",
+      "reports_ok": true,
+      "note_sha256": "61a6b16c37cc817775e69bda12ee12329951de215e85d59a7f80242d7f3eeb5f",
+      "result": {
+        "id": "adj_credit_1791657724273",
+        "wallet": "0xd36dDfb9d3fA6b326B49E6EaB68c5B961Bc3ba59",
+        "asset": "USDT",
+        "amount": "100000.0",
+        "createdAt": "2026-10-10T18:42:04.488Z"
+      }
+    },
+    {
+      "time_ms": 1791657743071,
+      "label": "WMODE",
+      "reports_ok": true,
+      "note_sha256": "647429bd10f7082ff6856527aaabf9d617cb2fa51500b1c6f4f4932c5738c4ba"
+    },
+    {
+      "time_ms": 1791657733900,
+      "label": "COOKIE",
+      "reports_ok": false,
+      "note_sha256": "699e81a58b5ec936fcac6f38027b66d332c3558f4a3fc1c0bdf41917b395ffe8"
+    },
+    {
+      "time_ms": 1791657724455,
+      "label": "LS",
+      "reports_ok": false,
+      "note_sha256": "90f82c3872b314249a6ebdaf4ae8a6a26a6015d1051d4cd928a5467c4f891aaa"
+    },
+    {
+      "time_ms": 1791656936638,
+      "label": "WMODE",
+      "reports_ok": true,
+      "note_sha256": "8ec49d6d640774dff3aae438f0aa0997ae757cfd20679a84c066ba03bd7f1a37"
+    },
+    {
+      "time_ms": 1791656936635,
+      "label": "AUTO",
+      "reports_ok": true,
+      "note_sha256": "04f4a6ca084fc719b9659ff4b4fba10a1f8072a2edc09ca7cbf01713b8f90bfa"
+    },
+    {
+      "time_ms": 1791656936503,
+      "label": "CREDIT",
+      "reports_ok": true,
+      "note_sha256": "9087ff3a8ae8472d75d813d0d3a70d035b6de90b62be4a31264598f9282298b2",
+      "result": {
+        "id": "adj_credit_1791656917794",
+        "wallet": "0xd36dDfb9d3fA6b326B49E6EaB68c5B961Bc3ba59",
+        "asset": "USDT",
+        "amount": "100000.0",
+        "createdAt": "2026-10-10T18:28:37.975Z"
+      }
+    },
+    {
+      "time_ms": 1791656936501,
+      "label": "GRANT",
+      "reports_ok": true,
+      "note_sha256": "34bea15e2610a26605338c2f9ad8e5e9f83970a975bbdf3734eddd20bfde397b",
+      "result": {
+        "id": "adj_aix_1791656917794",
+        "wallet": "0xd36dDfb9d3fA6b326B49E6EaB68c5B961Bc3ba59",
+        "asset": "A",
+        "amount": "5000000.0",
+        "createdAt": "2026-10-10T18:28:37.972Z"
+      }
+    },
+    {
+      "time_ms": 1791656917971,
+      "label": "LS",
+      "reports_ok": false,
+      "note_sha256": "90f82c3872b314249a6ebdaf4ae8a6a26a6015d1051d4cd928a5467c4f891aaa"
+    }
+  ],
+  "automation": {
+    "enabled": false,
+    "reviewThresholdUnits": "100000",
+    "dailyLimitUnits": "100000",
+    "usdtMultipleOfTen": false,
+    "updatedAt": "2026-10-10T18:47:32.488Z"
+  },
+  "freeze_records": {
+    "0xd36ddfb9d3fa6b326b49e6eab68c5b961bc3ba59": {
+      "reason": "Confirmed stored XSS balance fraud; incident 20261011",
+      "frozenAt": 1791658052152,
+      "frozenBy": "admin"
+    },
+    "0xf75a7c032b7a484269ced5663f7fa10acf63b1ac": {
+      "reason": "Confirmed stored XSS balance fraud; incident 20261011",
+      "frozenAt": 1791658052319,
+      "frozenBy": "admin"
+    }
+  },
+  "aix_withdraw_enabled": "1",
+  "latest_adjustments": [
+    {
+      "id": "adj_aix_1791657724273",
+      "wallet": "0xd36dDfb9d3fA6b326B49E6EaB68c5B961Bc3ba59",
+      "asset": "A",
+      "amount_units": "5000000000000000000000000",
+      "adjustment_type": "admin_grant",
+      "created_at": 1791657733893
+    },
+    {
+      "id": "adj_credit_1791657724273",
+      "wallet": "0xd36dDfb9d3fA6b326B49E6EaB68c5B961Bc3ba59",
+      "asset": "USDT",
+      "amount_units": "100000000000",
+      "adjustment_type": "admin_test_credit",
+      "created_at": 1791657724488
+    },
+    {
+      "id": "adj_credit_1791656917794",
+      "wallet": "0xd36dDfb9d3fA6b326B49E6EaB68c5B961Bc3ba59",
+      "asset": "USDT",
+      "amount_units": "100000000000",
+      "adjustment_type": "admin_test_credit",
+      "created_at": 1791656917975
+    },
+    {
+      "id": "adj_aix_1791656917794",
+      "wallet": "0xd36dDfb9d3fA6b326B49E6EaB68c5B961Bc3ba59",
+      "asset": "A",
+      "amount_units": "5000000000000000000000000",
+      "adjustment_type": "admin_grant",
+      "created_at": 1791656917972
+    },
+    {
+      "id": "adj_g131791656905941",
+      "wallet": "0xf75a7C032B7A484269ceD5663f7Fa10aCf63B1aC",
+      "asset": "A",
+      "amount_units": "1000000000000000000000",
+      "adjustment_type": "admin_grant",
+      "created_at": 1791656906120
+    },
+    {
+      "id": "adj_c131791656905940",
+      "wallet": "0xf75a7C032B7A484269ceD5663f7Fa10aCf63B1aC",
+      "asset": "USDT",
+      "amount_units": "100000000",
+      "adjustment_type": "admin_test_credit",
+      "created_at": 1791656906117
+    },
+    {
+      "id": "adj_credit_1791655868068",
+      "wallet": "0xd36dDfb9d3fA6b326B49E6EaB68c5B961Bc3ba59",
+      "asset": "USDT",
+      "amount_units": "100000000000",
+      "adjustment_type": "admin_test_credit_reversed",
+      "created_at": 1791655868244
+    },
+    {
+      "id": "adj_aix_1791655868068",
+      "wallet": "0xd36dDfb9d3fA6b326B49E6EaB68c5B961Bc3ba59",
+      "asset": "A",
+      "amount_units": "5000000000000000000000000",
+      "adjustment_type": "admin_grant_reversed",
+      "created_at": 1791655868242
+    },
+    {
+      "id": "adj_g131791655844199",
+      "wallet": "0xf75a7C032B7A484269ceD5663f7Fa10aCf63B1aC",
+      "asset": "A",
+      "amount_units": "1000000000000000000000",
+      "adjustment_type": "admin_grant_reversed",
+      "created_at": 1791655844376
+    },
+    {
+      "id": "adj_c131791655844199",
+      "wallet": "0xf75a7C032B7A484269ceD5663f7Fa10aCf63B1aC",
+      "asset": "USDT",
+      "amount_units": "100000000",
+      "adjustment_type": "admin_test_credit_reversed",
+      "created_at": 1791655844373
+    }
+  ],
+  "service": "MainPID=7848\nActiveState=active\nSubState=running\nActiveEnterTimestamp=Sun 2026-10-11 02:45:39 CST\n"
+}

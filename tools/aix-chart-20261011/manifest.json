@@ -1,0 +1,23 @@
+{
+  "deployed": true,
+  "scope": "AIX chart default viewport and period-switch presentation",
+  "runtimeFiles": {
+    "public/js/a-token-trade.js": {
+      "beforeSha256": "8251d22f1ee70b65bc2c785c7628b917c53868f4c9fc002f2f8bb248040862b0",
+      "afterSha256": "3acf645ea4577ff4ba94330e7f587d84471c9198bef475fc419f73295bae70e1"
+    },
+    "public/js/page-loader.js": {
+      "beforeSha256": "3dd3cc90c8dca3e5225a6bea302548ef5113849508dec0b9e026145434d52d2e",
+      "afterSha256": "9e750cf728d285a1f26651b95ca35ccb647541e0c773ccfca449acbc2ebf2d6e"
+    },
+    "public/index.html": {
+      "beforeSha256": "2c16d0efdd2eafc4a9cc06762fd5aef1bd2ae9536967df1ed658a59d89318627",
+      "afterSha256": "d04f2610a324267206cc078e08663b48763b44d18c2b7ab9bc0c42c39c1545c7"
+    }
+  },
+  "release": "aix-chart-20261011-024625",
+  "completed_at_utc": "2026-10-11T02:46:26.268620+00:00",
+  "public_verified": true,
+  "online_browser_verified": true,
+  "backup_directory": "/opt/wg-platform/backups/aix-chart-20261011-024625"
+}

@@ -1,0 +1,90 @@
+{
+  "public/index.html": {
+    "before": "49580d30c471ff6a262a90f50e798a05e3eb5b7c40e41fe80281b899586e2e9a",
+    "after": "ea33e1c3f7297b6c2fcbfd5481479b74798c9e2b468871283a2fa5bf1a93c662"
+  },
+  "public/js/core.js": {
+    "before": "7ec30147b6b7b603ccd776f95643460cc2625688d862836326d253bbbc9513f3",
+    "after": "af77b6fd1a16bc6a82cf3428ab48e5b386faed9897404e0105a32c0e6347c9f0"
+  },
+  "public/js/page-loader.js": {
+    "before": "1b82a25c4ea1f9fa3025d037fe506808eb4516d2b6bf2ddc8d8bc84a2fe1c2de",
+    "after": "f7d2d926c1109da4fd4e8d4784c92d3ec09322f5fb528a682e5cfbea44e4ac19"
+  },
+  "public/js/portal-shared.js": {
+    "before": "9cf789635b9a458e2add0fc47a4bf1f919cdf27017355037b250f78e193cbec1",
+    "after": "f341ebb87ebe81bf48ab4a4c4e6daba7c664fdf75a9efb8e3acb3f56af9a19f2"
+  },
+  "public/js/portfolio.js": {
+    "before": "5d2137eda33c5aede41222964c941292abb0bf82d39c543e07f2f78d42927c64",
+    "after": "9946d77805dc5083192a229b7e221247f01203afe830312c8b75fd2ed2e077f7"
+  },
+  "public/js/staking.js": {
+    "before": "3f603558d2a58db0ec9b5669aacbaea3065764bcd4e212aa1c258d9f5a6feb27",
+    "after": "5bad06df996f8ad5b9ed64b9453e6c0bd54d2bef5fb38982f494b74d0b1e12f1"
+  },
+  "public/js/vaults.js": {
+    "before": "6836836669c4a121dd906a24926f24624400791fc129d3db4e9ac6dd051dbf08",
+    "after": "5b91f9c13dc49740bca398b83170bb189c1f47e012a87b7b2e8d577c8fc2c276"
+  },
+  "public/js/lottery.js": {
+    "before": "bd1ca5fbda468d394991158f55149d78389227de36551df814d685944db621e6",
+    "after": "db6ad3b28e2b6ac84940504ef6f7ce3a7b6ecdf0105bf38762be5a641a6a8e61"
+  },
+  "public/js/assets.js": {
+    "before": "7b6d59d1e1f3c09afc6786fd07f8c9f7c349c76ad8602f7951f357bb00ed6801",
+    "after": "c713d6ff83c178ca4ff2def2171a1714e2a53597ae619518118dfab6e92fcfc9"
+  },
+  "public/js/wallet.js": {
+    "before": "44bc774245c85caa4deb29f1c0ab40a2354e365f9655f82180f398a231002285",
+    "after": "2726e97455b8a13429f2a1aa47062d09a0d64f8d5659a7286bffc79f3a140d8b"
+  },
+  "public/js/trade-account.js": {
+    "before": "99bfa696a81c3dbe6bc676ef7d80a7e639b9280edf7048edd63dd688e128e09d",
+    "after": "e0d2cd02480bfa1792eb832f5ac8daa5c3bc7bd9c57ccfae26dec88cac5028cf"
+  },
+  "public/js/ai-managed.js": {
+    "before": "be81dbe4fcd6817f9934c393955d20011bd6b541713b03e8f8200c0820b9345e",
+    "after": "6d54f2e979781d6f982af040fa74e89f64cf859ac99db673ea02a7adec18a8eb"
+  },
+  "public/js/strategy.js": {
+    "before": "2760f8a9d17c4b26e035aba688189f8084ccf9857c0f350124234a1bc6eccaa6",
+    "after": "cd9593f7ece36fb5e6c4a7fb7d5ec89a7cfb06f0339d35cff189bf2705cc2623"
+  },
+  "public/js/a-token-trade.js": {
+    "before": "fdf1d7735a1d0021a1f6e8a72ff93efbec4b511cbf586ca49f31c895c527104b",
+    "after": "8251d22f1ee70b65bc2c785c7628b917c53868f4c9fc002f2f8bb248040862b0"
+  },
+  "public/js/support-chat.js": {
+    "before": "7acc784b8b49308f1b4d3940ac718c6456edeee7e55712dc158551ece429c996",
+    "after": "f93dcb075b27f9c933c92c2f153ab0229d3867504262843afb33fba2d33f3b03"
+  },
+  "public/js/referrals.js": {
+    "before": "4ddd15e06cc9a19999531f41e6e47175d734e71e605330088f2296297e1587e1",
+    "after": "e52f44835ba4d8fe34caed9a17aaa11b74ee72b03a64a7ca225281ffdb16a3ac"
+  },
+  "public/js/leaderboard.js": {
+    "before": "4b0a5ea668a27cdfac0ae5b1ce7a28ecaf01eb1f19c5a0461e87d26c6bec7b4f",
+    "after": "b250fd97784aaf3fbe6f72a0afe5379d68f37b80744c0ca2d7513e0a9d9eeff4"
+  },
+  "public/js/ledger.js": {
+    "before": "37160751bee9cd3272bdded8f40ffdba570cef5cf71720894f0cb42bab126e7f",
+    "after": "6cc93a83ede787b94dfed37b3749e0b47a37dddcd987ab9b2bfa288680e4cc4a"
+  },
+  "public/js/ai.js": {
+    "before": "6063b501bd80224e56fad2f1455d0663286100d1dc3f7bedb1dc1cac2b8955d0",
+    "after": "78a27c073aaa6ccff819980ad49632f345ec99f09ffa0212a7e7f678e2e80b44"
+  },
+  "public/js/hyperliquid-client.js": {
+    "before": "ffa14bbbbe073d48f74fbaeca3764a7c4532f04310ed41e484b21be96a50c1a9",
+    "after": "244d79152bdc2552f58678d88f88b47c24d8b4e43f63d1ee8235c9c62746ffaf"
+  },
+  "public/js/platform-client.js": {
+    "before": "3e6107b632d9b1ea0b7a85935136a5d1e315e83fefbd4d055085eea8048f62c9",
+    "after": "49e5177d017adae9faeb45f747b49ac6e936ae3dd1eb1f63ec0e0f2bfbd064cd"
+  },
+  "public/js/trade-chart.js": {
+    "before": "e06e29dc0644ad6b4b85ad9776ea674539b9658ba28080c6c438ded04824c55d",
+    "after": "71927c762e33720508e17aca41d0a7a2fb70dbe706a3a7f60e34edf8692961ca"
+  }
+}

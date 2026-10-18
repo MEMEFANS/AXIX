@@ -1,0 +1,24 @@
+--- public/js/trade-account.js before
++++ public/js/trade-account.js after
+@@ -1,8 +1,12 @@
+ let tradeAccountView = 'balances';
+ let tradeOrderType = 'market';
+ let platformProfile = null;
++let platformProfileSeq = 0;
+ 
+ async function loadPlatformProfile({ preservePositionControls = false } = {}) {
++  const seq = ++platformProfileSeq;
++  const address = window.currentWalletProfile?.address?.toLowerCase();
++  const revision = window.getWalletStateRevision?.();
+   if (!window.currentWalletProfile?.authenticated) {
+     platformProfile = null;
+     renderTradeAccount();
+@@ -10,6 +14,8 @@
+     return null;
+   }
+   const data = await PlatformClient.profile(tradeSymbol);
++  if (seq !== platformProfileSeq || revision !== window.getWalletStateRevision?.()
++    || !window.currentWalletProfile?.authenticated || address !== window.currentWalletProfile.address?.toLowerCase()) return null;
+   platformProfile = data;
+   updateQuickCloseButton();
+   window.TradeFunding?.update(data);

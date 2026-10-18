@@ -1,0 +1,44 @@
+[
+  {
+    "lang": "zh",
+    "width": 390,
+    "scrollWidth": 390,
+    "button": "钱包已连接 · 确认身份后激活"
+  },
+  {
+    "lang": "zh-TW",
+    "width": 390,
+    "scrollWidth": 390,
+    "button": "錢包已連接 · 確認身分後啟用"
+  },
+  {
+    "lang": "en",
+    "width": 390,
+    "scrollWidth": 390,
+    "button": "Wallet connected · Verify to activate"
+  },
+  {
+    "lang": "ja",
+    "width": 390,
+    "scrollWidth": 390,
+    "button": "ウォレット接続済み · 認証して有効化"
+  },
+  {
+    "lang": "ko",
+    "width": 390,
+    "scrollWidth": 390,
+    "button": "지갑 연결됨 · 인증 후 활성화"
+  },
+  {
+    "lang": "ru",
+    "width": 390,
+    "scrollWidth": 390,
+    "button": "Кошелёк подключён · подтвердите для активации"
+  },
+  {
+    "lang": "es",
+    "width": 390,
+    "scrollWidth": 390,
+    "button": "Billetera conectada · verifica para activar"
+  }
+]

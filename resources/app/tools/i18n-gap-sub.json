@@ -1,0 +1,42 @@
+[
+ {
+  "text": "<label class=\"mt-setting-row\">价格显示<select id=\"mt-price-mode\"><option value=\"last\">最新价格</option><option value=\"mark\">标记价格</option></select></label><label class=\"mt-setting-row\">显示成交量<input id=\"mt-volume-setting\" type=\"checkbox\"></label><label class=\"mt-setting-row\">显示图表网格<input id=\"mt-grid-setting\" type=\"checkbox\"></label>",
+  "files": "mobile-trade.js",
+  "residual": ""
+ },
+ {
+  "text": "交易显示设置",
+  "files": "mobile-trade.js",
+  "residual": ""
+ },
+ {
+  "text": "显示名称",
+  "files": "admin.html",
+  "residual": ""
+ },
+ {
+  "text": "显示顺序",
+  "files": "admin.html",
+  "residual": ""
+ },
+ {
+  "text": "已取消",
+  "files": "a-token-trade.js,earn.js",
+  "residual": ""
+ },
+ {
+  "text": "已取消充值",
+  "files": "wallet-funds.js",
+  "residual": ""
+ },
+ {
+  "text": "已取消互转",
+  "files": "a-token-transfer.js",
+  "residual": ""
+ },
+ {
+  "text": "已取消提现",
+  "files": "a-token-withdrawal.js,wallet-funds.js",
+  "residual": ""
+ }
+]

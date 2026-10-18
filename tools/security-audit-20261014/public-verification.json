@@ -1,0 +1,42 @@
+[
+  {
+    "path": "/",
+    "status": "200",
+    "exitCode": 0
+  },
+  {
+    "path": "/api/wallet/config",
+    "status": "200",
+    "exitCode": 0
+  },
+  {
+    "path": "/api/a-token/plans",
+    "status": "200",
+    "exitCode": 0
+  },
+  {
+    "path": "/api/wallet/session",
+    "status": "200",
+    "exitCode": 0
+  },
+  {
+    "path": "/admin.html",
+    "status": "200",
+    "exitCode": 0
+  },
+  {
+    "path": "/funds-admin.html",
+    "status": "200",
+    "exitCode": 0
+  },
+  {
+    "path": "/api/admin/dashboard?view=overview",
+    "status": "401",
+    "exitCode": 0
+  },
+  {
+    "path": "/api/wallet/admin/withdrawals",
+    "status": "401",
+    "exitCode": 0
+  }
+]

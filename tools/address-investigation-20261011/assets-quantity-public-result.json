@@ -1,0 +1,39 @@
+{
+  "captured_at_utc": "2026-10-10T20:48:37.943084+00:00",
+  "public_checks": [
+    {
+      "uri": "/",
+      "status": 200,
+      "sha256": "13eebb9862a4bcb9e56e9f67ba7fe5e10e79ca9e06df90b36ba147a9243894b3",
+      "cf_cache_status": "DYNAMIC",
+      "cache_control": "no-cache",
+      "cloudflare_analytics_inserted": true,
+      "new_page_loader_version": true,
+      "origin_content_sha256": "974440c89b12657f4dd4b36d475c71de0b2d6208d463659a2cbc10b9038c7fc3"
+    },
+    {
+      "uri": "/js/assets.js?v=20261011-aix-quantity",
+      "status": 200,
+      "sha256": "7b6d59d1e1f3c09afc6786fd07f8c9f7c349c76ad8602f7951f357bb00ed6801",
+      "cf_cache_status": "MISS",
+      "cache_control": "public, max-age=2592000, s-maxage=2592000, immutable",
+      "origin_content_sha256": "7b6d59d1e1f3c09afc6786fd07f8c9f7c349c76ad8602f7951f357bb00ed6801"
+    },
+    {
+      "uri": "/js/trade-account.js?v=32-assets",
+      "status": 200,
+      "sha256": "99bfa696a81c3dbe6bc676ef7d80a7e639b9280edf7048edd63dd688e128e09d",
+      "cf_cache_status": "MISS",
+      "cache_control": "public, max-age=2592000, s-maxage=2592000, immutable",
+      "origin_content_sha256": "99bfa696a81c3dbe6bc676ef7d80a7e639b9280edf7048edd63dd688e128e09d"
+    },
+    {
+      "uri": "/js/page-loader.js?v=5-assets",
+      "status": 200,
+      "sha256": "1b82a25c4ea1f9fa3025d037fe506808eb4516d2b6bf2ddc8d8bc84a2fe1c2de",
+      "cf_cache_status": "MISS",
+      "cache_control": "public, max-age=2592000, s-maxage=2592000, immutable",
+      "origin_content_sha256": "1b82a25c4ea1f9fa3025d037fe506808eb4516d2b6bf2ddc8d8bc84a2fe1c2de"
+    }
+  ]
+}

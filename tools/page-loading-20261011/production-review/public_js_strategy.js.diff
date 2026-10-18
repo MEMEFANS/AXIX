@@ -1,0 +1,191 @@
+--- public/js/strategy.js before
++++ public/js/strategy.js after
+@@ -27,6 +27,8 @@
+   let trendRefreshInFlight = false;
+   let initialized = false;
+   let platformAvailable = 0;
++  let latestCandles = [], chartLoading = null;
++  let walletGeneration = 0;
+   const dirtyFields = new Set();
+ 
+   window.addEventListener('wg-theme-change', event => {
+@@ -179,8 +181,8 @@
+ 
+   async function loadMarkets() {
+     try {
+-      const r = await fetch(`${strategyApi}/markets`);
+-      const j = await r.json();
++      const j = await Portal.readJSON(`${strategyApi}/markets`);
++      if (!Portal.active(prefix)) { initialized = false; return; }
+       markets = j.markets;
+       // Update header badge
+       const hdrBadge = $('hdr-' + prefix);
+@@ -192,22 +194,26 @@
+       const restored = syncFormFromConfig(lastState?.config, { force: true });
+       if (!restored && markets[0]) P('size-base').value = markets[0].minOrderSize || 0.001;
+       renderLiveMarketPrice(lastState);
+-      await refreshTrend();
+-      await refreshPlatformBalance();
++      // Account funds and market analysis render independently.
++      await Promise.allSettled([refreshTrend(), refreshPlatformBalance()]);
+     } catch (e) {
++      initialized = false;
+       console.error(`[${prefix}] loadMarkets failed:`, e.message);
+     }
+   }
+ 
+   async function refreshPlatformBalance() {
++    const wallet = Portal.walletKey(), generation = walletGeneration;
+     try {
+       const profile = await PlatformClient.profile(P('market').value || 'BTC');
++      if (wallet !== Portal.walletKey() || generation !== walletGeneration) return;
+       platformAvailable = Number(profile?.account?.availableMargin ?? profile?.account?.availableBalance ?? 0);
+       P('capital').value = platformAvailable > 0 ? platformAvailable.toFixed(6) : '0';
+       const balanceNode = P('capital-available');
+       if (balanceNode) balanceNode.textContent = platformAvailable > 0 ? `${platformAvailable.toLocaleString('en-US', { maximumFractionDigits:6 })} USDT` : '0 USDT';
+       calculateGridSettings();
+     } catch {
++      if (wallet !== Portal.walletKey() || generation !== walletGeneration) return;
+       platformAvailable = 0;
+       const balanceNode = P('capital-available');
+       if (balanceNode) balanceNode.textContent = '请先连接钱包';
+@@ -220,8 +226,9 @@
+     const marketId = P('market').value;
+     if (!silent) P('rec-tag').textContent = '分析中…';
+     try {
+-      const r = await fetch(`${strategyApi}/trend?marketId=${marketId}&intervalSec=${P('interval').value}`);
+-      const j = await r.json();
++      const interval = P('interval').value;
++      const j = await Portal.readJSON(`${strategyApi}/trend?marketId=${marketId}&intervalSec=${interval}`);
++      if (!Portal.active(prefix) || marketId !== P('market').value || interval !== P('interval').value) return;
+       if (j.error) throw new Error(j.error);
+       curTrend = j.analysis;
+       renderTrend(j.analysis);
+@@ -511,6 +518,7 @@
+     };
+   }
+   function resetForWallet() {
++    ++walletGeneration; platformAvailable = 0;
+     es?.close(); es = null; lastState = null;
+     P('st-run').innerHTML = '<span class="badge badge-stop">连接钱包后查看</span>';
+     P('fills').innerHTML = '<tr><td class="empty-row" colspan="7">暂无成交</td></tr>';
+@@ -592,6 +600,15 @@
+   }
+ 
+   function drawChart(candles) {
++    latestCandles = candles;
++    if (typeof LightweightCharts === 'undefined') {
++      if (!chartLoading && Portal.active(prefix)) {
++        chartLoading = window.loadPageCharts?.();
++        chartLoading?.then(() => { if (Portal.active(prefix)) drawChart(latestCandles); }).catch(() => {}).finally(() => { chartLoading = null; });
++      }
++      return;
++    }
++    if (!Portal.active(prefix)) return;
+     const container = $(chartId);
+     if (!container || !Array.isArray(candles)) return;
+     const data = candles.map(candle => ({
+@@ -673,8 +690,8 @@
+     const interval = P('interval')?.value || 3600;
+     if (!marketId) return;
+     try {
+-      const r = await fetch(`${strategyApi}/trend?marketId=${marketId}&intervalSec=${interval}`);
+-      const j = await r.json();
++      const j = await Portal.readJSON(`${strategyApi}/trend?marketId=${marketId}&intervalSec=${interval}`);
++      if (!Portal.active(prefix) || marketId !== P('market').value) return;
+       if (Array.isArray(j.candles) && j.candles.length) drawChart(j.candles);
+     } catch (error) {
+       console.error(`[${prefix}] candle refresh failed:`, error.message);
+@@ -682,24 +699,32 @@
+   }
+ 
+   async function activate() {
++    if (!Portal.active(prefix)) return;
++    const wallet = Portal.walletKey();
+     try {
+       await ensurePlatformSession();
+     } catch (error) {
+       if (typeof showToast === 'function') showToast(error.message || '请先连接钱包', 'error');
+       return;
+     }
++    if (!Portal.active(prefix) || wallet !== Portal.walletKey()) return;
+     if (!es || es.readyState === EventSource.CLOSED) connectStateStream();
+     if (lastState) render(lastState);
+     if (!initialized) {
+       initialized = true;
+       await loadMarkets();
+-    }
+-    refreshStrategySummary();
++    } else {
++      refreshPlatformBalance();
++      refreshTrend({ silent:true });
++    }
++    // The strategy's own stream carries its state; the all-strategy summary is for overview.
++
+   }
+   setInterval(() => {
+     if (!document.hidden && P('market').offsetParent !== null) refreshTrend({ silent: true });
+   }, 60_000);
+-  return { getLastState: () => lastState, applyFastPrice, refreshTrend, refreshCandles, activate, resetForWallet };
++  function deactivate() { es?.close(); es = null; }
++  return { deactivate, getLastState: () => lastState, applyFastPrice, refreshTrend, refreshCandles, activate, resetForWallet };
+ }
+ 
+ // ── 初始化三个交易所控制器 ──────────────────────────────────────────────────
+@@ -708,13 +733,25 @@
+ const rsCtrl = makeExchangeCtrl('rs', 'rs-chart');
+ const exchangeCtrls = { de: deCtrl, ex: exCtrl, rs: rsCtrl };
+ window.exchangeCtrls = exchangeCtrls;
+-window.resetInternalStrategiesForWallet = () => Object.values(exchangeCtrls).forEach(ctrl => ctrl.resetForWallet());
++window.resetInternalStrategiesForWallet = () => {
++  Object.values(exchangeCtrls).forEach(ctrl => ctrl.resetForWallet());
++  ++strategyOverviewGeneration; strategyOverviewPayload = null; strategyOverviewRequest = null;
++  renderInternalStrategyUnavailable('请先连接钱包');
++};
++window.addEventListener('pagechange', event => {
++  for (const [name, ctrl] of Object.entries(exchangeCtrls)) if (name !== event.detail.current) ctrl.deactivate();
++});
++document.addEventListener('visibilitychange', () => {
++  if (document.hidden) Object.values(exchangeCtrls).forEach(ctrl => ctrl.deactivate());
++  else for (const [name, ctrl] of Object.entries(exchangeCtrls)) if (Portal.active(name)) ctrl.activate();
++});
+ 
+ // ── 平台内部策略总览 ─────────────────────────────────────────────────────────
+ const strategyOverviewKeys = ['de', 'ex', 'rs'];
+ let strategyOverviewTimer = null;
+ let strategyOverviewRequest = null;
+ let strategyOverviewPayload = null;
++let strategyOverviewGeneration = 0;
+ function renderInternalStrategyOverview(payload) {
+   const states = payload?.strategies || {};
+   let totalEquity = 0, totalCapital = 0, totalPnl = 0, totalRealized = 0, totalUnrealized = 0, totalVolume = 0, totalRungs = 0;
+@@ -762,7 +799,10 @@
+   if ($('tot-modes')) $('tot-modes').textContent = strategyOverviewKeys.map(key => modeLabel(states[key]?.config?.mode)).join(' / ');
+ }
+ async function refreshInternalStrategyOverview() {
++  if (!Portal.active('overview')) return;
+   if (strategyOverviewRequest) return strategyOverviewRequest;
++  const generation = strategyOverviewGeneration, wallet = Portal.walletKey();
++  const valid = () => generation === strategyOverviewGeneration && wallet === Portal.walletKey();
+   strategyOverviewRequest = (async () => {
+     try {
+       if (!window.currentWalletProfile?.authenticated) {
+@@ -782,13 +822,15 @@
+         return;
+       }
+       if (!response.ok) throw new Error(`请求失败（${response.status}）`);
+-      strategyOverviewPayload = await response.json();
++      const next = await response.json();
++      if (!valid()) return;
++      strategyOverviewPayload = next;
+       renderInternalStrategyOverview(strategyOverviewPayload);
+     } catch (error) {
+-      if (!strategyOverviewPayload) renderInternalStrategyUnavailable('策略数据暂时不可用');
++      if (valid() && !strategyOverviewPayload) renderInternalStrategyUnavailable('策略数据暂时不可用');
+       console.warn('[internal-strategy] overview refresh failed:', error.message);
+     } finally {
+-      strategyOverviewRequest = null;
++      if (valid()) strategyOverviewRequest = null;
+     }
+   })();
+   return strategyOverviewRequest;

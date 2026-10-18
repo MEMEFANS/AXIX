@@ -1,0 +1,33 @@
+{
+  "captured_at_utc": "2026-10-10T19:11:07.607410+00:00",
+  "service": "MainPID=8734\nActiveState=active\nSubState=running\n",
+  "admin_users": {
+    "count": 5592,
+    "deleted_accounts_found": 0
+  },
+  "admin_social": {
+    "normal_count": 78,
+    "malicious_found": 0
+  },
+  "blocked_login_checks": [
+    {
+      "wallet": "0xd36ddfb9d3fa6b326b49e6eab68c5b961bc3ba59",
+      "local_blocked": true,
+      "public_blocked": true
+    },
+    {
+      "wallet": "0xf75a7c032b7a484269ced5663f7fa10acf63b1ac",
+      "local_blocked": true,
+      "public_blocked": true
+    }
+  ],
+  "normal_login_challenge_passed": true,
+  "remaining_deleted_accounts": 0,
+  "remaining_deleted_sessions": 0,
+  "malicious_database_count": 0,
+  "persisted_blocks": 114,
+  "foreign_key_errors": 0,
+  "integrity": "ok",
+  "source_hash": "93c7dca51246d2170ce0c5adb398b38a4af5890ba01f58771c38a767289a4a79",
+  "automatic_usdt_withdrawals_enabled": false
+}

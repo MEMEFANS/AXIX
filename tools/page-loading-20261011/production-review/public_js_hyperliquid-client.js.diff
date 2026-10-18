@@ -1,0 +1,17 @@
+--- public/js/hyperliquid-client.js before
++++ public/js/hyperliquid-client.js after
+@@ -1,5 +1,6 @@
+ (function () {
+   async function json(url, options = {}) {
++    if (window.Portal?.readJSON) return Portal.readJSON(url, options);
+     const response = await fetch(url, { credentials:'same-origin', ...options });
+     const data = await response.json().catch(() => ({}));
+     if (!response.ok) throw new Error(data.error || `请求失败（${response.status}）`);
+@@ -8,6 +9,7 @@
+ 
+   async function info(type, args = {}) {
+     return json('/api/hyperliquid/info', {
++      dedupe:true,
+       method:'POST', headers:{ 'Content-Type':'application/json' },
+       body:JSON.stringify({ type, ...args }),
+     });

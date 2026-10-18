@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AxiX 代理后台</title>
+  <link rel="stylesheet" href="/styles/base.css?v=14">
+  <link rel="stylesheet" href="/styles/operator-admin.css?v=12">
+</head>
+<body>
+  <main id="agent-login-view" class="admin-login-view">
+    <form id="agent-login-form" class="admin-login-card">
+      <div class="admin-login-brand"><i class="brand-mark"></i><b>AxiX Exchange</b></div>
+      <div class="admin-login-heading">
+        <h1>代理后台</h1>
+        <p>使用代理账号查看团队数据</p>
+      </div>
+      <label>账号<input id="agent-username" name="username" autocomplete="username" required></label>
+      <label>密码<input id="agent-password" name="password" type="password" autocomplete="current-password" required></label>
+      <div id="agent-login-error" class="admin-login-error" role="alert"></div>
+      <button id="agent-login-button" class="admin-primary-button" type="submit">登录</button>
+    </form>
+  </main>
+
+  <div id="agent-app" class="admin-app" hidden>
+    <div class="admin-sidebar-backdrop" id="agent-sidebar-backdrop" aria-hidden="true"></div>
+    <aside class="admin-sidebar" id="agent-sidebar" aria-label="代理侧边栏">
+      <div class="admin-sidebar-brand"><i class="brand-mark"></i><span><b>AxiX Exchange</b><small>代理控制台</small></span></div>
+      <nav class="admin-navigation" aria-label="代理功能">
+        <button type="button" data-agent-page="overview"><span class="admin-nav-icon">📊</span>团队概览</button>
+        <button type="button" data-agent-page="users"><span class="admin-nav-icon">👥</span>下级用户</button>
+        <button type="button" data-agent-page="deposits"><span class="admin-nav-icon">💰</span>充值记录</button>
+        <button type="button" data-agent-page="withdrawals"><span class="admin-nav-icon">📤</span>提现记录</button>
+        <button type="button" data-agent-page="rewards"><span class="admin-nav-icon">🎁</span>返佣记录</button>
+      </nav>
+      <div class="admin-sidebar-account">
+        <span>当前代理</span>
+        <b id="agent-current-user">-</b>
+        <small id="agent-current-wallet" style="font-family:monospace;font-size:11px;word-break:break-all;color:var(--admin-muted)"></small>
+        <button id="agent-logout" type="button">退出登录</button>
+      </div>
+    </aside>
+
+    <section class="admin-workspace">
+      <header class="admin-topbar">
+        <button class="admin-topbar-menu" id="agent-menu-toggle" type="button" aria-label="打开菜单" aria-controls="agent-sidebar">☰</button>
+        <div><h1 id="agent-page-title">团队概览</h1><p id="agent-updated">正在读取团队数据</p></div>
+        <button id="agent-refresh" class="admin-secondary-button" type="button">刷新数据</button>
+      </header>
+      <div id="agent-global-status" class="admin-global-status" role="status"></div>
+
+      <section class="admin-page-panel active" data-agent-panel="overview">
+        <div class="admin-metrics" aria-label="团队核心数据">
+          <article><span>下级用户</span><b id="metric-downline-users">0</b><small>直推 + 间推全部下级</small></article>
+          <article><span>真实充值用户</span><b id="metric-real-users">0</b><small>存在已确认 USDT 充值</small></article>
+          <article><span>累计确认充值</span><b><i id="metric-total-deposited">0.00</i> <em>USDT</em></b><small>下级充值合计</small></article>
+          <article><span>下级平台余额</span><b><i id="metric-total-balance">0.00</i> <em>USDT</em></b><small>下级余额合计</small></article>
+          <article><span>累计提现</span><b><i id="metric-total-withdrawn">0.00</i> <em>USDT</em></b><small>下级提现合计</small></article>
+          <article><span>已领返佣</span><b><i id="metric-earned">0.00</i> <em>USDT</em></b><small id="metric-claimable">待领 0.00 USDT</small></article>
+        </div>
+      </section>
+
+      <section class="admin-page-panel" data-agent-panel="users">
+        <section class="admin-content-block">
+          <header class="admin-list-header"><div><h2>下级用户</h2><p id="agent-user-count">0 位用户</p></div><div class="admin-filters"><input id="agent-user-search" type="search" placeholder="搜索钱包地址"><label><input id="agent-real-only" type="checkbox"> 只看真实充值用户</label></div></header>
+          <div class="admin-table-scroll"><table><thead><tr><th>钱包地址</th><th>等级</th><th>确认充值</th><th>平台余额</th><th>首次连接</th><th>最近充值</th></tr></thead><tbody id="agent-users-body"></tbody></table></div>
+        </section>
+      </section>
+
+      <section class="admin-page-panel" data-agent-panel="deposits">
+        <section class="admin-content-block">
+          <header class="admin-list-header"><div><h2>下级充值记录</h2><p id="agent-deposit-count">0 笔</p></div></header>
+          <div class="admin-table-scroll"><table><thead><tr><th>钱包</th><th>网络</th><th>金额</th><th>状态</th><th>时间</th></tr></thead><tbody id="agent-deposits-body"></tbody></table></div>
+        </section>
+      </section>
+
+      <section class="admin-page-panel" data-agent-panel="withdrawals">
+        <section class="admin-content-block">
+          <header class="admin-list-header"><div><h2>下级提现记录</h2><p id="agent-withdrawal-count">0 笔</p></div></header>
+          <div class="admin-table-scroll"><table><thead><tr><th>钱包</th><th>网络</th><th>金额</th><th>状态</th><th>时间</th></tr></thead><tbody id="agent-withdrawals-body"></tbody></table></div>
+        </section>
+      </section>
+
+      <section class="admin-page-panel" data-agent-panel="rewards">
+        <section class="admin-content-block">
+          <header class="admin-list-header"><div><h2>返佣记录</h2><p>交易手续费返佣 + AI 跟单返佣</p></div></header>
+          <div class="admin-metrics" style="grid-template-columns:1fr 1fr">
+            <article><span>已领返佣</span><b><i id="reward-earned">0.00</i> <em>USDT</em></b></article>
+            <article><span>待领返佣</span><b><i id="reward-claimable">0.00</i> <em>USDT</em></b></article>
+          </div>
+          <div class="admin-table-scroll" style="margin-top:16px"><table><thead><tr><th>来源钱包</th><th>类型</th><th>来源</th><th>金额</th><th>状态</th><th>时间</th></tr></thead><tbody id="agent-rewards-body"></tbody></table></div>
+        </section>
+      </section>
+    </section>
+  </div>
+
+  <script src="/js/agent.js?v=2"></script>
+</body>
+</html>

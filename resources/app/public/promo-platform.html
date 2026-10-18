@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>AxiX 平台介绍</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html,body { width:1080px; height:1920px; overflow:hidden; }
+  body { font-family:"Microsoft YaHei","PingFang SC",sans-serif; color:#c7d5d2;
+    background:
+      radial-gradient(900px 500px at 50% -5%, rgba(79,209,181,.14), transparent 60%),
+      radial-gradient(700px 400px at 50% 105%, rgba(79,209,181,.08), transparent 60%),
+      linear-gradient(170deg,#07100f 0%,#0a1112 55%,#081211 100%);
+    position:relative; display:flex; flex-direction:column; padding:64px 70px 56px; }
+  .wm { position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    font-size:180px; font-weight:900; letter-spacing:16px; color:rgba(79,209,181,.045); pointer-events:none; }
+  .top { display:flex; align-items:center; gap:20px; }
+  .top img { width:76px; height:76px; border-radius:18px; box-shadow:0 0 30px rgba(79,209,181,.4); }
+  .brand { font-size:36px; font-weight:900; color:#eaf6f3; }
+  .brand b { color:#4fd1b5; }
+  .hero { text-align:center; margin-top:64px; }
+  .hero h1 { font-size:96px; font-weight:900; letter-spacing:4px;
+    background:linear-gradient(100deg,#8ff0dc,#4fd1b5 50%,#b9f4e6);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    text-shadow:0 0 60px rgba(79,209,181,.3); }
+  .hero p { margin-top:20px; font-size:33px; color:#7d9691; letter-spacing:12px; }
+  .sec-title { margin-top:64px; font-size:30px; font-weight:900; color:#7fe6d3;
+    display:flex; align-items:center; gap:14px; }
+  .sec-title::before { content:""; width:12px; height:12px; border-radius:50%; background:#4fd1b5; box-shadow:0 0 12px #4fd1b5; }
+  .grid { margin-top:26px; display:grid; grid-template-columns:1fr 1fr; gap:26px; }
+  .card { background:linear-gradient(180deg,#101b1d,#0c1517); border:1px solid #29413e;
+    border-radius:24px; padding:34px 36px; }
+  .card.wide { grid-column:1 / -1; }
+  .card h3 { font-size:32px; font-weight:900; color:#eaf6f3; }
+  .card h3 em { font-style:normal; color:#4fd1b5; }
+  .card p { margin-top:14px; font-size:23px; line-height:1.75; color:#a9bfb9; }
+  .card p b { color:#4fd1b5; }
+  .card .chips { margin-top:18px; display:flex; flex-wrap:wrap; gap:12px; }
+  .chip { font-size:21px; font-weight:700; color:#9fe8d8; background:#0d2020; border:1px solid #24493f;
+    border-radius:999px; padding:8px 20px; }
+  .stats { margin-top:auto; display:grid; grid-template-columns:repeat(4,1fr); gap:20px; }
+  .st { text-align:center; background:#0d2020; border:1px solid #24493f; border-radius:20px; padding:24px 6px 20px; }
+  .st .v { font-size:44px; font-weight:900; color:#4fd1b5; line-height:1.1; }
+  .st .v small { font-size:24px; }
+  .st .t { margin-top:8px; font-size:20px; color:#7d9691; }
+  .cta { margin-top:26px; text-align:center; }
+  .cta .btn { display:inline-block; font-size:42px; font-weight:900; color:#04211b; letter-spacing:8px;
+    background:linear-gradient(135deg,#8ff0dc,#4fd1b5); border-radius:999px; padding:28px 104px;
+    box-shadow:0 20px 60px rgba(79,209,181,.35); }
+  .foot { margin-top:36px; text-align:center; font-size:22px; color:#3d5a53; letter-spacing:5px; }
+</style>
+</head>
+<body>
+<div class="wm">AXIX</div>
+<div class="top">
+  <img src="assets/brand/logo.png" alt="AxiX">
+  <div class="brand">Axi<b>X</b> Exchange</div>
+</div>
+
+<div class="hero">
+  <h1>AxiX Exchange</h1>
+  <p>一站式数字资产交易平台</p>
+</div>
+
+<div class="sec-title">五大核心板块</div>
+<div class="grid">
+  <div class="card wide">
+    <h3>交易市场 · <em>现货 / 永续合约 / AIX</em></h3>
+    <p>主流币对与 AIX/USDT 三大交易区，专业 K 线与订单簿，合约支持多空双向与杠杆调节。</p>
+    <div class="chips"><span class="chip">币安级行情</span><span class="chip">多空双向</span><span class="chip">杠杆灵活</span></div>
+  </div>
+  <div class="card">
+    <h3>AIX 生态</h3>
+    <p>算力矿机每日产出，四档质押每日收益结算，<b>每笔卖出 50% 销毁 + 50% 进 A10 分红池</b>。</p>
+    <div class="chips"><span class="chip">矿机挖矿</span><span class="chip">质押增值</span><span class="chip">通缩模型</span></div>
+  </div>
+  <div class="card">
+    <h3>合约跟单</h3>
+    <p>机构信号驱动<b>自动开平仓</b>，策略胜率公开，收益定时结算，USDT 随时赎回。</p>
+    <div class="chips"><span class="chip">一键跟单</span><span class="chip">胜率透明</span></div>
+  </div>
+  <div class="card wide">
+    <h3>团队奖励 · <em>建团队享长期分润</em></h3>
+    <p>直推好友跟单收益 <b>10%</b> 永久分成，团队级差 <b>A1~A10</b>（10%~90%），A10 专属均分手续费分红池。</p>
+    <div class="chips"><span class="chip">直推 10%</span><span class="chip">级差 A1~A10</span><span class="chip">A10 分红池</span></div>
+  </div>
+</div>
+
+<div class="stats">
+  <div class="st"><div class="v">0</div><div class="t">提现手续费</div></div>
+  <div class="st"><div class="v">10<small>U</small></div><div class="t">提现门槛</div></div>
+  <div class="st"><div class="v">7×24</div><div class="t">行情不间断</div></div>
+  <div class="st"><div class="v">7</div><div class="t">国语言支持</div></div>
+</div>
+
+<div class="cta"><span class="btn">立即体验 AxiX</span></div>
+<div class="foot">AXIX EXCHANGE · BNB SMART CHAIN</div>
+</body>
+</html>

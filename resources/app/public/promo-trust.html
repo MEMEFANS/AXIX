@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>AxiX 平台背书</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html,body { width:1080px; height:1920px; overflow:hidden; }
+  body { font-family:"Microsoft YaHei","PingFang SC",sans-serif; color:#c7d5d2;
+    background:
+      radial-gradient(900px 500px at 50% -5%, rgba(79,209,181,.14), transparent 60%),
+      radial-gradient(700px 400px at 50% 105%, rgba(79,209,181,.08), transparent 60%),
+      linear-gradient(170deg,#07100f 0%,#0a1112 55%,#081211 100%);
+    position:relative; display:flex; flex-direction:column; padding:60px 70px 52px; }
+  .wm { position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    font-size:190px; font-weight:900; letter-spacing:18px; color:rgba(79,209,181,.045); pointer-events:none; }
+  .top { display:flex; align-items:center; gap:20px; }
+  .top img { width:72px; height:72px; border-radius:17px; box-shadow:0 0 30px rgba(79,209,181,.4); }
+  .brand { font-size:35px; font-weight:900; color:#eaf6f3; }
+  .brand b { color:#4fd1b5; }
+  .hero { text-align:center; margin-top:38px; }
+  .hero h1 { font-size:84px; font-weight:900; letter-spacing:5px;
+    background:linear-gradient(100deg,#8ff0dc,#4fd1b5 50%,#b9f4e6);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    text-shadow:0 0 60px rgba(79,209,181,.3); }
+  .hero p { margin-top:16px; font-size:29px; color:#7d9691; letter-spacing:9px; }
+  .aethon { margin-top:46px; background:linear-gradient(180deg,rgba(79,209,181,.10),rgba(79,209,181,.02));
+    border:2px solid #2b6157; border-radius:28px; padding:40px 48px 34px; position:relative; overflow:hidden;
+    box-shadow:0 0 70px rgba(79,209,181,.12); }
+  .aethon .tag { position:absolute; top:0; right:0; background:linear-gradient(135deg,#8ff0dc,#4fd1b5);
+    color:#04211b; font-size:22px; font-weight:900; padding:10px 28px; border-radius:0 26px 0 26px; }
+  .aethon h2 { font-size:52px; font-weight:900; color:#eaf6f3; }
+  .aethon h2 em { font-style:normal; color:#4fd1b5; }
+  .aethon .sub { margin-top:12px; font-size:26px; color:#b9cbc7; line-height:1.7; }
+  .aethon .sub b { color:#4fd1b5; }
+  .astats { display:flex; gap:18px; margin-top:30px; }
+  .as { flex:1; background:#0d2020; border:1px solid #24493f; border-radius:18px; text-align:center; padding:22px 6px 18px; }
+  .as .v { font-size:52px; font-weight:900; color:#4fd1b5; line-height:1.05; text-shadow:0 0 30px rgba(79,209,181,.4); }
+  .as .v small { font-size:26px; }
+  .as .t { margin-top:8px; font-size:20px; color:#7d9691; }
+  .aethon .note { margin-top:24px; font-size:20px; color:#5f7a73; line-height:1.6; text-align:center; }
+  .sec { margin-top:42px; }
+  .sec-title { font-size:28px; font-weight:900; color:#7fe6d3; display:flex; align-items:center; gap:14px; }
+  .sec-title::before { content:""; width:11px; height:11px; border-radius:50%; background:#4fd1b5; box-shadow:0 0 12px #4fd1b5; }
+  .row { margin-top:18px; display:flex; flex-direction:column; gap:14px; }
+  .r { display:flex; align-items:center; gap:28px; background:linear-gradient(180deg,#101b1d,#0c1517);
+    border:1px solid #29413e; border-radius:20px; padding:20px 32px; }
+  .r .ic { flex:0 0 70px; width:70px; height:70px; border-radius:20px; display:flex; align-items:center; justify-content:center;
+    font-size:31px; font-weight:900; color:#4fd1b5; background:#0d2020; border:2px solid #2b6157; }
+  .r .bd h4 { font-size:28px; font-weight:900; color:#eaf6f3; }
+  .r .bd h4 em { font-style:normal; color:#4fd1b5; }
+  .r .bd p { margin-top:7px; font-size:21px; line-height:1.6; color:#a9bfb9; }
+  .r .bd p b { color:#4fd1b5; }
+  .grid { margin-top:18px; display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  .g { background:linear-gradient(180deg,#101b1d,#0c1517); border:1px solid #29413e;
+    border-radius:18px; padding:24px 28px; }
+  .g .t { font-size:26px; font-weight:900; color:#eaf6f3; }
+  .g .t em { font-style:normal; color:#4fd1b5; }
+  .g .s { margin-top:9px; font-size:20px; line-height:1.6; color:#a9bfb9; }
+  .g .s b { color:#4fd1b5; }
+  .cta { margin-top:auto; text-align:center; }
+  .cta .btn { display:inline-block; font-size:42px; font-weight:900; color:#04211b; letter-spacing:8px;
+    background:linear-gradient(135deg,#8ff0dc,#4fd1b5); border-radius:999px; padding:28px 104px;
+    box-shadow:0 20px 60px rgba(79,209,181,.35); }
+  .foot { margin-top:34px; text-align:center; font-size:21px; color:#3d5a53; letter-spacing:5px; }
+</style>
+</head>
+<body>
+<div class="wm">TRUST</div>
+<div class="top">
+  <img src="assets/brand/logo.png" alt="AxiX">
+  <div class="brand">Axi<b>X</b> Exchange</div>
+</div>
+
+<div class="hero">
+  <h1>为什么选择 AxiX</h1>
+  <p>TRUST &amp; TRANSPARENCY</p>
+</div>
+
+<div class="aethon">
+  <div class="tag">机构背书</div>
+  <h2>AxiX <em>×</em> Aethon Fund</h2>
+  <div class="sub">2026 年 7 月启动的 <b>AI 对冲基金</b>，初始资本 <b>$50M</b>，获 BusinessWire、Hedgeweek 等权威媒体报道。<br>AxiX 合约跟单<b>对齐其策略方法论与机构级风控框架</b>。</div>
+  <div class="astats">
+    <div class="as"><div class="v">$50M</div><div class="t">初始资本规模</div></div>
+    <div class="as"><div class="v">20<small> 年</small></div><div class="t">信号研究沉淀</div></div>
+    <div class="as"><div class="v">7.5<small>×</small></div><div class="t">前瞻组合跑赢 S&amp;P 500</div></div>
+  </div>
+  <div class="note">合作性质：策略方法论与风控框架参考（Methodology Reference）· 消息来源：BusinessWire 官方新闻稿</div>
+</div>
+
+<div class="sec">
+  <div class="sec-title">基础设施 · 全部真实可查</div>
+  <div class="row">
+    <div class="r">
+      <div class="ic">链</div>
+      <div class="bd"><h4>BNB Smart Chain 公链</h4>
+      <p>充值提现<b>链上可查</b>，每一笔都经得起验证</p></div>
+    </div>
+    <div class="r">
+      <div class="ic">市</div>
+      <div class="bd"><h4>币安级行情数据源</h4>
+      <p>K 线与价格直连<b>币安实时数据</b>，7×24 不间断</p></div>
+    </div>
+    <div class="r">
+      <div class="ic">包</div>
+      <div class="bd"><h4>OKX / MetaMask 钱包直连</h4>
+      <p>主流 Web3 钱包一键登录，<b>资产始终自持</b></p></div>
+    </div>
+  </div>
+</div>
+
+<div class="sec">
+  <div class="sec-title">透明机制 · 不玩黑箱</div>
+  <div class="grid">
+    <div class="g"><div class="t">收益<em>规则透明</em></div>
+    <div class="s">矿机、质押、费率<b>明码标价</b>写进机制</div></div>
+    <div class="g"><div class="t">跟单<em>胜率公开</em></div>
+    <div class="s">策略明细与<b>历史胜率</b>实时可查</div></div>
+    <div class="g"><div class="t">销毁<em>链上执行</em></div>
+    <div class="s">每笔卖出 <b>50% 手续费当场销毁</b></div></div>
+    <div class="g"><div class="t">排行<em>数据公开</em></div>
+    <div class="s">收益排行榜<b>实时更新</b>，摆在明面上</div></div>
+  </div>
+</div>
+
+<div class="cta"><span class="btn">立即体验 AxiX</span></div>
+<div class="foot">AXIX EXCHANGE · BNB SMART CHAIN</div>
+</body>
+</html>

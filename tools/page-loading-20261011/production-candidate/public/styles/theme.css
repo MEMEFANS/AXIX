@@ -1,0 +1,71 @@
+/* Header language control. Theme switching is intentionally unavailable. */
+.lang-toggle {
+  width: 40px; height: 40px; flex: 0 0 40px; display: grid; place-items: center;
+  border: 1px solid var(--border2); border-radius: 50%; background: transparent;
+  color: var(--txt); font: 17px/1 "Segoe UI Symbol", sans-serif; cursor: pointer;
+  min-width: 40px; min-height: 40px;
+}
+@media (min-width: 768px) {
+  .lang-toggle { width: 34px; height: 34px; flex-basis: 34px; min-width: 34px; min-height: 34px; }
+}
+.lang-toggle:hover { border-color: var(--brand); color: var(--brand); background: color-mix(in srgb, var(--brand) 8%, transparent); }
+.lang-toggle:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+@media (max-width: 900px) {
+  .lang-toggle { width: 38px; height: 38px; flex-basis: 38px; min-width: 38px; min-height: 38px; font-size: 15px; }
+}
+@media (max-width: 480px) {
+  .lang-toggle { width: 38px; height: 38px; flex-basis: 38px; min-width: 38px; min-height: 38px; }
+}
+
+/* ── Product polish layer ──
+   Keep the dark palette while giving the shell a clearer hierarchy and a
+   predictable navigation rhythm at every viewport width. */
+.header {
+  background: color-mix(in srgb, var(--panel) 92%, #061015 8%);
+  box-shadow: 0 1px 0 rgba(96, 218, 194, .08), 0 8px 24px rgba(0, 0, 0, .16);
+  backdrop-filter: blur(14px);
+}
+.main-tabs {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.main-tabs::-webkit-scrollbar { display: none; }
+.tab-btn { white-space: nowrap; min-width: max-content; }
+.tab-btn:focus-visible,
+.mobile-nav-toggle:focus-visible,
+.wallet-connect:focus-visible,
+button:focus-visible,
+a:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+.panel,
+.portal-section,
+.portal-card,
+.assets-main,
+.assets-overview,
+.aim-banner,
+.earn-v2-head-banner {
+  box-shadow: 0 10px 26px rgba(0, 0, 0, .12);
+}
+.panel-title,
+.portal-section-head h2 { letter-spacing: .35px; }
+.muted { color: color-mix(in srgb, var(--mut2) 88%, #fff 12%); }
+@media (max-width: 1100px) {
+  .header-slogan { max-width: 32vw; }
+  .header { gap: 10px; }
+}
+@media (max-width: 768px) {
+  .header { box-shadow: 0 4px 18px rgba(0, 0, 0, .24); }
+  .panel,
+  .portal-section,
+  .portal-card,
+  .assets-main,
+  .assets-overview,
+  .aim-banner,
+  .earn-v2-head-banner { box-shadow: 0 6px 16px rgba(0, 0, 0, .16); }
+}
+@media (max-width: 480px) {
+  .header-slogan { display: none; }
+  .header-logo { font-size: 15px; }
+}

@@ -1,0 +1,72 @@
+{
+  "deployed": true,
+  "release": "admin-speed-20261012-084824",
+  "backup_directory": "/opt/wg-platform/backups/admin-speed-20261012-084824",
+  "completed_at_utc": "2026-10-12T08:48:50.651250+00:00",
+  "files": [
+    "public/js/admin-agents.js",
+    "public/js/admin-lottery.js",
+    "public/js/operator-admin.js",
+    "src/server.js",
+    "src/wallet-service.js",
+    "public/admin.html"
+  ],
+  "service": {
+    "MainPID": "41336",
+    "ActiveState": "active",
+    "SubState": "running"
+  },
+  "service_restarted": true,
+  "protected_files_unchanged": 263,
+  "env_unchanged": true,
+  "ledger_unchanged_during_file_switch": true,
+  "database_restored": false,
+  "withdrawal_settings_and_frozen_accounts_unchanged": true,
+  "candidate_verification": {
+    "isolatedDatabase": true,
+    "users": 7370,
+    "summaryUnchanged": true,
+    "usersUnchanged": true,
+    "withdrawalAutomationUnchanged": true,
+    "baselineMilliseconds": 16812,
+    "overviewMilliseconds": 19,
+    "pageRows": 50
+  },
+  "verification": {
+    "static": [
+      {
+        "uri": "/admin.html",
+        "status": 200,
+        "sha256": "78d49c3a01b6f59a8ed81ae03e4e513ff30d673413e50822b2aafc47c1bdae06"
+      },
+      {
+        "uri": "/js/operator-admin.js?v=20261012-admin-speed-1",
+        "status": 200,
+        "sha256": "43b0131b372495dec90dfaad822f4a67e8d6f4d6183fd99f30f469e12653b64c"
+      },
+      {
+        "uri": "/js/admin-lottery.js?v=20261012-admin-speed-1",
+        "status": 200,
+        "sha256": "51f4b8d3dc64e0df0bdc370a568dff37de0cc805182a0bf841f493c4b07f4b3e"
+      },
+      {
+        "uri": "/js/admin-agents.js?v=20261012-admin-speed-1",
+        "status": 200,
+        "sha256": "1e335a174456306f781bd5e85663ebb961fd04c794fb76df126548a9847b4e92"
+      },
+      {
+        "uri": "/funds-admin.html",
+        "status": 200,
+        "sha256": "c42d7a888344e49ed4a8b1a89b56ec86795d90a757f690622c4045542777cc0e"
+      }
+    ],
+    "operatorLogin": true,
+    "overviewMilliseconds": 26,
+    "usersMilliseconds": 56,
+    "usersTotal": 7370,
+    "usersRows": 50,
+    "paginationAndSearch": true,
+    "fundsPermissions": true,
+    "unsafeScreenshotsSuppressed": true
+  }
+}

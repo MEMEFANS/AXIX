@@ -1,0 +1,41 @@
+--- before/src/server.js
++++ after/src/server.js
+@@ -1063,18 +1063,23 @@
+         }
+       }
+       if (p === '/api/admin/dashboard' && request.method === 'GET') {
+-        const walletDashboard = walletService.adminDashboard();
++        const walletDashboard = walletService.adminDashboard({ includeUsers:url.searchParams.get('view') !== 'overview' });
+         return send(res, 200, {
+           ...walletDashboard,
+           withdrawalAutomation:{ ...walletDashboard.withdrawalAutomation, ...withdrawalPayoutService.status() },
+           tokens:marketCatalog.list({ includeDisabled:true }),
+-          recentDeposits:walletService.adminListDeposits().slice(0, 8),
+-          recentWithdrawals:walletService.adminListWithdrawals().slice(0, 8),
++          recentDeposits:walletService.adminListDeposits('', { limit:8 }),
++          recentWithdrawals:walletService.adminListWithdrawals('', { limit:8 }),
+         });
+       }
+       if (p === '/api/admin/users' && request.method === 'GET') {
+-        const dashboard = walletService.adminDashboard();
+-        return send(res, 200, { summary:dashboard.summary, users:dashboard.users });
++        const dashboard = walletService.adminDashboard({
++          userQuery:url.searchParams.get('q') || '', realOnly:url.searchParams.get('realOnly') === '1',
++          ...(url.searchParams.has('limit') ? { limit:url.searchParams.get('limit'), offset:url.searchParams.get('offset') } : {}),
++        });
++        return send(res, 200, { summary:dashboard.summary, users:dashboard.users,
++          ...(dashboard.usersTotal !== undefined ? { total:dashboard.usersTotal, limit:dashboard.usersLimit, offset:dashboard.usersOffset } : {}),
++        });
+       }
+       // 用户完整数据详情：矿机/质押/激活/直推间推团队/交易/互转
+       if (p.startsWith('/api/admin/users/') && p.endsWith('/detail') && request.method === 'GET') {
+@@ -1329,6 +1334,9 @@
+           return send(res, 200, { items: results });
+         } catch (e) { return send(res, 500, { error: e?.message || String(e) }); }
+       }
++      if (p === '/api/admin/tokens' && request.method === 'GET') {
++        return send(res, 200, { tokens:marketCatalog.list({ includeDisabled:true }) });
++      }
+       if (p === '/api/admin/tokens' && request.method === 'POST') {
+         try {
+           const body = await readBody(request);

@@ -1,0 +1,18 @@
+{
+  "public/js/assets.js": {
+    "before": "3f1aae919a86374cbe002033ffbe21dbaf97470a052e494412c3a7bbf3360d97",
+    "after": "7b6d59d1e1f3c09afc6786fd07f8c9f7c349c76ad8602f7951f357bb00ed6801"
+  },
+  "public/js/trade-account.js": {
+    "before": "8de3b68a80d6a45c97e7f2dbfad74b3acfa0ed39747a61b17a0fafe9e70af989",
+    "after": "99bfa696a81c3dbe6bc676ef7d80a7e639b9280edf7048edd63dd688e128e09d"
+  },
+  "public/js/page-loader.js": {
+    "before": "2e995741e484b4d8fa47fb7031a681715607534509e342ccd987b29b56744b19",
+    "after": "1b82a25c4ea1f9fa3025d037fe506808eb4516d2b6bf2ddc8d8bc84a2fe1c2de"
+  },
+  "public/index.html": {
+    "before": "41213883cf95fc31dee5591ad12435d3bf9fdd8131393fb6fdd45530525af300",
+    "after": "974440c89b12657f4dd4b36d475c71de0b2d6208d463659a2cbc10b9038c7fc3"
+  }
+}

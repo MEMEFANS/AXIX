@@ -1,0 +1,109 @@
+{
+  "checkedAt": "2026-10-10T15:52:18.321Z",
+  "results": [
+    {
+      "file": "public/js/ai-managed.js",
+      "status": 200,
+      "bytes": 24302,
+      "match": true,
+      "encoding": "gzip",
+      "cache": "MISS"
+    },
+    {
+      "file": "public/js/assets.js",
+      "status": 200,
+      "bytes": 24695,
+      "match": true,
+      "encoding": "gzip",
+      "cache": "MISS"
+    },
+    {
+      "file": "public/js/core.js",
+      "status": 200,
+      "bytes": 60586,
+      "match": true,
+      "encoding": "gzip",
+      "cache": "MISS"
+    },
+    {
+      "file": "public/js/i18n-zh-en.js",
+      "status": 200,
+      "bytes": 315081,
+      "match": true,
+      "encoding": "gzip",
+      "cache": "MISS"
+    },
+    {
+      "file": "public/js/wallet.js",
+      "status": 200,
+      "bytes": 28923,
+      "match": true,
+      "encoding": "gzip",
+      "cache": "MISS"
+    },
+    {
+      "file": "public/js/platform-client.js",
+      "status": 200,
+      "bytes": 2563,
+      "match": true,
+      "encoding": "gzip",
+      "cache": "MISS"
+    },
+    {
+      "file": "public/index.html",
+      "status": 200,
+      "bytes": 119055,
+      "match": true,
+      "encoding": "br",
+      "cache": "DYNAMIC"
+    },
+    {
+      "file": "public/js/earn.js",
+      "status": 200,
+      "bytes": 67704,
+      "match": true,
+      "encoding": "gzip",
+      "cache": "MISS"
+    },
+    {
+      "file": "public/js/page-loader.js",
+      "status": 200,
+      "bytes": 2667,
+      "match": true,
+      "encoding": "gzip",
+      "cache": "MISS"
+    },
+    {
+      "file": "public/js/i18n.js",
+      "status": 200,
+      "bytes": 8111,
+      "match": true,
+      "encoding": "gzip",
+      "cache": "MISS"
+    },
+    {
+      "file": "public/js/i18n-extra.js",
+      "status": 200,
+      "bytes": 1546511,
+      "match": true,
+      "encoding": "gzip",
+      "cache": "MISS"
+    },
+    {
+      "file": "public/vendor/wallet/connector.js",
+      "status": 200,
+      "bytes": 4717,
+      "match": true,
+      "encoding": "gzip",
+      "cache": "MISS"
+    }
+  ],
+  "homeStatus": 200,
+  "versions": {
+    "wallet": true,
+    "connector": true,
+    "core": true,
+    "pageLoader": true,
+    "noEagerTrade": true
+  }
+}

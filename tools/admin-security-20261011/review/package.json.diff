@@ -1,0 +1,23 @@
+--- package.json before
++++ package.json after
+@@ -5,8 +5,8 @@
+   "description": "钱包连接、链上 USDT 充值、平台内部现货与永续合约交易及原钱包提现。",
+   "type": "module",
+   "scripts": {
+-    "test:community": "node test/community-links.test.js",
+-    "test:lottery": "node test/lottery.test.js",
++    "test:community": "node test/community-links.test.js",
++    "test:lottery": "node test/lottery.test.js",
+     "test:asset-reporting": "node test/a-token-asset-reporting.test.js",
+     "test:assets-wallet-balance": "node test/assets-wallet-balance.test.js",
+     "test:earn-team-loading": "node test/a-token-team-loading.test.js && node test/earn-team-loading.test.js",
+@@ -14,7 +14,8 @@
+     "build:wallet": "node scripts/build-wallet.js",
+     "prestart": "npm run build:wallet",
+     "start": "node src/server.js",
+-    "test": "node test/database.test.js && node test/admin-test-credit.test.js && node test/perp-pnl.test.js && node test/trade-history.test.js && node test/atomic-ledger.test.js && node test/corrupt-ledger.test.js && node test/platform-service.test.js && node test/internal-strategy.test.js && node test/ai-managed.test.js && node test/referral.test.js && node test/platform-api.test.js && node test/market-data.test.js && node test/market-catalog.test.js && node test/bridge-service.test.js && node test/wallet-deposit.test.js && node test/wallet-bridge-deposit.test.js && node test/a-token-burn.test.js && node test/a-token-ecosystem.test.js && node test/a-token-income.test.js && node test/lottery.test.js && node test/wallet-session.test.js && node test/wallet-connector.test.js && node test/admin-auth.test.js && node test/withdrawal-payout.test.js && node test/withdrawal-swap-v3.test.js && node test/bridge-withdrawal-payout.test.js"
++    "test": "node test/database.test.js && node test/admin-test-credit.test.js && node test/perp-pnl.test.js && node test/trade-history.test.js && node test/atomic-ledger.test.js && node test/corrupt-ledger.test.js && node test/platform-service.test.js && node test/internal-strategy.test.js && node test/ai-managed.test.js && node test/referral.test.js && node test/platform-api.test.js && node test/market-data.test.js && node test/market-catalog.test.js && node test/bridge-service.test.js && node test/wallet-deposit.test.js && node test/wallet-bridge-deposit.test.js && node test/a-token-burn.test.js && node test/a-token-ecosystem.test.js && node test/a-token-income.test.js && node test/lottery.test.js && node test/wallet-session.test.js && node test/wallet-connector.test.js && node test/admin-auth.test.js && node test/withdrawal-payout.test.js && node test/withdrawal-swap-v3.test.js && node test/bridge-withdrawal-payout.test.js",
++    "test:admin-security": "node test/social-security.test.js && node test/admin-security.test.js && node test/admin-security-browser.test.js"
+   },
+   "engines": {
+     "node": ">=22.5.0"
