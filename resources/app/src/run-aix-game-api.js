@@ -68,7 +68,8 @@ function parseTrace(raw) {
   return raw.map(frame => {
     if (!Array.isArray(frame) || frame.length !== 2) throw new Error('输入日志格式不正确');
     const [d, inputs] = frame;
-    if (typeof d !== 'number' || !Number.isFinite(d) || d <= 0 || d > 5) throw new Error('输入日志帧时长异常');
+    // 允许 dt=0：高刷屏/后台节流时相邻两帧可能拿到同一个时间戳，清零帧回放无副作用。
+    if (typeof d !== 'number' || !Number.isFinite(d) || d < 0 || d > 5) throw new Error('输入日志帧时长异常');
     if (!Array.isArray(inputs) || inputs.length > TRACE_MAX_INPUTS_PER_FRAME) throw new Error('输入日志输入数异常');
     for (const item of inputs) {
       if (!['p', 'r', 'm1', 'm-1'].includes(item)) throw new Error('输入日志含未知指令');

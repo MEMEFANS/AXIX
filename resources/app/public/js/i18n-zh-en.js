@@ -2943,7 +2943,7 @@ window.I18nDict = {
     '人 · 成交时扣)': ' direct referrals · deducted on fill)',
     '累计收益只统计已到账收益，返还的 AIX 单独展示；团队分润仅按收益计算。': 'Cumulative earnings count settled payouts only; returned AIX is shown separately. Team bonuses are based on earnings only.',
     '连接钱包并登录平台后，这里只显示你自己的矿机数据': 'Connect your wallet and sign in — only your own rig data is shown here',
-    '按已到账流水统计产出；北京时间每日结算，首个完整日结束后开始到账': 'Output is counted by settled payouts; settlement runs daily at Beijing time, with the first payout after the first full day',
+    '按已到账流水统计产出；每天 00:00（北京时间）结算，起押当天跨过 0 点即按实际时长折算到账': 'Output is counted by settled payouts; settlement runs daily at 00:00 Beijing time, and the first partial day is paid pro-rata once midnight passes',
     '档位越高 · 月化越高 · 每日自动结算': 'Higher tier · higher monthly yield · automatic daily settlement',
     '分润收益明细（矿机产出 / 质押收益）': 'Bonus earnings detail (rig output / staking rewards)',
     '输入数量后开始产生收益': 'Earnings start once you enter an amount',

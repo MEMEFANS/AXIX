@@ -70,6 +70,25 @@ fixture(({db,at,team,stake,revenue,fund,link,activate,advance,now,root}) => {
   assert.equal(reopened.balanceUnits(child,'A'),A(1240),'committed credits survive reopening');
 });
 
+// 2026-10-28 改版：起押当天零头也结算——12:00（北京）起押，跨过次日 00:00 即到账半日产出
+fixture(({at,stake,fund,advance,db}) => {
+  const child=fund(41,2000);
+  advance(.5); // 当天 12:00（北京）起押
+  stake.stake(child,'s30','1000');
+  const before=at.balanceA(child);
+  advance(.5); // 次日 00:00（北京）
+  stake.processAll();
+  const dailyP=A(1000)/30n, dailyI=A(1000)*80n/10000n;
+  const grantP=dailyP*43200000n/86400000n, grantI=dailyI*43200000n/86400000n;
+  assert.equal(at.balanceA(child)-before, grantP+grantI, '12:00 起押跨 0 点即按半日折算到账');
+  assert.equal(readAixIncome(db,child,'stake').length,1,'零头天也一条流水');
+  const mid=at.balanceA(child);
+  stake.processAll();
+  assert.equal(at.balanceA(child),mid,'同刻重复巡检不重复发放');
+  advance(1); stake.processAll();
+  assert.equal(at.balanceA(child)-mid, dailyP+dailyI, '之后每个北京日整日产出');
+});
+
 fixture(({db,at,team,stake,miner,fund,link,activate,advance,now}) => {
   const child=fund(11,2000), parent=fund(12); link(child,parent); activate(parent);
   const s=stake.stake(child,'s30','1000'); const m=miner.createMiner(child,'mini120');

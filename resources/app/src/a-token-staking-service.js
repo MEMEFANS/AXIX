@@ -3,7 +3,8 @@ import { randomUUID } from 'node:crypto';
 import { A_TOKEN_DECIMALS } from './a-token-service.js';
 import { splitStakePayment, readAixIncome } from './a-token-income.js';
 
-// A 币质押任务包：日结（60s 定时巡检，北京时间每天 00:00 结算前一完整日，一天一条流水）。
+// A 币质押任务包：日结（60s 定时巡检；每天 00:00（北京）结算自上次结算起经过的时长，
+// 起押当天的零头也按实际时长折算发放——2026-10-28 起不再等满 24 小时，一天一条流水）。
 // 活期 current: 100 起质押,日产 0.3%,随进随出（本金可随时赎回,利息日结）。
 // 固定 s30/s60/s90: 月产 24%/30%/36%，本利同时产出（本金+利息按天滴灌,到期自动结清,不可提前赎回）。
 // daily_rate_bps = 日收益率(bps of principal)。固定包每日产出 = 本金/days + 本金*rate/10000。
@@ -112,36 +113,35 @@ export function createATokenStakingService({ aTokenService, database, teamServic
     if (stake.status !== 'active') return;
     const plan = planOf(stake.planId);
     if (!plan.flexible && now >= Number(stake.expiresAt)) { finalizeFixed(stake, now); return; }
-    // 北京日结：只结算已完整度过的北京日（与矿机同口径），不足一天的零头固定包到期补齐
+    // 2026-10-28 改版：不再等满 24 小时——起押当天的零头也在跨过 00:00（北京）时
+    // 按实际经过时长折算发放（例：16:00 起押，次日 00:00 到账 8/24 天的产出）。
+    // 每跨过一个北京日界出一条流水：首条含起押零头，之后每天整日一条；60s 巡检靠日界防重入。
     const lastAt = Number(stake.lastSettledAt);
-    if (now <= lastAt) return;
-    const lastDayStart0 = bjDayStart(lastAt);
-    const firstFullDayStart = lastAt === lastDayStart0 ? lastDayStart0 : lastDayStart0 + DAY_MS;
     const todayStart = bjDayStart(now);
-    if (todayStart <= lastAt) return; // 今天（北京）尚未跨过 00:00，无完整日可结
-    const days = Math.max(0, Math.round((todayStart - firstFullDayStart) / DAY_MS));
-    if (days <= 0) return;
-    const reward = dailyRewardOf(stake, plan);
-    if (reward <= 0n) return;
+    if (bjDaySlot(now) <= bjDaySlot(lastAt)) return; // 未跨过北京日界（今天已结过）
     const maxTotal = maxTotalOf(stake, plan);
+    let periodStart = lastAt;
     let settledAny = false;
-    // 每个完整北京日一条流水（服务中断恢复后逐天补齐），日界时刻结算
-    for (let i = 1; i <= days; i += 1) {
-      const dayBoundary = firstFullDayStart + i * DAY_MS; // 该完整日结束的北京日界（结算时刻）
-      const d = bjDaySlot(dayBoundary);
+    while (periodStart < todayStart) {
+      const end = Math.min(bjDayStart(periodStart) + DAY_MS, todayStart); // 片段末 = 下一个北京日界
+      const elapsed = BigInt(Math.max(0, Math.round(end - periodStart)));
       const payment = splitStakePayment(stake, stake.totalEarnedUnits);
       const dailyPrincipal = plan.flexible ? 0n : BigInt(stake.principalUnits) / BigInt(plan.days);
+      const dailyInterest = BigInt(stake.principalUnits) * BigInt(plan.dailyRateBps) / BPS;
+      let principal = dailyPrincipal * elapsed / BigInt(DAY_MS);
+      let interest = dailyInterest * elapsed / BigInt(DAY_MS);
       const remainingPrincipal = BigInt(stake.principalUnits) - payment.principal;
-      const principal = dailyPrincipal < remainingPrincipal ? dailyPrincipal : remainingPrincipal;
-      let interest = BigInt(stake.principalUnits) * BigInt(plan.dailyRateBps) / BPS;
+      if (principal > remainingPrincipal) principal = remainingPrincipal;
       if (maxTotal) {
         const remainingInterest = maxTotal - BigInt(stake.principalUnits) - payment.interest;
         if (interest > remainingInterest) interest = remainingInterest;
       }
-      const rewardId = `asr_${stake.id}_${d}`;
-      const granted = paySettlement(stake, principal, interest, rewardId, now, {day:d, periodEndAt:dayBoundary});
-      if (granted <= 0n) continue;
+      if (principal + interest <= 0n) break;
+      const d = bjDaySlot(end);
+      const granted = paySettlement(stake, principal, interest, `asr_${stake.id}_${d}`, now, { day: d, periodEndAt: end });
+      if (granted <= 0n) break;
       settledAny = true;
+      periodStart = end;
       if (maxTotal && BigInt(stake.totalEarnedUnits) >= maxTotal) break;
     }
     if (maxTotal && BigInt(stake.totalEarnedUnits) >= maxTotal) { finalizeFixed(stake, now); return; }

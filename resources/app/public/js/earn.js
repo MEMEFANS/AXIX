@@ -682,7 +682,7 @@
         <div class="miner-page-hero-copy">
           <span class="miner-page-kicker">AIX 算力中心</span>
           <h2>让矿机持续工作</h2>
-          <p>按已到账流水统计产出；北京时间每日结算，首个完整日结束后开始到账</p>
+          <p>按已到账流水统计产出；每天 00:00（北京时间）结算，起押当天跨过 0 点即按实际时长折算到账</p>
         </div>
         <img src="/assets/miner-rig.svg?v=1" alt="AIX 矿机" loading="lazy">
       </section>

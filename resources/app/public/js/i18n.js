@@ -12,7 +12,7 @@ window.I18n = (() => {
     if(loads.has(file))return loads.get(file);
     const promise=new Promise((resolve,reject)=>{
       const script=document.createElement('script');
-      script.src='/js/'+file+'?v=20261025-stake1000-1';
+      script.src='/js/'+file+'?v=20261028-stake-day-1';
       script.onload=()=>ready()?resolve():reject(new Error('Invalid translation dictionary: '+file));
       script.onerror=()=>reject(new Error('Unable to load translation dictionary: '+file));
       document.head.appendChild(script);
