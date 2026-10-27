@@ -1,0 +1,116 @@
+/* AIX PLAY 游戏厅层（2026-10-27）：玩家条、精选轮播、我的战绩、卡片倾斜高光。
+   叠加在 lobby.css 之后，只用新类名，不改原有结构样式。 */
+
+/* —— 顶栏玩家条 —— */
+.player-chip{display:flex;align-items:center;gap:10px;min-height:44px;padding:4px 14px 4px 5px;border-radius:999px;border:1px solid #c9b6f040;background:linear-gradient(120deg,#2a2346,#1a1f33);color:var(--text);cursor:pointer;transition:border-color .2s,box-shadow .2s,transform .2s}
+.player-chip:hover{border-color:#d9c6ff80;box-shadow:0 0 22px #ad8df233}
+.player-chip:active{transform:scale(.97)}
+.pc-avatar{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-size:16px;color:#1d1530;background:conic-gradient(from 200deg,#ad8df2,#b5ead5,#ffd99a,#ad8df2);box-shadow:0 0 0 2px #10121d inset}
+.pc-text{display:flex;flex-direction:column;align-items:flex-start;line-height:1.2;text-align:left}
+.pc-text small{font-size:10px;color:var(--muted);letter-spacing:.5px}
+.pc-text b{font-size:13px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.player-chip.ready .pc-text b{color:#ffe1a0}
+.player-chip:not(.ready) .pc-text b{color:#b5ead5}
+
+/* —— 精选轮播 —— */
+.play-hero{position:relative;overflow:hidden;height:clamp(300px,46vh,460px);border-radius:18px;border:1px solid #b5a0e838;background:#141a2c;box-shadow:0 30px 80px #00000060,inset 0 0 90px #8a6bd618;isolation:isolate}
+.ph-slide{position:absolute;inset:0;opacity:0;visibility:hidden;transition:opacity .7s ease,visibility 0s linear .7s}
+.ph-slide.active{opacity:1;visibility:visible;transition:opacity .7s ease}
+.ph-slide>img:first-child{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:62% 48%;transform:scale(1.08);transition:transform 7s ease-out}
+.ph-slide.active>img:first-child{transform:scale(1)}
+.ph-shade{position:absolute;inset:0;background:linear-gradient(90deg,#0d1020f2 0%,#14152acc 34%,#1a183000 70%),linear-gradient(0deg,#0c0f1ccc,transparent 45%)}
+.ph-mascot{position:absolute;right:6%;bottom:-4%;height:92%;object-fit:contain;filter:drop-shadow(0 18px 36px #b8a4ff55);animation:phFloat 4.5s ease-in-out infinite;pointer-events:none}
+.ph-orb{position:absolute;right:12%;top:50%;width:min(230px,34vw);aspect-ratio:1;transform:translateY(-50%);display:grid;place-items:center;pointer-events:none}
+.ph-orb b{font-size:min(96px,13vw);font-weight:800;color:#f4ecff;text-shadow:0 0 30px #ad8df2,0 0 70px #7c5cd6;font-family:ui-monospace,Consolas,monospace;animation:phFlicker 3.2s steps(1) infinite}
+.ph-orb i{position:absolute;inset:0;border-radius:50%;border:2px solid #c9b6f066;border-top-color:#b5ead5;animation:phSpin 6s linear infinite}
+.ph-orb i+i{inset:14%;border-color:#ffd99a44;border-bottom-color:#ffd99a;animation-duration:4s;animation-direction:reverse}
+.ph-copy{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;justify-content:center;padding:0 clamp(20px,5vw,56px);max-width:620px}
+.ph-kicker{display:inline-flex;align-items:center;gap:8px;font-size:11px;letter-spacing:1.5px;color:#d6caef}
+.ph-kicker i{width:7px;height:7px;border-radius:50%;background:#b5ead5;box-shadow:0 0 0 0 #b5ead5aa;animation:phPulse 1.8s infinite}
+.ph-copy h2{font-size:clamp(34px,5.4vw,60px);line-height:1.1;margin:14px 0 10px;letter-spacing:2px;color:#fbf8ff;text-shadow:0 4px 30px #7c5cd680}
+.ph-copy p{margin:0 0 18px;color:#c9c3dc;font-size:clamp(13px,1.4vw,15px)}
+.ph-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:22px}
+.ph-chips span{display:inline-flex;align-items:baseline;gap:6px;padding:7px 12px;border-radius:10px;background:#0f1324b8;border:1px solid #ffffff1a;font-size:11px;color:#b9bdd2;backdrop-filter:blur(6px)}
+.ph-chips b{font-size:16px;color:#ffe1a0;font-variant-numeric:tabular-nums}
+.ph-actions{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.ph-play{position:relative;display:inline-flex;align-items:center;gap:10px;min-height:52px;padding:0 30px;border-radius:14px;font-size:17px;font-weight:800;letter-spacing:1px;color:#1d1530;background:linear-gradient(110deg,#e5d6ff,#ad8df2 55%,#b5ead5);box-shadow:0 10px 30px #ad8df255,inset 0 -3px 0 #00000022;overflow:hidden;transition:transform .18s,box-shadow .18s}
+.ph-play.mint{background:linear-gradient(110deg,#d6fbe9,#9ed7c0 55%,#ffe1a0)}
+.ph-play:hover{transform:translateY(-2px);box-shadow:0 16px 40px #ad8df27a}
+.ph-play:active{transform:scale(.97)}
+.ph-play:after{content:"";position:absolute;inset:-40% auto -40% -30%;width:40%;background:linear-gradient(100deg,transparent,#ffffffb0,transparent);transform:skewX(-20deg);animation:phSweep 2.8s ease-in-out infinite}
+.ph-play span{font-size:15px}
+.ph-ghost{min-height:44px;display:inline-flex;align-items:center;padding:0 16px;border-radius:12px;border:1px solid #ffffff2a;color:#ddd6ee;font-size:13px;background:#ffffff08}
+.ph-ghost:hover{border-color:#ffffff55}
+.ph-sparks{position:absolute;inset:0;z-index:1;pointer-events:none}
+.ph-sparks i{position:absolute;bottom:-10px;width:4px;height:4px;border-radius:50%;background:#e9dcff;box-shadow:0 0 10px #ad8df2;opacity:0;animation:phRise 7s linear infinite}
+.ph-sparks i:nth-child(1){left:8%;animation-delay:0s}.ph-sparks i:nth-child(2){left:22%;animation-delay:1.4s}.ph-sparks i:nth-child(3){left:37%;animation-delay:3.1s}.ph-sparks i:nth-child(4){left:51%;animation-delay:.7s}
+.ph-sparks i:nth-child(5){left:63%;animation-delay:2.2s}.ph-sparks i:nth-child(6){left:74%;animation-delay:4.4s}.ph-sparks i:nth-child(7){left:86%;animation-delay:1.9s}.ph-sparks i:nth-child(8){left:94%;animation-delay:5.2s}
+.ph-dots{position:absolute;z-index:3;left:clamp(20px,5vw,56px);bottom:16px;display:flex;gap:6px}
+.ph-dots button{width:44px;height:28px;display:grid;place-items:center;background:none;padding:0;cursor:pointer}
+.ph-dots span{display:block;width:28px;height:4px;border-radius:4px;background:#ffffff33;overflow:hidden;position:relative}
+.ph-dots button.active span:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,#ad8df2,#b5ead5);transform-origin:left;animation:phFill 6.5s linear forwards}
+
+/* —— 我的战绩 —— */
+.play-stats{margin:18px 0 6px;display:grid;gap:12px}
+.ps-tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.ps-tile{position:relative;padding:14px 16px;border-radius:14px;border:1px solid #ffffff12;background:linear-gradient(160deg,#1d2236,#151a2a);overflow:hidden}
+.ps-tile:before{content:"";position:absolute;inset:0 0 auto;height:2px;background:linear-gradient(90deg,#ad8df2,transparent)}
+.ps-tile.gold:before{background:linear-gradient(90deg,#ffd99a,transparent)}
+.ps-tile.mint:before{background:linear-gradient(90deg,#b5ead5,transparent)}
+.ps-tile>span{font-size:11px;color:var(--muted);letter-spacing:.5px}
+.ps-tile>b{display:block;margin:6px 0 4px;font-size:clamp(20px,2.4vw,26px);font-weight:800;color:#f1eefb;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ps-tile.gold>b{color:#ffe1a0}.ps-tile.mint>b{color:#b5ead5}
+.ps-tile>b small{font-size:12px;font-weight:500;color:#b9bdd2;margin-left:2px}
+.ps-note{font-size:10px;color:#7f86a0}
+.ps-feed{display:flex;align-items:center;gap:12px;min-height:46px;padding:6px 8px 6px 14px;border-radius:12px;border:1px solid #ffffff10;background:#12172699;overflow:hidden}
+.ps-feed-label{flex-shrink:0;font-size:11px;color:#d6caef;letter-spacing:1px}
+.ps-feed-track{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;min-width:0;flex:1}
+.ps-feed-track::-webkit-scrollbar{display:none}
+.ps-event{flex-shrink:0;display:inline-flex;align-items:baseline;gap:8px;padding:6px 10px;border-radius:9px;background:#ffffff08;border:1px solid #ffffff10;font-size:12px;animation:phIn .4s ease both}
+.ps-event small{font-size:11px;font-variant-numeric:tabular-nums}
+.ps-event.up small{color:#9fe3c2}.ps-event.down small{color:#f2a3b6}
+.ps-empty{font-size:12px;color:var(--muted)}
+.ps-login{min-height:36px;padding:0 14px;border-radius:9px;border:1px dashed #c9b6f066;background:#ad8df214;color:#e1d6fb;font-size:12px;cursor:pointer}
+.ps-login:hover{background:#ad8df229}
+
+/* —— 精选卡：倾斜 + 高光 + 赔率 —— */
+.rail-card{transform:perspective(900px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));transform-style:preserve-3d}
+.rail-card:hover{transform:perspective(900px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)) translateY(-4px)}
+.rail-shine{position:absolute;inset:0;z-index:1;pointer-events:none;opacity:0;background:radial-gradient(circle at var(--mx,50%) var(--my,30%),#ffffff2e,transparent 45%);transition:opacity .25s}
+.rail-card:hover .rail-shine{opacity:1}
+.rail-odds{display:flex;gap:6px;margin:0 0 12px}
+.rail-odds span{display:inline-flex;align-items:baseline;gap:4px;padding:4px 9px;border-radius:8px;background:#0c1020b8;border:1px solid #ffffff1c;font-size:10px;color:#b9bdd2}
+.rail-odds b{font-size:13px;color:#ffe1a0}
+
+@keyframes phFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+@keyframes phSpin{to{transform:rotate(360deg)}}
+@keyframes phFlicker{0%{opacity:1}48%{opacity:1}50%{opacity:.35}52%{opacity:1}}
+@keyframes phPulse{0%{box-shadow:0 0 0 0 #b5ead5aa}70%{box-shadow:0 0 0 9px #b5ead500}100%{box-shadow:0 0 0 0 #b5ead500}}
+@keyframes phSweep{0%,55%{left:-30%}100%{left:130%}}
+@keyframes phRise{0%{transform:translateY(0);opacity:0}10%{opacity:.9}100%{transform:translateY(-420px);opacity:0}}
+@keyframes phFill{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes phIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+@media (max-width:760px){
+  .play-hero{height:340px;border-radius:14px}
+  .ph-mascot{height:52%;right:-12%;bottom:-2%;opacity:.75}
+  .ph-ghost{background:#141a2ce6}
+  .ph-orb{right:-4%;width:160px;opacity:.7}
+  .ph-copy{justify-content:flex-end;padding-bottom:58px}
+  .ph-copy p{max-width:70%}
+  .ph-chips span{padding:5px 9px;font-size:10px}
+  .ph-chips b{font-size:14px}
+  .ph-play{min-height:48px;padding:0 22px;font-size:16px}
+  .ps-tiles{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .ps-feed{flex-direction:column;align-items:flex-start;gap:6px;padding:10px}
+  .ps-feed-track{width:100%}
+  .pc-text small{display:none}
+  .player-chip{padding-right:10px;gap:7px}
+  .pc-avatar{width:30px;height:30px}
+}
+@media (prefers-reduced-motion:reduce){
+  .ph-mascot,.ph-orb b,.ph-orb i,.ph-kicker i,.ph-play:after,.ph-sparks i,.ps-event{animation:none}
+  .ph-dots button.active span:after{animation:none;transform:none}
+  .ph-slide,.ph-slide>img:first-child,.rail-card{transition:none}
+  .rail-card,.rail-card:hover{transform:none}
+}

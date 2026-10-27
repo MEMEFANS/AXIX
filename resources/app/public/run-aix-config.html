@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#0b1028">
+  <title>奔跑吧 AIX · 本机规则配置</title>
+  <link rel="icon" href="/assets/brand/favicon-32.png">
+  <link rel="stylesheet" href="/games/run-aix/operator.css?v=20261020-v3">
+</head>
+<body>
+<main class="operator">
+  <header class="page-head"><div><a href="/run-aix-classic.html" class="back">‹ 返回概率试玩</a><p class="eyebrow">RUN AIX / LOCAL STUDIO</p><h1>本机规则配置 <span>V3</span></h1><p>配置当前浏览器的独立概率试玩，不影响冒险闯关。保存后从下一局生效。</p></div><div class="local-badge"><i></i>本地模拟 · 独立积分</div></header>
+  <div class="notice"><strong>概率玩法公开透明</strong><p>概率模式在开局时由系统抽取结果档；连点和闪避影响速度与演出，提前碰撞不改变结果档，停点会踉跄减速；玩家可提前带走，实际返还可能降低。纯操作模式不预定结局，碰撞或超时停点会失败，按实际米数结算。此页只保存本机规则，不连接钱包，不修改线上配置或真实币余额。</p></div>
+  <div id="message" class="message" role="status" aria-live="polite" hidden></div>
+  <div class="workspace">
+    <section class="settings"><form id="rules-form" novalidate><div id="rule-groups"></div><div class="save-bar"><span id="revision">默认规则</span><div><button id="restore" type="button" class="ghost">恢复默认并保存</button><button type="submit" class="primary">保存规则</button></div></div></form>
+      <section class="panel catalog-panel" id="catalog-panel"><div class="section-heading"><div><p class="eyebrow">OBSTACLE LIBRARY</p><h2>障碍运营配置</h2></div><span class="tag" id="catalog-count"></span></div><p class="muted">每个障碍独立设置。相对权重只决定满足距离、场景与车道条件的候选障碍出现频率，与五档系统结果概率独立。至少保留每个场景的一个零米有效障碍。</p>
+        <div id="catalog-message" class="message" role="status" aria-live="polite" hidden></div>
+        <label class="field catalog-picker" for="catalog-selected"><span class="field-label">选择要编辑的障碍</span><select id="catalog-selected"></select></label>
+        <form id="catalog-form" novalidate><div class="field-grid">
+          <label class="field switch-field" for="catalog-enabled"><span class="field-label">允许出现</span><input type="checkbox" id="catalog-enabled" name="enabled"></label>
+          <label class="field" for="catalog-weight"><span class="field-label">相对权重（0–100）</span><input type="number" id="catalog-weight" name="weight" min="0" max="100" step="any"><small>0 表示不参与随机抽取。</small></label>
+          <label class="field" for="catalog-minDistance"><span class="field-label">最早出现距离（米）</span><input type="number" id="catalog-minDistance" name="minDistance" min="0" max="2000" step="1"></label>
+          <label class="field" for="catalog-behavior"><span class="field-label">玩法行为</span><select id="catalog-behavior" name="behavior"><option value="block">致命实体</option><option value="sweep">横扫（致命）</option><option value="weather">天气（减速）</option><option value="slow">软障碍（减速）</option></select></label>
+          <fieldset class="catalog-checks"><legend>允许车道</legend><label><input type="checkbox" name="lanes" value="0">左道</label><label><input type="checkbox" name="lanes" value="1">中道</label><label><input type="checkbox" name="lanes" value="2">右道</label></fieldset>
+          <fieldset class="catalog-checks"><legend>允许场景</legend><label><input type="checkbox" name="scenes" value="0">星空之城</label><label><input type="checkbox" name="scenes" value="1">交易所大厅</label><label><input type="checkbox" name="scenes" value="2">稳定币海域</label></fieldset>
+          <label class="field catalog-line" for="catalog-line"><span class="field-label">受击台词（最多 200 字符）</span><textarea id="catalog-line" name="line" maxlength="200" rows="3"></textarea><small>致命判定适用于纯操作模式；概率模式的提前碰撞只作减速演出。系统结果区沿用公开概率结算，不受此库开关影响。</small></label>
+        </div><div class="catalog-actions"><span id="catalog-revision">默认障碍库</span><div><button type="button" class="ghost" id="catalog-reset">恢复默认障碍库</button><button type="submit" class="primary">保存障碍库</button></div></div></form>
+        <details class="catalog-overview" open><summary>障碍列表与当前草稿</summary><div id="catalog-list"></div></details>
+        <div class="catalog-history"><label class="field" for="catalog-history"><span class="field-label">障碍配置历史（最近 30 次，回滚从下一局生效）</span><select id="catalog-history"></select></label><button type="button" id="catalog-rollback" class="ghost">回滚所选版本</button></div>
+      </section>
+    </section>
+    <aside>
+      <section class="panel simulation"><div class="section-heading"><div><p class="eyebrow">OUTCOME SANDBOX</p><h2>结果模板试算</h2></div><span class="tag">不消耗积分</span></div><p class="muted">按当前表单试算，不必先保存。每局门槛设为 1 试玩积分。</p><div class="sim-controls"><label for="rounds">试算局数<select id="rounds"><option value="10000">10,000 局</option><option value="100000" selected>100,000 局</option><option value="1000000">1,000,000 局</option></select></label><button type="button" id="simulate" class="primary">运行试算 ↗</button></div><p class="sim-disclaimer">仅模拟系统结果模板；不含玩家碰撞、断连、提前带走、每日限制或新手保护。纯操作模式的实际返还率不能通过此工具预测。</p><div id="simulation-result" aria-live="polite"><p class="empty">点击运行，查看返还率、亏保盈分布和模拟分配。</p></div></section>
+      <section class="panel history"><div class="section-heading"><div><p class="eyebrow">CHANGE LOG</p><h2>修改与回滚</h2></div><span class="tag">最近 30 次</span></div><p class="muted">每次保存、恢复或回滚均新增版本。回滚从下一局生效。</p><div id="history-list"></div></section>
+    </aside>
+  </div>
+  <footer>所有数值均为本机试玩数据 · 原始默认分布：60% 全损 / 15% 保本 / 18% 小赚 / 6% 翻倍 / 1% 高倍</footer>
+</main>
+<script type="module" src="/games/run-aix/operator.js?v=20261020-v3"></script>
+</body>
+</html>

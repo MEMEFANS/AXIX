@@ -1,0 +1,43 @@
+/* 第二版美术皮肤：精修角色与环境位图、香槟金 / 紫罗兰 / 薄荷青。 */
+:root{background:#080c1a}
+body{background:linear-gradient(115deg,#060c1ded,#10102cdb),url('/games/run-aix/assets/city-v2.jpg') center/cover fixed}
+.cabinet{background:linear-gradient(155deg,#13162aeF,#0c1425fa);border-color:#b9abd91b;box-shadow:0 35px 130px #030610b3}
+.topbar{gap:13px}.wordmark{letter-spacing:-.8px;color:#f6ecd9}.wordmark i{font-size:9px;letter-spacing:2.8px;color:#a4a3bb}
+.preview{background:#29463f4d;border-color:#82c7ad35;color:#b5e8cf;font-size:9px;letter-spacing:1px}
+.topbar button{background:#ffffff09;border-color:#d5c7f128;color:#d4c5e8}
+.wallet-strip{font-size:10px;color:#909db5;margin:10px 1px 14px}.wallet-strip strong{font-size:12px;color:#eae1d5}
+.stage{border-radius:22px;border-color:#e5c7923b;box-shadow:0 14px 48px #0006,0 0 0 4px #e2ccff03}
+.stage:has(.lobby:not([hidden])) .hud,.stage:has(.lobby:not([hidden])) .scene-label{visibility:hidden}
+.lobby{padding:29px 23px 19px;background:linear-gradient(#080a225c,transparent 33%,#0d102222 54%,#0b1223dc 80%,#0b1223f5);text-align:center}
+.lobby>.eyebrow{font-size:8px;letter-spacing:4px;color:#d7c3a1;display:flex;align-items:center;gap:12px;justify-content:center;width:100%}
+.lobby>.eyebrow:before,.lobby>.eyebrow:after{content:'';width:26px;height:1px;background:linear-gradient(90deg,transparent,#d2b57e88)}
+.lobby>.eyebrow:after{transform:rotate(180deg)}
+h1{font-size:30px;font-weight:800;letter-spacing:6px;margin-top:14px;color:#f5eee4;text-shadow:0 4px 18px #16102f99}
+h1>span{font-family:Arial,sans-serif;position:relative;font-size:76px;font-style:italic;letter-spacing:1px;line-height:1.02;color:#f4e9dc;text-shadow:0 3px 0 #776c8a,0 10px 25px #080b27aa}
+.title-star{font-style:normal;font-size:25px;color:#c4fae8;transform:translate(7px,13px)}
+.tagline{font-size:10px;letter-spacing:1.5px;color:#dbd0df;margin-top:12px;text-shadow:0 2px 10px #0d122e}
+.hero-space{min-height:100px}
+.milestones{padding:9px 0;margin:0 0 13px;background:linear-gradient(90deg,transparent,#10152a9c 15%,#10152a9c 85%,transparent);border-top:1px solid #d5b77a1c;border-bottom:1px solid #d5b77a1c}
+.milestones>span{font-size:9px;letter-spacing:1px;color:#b5acc6;border-color:#d0b37a30}
+.milestones b{font-size:24px;font-weight:800;color:#f0dfbb;text-shadow:0 3px 12px #0005}
+.milestones small{color:#c9bbd2;font-size:10px;font-weight:500}
+.launch-card{padding:13px 15px 10px;border:1px solid #d4c2b22a;background:linear-gradient(130deg,#293049cf,#161e36e6);border-radius:16px;box-shadow:0 12px 26px #02071d4d,inset 0 1px #f9e6ce0d}
+.stake-heading{font-size:10px;color:#c5bdce}.stake-heading strong{font-size:22px;color:#f3e6d3}.stake-heading small{font-size:7px;letter-spacing:1px;color:#b4a7c0}
+input[type=range]{accent-color:#e1c7a2;height:12px;margin:8px 0 9px}
+.stake-presets{gap:7px;margin-bottom:12px}.stake-presets button{padding:5px;background:#ffffff04;border-color:#c6b9d71a;color:#b4abc3;border-radius:6px}
+.stake-presets button.selected{background:#e4c69f1a;border-color:#e3c39980;color:#f6dfbe}
+.primary{min-height:47px;color:#3c2b29;font-size:15px;font-weight:800;letter-spacing:2px;background:linear-gradient(110deg,#f7e4bf,#e7c899 58%,#caa67c);border:1px solid #ffe8bc99;box-shadow:inset 0 1px #fff5d5b3,0 4px 18px #e4bd6b20}
+.primary:hover{filter:brightness(1.07)}.primary span{font-size:23px}
+.simulation-note{font-size:8px;letter-spacing:.3px;color:#aaa2b9;margin-top:9px}
+.controls>button{background:linear-gradient(150deg,#2b2e48,#171f34);border-color:#d1b7e12b;box-shadow:inset 0 1px #d6cbf20a,0 5px 16px #060a1633}
+.controls>button>b{font-size:30px;color:#d2c2e6}.controls>button>span{color:#9f9cb8}
+.controls .tap{background:linear-gradient(130deg,#c2f4e6,#91d4c5);border-color:#d5ffed80;box-shadow:inset 0 1px #e5fff1,0 5px 18px #54e9c619}
+.tap b{font-size:17px;letter-spacing:2px}.tap small{letter-spacing:1px}.tap .tap-orbit{font-size:27px}
+.hud{top:20px}.hud span{color:#c4bad4;text-shadow:0 2px 8px #000;font-size:8px}.hud strong{font-size:36px;color:#fff2de;text-shadow:0 3px 15px #060b23}.multiplier strong{color:#baf4db}
+.scene-label{color:#d2c2da;text-shadow:0 2px 6px #080d28}.scene-label span:last-child{color:#c7b9dd}
+.modal{background:#090c23a8}.modal-card{background:linear-gradient(150deg,#343249ee,#152036f5);border-color:#e1c9a43d;box-shadow:0 25px 70px #0006,inset 0 1px #fce8c40d}.modal h2{color:#f8e6c9;letter-spacing:0;font-size:27px}.modal .eyebrow{color:#dcc7a5;letter-spacing:2px}.result-grid>div{border:1px solid #d6b78917;background:#10182db0}.result-grid b{color:#d4f4dc}.secondary{border-color:#cdbda22c;color:#c6bdd2;background:#f7ebd507}
+.energy{background:#ede1ff20}.energy>span{background:linear-gradient(90deg,#b7a2ed,#efd7b7,#a8f4d6)}
+footer{color:#8893ab}footer b{color:#ddcebb}.keyboard-tip{color:#5f6c89}
+@media(max-width:699px) and (max-height:760px){.lobby{padding-top:20px;padding-bottom:13px}h1{font-size:24px;letter-spacing:4px;margin-top:10px}h1>span{font-size:57px}.title-star{font-size:20px;transform:translate(7px,11px)}.tagline{margin-top:8px;font-size:9px;letter-spacing:.6px}.hero-space{min-height:65px}.milestones{margin-bottom:9px;padding:7px 0}.milestones b{font-size:20px}.launch-card{padding:9px 11px 8px}.stake-heading strong{font-size:19px}.stake-presets{margin-bottom:8px}input[type=range]{margin:7px 0}.primary{min-height:43px}.simulation-note{font-size:7px;margin-top:7px}}
+@media(max-width:350px){.lobby{padding-left:16px;padding-right:16px}.lobby>.eyebrow{font-size:7px;letter-spacing:2px}.tagline{font-size:8px}.stake-heading{font-size:9px}.milestones small{font-size:8px}}
+@media(max-width:699px) and (max-height:760px){h1{display:flex;align-items:center;justify-content:center;gap:8px;letter-spacing:2px}h1>span{font-size:53px;line-height:1.05}.title-star{font-size:17px;transform:translate(2px,3px)}.tagline{margin-top:5px}.hero-space{min-height:105px}}

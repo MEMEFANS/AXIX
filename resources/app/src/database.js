@@ -285,7 +285,7 @@ export function openDatabase(dataRoot) {
       FOREIGN KEY(wallet) REFERENCES wallet_users(address)
     ) STRICT;
     CREATE UNIQUE INDEX IF NOT EXISTS a_token_activations_tx_unique
-      ON a_token_activations(tx_hash COLLATE NOCASE);
+      ON a_token_activations(tx_hash COLLATE NOCASE) WHERE tx_hash <> '';
     CREATE INDEX IF NOT EXISTS a_token_activations_wallet_idx
       ON a_token_activations(wallet, created_at DESC);
     CREATE INDEX IF NOT EXISTS a_token_activations_status_idx
@@ -423,6 +423,88 @@ export function openDatabase(dataRoot) {
     ) STRICT;
     CREATE INDEX IF NOT EXISTS a_token_team_levels_level_idx
       ON a_token_team_levels(level);
+
+    -- AIX 可卖额度（2026-10-25）：只有质押释放的产出（每日本金滴灌+利息）才能挂卖。
+    -- released_units = 累计发放的可卖额度；used_units = 已挂单占用（撤单返还）。
+    CREATE TABLE IF NOT EXISTS a_token_sell_quotas (
+      wallet TEXT PRIMARY KEY COLLATE NOCASE,
+      released_units TEXT NOT NULL DEFAULT '0',
+      used_units TEXT NOT NULL DEFAULT '0',
+      updated_at INTEGER NOT NULL,
+      FOREIGN KEY(wallet) REFERENCES wallet_users(address)
+    ) STRICT;
+
+    -- 奔跑吧 AIX 押注局（2026-10-27）：开跑扣 AIX 押注，终点按距离阶梯返还；
+    -- 每局流水的 1% 累计为 AIX 可卖额度（同步写入 a_token_sell_quotas）。
+    CREATE TABLE IF NOT EXISTS run_aix_runs (
+      id TEXT PRIMARY KEY,
+      wallet TEXT NOT NULL COLLATE NOCASE,
+      stake_units TEXT NOT NULL,
+      status TEXT NOT NULL DEFAULT 'pending',
+      distance INTEGER NOT NULL DEFAULT 0,
+      payout_units TEXT NOT NULL DEFAULT '0',
+      quota_units TEXT NOT NULL DEFAULT '0',
+      elapsed_ms INTEGER NOT NULL DEFAULT 0,
+      started_at INTEGER NOT NULL,
+      settled_at INTEGER NOT NULL DEFAULT 0,
+      payload_json TEXT NOT NULL DEFAULT '{}',
+      FOREIGN KEY(wallet) REFERENCES wallet_users(address)
+    ) STRICT;
+    CREATE INDEX IF NOT EXISTS run_aix_runs_wallet_idx
+      ON run_aix_runs(wallet, started_at DESC);
+    CREATE INDEX IF NOT EXISTS run_aix_runs_status_idx
+      ON run_aix_runs(status, started_at);
+
+    -- 每钱包流水汇总（开跑即累计，O(1) 读取；turnover_units 为 18 位精度字符串）
+    CREATE TABLE IF NOT EXISTS run_aix_stats (
+      wallet TEXT PRIMARY KEY COLLATE NOCASE,
+      turnover_units TEXT NOT NULL DEFAULT '0',
+      runs INTEGER NOT NULL DEFAULT 0,
+      updated_at INTEGER NOT NULL,
+      FOREIGN KEY(wallet) REFERENCES wallet_users(address)
+    ) STRICT;
+
+    -- 哈希星盘 AIX 版（2026-10-27）：commit-reveal 公平架构。
+    -- server_seed 服务端预生成并对玩家只公布 sha256 摘要；每局结算后立即轮换，
+    -- 旧 seed 揭示明文供玩家验算，但无法预测后续局。
+    CREATE TABLE IF NOT EXISTS hash_aix_seeds (
+      wallet TEXT PRIMARY KEY COLLATE NOCASE,
+      server_seed TEXT NOT NULL,
+      server_seed_hash TEXT NOT NULL,
+      nonce INTEGER NOT NULL DEFAULT 1,
+      updated_at INTEGER NOT NULL,
+      FOREIGN KEY(wallet) REFERENCES wallet_users(address)
+    ) STRICT;
+
+    -- 哈希星盘每局押注凭证（结算即落库，含完整公平性字段）
+    CREATE TABLE IF NOT EXISTS hash_aix_bets (
+      id TEXT PRIMARY KEY,
+      wallet TEXT NOT NULL COLLATE NOCASE,
+      choice TEXT NOT NULL,
+      stake_units TEXT NOT NULL,
+      payout_units TEXT NOT NULL DEFAULT '0',
+      digit INTEGER NOT NULL,
+      outcome TEXT NOT NULL,
+      hash TEXT NOT NULL,
+      server_seed TEXT NOT NULL,
+      server_seed_hash TEXT NOT NULL,
+      client_seed TEXT NOT NULL,
+      nonce INTEGER NOT NULL,
+      quota_units TEXT NOT NULL DEFAULT '0',
+      created_at INTEGER NOT NULL,
+      payload_json TEXT NOT NULL DEFAULT '{}',
+      FOREIGN KEY(wallet) REFERENCES wallet_users(address)
+    ) STRICT;
+    CREATE INDEX IF NOT EXISTS hash_aix_bets_wallet_idx
+      ON hash_aix_bets(wallet, created_at DESC);
+
+    CREATE TABLE IF NOT EXISTS hash_aix_stats (
+      wallet TEXT PRIMARY KEY COLLATE NOCASE,
+      turnover_units TEXT NOT NULL DEFAULT '0',
+      bets INTEGER NOT NULL DEFAULT 0,
+      updated_at INTEGER NOT NULL,
+      FOREIGN KEY(wallet) REFERENCES wallet_users(address)
+    ) STRICT;
 
     -- 后台手动设置的团队展示数据（仅前端展示用差值，不影响真实推荐关系/等级/手续费/分润）：
     -- 各字段 = 在真实数据之上额外叠加的虚拟人数（保存时按 设定值-真实值 计算，不为负）
@@ -741,6 +823,15 @@ export function openDatabase(dataRoot) {
       ON support_messages(ticket_id, created_at ASC);
   `);
 
+  // Internal AIX payments have no chain hash. Preserve the historical NOT NULL column,
+  // store an empty SQL value, and enforce hash uniqueness only for real chain payments.
+  const activationTxIndex = db.prepare("SELECT sql FROM sqlite_master WHERE name='a_token_activations_tx_unique'").get();
+  if (activationTxIndex && !/WHERE/i.test(activationTxIndex.sql)) {
+    db.exec(`BEGIN IMMEDIATE;
+      DROP INDEX a_token_activations_tx_unique;
+      CREATE UNIQUE INDEX a_token_activations_tx_unique ON a_token_activations(tx_hash COLLATE NOCASE) WHERE tx_hash <> '';
+      COMMIT;`);
+  }
   // 互转幂等：老库补 request_id 列与查询索引（新库建表已含该列，重复 ALTER 报错故静默忽略）
   try { db.exec(`ALTER TABLE a_token_transfers ADD COLUMN request_id TEXT NOT NULL DEFAULT ''`); } catch {}
   try { db.exec(`CREATE INDEX IF NOT EXISTS a_token_transfers_request_idx ON a_token_transfers(from_wallet, request_id)`); } catch {}
@@ -1334,6 +1425,9 @@ export function openDatabase(dataRoot) {
     ORDER BY created_at DESC LIMIT ?`);
   const listATokenActivationsByWalletStmt = db.prepare(`SELECT payload_json FROM a_token_activations
     WHERE wallet=? COLLATE NOCASE ORDER BY created_at DESC`);
+  // 按链上收款地址取已确认激活（轮换收款地址的激活归属钱包统计用，命中极少）
+  const listConfirmedATokenActivationsByCollectionStmt = db.prepare(`SELECT payload_json FROM a_token_activations
+    WHERE status='confirmed' AND lower(COALESCE(json_extract(payload_json,'$.payload.verifiedCollectionAddress'),json_extract(payload_json,'$.payload.collectionAddress')))=?`);
   // 每套餐限购：统计该钱包该套餐的有效记录（pending/confirmed；rejected 不占名额可重试）
   const countATokenActivationsByWalletPlanStmt = db.prepare(`SELECT COUNT(*) AS n
     FROM a_token_activations WHERE wallet=? COLLATE NOCASE AND plan=? AND status IN ('pending','confirmed')`);
@@ -1387,6 +1481,53 @@ export function openDatabase(dataRoot) {
     direct_valid_count=excluded.direct_valid_count,updated_at=excluded.updated_at,payload_json=excluded.payload_json`);
   const getATokenTeamLevelStmt = db.prepare(`SELECT payload_json FROM a_token_team_levels
     WHERE wallet=? COLLATE NOCASE`);
+
+  const getATokenSellQuotaStmt = db.prepare(`SELECT released_units,used_units,updated_at
+    FROM a_token_sell_quotas WHERE wallet=? COLLATE NOCASE`);
+  const upsertATokenSellQuotaStmt = db.prepare(`INSERT INTO a_token_sell_quotas
+    (wallet,released_units,used_units,updated_at) VALUES(?,?,?,?)
+    ON CONFLICT(wallet) DO UPDATE SET released_units=excluded.released_units,
+    used_units=excluded.used_units,updated_at=excluded.updated_at`);
+
+  // 奔跑吧 AIX 押注局
+  const insertRunAixRunStmt = db.prepare(`INSERT INTO run_aix_runs
+    (id,wallet,stake_units,status,distance,payout_units,quota_units,elapsed_ms,started_at,settled_at,payload_json)
+    VALUES(?,?,?,?,?,?,?,?,?,?,?)`);
+  const getRunAixRunStmt = db.prepare(`SELECT id,wallet,stake_units,status,distance,payout_units,quota_units,
+    elapsed_ms,started_at,settled_at,payload_json FROM run_aix_runs WHERE id=?`);
+  const getPendingRunAixRunStmt = db.prepare(`SELECT id,wallet,stake_units,status,distance,payout_units,quota_units,
+    elapsed_ms,started_at,settled_at,payload_json FROM run_aix_runs
+    WHERE wallet=? COLLATE NOCASE AND status='pending' ORDER BY started_at DESC LIMIT 1`);
+  const settleRunAixRunStmt = db.prepare(`UPDATE run_aix_runs SET status=?,distance=?,payout_units=?,
+    elapsed_ms=?,settled_at=?,payload_json=? WHERE id=? AND status='pending'`);
+  const updateRunAixPayloadStmt = db.prepare(`UPDATE run_aix_runs SET payload_json=?
+    WHERE id=? AND status='pending'`);
+  const listRunAixRunsStmt = db.prepare(`SELECT id,wallet,stake_units,status,distance,payout_units,quota_units,
+    elapsed_ms,started_at,settled_at,payload_json FROM run_aix_runs
+    WHERE wallet=? COLLATE NOCASE ORDER BY started_at DESC LIMIT ?`);
+  const upsertRunAixStatsStmt = db.prepare(`INSERT INTO run_aix_stats(wallet,turnover_units,runs,updated_at)
+    VALUES(?,?,?,?) ON CONFLICT(wallet) DO UPDATE SET
+    turnover_units=excluded.turnover_units,runs=run_aix_stats.runs+1,updated_at=excluded.updated_at`);
+  const getRunAixStatsStmt = db.prepare(`SELECT turnover_units,runs,updated_at
+    FROM run_aix_stats WHERE wallet=? COLLATE NOCASE`);
+
+  // 哈希星盘 AIX 版
+  const getHashAixSeedStmt = db.prepare(`SELECT server_seed,server_seed_hash,nonce,updated_at
+    FROM hash_aix_seeds WHERE wallet=? COLLATE NOCASE`);
+  const upsertHashAixSeedStmt = db.prepare(`INSERT INTO hash_aix_seeds(wallet,server_seed,server_seed_hash,nonce,updated_at)
+    VALUES(?,?,?,?,?) ON CONFLICT(wallet) DO UPDATE SET server_seed=excluded.server_seed,
+    server_seed_hash=excluded.server_seed_hash,nonce=excluded.nonce,updated_at=excluded.updated_at`);
+  const insertHashAixBetStmt = db.prepare(`INSERT INTO hash_aix_bets
+    (id,wallet,choice,stake_units,payout_units,digit,outcome,hash,server_seed,server_seed_hash,client_seed,nonce,quota_units,created_at,payload_json)
+    VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`);
+  const listHashAixBetsStmt = db.prepare(`SELECT id,wallet,choice,stake_units,payout_units,digit,outcome,hash,
+    server_seed,server_seed_hash,client_seed,nonce,quota_units,created_at,payload_json FROM hash_aix_bets
+    WHERE wallet=? COLLATE NOCASE ORDER BY created_at DESC, nonce DESC LIMIT ?`);
+  const upsertHashAixStatsStmt = db.prepare(`INSERT INTO hash_aix_stats(wallet,turnover_units,bets,updated_at)
+    VALUES(?,?,?,?) ON CONFLICT(wallet) DO UPDATE SET
+    turnover_units=excluded.turnover_units,bets=hash_aix_stats.bets+1,updated_at=excluded.updated_at`);
+  const getHashAixStatsStmt = db.prepare(`SELECT turnover_units,bets,updated_at
+    FROM hash_aix_stats WHERE wallet=? COLLATE NOCASE`);
 
   const insertATokenTeamReward = db.prepare(`INSERT INTO a_token_team_rewards
     (id,recipient_wallet,source_wallet,kind,level,rate_bps,amount_units,created_at,payload_json)
@@ -1472,6 +1613,19 @@ export function openDatabase(dataRoot) {
       total += Number(r.c || 0);
     }
     return { total, by, rows };
+  }
+  // 后台矿机管理：今日激活统计（北京日界，含赠送+购买，按 plan 分组 + 去重用户数）
+  const adminMinerTodayStmt = db.prepare(`SELECT plan, COUNT(*) AS c FROM a_token_miners WHERE started_at >= ? GROUP BY plan`);
+  const adminMinerTodayWalletsStmt = db.prepare(`SELECT COUNT(DISTINCT LOWER(wallet)) AS w FROM a_token_miners WHERE started_at >= ?`);
+  function adminMinerTodaySummary(nowMs = Date.now()) {
+    // 北京时间今日 00:00 对应的 UTC 毫秒
+    const dayStartMs = Math.floor((Number(nowMs) + 8 * 3600_000) / 86_400_000) * 86_400_000 - 8 * 3600_000;
+    const rows = adminMinerTodayStmt.all(dayStartMs);
+    const by = {};
+    let total = 0;
+    for (const r of rows) { by[String(r.plan || 'unknown')] = Number(r.c || 0); total += Number(r.c || 0); }
+    const wallets = Number(adminMinerTodayWalletsStmt.get(dayStartMs)?.w || 0);
+    return { total, by, wallets, dayStartMs };
   }
   /** 矿池总览统计：active 矿机数、总算力、累计已产出、按 plan 分档（BigInt 行级聚合） */
   function minerStats() {
@@ -1594,12 +1748,17 @@ export function openDatabase(dataRoot) {
   function upsertATokenActivationRow(record) {
     const item = { ...record };
     upsertATokenActivation.run(item.id, item.wallet, item.plan, item.bnbAmountWei,
-      item.txHash, item.blockNumber ?? null, item.status, item.confirmedAt ?? null,
+      item.txHash || '', item.blockNumber ?? null, item.status, item.confirmedAt ?? null,
       timestamp(item.createdAt), json(item));
     return item;
   }
   function getATokenActivationByTx(txHash) {
+    if (!txHash) return null;
     const row = getATokenActivationByTxStmt.get(String(txHash || ''));
+    return row ? parse(row.payload_json, null) : null;
+  }
+  function getATokenActivationById(recordId) {
+    const row = db.prepare('SELECT payload_json FROM a_token_activations WHERE id=?').get(String(recordId || ''));
     return row ? parse(row.payload_json, null) : null;
   }
   function countConfirmedATokenActivations() {
@@ -1618,6 +1777,9 @@ export function openDatabase(dataRoot) {
   }
   function listATokenActivationsByWallet(wallet) {
     return listATokenActivationsByWalletStmt.all(wallet).map(r => parse(r.payload_json, {}));
+  }
+  function listConfirmedATokenActivationsByCollection(address) {
+    return listConfirmedATokenActivationsByCollectionStmt.all(String(address || '').toLowerCase()).map(r => parse(r.payload_json, {}));
   }
   function insertATokenBurnRow(burn) {
     const item = { ...burn };
@@ -1701,6 +1863,115 @@ export function openDatabase(dataRoot) {
   function getATokenTeamLevel(wallet) {
     const row = getATokenTeamLevelStmt.get(wallet);
     return row ? parse(row.payload_json, null) : null;
+  }
+  // AIX 可卖额度：released 累计发放，used 已占用，可用 = released - used
+  function getATokenSellQuota(wallet) {
+    const row = getATokenSellQuotaStmt.get(String(wallet || ''));
+    return row
+      ? { releasedUnits: row.released_units, usedUnits: row.used_units, updatedAt: row.updated_at }
+      : { releasedUnits: '0', usedUnits: '0', updatedAt: 0 };
+  }
+  function addATokenSellQuota(wallet, units) {
+    const delta = BigInt(units || '0');
+    if (delta <= 0n) return getATokenSellQuota(wallet);
+    const cur = getATokenSellQuota(wallet);
+    const released = (BigInt(cur.releasedUnits) + delta).toString();
+    upsertATokenSellQuotaStmt.run(String(wallet || '').toLowerCase(), released, cur.usedUnits, Date.now());
+    return { releasedUnits: released, usedUnits: cur.usedUnits };
+  }
+  function consumeATokenSellQuota(wallet, units) {
+    const delta = BigInt(units || '0');
+    if (delta <= 0n) return getATokenSellQuota(wallet);
+    const cur = getATokenSellQuota(wallet);
+    const used = (BigInt(cur.usedUnits) + delta).toString();
+    upsertATokenSellQuotaStmt.run(String(wallet || '').toLowerCase(), cur.releasedUnits, used, Date.now());
+    return { releasedUnits: cur.releasedUnits, usedUnits: used };
+  }
+  function refundATokenSellQuota(wallet, units) {
+    const delta = BigInt(units || '0');
+    if (delta <= 0n) return getATokenSellQuota(wallet);
+    const cur = getATokenSellQuota(wallet);
+    let used = BigInt(cur.usedUnits) - delta;
+    if (used < 0n) used = 0n;
+    upsertATokenSellQuotaStmt.run(String(wallet || '').toLowerCase(), cur.releasedUnits, used.toString(), Date.now());
+    return { releasedUnits: cur.releasedUnits, usedUnits: used.toString() };
+  }
+  // 奔跑吧 AIX 押注局：行存储 + 每钱包流水汇总（开跑即累计）
+  const runAixRow = row => row && {
+    id: row.id, wallet: row.wallet, stakeUnits: row.stake_units, status: row.status,
+    distance: Number(row.distance) || 0, payoutUnits: row.payout_units, quotaUnits: row.quota_units,
+    elapsedMs: Number(row.elapsed_ms) || 0, startedAt: Number(row.started_at) || 0,
+    settledAt: Number(row.settled_at) || 0, payload: parse(row.payload_json, {}),
+  };
+  function insertRunAixRun(run) {
+    const wallet = String(run.wallet || '').toLowerCase();
+    insertRunAixRunStmt.run(run.id, wallet, run.stakeUnits, run.status || 'pending',
+      Number(run.distance) || 0, run.payoutUnits || '0', run.quotaUnits || '0',
+      Number(run.elapsedMs) || 0, Number(run.startedAt) || Date.now(), Number(run.settledAt) || 0, json(run));
+    const cur = getRunAixStats(wallet);
+    upsertRunAixStatsStmt.run(wallet, (BigInt(cur.turnoverUnits) + BigInt(run.stakeUnits)).toString(),
+      Number(cur.runs) || 0, Date.now());
+    return run;
+  }
+  function getRunAixRun(id) { return runAixRow(getRunAixRunStmt.get(String(id || ''))); }
+  function getPendingRunAixRun(wallet) {
+    return runAixRow(getPendingRunAixRunStmt.get(String(wallet || '').toLowerCase()));
+  }
+  // 返回 changes：0 表示该局不在 pending 状态（幂等结算靠它判断）
+  function settleRunAixRun(id, patch) {
+    const cur = getRunAixRun(id);
+    if (!cur || cur.status !== 'pending') return 0;
+    return settleRunAixRunStmt.run(String(patch.status || 'settled'), Number(patch.distance) || 0,
+      patch.payoutUnits || '0', Number(patch.elapsedMs) || 0, Number(patch.settledAt) || Date.now(),
+      json({ ...(cur.payload || {}), ...patch }), String(id)).changes;
+  }
+  // 进行中局的回放日志/随机带进度落盘；非 pending 返回 0
+  function updateRunAixPayload(id, payload) {
+    return updateRunAixPayloadStmt.run(json(payload), String(id)).changes;
+  }
+  function listRunAixRuns(wallet, limit = 20) {
+    return listRunAixRunsStmt.all(String(wallet || '').toLowerCase(), Math.min(Math.max(Number(limit) || 20, 1), 100))
+      .map(runAixRow);
+  }
+  function getRunAixStats(wallet) {
+    const row = getRunAixStatsStmt.get(String(wallet || '').toLowerCase());
+    return { turnoverUnits: row?.turnover_units || '0', runs: Number(row?.runs) || 0, updatedAt: Number(row?.updated_at) || 0 };
+  }
+  // 哈希星盘 AIX 版：seed 状态 + 押注凭证 + 流水汇总
+  const hashAixBetRow = row => row && {
+    id: row.id, wallet: row.wallet, choice: row.choice,
+    stakeUnits: row.stake_units, payoutUnits: row.payout_units,
+    digit: Number(row.digit), outcome: row.outcome, hash: row.hash,
+    serverSeed: row.server_seed, serverSeedHash: row.server_seed_hash,
+    clientSeed: row.client_seed, nonce: Number(row.nonce),
+    quotaUnits: row.quota_units, createdAt: Number(row.created_at) || 0,
+  };
+  function getHashAixSeed(wallet) {
+    const row = getHashAixSeedStmt.get(String(wallet || '').toLowerCase());
+    return row ? { serverSeed: row.server_seed, serverSeedHash: row.server_seed_hash, nonce: Number(row.nonce) } : null;
+  }
+  function upsertHashAixSeed(wallet, serverSeed, serverSeedHash, nonce) {
+    upsertHashAixSeedStmt.run(String(wallet || '').toLowerCase(), String(serverSeed || ''), String(serverSeedHash || ''),
+      Number(nonce) || 1, Date.now());
+    return { serverSeed: String(serverSeed || ''), serverSeedHash: String(serverSeedHash || ''), nonce: Number(nonce) || 1 };
+  }
+  function insertHashAixBet(bet) {
+    const wallet = String(bet.wallet || '').toLowerCase();
+    insertHashAixBetStmt.run(bet.id, wallet, bet.choice, bet.stakeUnits, bet.payoutUnits || '0',
+      Number(bet.digit) || 0, bet.outcome || 'lose', bet.hash || '', bet.serverSeed || '', bet.serverSeedHash || '',
+      bet.clientSeed || '', Number(bet.nonce) || 0, bet.quotaUnits || '0', Number(bet.createdAt) || Date.now(), json(bet));
+    const cur = getHashAixStats(wallet);
+    upsertHashAixStatsStmt.run(wallet, (BigInt(cur.turnoverUnits) + BigInt(bet.stakeUnits)).toString(),
+      Number(cur.bets) || 0, Date.now());
+    return bet;
+  }
+  function listHashAixBets(wallet, limit = 50) {
+    return listHashAixBetsStmt.all(String(wallet || '').toLowerCase(), Math.min(Math.max(Number(limit) || 50, 1), 200))
+      .map(hashAixBetRow);
+  }
+  function getHashAixStats(wallet) {
+    const row = getHashAixStatsStmt.get(String(wallet || '').toLowerCase());
+    return { turnoverUnits: row?.turnover_units || '0', bets: Number(row?.bets) || 0, updatedAt: Number(row?.updated_at) || 0 };
   }
   function insertATokenTeamRewardRow(reward) {
     const item = { ...reward };
@@ -2158,17 +2429,21 @@ export function openDatabase(dataRoot) {
 
   const api = { adjustmentById, listBalanceAdjustmentsByWallet, aiRewardById, updateAiReward, applyBalanceAdjustment, db, updateAiRewardKind, updateReferralReward, deleteAuthRecord, file, findExecution, getLatestAuthForWallet, hasPlatformData, hasSchemaMigration, hasWalletData, insertAiReward, insertPermitSignature, insertReferralReward, listAiBatches, listAiManagedActiveWallets, listAiRewards, listBalanceAdjustments, listAuthRecords, listReferralLinks, listReferralRewards, loadPlatformAccount, loadPlatformState, loadWalletState, markPermitSignatureUsed, platformRecords, recordSchemaMigration, referralRewardById, replaceLedgerStates, replacePlatformState, replaceWalletState, replaceWalletStateInside, transaction, upsertAiBatch, upsertReferralLink, walletRecords,
     // A 币生态
-    upsertATokenMinerRow, listATokenMiners, listActiveATokenMiners, listDueATokenMiners, listExpiringATokenMiners, adminListATokenMiners, adminMinerSummary, minerStats, insertATokenMinerReleaseRow, listATokenMinerReleases, listATokenMinerWallets, listATokenMinerWalletsByPlan, countATokenMinersByWallet,
+    upsertATokenMinerRow, listATokenMiners, listActiveATokenMiners, listDueATokenMiners, listExpiringATokenMiners, adminListATokenMiners, adminMinerSummary, adminMinerTodaySummary, minerStats, insertATokenMinerReleaseRow, listATokenMinerReleases, listATokenMinerWallets, listATokenMinerWalletsByPlan, countATokenMinersByWallet,
     upsertATokenStakeRow, listATokenStakes, listActiveATokenStakes, listExpiringATokenStakes, insertATokenStakeRewardRow, listATokenStakeRewards,
     insertATokenTradeRow, listATokenTrades, listATokenTradesByWallet,
     insertATokenTransferRow, listATokenTransfers, getATokenTransferByRequestId,
     upsertATokenUserIdRow, getATokenUserId, getATokenUserIdByWallet,
-    upsertATokenActivationRow, getATokenActivationByTx, countConfirmedATokenActivations, countConfirmedATokenActivationsByPlan, listATokenActivations, listATokenActivationsByWallet,
+    upsertATokenActivationRow, getATokenActivationById, getATokenActivationByTx, countConfirmedATokenActivations, countConfirmedATokenActivationsByPlan, listATokenActivations, listATokenActivationsByWallet,
+    listConfirmedATokenActivationsByCollection,
     countATokenActivationsByWalletPlan,
     insertATokenBurnRow, totalATokenBurned,
     upsertATokenWithdrawalRow, getATokenWithdrawalById, getATokenWithdrawalByRequestId, listATokenWithdrawalsByWallet, listPendingATokenWithdrawals, listATokenWithdrawalsByStatus, sumATokenWithdrawalsByWalletToday,
     upsertATokenClaimRow, getATokenClaimById, listATokenClaimsByWallet, listPendingATokenClaims, sumATokenClaimsByWalletToday,
     upsertATokenTeamLevelRow, getATokenTeamLevel,
+    getATokenSellQuota, addATokenSellQuota, consumeATokenSellQuota, refundATokenSellQuota,
+    insertRunAixRun, getRunAixRun, getPendingRunAixRun, settleRunAixRun, updateRunAixPayload, listRunAixRuns, getRunAixStats,
+    getHashAixSeed, upsertHashAixSeed, insertHashAixBet, listHashAixBets, getHashAixStats,
     insertATokenTeamRewardRow, listATokenTeamRewards,
     insertATokenDirectCountRewardRow, listATokenDirectCountRewards,
     listATokenTeamLevelsByLevel, listAllATokenTeamLevels,

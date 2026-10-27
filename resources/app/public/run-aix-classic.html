@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0b1028">
+  <title>奔跑吧 AIX · 独立概率试玩</title>
+  <link rel="icon" href="/assets/brand/favicon-32.png">
+  <link rel="stylesheet" href="/games/run-aix/game.css">
+  <link rel="stylesheet" href="/games/run-aix/visual-v2.css?v=20261019">
+</head>
+<body>
+<main class="cabinet">
+  <header class="topbar"><a href="/run-aix.html" id="back" aria-label="返回冒险大厅">‹</a><span class="wordmark">AIX <i>CLASSIC</i></span><span class="preview">概率试玩</span><button id="sound" aria-label="开启音乐" aria-pressed="false">♫</button></header>
+  <section class="wallet-strip"><span><i class="status-dot"></i><span id="account">读取网站账户…</span></span><span>可用 AIX <strong id="balance">—</strong></span></section>
+  <section class="stage" aria-label="三车道跑酷游戏">
+    <canvas id="world" aria-label="AIX 小精灵在星际赛道上奔跑"></canvas>
+    <div class="hud"><div><span>DISTANCE / 距离</span><strong><b id="distance">0</b><small> m</small></strong></div><div class="multiplier"><span>模拟倍率</span><strong id="multiplier">0.0×</strong></div></div>
+    <div class="scene-label"><i></i><span id="scene">01 / 星空之城</span><span id="speed">READY TO RUN</span></div>
+    <div id="banner" class="banner" aria-live="polite"></div>
+    <div class="energy"><span id="energy-fill"></span></div>
+    <div class="energy-label"><span>ROCKET ENERGY</span><span id="energy-label">连续点击 · 点燃冲刺</span></div>
+    <section id="lobby" class="overlay lobby">
+      <span class="eyebrow">THE COSMIC SPRINT</span><h1>奔跑吧<span>AIX<span class="title-star">✦</span></span></h1>
+      <p class="tagline" id="mode-label">概率模式 · 结果档位由系统抽取</p>
+      <div class="hero-space" aria-hidden="true"></div>
+      <div class="milestones"><span><b>100<small>m</small></b>保本线</span><span><b>200<small>m</small></b>翻倍线</span><span><b>500<small>m</small></b>极限 5×</span></div>
+      <div class="launch-card"><div class="stake-heading"><label for="stake">本局模拟门槛</label><strong><output id="stake-value">10</output><small> POINTS</small></strong></div><input id="stake" type="range" min="1" max="100" value="10"><div class="stake-presets"><button data-stake="1">1</button><button data-stake="10" class="selected">10</button><button data-stake="50">50</button><button data-stake="100">100</button></div><button id="start" class="primary">开始冲刺 <span>↗</span></button><p class="simulation-note">本机模拟积分 · 不涉及真实 AIX 扣返</p></div>
+    </section>
+    <section id="modal" class="overlay modal" hidden aria-live="polite"><div class="modal-card"><span id="modal-kicker" class="eyebrow"></span><h2 id="modal-title"></h2><p id="modal-copy"></p><div id="result-stats"></div><button id="modal-primary" class="primary"></button><button id="modal-secondary" class="secondary"></button></div></section>
+  </section>
+  <section class="controls" aria-label="游戏操作"><button id="left" aria-label="向左闪避"><b>‹</b><span>左闪避</span></button><button id="tap" class="tap"><span class="tap-orbit">✦</span><span><b>加油 AIX</b><small>快速连点 · 火箭冲刺</small></span><span>↗</span></button><button id="right" aria-label="向右闪避"><b>›</b><span>右闪避</span></button></section>
+  <footer><span>试玩 <b id="credits">1,000</b> · 安慰 <b id="consolation">0</b></span><button id="records">本机纪录 ↗</button><button id="rules">规则 ⓘ</button></footer>
+  <nav class="extras" aria-label="试玩功能"><button id="lottery">安慰积分抽奖</button><button id="leaderboard">本机排行榜</button><a href="/run-aix-config.html">本地运营配置 ↗</a></nav>
+  <p class="keyboard-tip">左右换道也要保持连点 · ← → 换道 · 空格加油 · P 暂停</p>
+</main>
+<script type="module" src="/games/run-aix/main.js"></script>
+</body></html>

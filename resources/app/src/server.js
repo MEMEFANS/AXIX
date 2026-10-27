@@ -49,6 +49,8 @@ import { createATokenActivationService } from './a-token-activation-service.js';
 import { createATokenKlineService } from './a-token-kline-service.js';
 import { createATokenOrderService } from './a-token-order-service.js';
 import { createATokenApi } from './a-token-api.js';
+import { createRunAixGameApi } from './run-aix-game-api.js';
+import { createHashAixGameApi } from './hash-aix-game-api.js';
 import { createATokenAdminApi } from './a-token-admin-api.js';
 import { createSupportService } from './support-service.js';
 import { createSupportApi } from './support-api.js';
@@ -457,6 +459,11 @@ function walletSession(req) {
   return walletService.getSession(readCookie(req, 'wg_session'));
 }
 
+function sendIdleAccountResponse(res) {
+  res.writeHead(204, { 'X-AxiX-Action':'idle', 'Cache-Control':'no-store' });
+  return res.end();
+}
+
 function adminSession(req) {
   return adminAuth.session(readCookie(req, 'wg_admin_session'));
 }
@@ -540,6 +547,8 @@ const aiManagedApi = createAiManagedApi({
   getSession:walletSession,
   withAccountLock:platformApi.withAccountLock,
 });
+// 跟单提现额度（2026-10-25）：USDT 提现占用跟单本金 30 天线性解锁的额度，驳回返还
+walletService.setWithdrawalQuotaHook?.(aiManagedService.withdrawQuota);
 
 // ── A 币赚取生态服务 ───────────────────────────────────────────────────────────
 const bscNetworkCfg = (cfg.wallet.networks || []).find(n => n.id === 'bsc') || {};
@@ -550,10 +559,21 @@ const aTokenPoolService = createATokenPoolService({
   // 市价卖报价按钱包直推阶梯费率（惰性求值：aTokenOrderService 在下方创建）
   sellFeeProfile: (wallet) => aTokenOrderService.sellFeeProfile(wallet),
 });
-const aTokenTeamService = createATokenTeamService({ database: walletService.database, walletService });
+// 轮换收款地址集合（含 A_TOKEN_ROTATION_ADDRESSES 的 '2:0x..' 套餐前缀）：
+// 打到这些地址的激活属后台写入的虚拟数据，不计入上级看到的「激活矿机数」台数
+const aTokenRotationAddresses = [...new Set([
+  process.env.A_TOKEN_ROTATION_ADDRESS || '',
+  ...String(process.env.A_TOKEN_ROTATION_ADDRESSES || '').split(',').map(entry => entry.split(':').pop()),
+])].map(addr => String(addr || '').trim()).filter(Boolean).join(',');
+// A_TOKEN_ROTATION_HIDE_VIEWERS：这些地址本人查看团队页时，其整棵下级里经轮换收款地址
+// 确认的激活不计入「团队激活矿机」（如这条线最上面的号）；其他查看者不受影响。
+const aTokenRotationHideViewers = String(process.env.A_TOKEN_ROTATION_HIDE_VIEWERS || '').trim();
+const proReportingFile = path.join(DATA_ROOT, 'pro-reporting-exclusions.json');
+const proReportingExclusions = fs.existsSync(proReportingFile) ? JSON.parse(fs.readFileSync(proReportingFile, 'utf8')) : null;
+const aTokenTeamService = createATokenTeamService({ database: walletService.database, walletService, rotationAddresses: aTokenRotationAddresses, rotationHideViewers: aTokenRotationHideViewers, reportingExclusions: proReportingExclusions });
 const aTokenMinerService = createATokenMinerService({ aTokenService, database: walletService.database, teamService: aTokenTeamService });
 const aTokenStakingService = createATokenStakingService({ aTokenService, database: walletService.database, teamService: aTokenTeamService });
-const aTokenTransferService = createATokenTransferService({ aTokenService, database: walletService.database, referralService, teamService: aTokenTeamService });
+const aTokenTransferService = createATokenTransferService({ aTokenService, database: walletService.database, referralService, teamService: aTokenTeamService, walletService });
 const aTokenActivationService = createATokenActivationService({
   aTokenService, minerService: aTokenMinerService, database: walletService.database,
   rpcUrl: bscNetworkCfg.rpcUrl || process.env.BSC_RPC_URL || '',
@@ -586,8 +606,8 @@ const aTokenOrderService = createATokenOrderService({
       aTokenService,
       database: walletService.database, teamService: aTokenTeamService,
       referralService,
-      // 撮合同价档内：买单默认大额优先，卖单默认按挂单时间先来先成交（大单小单都优先卖给大额买家）；
-      // 每 W 次撮合尝试中有 C 次为小额轮（买、卖都按金额小者优先）= 默认 10 次里 3 次
+      // 撮合同价档内：买单始终小额优先（金额小者先成交）；卖单默认按挂单时间先来先成交，
+      // 每 W 次撮合尝试中有 C 次走小额轮（卖单也按金额小者优先）= 默认 10 次里 3 次
       matchSmallFirstWindow: Number(process.env.A_TOKEN_MATCH_SMALL_FIRST_WINDOW || 10),
       matchSmallFirstCount: Number(process.env.A_TOKEN_MATCH_SMALL_FIRST_COUNT || 3),
     });
@@ -660,6 +680,16 @@ const aTokenApi = createATokenApi({
       walletService, teamService: aTokenTeamService,
       send, readBody, getSession: walletSession, withAccountLock: platformApi.withAccountLock,
     });
+// 奔跑吧 AIX 押注经济（自选押注 + 距离阶梯返还 + 1% 流水转可卖额度）
+const runAixGameApi = createRunAixGameApi({
+  aTokenService, database: walletService.database,
+  send, readBody, getSession: walletSession, withAccountLock: platformApi.withAccountLock,
+});
+// 哈希星盘 AIX 押注（commit-reveal 公平架构 + 1% 流水转可卖额度）
+const hashAixGameApi = createHashAixGameApi({
+  aTokenService, database: walletService.database,
+  send, readBody, getSession: walletSession, withAccountLock: platformApi.withAccountLock,
+});
 const aTokenAdminApi = createATokenAdminApi({
   aTokenService, poolService: aTokenPoolService, minerService: aTokenMinerService,
   stakingService: aTokenStakingService, activationService: aTokenActivationService,
@@ -937,6 +967,9 @@ const deHandler = makeExchangeHandler('/api/de', deBot, deExchange, cfg.de, deCl
 const exHandler = makeExchangeHandler('/api/ex', exBot, exExchange, cfg.ex, exClients, 'Extended');
 const rsHandler = makeExchangeHandler('/api/rs', rsBot, rsExchange, cfg.rs, rsClients, 'RISEx');
 
+// 游戏页需要被站内「游戏生态」弹层以同源 iframe 嵌入，其余页面维持禁止嵌入
+const GAME_PAGE_PATHS = new Set(['/games.html', '/run-aix.html', '/hash-aix.html', '/run-aix-classic.html', '/run-aix-config.html']);
+
 // ── HTTP 服务器 ───────────────────────────────────────────────────────────────
 export const server = http.createServer(async (request, res) => {
   const url = new URL(request.url, 'http://localhost');
@@ -952,6 +985,10 @@ export const server = http.createServer(async (request, res) => {
     res.setHeader('Referrer-Policy', 'no-referrer');
     res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
     res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://bin.bnbstatic.com; connect-src 'self' https://api.hyperliquid.xyz https://stats-data.hyperliquid.xyz https://cloudflareinsights.com; frame-ancestors 'none'; base-uri 'self'; object-src 'none'; form-action 'self'");
+    if (GAME_PAGE_PATHS.has(p.toLowerCase())) {
+      res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+      res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; media-src 'self' data:; connect-src 'self'; frame-ancestors 'self'; base-uri 'self'; object-src 'none'; form-action 'self'");
+    }
     const adminKind = adminPageKind(p);
     if (adminKind) {
       res.setHeader('Content-Security-Policy', adminKind === 'funds' ? FUNDS_ADMIN_CSP : OPERATOR_ADMIN_CSP);
@@ -964,6 +1001,12 @@ export const server = http.createServer(async (request, res) => {
     }
     if (!['GET', 'HEAD', 'OPTIONS'].includes(request.method) && !isSameOrigin(request)) {
       return send(res, 403, { error:'拒绝跨站修改请求' });
+    }
+    // Reject restricted wallet requests before any user API can read or mutate account state.
+    // Administrative authentication is independent of the user's wallet cookie.
+    if (p.startsWith('/api/') && !p.startsWith('/api/admin/') && !p.startsWith('/api/wallet/admin/')
+      && !p.startsWith('/api/operator/') && walletService.isSilentSessionBlocked(readCookie(request, 'wg_session'))) {
+      return sendIdleAccountResponse(res);
     }
     if (p.startsWith('/api/wallet/admin/')) return fundsAdminApi.handle(request, res, p);
     if (p === '/api/admin/login' && request.method === 'POST') {
@@ -1154,6 +1197,9 @@ export const server = http.createServer(async (request, res) => {
           const activations = db.listATokenActivationsByWallet(wallet);
           // 直推列表（带激活统计）
           const directs = links.filter(l => String(l.referrerWallet || '').toLowerCase() === wallet);
+          const teamStatsView = aTokenTeamService.getTeamStatsView(wallet);
+          const reporting = teamStatsView.reporting;
+          const excludedDirectProWallets = new Set(reporting?.enabled ? reporting.excludedDirectWallets || [] : []);
           let act002 = 0, act005 = 0, actPending = 0, actRejected = 0;
           const directList = directs.map(d => {
             const dw = String(d.wallet).toLowerCase();
@@ -1169,14 +1215,19 @@ export const server = http.createServer(async (request, res) => {
             // 直推用户的矿机数
             const dm = db.listATokenMiners(d.wallet) || [];
             const activeMiner = dm.filter(m => m.status === 'active').length;
+            // Apply the same one-miner exclusion as the team report without changing source records.
+            const proMiners = dm.filter(m => m.plan === 'pro1500');
+            const excludedProMiner = excludedDirectProWallets.has(dw) ? proMiners
+              .filter(m => !String(m.activationId || '').startsWith('ata_aix_'))
+              .sort((a, b) => Number(a.startedAt) - Number(b.startedAt) || String(a.id).localeCompare(String(b.id)))[0] : null;
             return {
               wallet: d.wallet,
               joinedAt: d.createdAt,
               hasMini: confirmed002,
-              hasPro: confirmed005,
+              hasPro: confirmed005 && (!excludedProMiner || proMiners.length > 1),
               pending, rejected,
-              minerCount: dm.length,
-              activeMinerCount: activeMiner,
+              minerCount: Math.max(0, dm.length - (excludedProMiner ? 1 : 0)),
+              activeMinerCount: Math.max(0, activeMiner - (excludedProMiner?.status === 'active' ? 1 : 0)),
             };
           });
           // 间推（直推的直推）
@@ -1211,7 +1262,6 @@ export const server = http.createServer(async (request, res) => {
           // 互转记录 —— 使用 transferService 返回格式化可读字段
           const transfers = aTokenTransferService.myTransfers(wallet, 100);
           // 团队展示数据视图（真实值 + 后台手动设置叠加后的生效值，仅前端展示）
-          const teamStatsView = aTokenTeamService.getTeamStatsView(wallet);
           const tEff = teamStatsView.effective;
           return send(res, 200, {
             address: wallet,
@@ -1234,7 +1284,7 @@ export const server = http.createServer(async (request, res) => {
               actMini: tEff.directMini,    // 0.002 BNB（生效值，含后台展示设置）
               realActMini: act002,
               actPro: tEff.directPro,      // 0.05 BNB（生效值，含后台展示设置）
-              realActPro: act005,
+              realActPro: reporting?.enabled ? reporting.realDirectPro : act005,
               pending: actPending,
               rejected: actRejected,
               holdA: tEff.directTotalHoldA,        // 直推总业绩（真实+虚拟）
@@ -1245,10 +1295,10 @@ export const server = http.createServer(async (request, res) => {
             team: {
               count: tEff.teamCount, realCount: teamSet.size,
               actMini: tEff.teamMini, realActMini: teamAct002,
-              actPro: tEff.teamPro, realActPro: teamAct005,
+              actPro: tEff.teamPro, realActPro: reporting?.enabled ? reporting.realTeamPro : teamAct005,
               virtualHoldA: tEff.teamHoldA, directVirtualHoldA: tEff.directHoldA,
             },
-            statsOverride: { real: teamStatsView.real, stored: teamStatsView.stored },
+            statsOverride: { real: teamStatsView.real, stored: teamStatsView.stored, reporting },
             withdrawFrozen: walletService.adminGetWithdrawalFreeze?.(wallet) || null,
             orders,
             trades,
@@ -1307,16 +1357,16 @@ export const server = http.createServer(async (request, res) => {
             teamPro: intField(body.teamPro, '团队开通 Pro 人数'),
           };
           // 存差值（设定值 - 当前真实值，负则记 0）：真实数据继续变化时在其之上叠加
-          const { real } = aTokenTeamService.getTeamStatsView(wallet);
+          const { real, reporting } = aTokenTeamService.getTeamStatsView(wallet);
           const row = walletService.database.upsertATokenTeamStatsOverride({
             wallet,
             dDirect: Math.max(0, inputs.directCount - real.directCount),
             dIndirect: Math.max(0, inputs.indirectCount - real.indirectCount),
             dTeam: Math.max(0, inputs.teamCount - real.teamCount),
             dDirectMini: Math.max(0, inputs.directMini - real.directMini),
-            dDirectPro: Math.max(0, inputs.directPro - real.directPro),
+            dDirectPro: Math.max(0, inputs.directPro - (reporting?.enabled ? reporting.realDirectPro : real.directPro)),
             dTeamMini: Math.max(0, inputs.teamMini - real.teamMini),
-            dTeamPro: Math.max(0, inputs.teamPro - real.teamPro),
+            dTeamPro: Math.max(0, inputs.teamPro - (reporting?.enabled ? reporting.realTeamPro : real.teamPro)),
             note: String(body.note || ''),
             updatedAt: Date.now(),
             updatedBy: operatorSession.username || 'admin',
@@ -1487,7 +1537,7 @@ export const server = http.createServer(async (request, res) => {
       && !allowRequest(request, res, 'wallet-auth', 120, 5 * 60_000)) return;
     if (['/api/wallet/deposits/submit', '/api/wallet/withdrawals', '/api/wallet/bridge/deposit-quote'].includes(p)
       && !allowRequest(request, res, 'wallet-funds', 30, 5 * 60_000)) return;
-    if ((p.startsWith('/api/platform/') || p.startsWith('/api/internal-strategy/') || p.startsWith('/api/ai-managed/') || p.startsWith('/api/a-token/') || p.startsWith('/api/support/')) && !['GET', 'HEAD'].includes(request.method)
+    if ((p.startsWith('/api/platform/') || p.startsWith('/api/internal-strategy/') || p.startsWith('/api/ai-managed/') || p.startsWith('/api/a-token/') || p.startsWith('/api/run-aix/') || p.startsWith('/api/hash-aix/') || p.startsWith('/api/support/')) && !['GET', 'HEAD'].includes(request.method)
       && !allowRequest(request, res, 'platform-mutation', 120, 60_000)) return;
     if (p.startsWith('/api/hyperliquid/') && !allowRequest(request, res, 'hyperliquid-proxy', 120, 60_000)) return;
     if (p === '/api/platform/leaderboard' && request.method === 'GET') {
@@ -1507,6 +1557,8 @@ export const server = http.createServer(async (request, res) => {
       if (await aiManagedApi.handle(request, res, p)) return;
       if (await referralApi.handle(request, res, p)) return;
     if (await aTokenApi.handle(request, res, p)) return;
+    if (await runAixGameApi.handle(request, res, p)) return;
+    if (await hashAixGameApi.handle(request, res, p)) return;
     if (await supportApi.handle(request, res, p)) return;
     if (await lotteryApi.handle(request, res, p)) return;
     // 空投积分（独立账本，登录钱包可见）
@@ -1686,6 +1738,17 @@ export const server = http.createServer(async (request, res) => {
     if (p === '/api/wallet/config' && request.method === 'GET') {
       return send(res, 200, walletService.publicConfig());
     }
+    // 充值页钱包链上 USDT 余额（服务端代查：浏览器直连公共 RPC 在部分网络环境不可达，2026-10-24）。
+    // 链上余额本身是公开数据，无需登录即可查询。
+    if (p === '/api/wallet/deposit-balance' && request.method === 'GET') {
+      try {
+        const address = String(url.searchParams.get('address') || '').trim();
+        const networkId = String(url.searchParams.get('network') || '').trim();
+        return send(res, 200, await walletService.readTokenBalance(networkId, address));
+      } catch (e) {
+        return send(res, 400, { error: e?.message || String(e) });
+      }
+    }
     if (p.startsWith('/api/wallet/') && request.method === 'POST' && !isSameOrigin(request)) {
       return send(res, 403, { error: '拒绝跨站资金请求' });
     }
@@ -1697,7 +1760,10 @@ export const server = http.createServer(async (request, res) => {
         if (!address) return send(res, 400, { error: '缺少 address 参数' });
         const result = walletService.buildLoginChallenge(address, { requestId:body.requestId });
         return send(res, 200, { message: result.message });
-      } catch (e) { return send(res, 400, { error: e?.message || String(e) }); }
+      } catch (e) {
+        if (e?.code === 'ACCOUNT_ACTION_DISABLED') return sendIdleAccountResponse(res);
+        return send(res, 400, { error: e?.message || String(e) });
+      }
     }
     // 登录签名提交
     if (p === '/api/wallet/login-sign' && request.method === 'POST') {
@@ -1714,7 +1780,10 @@ export const server = http.createServer(async (request, res) => {
           token: result.token,
           expiresAt: result.expiresAt,
         });
-      } catch (e) { return send(res, 400, { error: e?.message || String(e) }); }
+      } catch (e) {
+        if (e?.code === 'ACCOUNT_ACTION_DISABLED') return sendIdleAccountResponse(res);
+        return send(res, 400, { error: e?.message || String(e) });
+      }
     }
     if (p === '/api/wallet/logout' && request.method === 'POST') {
       walletService.logout(readCookie(request, 'wg_session'));

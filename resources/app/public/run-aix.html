@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#101321">
+  <title>奔跑吧 AIX · 星际冒险</title>
+  <link rel="icon" href="/assets/brand/favicon-32.png">
+  <link rel="stylesheet" href="/games/run-aix/adventure.css?v=6">
+</head>
+<body>
+<div class="app-shell">
+  <header class="app-header">
+    <a class="brand" href="#home" aria-label="奔跑吧 AIX 首页"><span class="brand-icon">✦</span><span>AIX <b>RUNNER</b><small>奔跑吧 · 星际冒险</small></span></a>
+    <nav class="desktop-nav" aria-label="游戏导航"><a href="#home">大厅</a><a href="#worlds">世界</a><a href="#collection">收藏</a><a href="#records">成绩</a></nav>
+    <div class="header-actions"><button class="wallet-chip" id="wallet-chip" type="button" aria-label="钱包登录与 AIX 余额">✦ 检测登录…</button><a class="icon-button" href="/games.html" aria-label="返回游戏大厅" title="游戏大厅">⌂</a><button class="icon-button" id="open-settings" aria-label="游戏设置">⚙</button></div>
+  </header>
+  <main id="main-content" tabindex="-1">
+    <section id="view-home" class="view">
+      <div class="section-topline"><span class="eyebrow">YOUR NEXT ADVENTURE</span><span class="local-badge"><i></i> 本地冒险版</span></div>
+      <section class="hero-banner">
+        <img class="hero-background" src="/games/run-aix/assets/hub-v4.jpg" alt="" id="hub-art">
+        <div class="hero-copy"><span class="chapter-tag">A LITTLE COURAGE. A BIG ADVENTURE.</span><h1>下一站，<br><em>星辰大海。</em></h1><p>押上 AIX，穿越三段星域。<br>开跑保底 0.7 倍，跑得越远返得越多，通关保本。</p><div class="hero-actions"><button class="button-primary" id="continue-adventure">开始冒险 <span>↗</span></button><a class="button-ghost" href="#guide">玩法指南 <span>▷</span></a></div><span class="hero-footnote">登录钱包 · 自选押注 · 按距离结算</span></div>
+        <div class="hero-coordinate"><span>01 / COSMIC CITY</span><span>EXPLORE THE UNKNOWN ↗</span></div>
+      </section>
+      <div class="journey-strip"><div><span class="journey-icon">✧</span><span><small>旅程进度</small><b id="journey-summary">航线待探索</b></span></div><div><span class="journey-icon gold">★</span><span><small>最佳星级</small><b id="star-summary">0 / 3 颗星</b></span></div><a href="#collection">我的收藏 <span>↗</span></a></div>
+      <div class="section-heading"><div><span class="eyebrow">CHOOSE YOUR WORLD</span><h2>世界，等你探索</h2></div><a href="#worlds">查看全部关卡 ↗</a></div>
+      <div class="world-grid" id="home-worlds"></div>
+      <div class="lower-grid"><button class="daily-card" id="start-daily"><span class="daily-glyph">◈</span><span><small>DAILY EXPEDITION</small><b>每日远征</b><span>同一天，同一条路。挑战自己的最佳表现。</span></span><span class="card-arrow">↗</span></button><a class="training-card" href="#guide"><span>新手航行指南</span><b>轻松上手，从第一步开始。 ↗</b><small>操作、目标与星级，一次了解。</small></a></div>
+      <a class="hash-discovery" href="/hash-aix.html"><img src="/games/hash-aix/assets/hash-core.jpg" alt=""><span><small>A NEW ORBIT / AIX HASH</small><b>哈希星盘 · 新游戏</b><span>选单双，猜大小。押 AIX，猜中 1.98 倍返还。</span></span><span class="card-arrow" aria-hidden="true">↗</span></a>
+    </section>
+    <section id="view-worlds" class="view" hidden><div class="page-heading"><span class="eyebrow">THE JOURNEY MAP</span><h1>选择你的下一站</h1><p>完成前一关，解锁新的航路。每个世界都有自己的节奏。</p></div><div id="level-map"></div></section>
+    <section id="view-collection" class="view" hidden><div class="page-heading"><span class="eyebrow">A LITTLE MORE YOU</span><h1>星际收藏室</h1><p>用冒险获得的星星，解锁小精灵的新色彩。</p></div><div class="skin-grid" id="skin-grid"></div><div class="section-heading"><div><span class="eyebrow">MOMENTS THAT MATTER</span><h2>冒险徽章</h2></div></div><div class="achievement-grid" id="achievement-grid"></div></section>
+    <section id="view-records" class="view" hidden><div class="page-heading"><span class="eyebrow">YOUR PERSONAL BEST</span><h1>每一步，都算数</h1><p>只记录你的真实冒险成绩，刷新页面后依然保留。</p></div><div class="stats-grid" id="career-stats"></div><div class="record-panel"><div class="section-heading"><h2>关卡最佳</h2><span class="muted">本机记录</span></div><div id="level-records"></div></div></section>
+    <section id="view-settings" class="view" hidden><div class="page-heading"><span class="eyebrow">MAKE YOURSELF AT HOME</span><h1>按你的节奏来</h1><p>让声音、触感和画面更适合你。</p></div><div class="settings-panel"><label><span><b>音乐与音效</b><small>原创星际配乐与操作反馈</small></span><input id="setting-sound" type="checkbox" role="switch"></label><label><span><b>触觉反馈</b><small>受击与收集时轻微震动，需设备支持</small></span><input id="setting-haptics" type="checkbox" role="switch"></label><label><span><b>减少动态效果</b><small>关闭镜头震动、闪烁与冲刺速度线</small></span><input id="setting-reducedMotion" type="checkbox" role="switch"></label></div><div class="about-panel"><span class="eyebrow">AIX RUNNER · ADVENTURE 5</span><h2>押注起跑的真实航线</h2><p>每局以平台 AIX 押注起跑（0.1 – 500 AIX）：开跑即保底返还 0.7 倍，100 米 0.76、300 米 0.86、500 米 0.9、1100 米 0.97，通关 1500 米 1.0 倍保本；累计流水的 1% 自动转为 AIX 可卖额度。航路随机数由服务端分段下发、全程回放核定成绩，超时作废按保底返还。</p><a href="/run-aix-classic.html">进入独立概率试玩 ↗</a><p class="small-copy">概率试玩保留原有公开比例与模拟积分，是独立玩法。</p></div></section>
+    <section id="view-guide" class="view" hidden><div class="page-heading"><span class="eyebrow">READY, SET, EXPLORE</span><h1>你的第一份航行指南</h1><p>先熟悉方向，再追求速度。</p></div><div class="guide-grid"><article><span>01</span><h2>登录并押注</h2><p>连接钱包登录后自选押注。押注在起跑时扣除，结算按最终距离返还。</p></article><article><span>02</span><h2>左右，找到空隙</h2><p>左右滑动，或点按屏幕左 / 右半区换道。电脑使用 ← → 或 A / D。一击即死，看清再动。</p></article><article><span>03</span><h2>越跑越快，40 → 130 m/s</h2><p>开局 40 m/s 从容热身，每 10 米换一档，后段冲到 130 m/s。盯住前方空车道提前站位。</p></article><article><span>04</span><h2>跑得越远，亏得越少</h2><p>撞上也保底返还 0.7 倍；300 米 0.86 倍、500 米 0.9 倍，通关 1.0 倍保本。流水 1% 自动转可卖额度。</p></article></div><button class="button-primary" id="guide-start">直接开始冒险 ↗</button></section>
+  </main>
+  <footer class="app-footer"><span>AIX RUNNER <i>·</i> 勇气从第一步开始</span><span>AIX 押注 · 按距离结算</span></footer>
+  <nav class="mobile-nav" aria-label="游戏导航"><a href="#home"><span>⌂</span>大厅</a><a href="#worlds"><span>◈</span>世界</a><a href="#collection"><span>✧</span>收藏</a><a href="#records"><span>▥</span>成绩</a></nav>
+</div>
+<section class="play-screen" id="play-screen" hidden aria-label="游戏进行中">
+  <div class="play-top"><button id="pause-game" class="icon-button" aria-label="暂停游戏">Ⅱ</button><span><small id="play-world">星空之城</small><b id="play-title">初次启航</b></span><span id="play-stake" hidden></span><span id="play-hearts" aria-label="剩余生命">♥ ♥ ♥</span></div>
+  <div class="play-stage"><canvas id="world" tabindex="0" aria-label="三车道跑酷，左右滑动或点按换道，P暂停"></canvas><div class="play-hud"><span><small>距离</small><b><span id="play-distance">0</span><small id="play-target"> / 200 m</small></b></span><span class="play-return" id="play-return-box" hidden><small>当前返还</small><b id="play-return">×0.70</b><small id="play-return-next"></small></span></div><div class="route-progress"><span id="route-fill"></span></div><div id="play-banner" aria-live="polite"></div><div class="play-coach" id="play-coach">自动奔跑中 · 找到空的车道</div><div class="play-bottom-hud"><span id="play-combo">从容出发</span><span id="play-speed">巡航</span></div></div>
+  <div class="play-controls-hint"><p class="play-keyboard">左右滑动或点按换道 · 电脑用 ← → / A D · P 暂停</p></div>
+</section>
+<dialog id="game-dialog" aria-labelledby="dialog-title"><div class="dialog-inner"><span class="eyebrow" id="dialog-kicker"></span><h2 id="dialog-title"></h2><p id="dialog-copy"></p><div id="dialog-stats"></div><button class="button-primary" id="dialog-primary"></button><button class="dialog-secondary" id="dialog-secondary"></button></div></dialog>
+<div class="toast" id="toast" role="status" hidden></div>
+<script type="module" src="/games/run-aix/adventure.js?v=21"></script>
+</body>
+</html>
