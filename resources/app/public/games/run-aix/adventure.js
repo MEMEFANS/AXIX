@@ -1,7 +1,7 @@
 import { CampaignEngine } from './campaign-engine.js?v=20261027c';
 import { LEVELS, WORLDS, getLevel } from './campaign.js?v=20261027c';
 import { PlayerProfile, SKINS, ACHIEVEMENTS, PROFILE_STORAGE_KEY } from './player-profile.js';
-import { WebsiteSession } from './session.js';
+import { WebsiteSession } from './session.js?v=20261028a';
 import { GameArt } from './art.js?v=20261028a';
 import { GameAudio } from './audio.js';
 import { artReady } from './sprites.js?v=20261027b';

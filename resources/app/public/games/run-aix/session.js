@@ -1,14 +1,13 @@
-// 只读网站登录态与余额，永远不请求钱包连接、签名、授权或转账。
+// 只读平台登录态与余额，永远不请求钱包连接、签名、授权或转账。
 export class WebsiteSession {
   constructor(onChange) { this.onChange = onChange; this.revision = 0; }
   async refresh() {
     const revision = ++this.revision;
     this.controller?.abort(); this.controller = new AbortController();
     const signal = this.controller.signal;
-    let websiteProfile, embedded = false;
-    try { if (window.parent !== window) { embedded = true; websiteProfile = window.parent.currentWalletProfile; } } catch {}
-    if (embedded && !websiteProfile?.authenticated) return this.onChange({ status: 'guest' });
-    this.onChange({ status: 'loading', address: embedded ? websiteProfile.address : undefined });
+    // 2026-10-28：登录态直接以平台会话 API（cookie）为准，不再依赖父页的钱包全局对象——
+    // 之前嵌入态下父页对象刷新/断连的瞬间会被误判成未登录，反复弹"去登录"。
+    this.onChange({ status: 'loading' });
     const timeout = setTimeout(() => this.controller?.signal === signal && this.controller.abort(), 7000);
     try {
       const response = await fetch('/api/a-token/profile', { credentials: 'same-origin', cache: 'no-store', signal });
@@ -17,11 +16,6 @@ export class WebsiteSession {
       if (!response.ok) throw new Error('balance unavailable');
       const profile = await response.json();
       if (revision !== this.revision) return;
-      let current;
-      try { if (window.parent !== window) current = window.parent.currentWalletProfile; } catch {}
-      if (embedded && (!current?.authenticated || (current.address || '').toLowerCase() !== String(profile.wallet || '').toLowerCase())) {
-        return this.onChange({ status: 'guest' });
-      }
       const value = String(profile.balances?.A ?? '');
       if (!/^\d+(\.\d+)?$/.test(value) || !/^0x[0-9a-f]{40}$/i.test(profile.wallet || '')) throw new Error('invalid profile');
       this.onChange({ status: 'ready', address: profile.wallet, balance: value });

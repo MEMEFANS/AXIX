@@ -1,5 +1,5 @@
 import { CHOICES, RULES, verifyServerRecord } from './core.js';
-import { WebsiteSession } from '../run-aix/session.js';
+import { WebsiteSession } from '../run-aix/session.js?v=20261028a';
 import { ServerSession } from './server-session.js';
 
 const $ = id => document.getElementById(id);
