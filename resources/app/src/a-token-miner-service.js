@@ -5,7 +5,7 @@ import { minerIncomeSummary } from './a-token-income.js';
 
 // A 币矿机：激活赠送矿机，60s 定时巡检，**北京时间每天 00:00 日结一次**（一天一条流水）。
 // 套餐 mini120(100A/30天,日约3.33A) 与 pro1500(1500A/90天,日16.67A)。
-// plan key 'mini120' 为历史兼容名，激活包 0.002 BNB 现产出 100 枚。
+// plan key 'mini120' 为历史兼容名，Mini 产出 100 枚；Pro 可同时持有多台。
 // 产出按 dailyTargetUnits 比例折算：每天 00:00（北京）结算「上次结算点 → 今日 00:00」的实际时长，
 // 首个日界即结出激活日零头（下午激活当晚 00:00 就见第一笔流水），幂等键按北京日槽；
 // 整数除法尾差在到期 finalize 时一次性补齐，总量守恒。
@@ -35,13 +35,13 @@ export function createATokenMinerService({ aTokenService, database, teamService,
   }
 
   // 激活确认 / 后台赠送时调用：创建一台矿机
-  function createMiner(wallet, plan, { startedAt } = {}) {
+  function createMiner(wallet, plan, { startedAt, activationId } = {}) {
     const cfg = MINER_PLANS[plan];
     if (!cfg) throw new Error('矿机套餐无效');
-    // 同钱包同套餐仅可激活一次（不管前端还是后台），防止重复发放
+    // Mini 终身一次；每次 Pro 激活或赠送各创建独立矿机。
     const w = String(wallet || '').toLowerCase();
     const existing = db.listATokenMiners(w);
-    if (existing.some(m => m.plan === plan)) throw new Error('该矿机套餐已激活，不可重复激活');
+    if (plan === 'mini120' && existing.some(m => m.plan === plan)) throw new Error('Mini 矿机每个钱包终身仅可激活一次');
     const now = startedAt ?? clock();
     const totalUnits = BigInt(cfg.totalUnits);
     const dailyTarget = dailyTargetOf(plan);
@@ -56,6 +56,7 @@ export function createATokenMinerService({ aTokenService, database, teamService,
       dayEarnedUnits: '0',
       totalEarnedUnits: '0',
       status: 'active',
+      ...(activationId ? { activationId } : {}),
     };
     db.upsertATokenMinerRow(miner);
     return miner;

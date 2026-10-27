@@ -17,10 +17,12 @@ const bjDayStart = (ts) => Math.floor((Number(ts) + BJ_OFFSET_MS) / DAY_MS) * DA
 const bjDaySlot = (ts) => Math.floor((Number(ts) + BJ_OFFSET_MS) / DAY_MS);
 
 export const STAKE_PLANS = Object.freeze({
+  // 活期已下线（2026-10-25）：存量已退本金结清，仅保留配置供历史记录展示
   current: { planId:'current', label:'活期', days:0, dailyRateBps:30, minUnits:(100n * A_UNIT).toString(), flexible:true },
+  // 2026-10-25 起三档统一 1000 A 起步
   s30: { planId:'s30', label:'1号 30天', days:30, dailyRateBps:80, minUnits:(1000n * A_UNIT).toString(), flexible:false },
-  s60: { planId:'s60', label:'2号 60天', days:60, dailyRateBps:100, minUnits:(2000n * A_UNIT).toString(), flexible:false },
-  s90: { planId:'s90', label:'3号 90天', days:90, dailyRateBps:120, minUnits:(5000n * A_UNIT).toString(), flexible:false },
+  s60: { planId:'s60', label:'2号 60天', days:60, dailyRateBps:100, minUnits:(1000n * A_UNIT).toString(), flexible:false },
+  s90: { planId:'s90', label:'3号 90天', days:90, dailyRateBps:120, minUnits:(1000n * A_UNIT).toString(), flexible:false },
 });
 
 export function createATokenStakingService({ aTokenService, database, teamService, clock = () => Date.now() }) {
@@ -50,6 +52,8 @@ export function createATokenStakingService({ aTokenService, database, teamServic
   }
 
   function stake(wallet, planId, principalInput) {
+    // 活期质押已于 2026-10-25 下线：存量本金已由后台统一退回，禁止新增
+    if (planId === 'current') throw new Error('活期质押已下线，请选择固定期限质押');
     const plan = planOf(planId);
     const principal = aTokenService.parseA(principalInput, '质押数量');
     if (principal < BigInt(plan.minUnits)) throw new Error(`${plan.label} 最小质押 ${formatUnits(BigInt(plan.minUnits), A_TOKEN_DECIMALS)} A`);
@@ -76,6 +80,9 @@ export function createATokenStakingService({ aTokenService, database, teamServic
     if (principal > 0n) aTokenService.creditA(stake.wallet, principal);
     const granted = principal + grantedInterest;
     if (granted <= 0n) return 0n;
+    // 2026-10-25：质押释放的产出（本金滴灌 + 利息）计入可卖额度——平台上只有这部分 AIX 能挂卖
+    try { db.addATokenSellQuota?.(stake.wallet, granted); }
+    catch (e) { console.warn(`[质押额度] ${stake.wallet} 额度累加失败:`, e?.message || e); }
     const record = { id:rewardId, stakeId:stake.id, wallet:stake.wallet, amountUnits:granted.toString(),
       principalUnits:principal.toString(), interestUnits:grantedInterest.toString(), settledAt, ...detail };
     insertRewardStmt.run(rewardId, stake.id, stake.wallet, granted.toString(), settledAt, JSON.stringify(record));
@@ -165,6 +172,50 @@ export function createATokenStakingService({ aTokenService, database, teamServic
     return target;
   }
 
+  // 活期质押下线退款（2026-10-25）：所有 active 活期质押一次性退本金、标记结清、停止产出。
+  // 不结当日利息（利息此前已日结发完），与 unstake 的区别是不调 settleOne。
+  function refundAllFlexible(now = clock()) {
+    const all = db.listActiveATokenStakes().filter(s => s.planId === 'current');
+    let refunded = 0;
+    let totalUnits = 0n;
+    for (const s of all) {
+      aTokenService.transaction(() => {
+        const principal = BigInt(s.principalUnits);
+        if (principal > 0n) aTokenService.creditA(s.wallet, principal);
+        s.status = 'completed';
+        s.lastSettledAt = now;
+        db.upsertATokenStakeRow(s);
+      });
+      refunded += 1;
+      totalUnits += BigInt(s.principalUnits);
+    }
+    return { refunded, totalUnits: totalUnits.toString(), totalA: formatUnits(totalUnits, A_TOKEN_DECIMALS) };
+  }
+
+  // 全部质押一次性退回（2026-10-25）：所有在架质押（含 30/60/90 天固定档）退还剩余未返还本金、
+  // 标记结清、停止产出。已日结发放的利息不追回；未结算的零头利息不再发放。
+  // 退回的本金不计入可卖额度（可卖额度只来自质押每日释放的产出）。
+  function refundAllStakes(now = clock()) {
+    const all = db.listActiveATokenStakes();
+    let refunded = 0;
+    let totalUnits = 0n;
+    for (const s of all) {
+      let remaining = 0n;
+      aTokenService.transaction(() => {
+        const payment = splitStakePayment(s, s.totalEarnedUnits);
+        remaining = BigInt(s.principalUnits) - payment.principal;
+        if (remaining < 0n) remaining = 0n;
+        if (remaining > 0n) aTokenService.creditA(s.wallet, remaining);
+        s.status = 'completed';
+        s.lastSettledAt = now;
+        db.upsertATokenStakeRow(s);
+      });
+      refunded += 1;
+      totalUnits += remaining;
+    }
+    return { refunded, totalUnits: totalUnits.toString(), totalA: formatUnits(totalUnits, A_TOKEN_DECIMALS) };
+  }
+
   function present(wallet) {
     const stakes = db.listATokenStakes(wallet);
     const now = clock();
@@ -201,5 +252,5 @@ export function createATokenStakingService({ aTokenService, database, teamServic
     });
   }
 
-  return { stake:(...args) => aTokenService.transaction(() => stake(...args)), unstake:(...args) => aTokenService.transaction(() => unstake(...args)), processAll, present, STAKE_PLANS, planOf };
+  return { stake:(...args) => aTokenService.transaction(() => stake(...args)), unstake:(...args) => aTokenService.transaction(() => unstake(...args)), processAll, refundAllFlexible, refundAllStakes, present, STAKE_PLANS, planOf };
 }

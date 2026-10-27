@@ -5,6 +5,7 @@
   "description": "钱包连接、链上 USDT 充值、平台内部现货与永续合约交易及原钱包提现。",
   "type": "module",
   "scripts": {
+    "test:aix-activation": "node test/a-token-aix-activation.test.js && node test/a-token-pro-reporting.test.js && node test/earn-aix-activation.test.js",
     "test:community": "node test/community-links.test.js",
     "test:lottery": "node test/lottery.test.js",
     "test:asset-reporting": "node test/a-token-asset-reporting.test.js",

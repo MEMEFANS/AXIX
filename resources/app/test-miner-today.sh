@@ -1,0 +1,10 @@
+#!/bin/bash
+DB="sqlite3 file:///var/lib/wg-platform/wg-platform.sqlite?mode=ro"
+echo "--- 今日（北京 00:00 = 1792512000000ms）按 plan ---"
+$DB "SELECT plan, COUNT(*) FROM a_token_miners WHERE started_at >= 1792512000000 GROUP BY plan;"
+echo "--- 今日去重钱包 ---"
+$DB "SELECT COUNT(DISTINCT LOWER(wallet)) FROM a_token_miners WHERE started_at >= 1792512000000;"
+echo "--- 昨日全天（对照） ---"
+$DB "SELECT plan, COUNT(*) FROM a_token_miners WHERE started_at >= 1792425600000 AND started_at < 1792512000000 GROUP BY plan;"
+echo "--- 最近 5 条 started_at（单位确认） ---"
+$DB "SELECT datetime(started_at/1000,'unixepoch','+8 hours'), plan FROM a_token_miners ORDER BY started_at DESC LIMIT 5;"

@@ -1,0 +1,6 @@
+{
+  "ok": true,
+  "count": 1,
+  "check": "另一标签存在pending时提供中文恢复入口，重新加载恢复原ID且不重复预扣",
+  "runtimeExceptions": 0
+}

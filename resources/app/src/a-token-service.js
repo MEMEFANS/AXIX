@@ -137,7 +137,7 @@ export function createATokenService({ database, walletService, clock = () => Dat
     const real = db.countConfirmedATokenActivations();
     const cap = Math.max(1, Math.floor(Number(stored.cap)) || 1_000_000);
     const offset = Math.max(0, Math.floor(Number(stored.activatedCountOffset)) || 0);
-    return { cap, activatedCount: real + offset, activatedCountReal: real, updatedAt: stored.updatedAt || null };
+    return { cap: null, unlimited: true, paymentMode: 'aix_balance', legacyCap: cap, activatedCount: real + offset, activatedCountReal: real, updatedAt: stored.updatedAt || null };
   }
   // 后台设置激活进度：activatedCount 传「前台应显示的人数」，内部换算成差值落库
   function setActivationMeta({ cap, activatedCount } = {}) {
@@ -404,8 +404,38 @@ export function createATokenService({ database, walletService, clock = () => Dat
         remaining: formatUnits(BigInt(v.remainingUnits || '0'), A_TOKEN_DECIMALS),
       }])),
     } : null;
+    // 24h 涨跌：现价 vs 24h 前 1h K 线开盘价（真实价格轨迹）。
+    // 不用 recentTrades 当基准：成交回报稀疏且时段不固定，算出来的"24h 涨跌"会与 K 线走势对不上（2026-10-21 事故）。
+    let changePct24h = null;
+    // 24h 最高/最低：近 24h 的 1h K 线 high/low 极值，再并入当前价（最新 bar 可能还没收录最新 tick）。
+    // 2026-10-24 修复：此前 poolStats 根本没返回 todayHigh/todayLow，前端只能兜底显示现价 → 最高/最低永远等于现价。
+    let todayHigh = null, todayLow = null;
+    try {
+      const cutoff = Math.floor(Date.now() / 1000) - 86_400;
+      const hourBars = db.listATokenKlines?.('1h', 26) || [];
+      let ref = 0;
+      for (let i = hourBars.length - 1; i >= 0; i--) {
+        if (Number(hourBars[i].time) <= cutoff) { ref = Number(hourBars[i].open); break; }
+      }
+      if (!(ref > 0) && hourBars.length) ref = Number(hourBars[0].open); // 历史不足 24h 时用最早可得
+      const cur = Number(meta.priceUsdt);
+      if (ref > 0 && cur > 0) changePct24h = (cur - ref) / ref * 100;
+      let hi = 0, lo = 0;
+      for (const bar of hourBars) {
+        if (Number(bar.time) + 3600 <= cutoff) continue; // 与近 24h 窗口不重叠的 bar 跳过
+        const h = Number(bar.high), l = Number(bar.low);
+        if (h > 0 && (hi === 0 || h > hi)) hi = h;
+        if (l > 0 && (lo === 0 || l < lo)) lo = l;
+      }
+      if (cur > 0) { if (hi === 0 || cur > hi) hi = cur; if (lo === 0 || cur < lo) lo = cur; }
+      if (hi > 0) todayHigh = String(hi);
+      if (lo > 0) todayLow = String(lo);
+    } catch { changePct24h = null; }
     return {
       priceUsdt: meta.priceUsdt,
+      changePct24h,
+      todayHigh,
+      todayLow,
       feeRateBps: meta.feeRateBps,
       burnRateBps: meta.burnRateBps,
       dividendRateBps: meta.dividendRateBps,

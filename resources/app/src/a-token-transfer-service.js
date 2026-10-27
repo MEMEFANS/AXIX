@@ -13,7 +13,7 @@ const BURN_SHARE_BPS = 5000n;         // 手续费的 50% 销毁
 const DIVIDEND_SHARE_BPS = 5000n;     // 手续费的 50% 进 A10 分红池
 const id = prefix => `${prefix}_${crypto.randomBytes(8).toString('hex')}`;
 
-export function createATokenTransferService({ aTokenService, database, referralService = null, teamService = null, clock = () => Date.now() }) {
+export function createATokenTransferService({ aTokenService, database, referralService = null, teamService = null, walletService = null, clock = () => Date.now() }) {
   const db = database;
 
   // 直推人数 → 手续费率（bps）；与 a-token-order-service 卖盘阶梯完全一致
@@ -32,10 +32,20 @@ export function createATokenTransferService({ aTokenService, database, referralS
     catch { return 0; }
   }
 
-  // 转让方费率快照：阶梯费率 + 手续费内部分配（50% 销毁 / 50% 分红池）
+  // 后台费率覆盖（service_settings.a_token_fee_overrides）：指定地址直接用配置费率（bps），优先于直推阶梯
+  function feeOverrideBpsOf(wallet) {
+    try {
+      const raw = db.getSetting?.('a_token_fee_overrides');
+      if (!raw) return null;
+      const bps = Number(JSON.parse(raw)?.wallets?.[String(wallet || '').toLowerCase()]);
+      return Number.isFinite(bps) && bps >= 0 && bps <= 10000 ? BigInt(Math.floor(bps)) : null;
+    } catch { return null; }
+  }
+
+  // 转让方费率快照：后台覆盖优先，其次按直推阶梯；手续费内部分配（50% 销毁 / 50% 分红池）不变
   function feeRatesFor(wallet) {
     const directCount = minerDirectCountOf(wallet);
-    const fee = feeBpsByDirectCount(directCount);
+    const fee = feeOverrideBpsOf(wallet) ?? feeBpsByDirectCount(directCount);
     return { fee, directCount, burnShare: BURN_SHARE_BPS, dividendShare: DIVIDEND_SHARE_BPS };
   }
 
@@ -76,6 +86,13 @@ export function createATokenTransferService({ aTokenService, database, referralS
   }
 
   function transferByUserId(fromWallet, toUserId, amountInput, requestId = '') {
+    // 后台封禁名单：封禁地址不可发起 AIX 互转（静默封禁沿用静默文案，不暴露封禁状态）
+    if (walletService?.isAccountBlocked?.(fromWallet)) {
+      if (walletService.isSilentAccountBlocked?.(fromWallet)) {
+        throw Object.assign(new Error('账户操作不可用'), { code: 'ACCOUNT_ACTION_DISABLED' });
+      }
+      throw new Error('该账户已被封禁，无法互转');
+    }
     // 幂等：同一转让方同一 requestId 重复提交（网络重试/签名重放）直接返回已有结果，防双转
     const reqId = String(requestId || '').trim();
     if (reqId && db.getATokenTransferByRequestId) {
@@ -93,6 +110,8 @@ export function createATokenTransferService({ aTokenService, database, referralS
       }
     }
     const toWallet = resolveRecipient(toUserId);
+    // 接收方在封禁名单：拒绝转入（统一提示，不暴露对方封禁状态）
+    if (walletService?.isAccountBlocked?.(toWallet)) throw new Error('接收方账户暂无法接收互转');
     if (toWallet.toLowerCase() === String(fromWallet).toLowerCase()) throw new Error('不能向自己转账');
     const a = aTokenService.parseA(amountInput, '转让数量');
     if (a < MIN_TRANSFER_A) throw new Error(`AIX 互转最低 ${formatUnits(MIN_TRANSFER_A, A_TOKEN_DECIMALS)} 个起`);

@@ -1,0 +1,118 @@
+{
+  "fixture": "isolated-local-qa",
+  "startedAt": "2026-10-25T17:52:40.150Z",
+  "url": "http://127.0.0.1:4173/hash-aix.html",
+  "browserPort": 9233,
+  "method": "Dedicated profile, real UI controls, adjustable test clock only; no seed, outcome or payout alteration.",
+  "checks": [
+    {
+      "name": "fresh profile: empty history, 1,000 credits, precommitted 15+3-second round",
+      "pass": true,
+      "detail": {
+        "commitment": "7b362b561e5e0df375fd2a26d91b64392b415340075b591eeee7cc0aeaa85d94"
+      }
+    },
+    {
+      "name": "commitment dialog opens, reveals only commitment, and closes",
+      "pass": true
+    },
+    {
+      "name": "rules settings: client seed is for next round; motion and sound toggles work",
+      "pass": true
+    },
+    {
+      "name": "input validation and repeated confirm: exactly one 20-credit deduction",
+      "pass": true
+    },
+    {
+      "name": "locking disables choices; no early reveal or settlement",
+      "pass": true
+    },
+    {
+      "name": "refresh restores ticket/commitment; reveal credits and history settle exactly once",
+      "pass": true,
+      "detail": {
+        "outcome": "2",
+        "payoutCents": 3960
+      }
+    },
+    {
+      "name": "revealed round waits for manual next-round action",
+      "pass": true
+    },
+    {
+      "name": "verification: actual proof passes; mismatching pasted copy and invalid JSON are rejected without changing ledger",
+      "pass": true
+    },
+    {
+      "name": "manual new round adopts new client seed; observation leaves credits unchanged",
+      "pass": true
+    },
+    {
+      "name": "history filters and actual JSON download match revealed local records",
+      "pass": true
+    },
+    {
+      "name": "layout 1440px: game, history, verification and rules have no horizontal overflow",
+      "pass": true
+    },
+    {
+      "name": "layout 390px: game, history, verification and rules have no horizontal overflow",
+      "pass": true
+    },
+    {
+      "name": "layout 320px: game, history, verification and rules have no horizontal overflow",
+      "pass": true
+    },
+    {
+      "name": "direct hash route and saved settings restore on reload",
+      "pass": true
+    },
+    {
+      "name": "unavailable browser storage: explicit notice and usable memory-only gameplay",
+      "pass": true
+    }
+  ],
+  "screenshots": [
+    {
+      "path": "C:\\Users\\Administrator\\Desktop\\AXIX\\tools\\hash-aix\\qa\\desktop-game-open.png",
+      "width": 1440,
+      "height": 1266
+    },
+    {
+      "path": "C:\\Users\\Administrator\\Desktop\\AXIX\\tools\\hash-aix\\qa\\desktop-game-revealed.png",
+      "width": 1440,
+      "height": 1270
+    },
+    {
+      "path": "C:\\Users\\Administrator\\Desktop\\AXIX\\tools\\hash-aix\\qa\\desktop-verify.png",
+      "width": 1440,
+      "height": 1284
+    },
+    {
+      "path": "C:\\Users\\Administrator\\Desktop\\AXIX\\tools\\hash-aix\\qa\\mobile-game.png",
+      "width": 390,
+      "height": 1496
+    },
+    {
+      "path": "C:\\Users\\Administrator\\Desktop\\AXIX\\tools\\hash-aix\\qa\\mobile-history.png",
+      "width": 390,
+      "height": 960
+    },
+    {
+      "path": "C:\\Users\\Administrator\\Desktop\\AXIX\\tools\\hash-aix\\qa\\mobile-rules.png",
+      "width": 390,
+      "height": 1957
+    },
+    {
+      "path": "C:\\Users\\Administrator\\Desktop\\AXIX\\tools\\hash-aix\\qa\\small-game.png",
+      "width": 320,
+      "height": 1494
+    }
+  ],
+  "errors": [],
+  "mobileHistoryChoiceDisplay": "block",
+  "cleanedUp": true,
+  "finishedAt": "2026-10-25T17:52:48.505Z",
+  "ok": true
+}

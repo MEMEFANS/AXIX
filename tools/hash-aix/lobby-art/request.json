@@ -1,0 +1,12 @@
+{
+  "type": "image",
+  "model": "gpt-image-2",
+  "input": {
+    "resolution": "2k",
+    "output_format": "png",
+    "aspect_ratio": "16:9",
+    "prompt": "Use case: stylized-concept.\nAsset type: original wide hero illustration for the AIX PLAY game lobby, landscape 16:9. This illustration is the atmosphere behind a real HTML interface, not a mockup.\nPrimary request: a premium space-fantasy arcade destination, a floating midnight-blue observatory island with a beautiful circular lavender portal, a short luminous mint runway leading into it, and a small faceted violet crystal floating beside the entrance. In the distance, a second elevated trail curves towards tiny floating futuristic structures. The scene should feel like the entrance to a coherent world of casual games and cosmic adventures.\nComposition: the hero UI places its heading and two buttons on the LEFT 45 percent, so this area must remain dark, quiet, mostly clean indigo atmosphere with only sparse stars. Compose the beautifully crafted portal and floating island on the RIGHT 55 percent. The subject fits comfortably within the right two-thirds, and the crystal stays clear of the far edges. No giant planet in the left copy area. The lower right runway is visible in perspective. Keep scene legible at mobile width with a crop of the right half.\nStyle: polished original 3D mobile adventure game key art, refined shapes, high material quality, soft bevels and optical crystal, controlled luminous edges, attractive cinematic atmosphere. Dark navy, violet, periwinkle and a small amount of mint light, restrained warm gold accents. Detailed but uncluttered. Deep shadowed architecture, soft ambient light and subtle floating dust. Visually consistent with a premium cosmic crystal observatory, inviting and calm.\nConstraints: no text, no letters, no numbers, no logos, no watermark, no interface, no borders, no coins, no currency symbols, no casino chips, no people, no weapons. No lens flare over the left area, no white sky, no busy neon wireframe. Original artwork, no recognizable copyrighted game environment.",
+    "quality": "high",
+    "output_count": 1
+  }
+}

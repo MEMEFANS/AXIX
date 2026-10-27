@@ -1,0 +1,1 @@
+const fs=require('fs');const d=JSON.parse(fs.readFileSync('tools/team-pro-display-20261019/inspect.json','utf8').replace(/^\uFEFF/,''));const expected={};for(const f of ['src/a-token-team-service.js','src/a-token-admin-api.js','src/server.js'])expected[f]=d.files[f].sha;fs.writeFileSync('tools/team-pro-display-20261019/expected.json',JSON.stringify(expected));

@@ -33,6 +33,10 @@ const MIN_SELL_A = 100n * 10n ** BigInt(A_TOKEN_DECIMALS);
 // ─────────────────────────────────────────────────────────────
 
 const BPS = 10000n;
+// 灰尘阈值：剩余量小于该值即视为「不可再成交的尾差」（挂单列表里会显示为 0）。
+// 注意 decimals：USDT 6 位（0.001 USDT = 1e3）、AIX 18 位（0.001 AIX = 1e15）
+const DUST_A = 10n ** 15n;     // 0.001 AIX
+const DUST_USDT = 10n ** 3n;   // 0.001 USDT
 const makeId = prefix => `${prefix}_${crypto.randomBytes(8).toString('hex')}`;
 
 // 小额轮分布：每 window 次撮合尝试中有 count 次走「小额优先」，用 Bresenham 方式均匀铺开。
@@ -50,10 +54,9 @@ export function createATokenOrderService({ aTokenService, database, teamService,
   const db = database;
 
   // 撮合优先级（价格为主键，买卖价交叉仍是硬性成交条件）：
-  //   买单：同价档内默认「大额优先」（挂单金额大者先成交），金额相同再按挂单时间；
-  //   卖单：同价档内默认按挂单时间先来先成交（不按金额插队，大单小单都优先卖给大额买家）；
-  //   每 SMALL_FIRST_WINDOW 次撮合尝试中有 SMALL_FIRST_COUNT 次改为「小额轮」：
-  //   买、卖都按金额小者优先，让小卖单偶尔配给小买单，避免小单长期排不上。
+  //   买单：同价档内始终「小额优先」（挂单金额小者先成交，金额相同再按挂单时间）——2026-10-23 用户确认
+  //   卖单：同价档内默认按挂单时间先来先成交；
+  //   每 SMALL_FIRST_WINDOW 次撮合尝试中有 SMALL_FIRST_COUNT 次改为「小额轮」，卖单也按金额小者优先。
   const SMALL_FIRST_WINDOW = Math.max(1, Math.floor(Number(matchSmallFirstWindow) || 10));
   const SMALL_FIRST_COUNT = Math.min(SMALL_FIRST_WINDOW, Math.max(0, Math.floor(Number(matchSmallFirstCount) || 0)));
   let matchAttemptSeq = 0;
@@ -77,6 +80,16 @@ export function createATokenOrderService({ aTokenService, database, teamService,
     return FEE_RATE_BPS_DEFAULT;
   }
 
+  // 后台费率覆盖（service_settings.a_token_fee_overrides）：指定地址直接用配置费率（bps），优先于直推阶梯
+  function feeOverrideBpsOf(wallet) {
+    try {
+      const raw = db.getSetting?.('a_token_fee_overrides');
+      if (!raw) return null;
+      const bps = Number(JSON.parse(raw)?.wallets?.[String(wallet || '').toLowerCase()]);
+      return Number.isFinite(bps) && bps >= 0 && bps <= 10000 ? BigInt(Math.floor(bps)) : null;
+    } catch { return null; }
+  }
+
   function minerDirectCountOf(wallet) {
     try { return referralService?.minerDirectCount?.(String(wallet || '').toLowerCase()) ?? 0; }
     catch { return 0; }
@@ -84,9 +97,9 @@ export function createATokenOrderService({ aTokenService, database, teamService,
 
   function feeRates(wallet) {
     const meta = at.getPoolMeta();
-    // 卖方手续费按直推人数阶梯（用户规则）：0~1→50%, 2~3→40%, 4~5→30%, 6~7→20%, 8~9→10%, ≥10→3%
-    // 后台 meta.feeRateBps 不再覆盖（已改为纯阶梯驱动）
-    const fee = feeBpsByDirectCount(minerDirectCountOf(wallet));
+    // 卖方手续费：后台覆盖（a_token_fee_overrides）优先，其次直推阶梯（用户规则）：
+    // 0~1→50%, 2~3→40%, 4~5→30%, 6~7→20%, 8~9→10%, ≥10→3%
+    const fee = feeOverrideBpsOf(wallet) ?? feeBpsByDirectCount(minerDirectCountOf(wallet));
     return {
       fee,
       // 销毁 = 手续费的 50%；A10 池 = 手续费的 50%（不再单设分红池）
@@ -107,6 +120,8 @@ export function createATokenOrderService({ aTokenService, database, teamService,
     }
     if (BigInt(order.input_a_units || '0') > 0n) {
       at.creditA(wallet, BigInt(order.input_a_units));
+      // 撤单返还已占用的可卖额度（旧单未占用过额度时 used 归零，不会凭空发放额度）
+      try { db.refundATokenSellQuota?.(wallet, BigInt(order.input_a_units)); } catch {}
     }
   }
 
@@ -225,7 +240,15 @@ export function createATokenOrderService({ aTokenService, database, teamService,
         throw new Error(`A 币可用余额不足：需 ${formatUnits(a, A_TOKEN_DECIMALS)} A`);
       }
       if (a < MIN_SELL_A) throw new Error(`AIX 卖出最低 ${formatUnits(MIN_SELL_A, A_TOKEN_DECIMALS)} 个起，买入不限制`);
+      // 2026-10-25：只有质押释放的产出（本金滴灌+利息）才可以卖，其他来源的 AIX 不能挂卖
+      const quotaSnapshot = db.getATokenSellQuota(wallet);
+      const quotaAvailable = BigInt(quotaSnapshot.releasedUnits) - BigInt(quotaSnapshot.usedUnits);
+      if (quotaAvailable < a) {
+        const avail = quotaAvailable > 0n ? quotaAvailable : 0n;
+        throw new Error(`可用额度不足：只有质押释放的产出可以卖出，当前可用 ${formatUnits(avail, A_TOKEN_DECIMALS)} AIX`);
+      }
       at.debitA(wallet, a);
+      db.consumeATokenSellQuota(wallet, a);
       inputAUnits = a;
     }
 
@@ -301,9 +324,6 @@ export function createATokenOrderService({ aTokenService, database, teamService,
 
     // 灰尘单清理：剩余量已小到无法再成交任何有效单位（列表里显示 0），
     // 原路退回冻结并关闭订单（CANCELLED），避免永远"挂单中"并每轮产生 0 数量的成交记录。
-    // 注意 decimals：USDT 6 位（0.001 USDT = 1e3）、AIX 18 位（0.001 AIX = 1e15）
-    const DUST_A = 10n ** 15n;     // 0.001 AIX
-    const DUST_USDT = 10n ** 3n;   // 0.001 USDT
     for (const r of openRows) {
       try {
         if (String(r.status || '') !== 'OPEN') continue;
@@ -333,22 +353,21 @@ export function createATokenOrderService({ aTokenService, database, teamService,
         && BigInt(r.input_usdt_units || '0') >= 0n
         && BigInt(r.input_a_units || '0') >= 0n);
 
-      // 本轮是否走「小额优先」：每 SMALL_FIRST_WINDOW 次尝试中有 SMALL_FIRST_COUNT 次
+      // 卖单侧的小额轮：每 SMALL_FIRST_WINDOW 次尝试中有 SMALL_FIRST_COUNT 次
       const smallFirst = smallFirstAt(++matchAttemptSeq, SMALL_FIRST_WINDOW, SMALL_FIRST_COUNT);
       const cmpAmt = (x, y) => (x < y ? -1 : x > y ? 1 : 0);
       const byTime = (a, b) => Number(a.created_at) - Number(b.created_at);
 
-      // 买单：同价档内小额轮按金额小者优先，默认轮按金额大者优先（大额买家先成交）；同金额再按挂单时间
+      // 买单：同价档内始终「小额优先」（金额小者先成交，2026-10-23 用户确认：AIX 优先卖给小额订单），
+      //       同金额再按挂单时间
       const buys = openRows.filter(r => String(r.side) === 'buy' && BigInt(r.input_usdt_units || '0') > 0n)
         .sort((a, b) => {
           const pb = BigInt(b.order_price_usdt_units) - BigInt(a.order_price_usdt_units); // 价高优先
           if (pb !== 0n) return pb > 0n ? 1 : -1;
-          const c = smallFirst
-            ? cmpAmt(BigInt(a.input_usdt_units || '0'), BigInt(b.input_usdt_units || '0'))
-            : cmpAmt(BigInt(b.input_usdt_units || '0'), BigInt(a.input_usdt_units || '0'));
+          const c = cmpAmt(BigInt(a.input_usdt_units || '0'), BigInt(b.input_usdt_units || '0'));
           return c !== 0 ? c : byTime(a, b);
         });
-      // 卖单：同价档内默认轮按挂单时间先来先成交（大单小单都优先卖给大额买家，金额大小都不插队）；
+      // 卖单：同价档内默认轮按挂单时间先来先成交（不按金额插队）；
       //       小额轮按金额小者优先（小卖单优先配小买单）
       const sells = openRows.filter(r => String(r.side) === 'sell' && BigInt(r.input_a_units || '0') > 0n)
         .sort((a, b) => {
@@ -491,9 +510,10 @@ export function createATokenOrderService({ aTokenService, database, teamService,
       payload: { source: 'p2p_match', matchGroupId: groupId, orderId: sellRaw.id, counterOrderId: buyRaw.id, priceUsdt: priceStr },
     });
 
-    // 更新两张订单的剩余冻结额度；耗尽则标记 FILLED
-    const buyDone = buyRemainAfter <= 0n;
-    const sellDone = sellAfterFinal <= 0n;
+    // 更新两张订单的剩余冻结额度；剩余量低于灰尘阈值即视为该单已完成（尾差原路退回），
+    // 否则最后一点点尾差会留成"挂单中"，下一轮被灰尘清理误标记为「已撤单」
+    const buyDone = buyRemainAfter < DUST_USDT;
+    const sellDone = sellAfterFinal < DUST_A;
     db.updateATokenOrderInputs(buyRaw.id, {
       inputUsdtUnits: buyDone ? '0' : buyRemainAfter.toString(),
       inputAUnits: '0', updatedAt: now,
@@ -504,11 +524,13 @@ export function createATokenOrderService({ aTokenService, database, teamService,
       updatedAt: now,
     });
     if (buyDone) {
+      if (buyRemainAfter > 0n) at.creditUsdt(bWallet, buyRemainAfter);   // 尾差（灰尘）原路退回
       db.markATokenOrderFilled(buyRaw.id, {
         fillPriceUsdtUnits: execPrice.toString(), fillTradeId: groupId, filledAt: now, updatedAt: now,
       });
     }
     if (sellDone) {
+      if (sellAfterFinal > 0n) at.creditA(sWallet, sellAfterFinal);       // 尾差（灰尘）原路退回
       db.markATokenOrderFilled(sellRaw.id, {
         fillPriceUsdtUnits: execPrice.toString(), fillTradeId: groupId, filledAt: now, updatedAt: now,
       });
@@ -812,15 +834,31 @@ export function createATokenOrderService({ aTokenService, database, teamService,
     };
   }
 
-  // 卖出手续费档案：当前钱包的阶梯费率 + 激活矿机的直推人数（供报价/前端展示）
+  // 卖出手续费档案：后台覆盖优先，其次阶梯费率 + 激活矿机的直推人数（供报价/前端展示）
   function sellFeeProfile(wallet) {
     const directCount = minerDirectCountOf(wallet);
-    const fee = feeBpsByDirectCount(directCount);
+    const fee = feeOverrideBpsOf(wallet) ?? feeBpsByDirectCount(directCount);
     return { feeRateBps: Number(fee), feePct: (Number(fee) / 100).toFixed(0) + '%', directCount };
+  }
+
+  // 可卖额度（2026-10-25）：只有质押释放的产出可以卖；挂单占用、撤单返还
+  function sellQuota(wallet) {
+    const q = db.getATokenSellQuota(String(wallet || '').toLowerCase());
+    const released = BigInt(q.releasedUnits);
+    const used = BigInt(q.usedUnits);
+    const available = released > used ? released - used : 0n;
+    return {
+      released: formatUnits(released, A_TOKEN_DECIMALS),
+      used: formatUnits(used, A_TOKEN_DECIMALS),
+      available: formatUnits(available, A_TOKEN_DECIMALS),
+      releasedUnits: released.toString(),
+      usedUnits: used.toString(),
+      availableUnits: available.toString(),
+    };
   }
 
   return {
     placeOrder, cancelOrder, myOrders,
-    quoteLimitOrder, matchOpenOrders, orderbook, openOrders, depth, stats, myLocks, sellFeeProfile,
+    quoteLimitOrder, matchOpenOrders, orderbook, openOrders, depth, stats, myLocks, sellFeeProfile, sellQuota,
   };
 }

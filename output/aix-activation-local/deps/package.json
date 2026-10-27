@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "ethers": "^6.17.0",
+    "puppeteer": "^24.43.1",
+    "undici": "^6.29.1",
+    "zod": "^3.25.76"
+  }
+}

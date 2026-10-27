@@ -158,6 +158,17 @@
     el('aim-day-earned').textContent = `+${earn(next.dayEarned)} USDT`;
     el('aim-total-earned').textContent = `+${earn(next.totalEarned)} USDT`;
     el('aim-available').textContent = `可用余额 ${money(next.availableBalance)} USDT`;
+    const quotaEl = el('aim-quota');
+    if (quotaEl) {
+      const q = next.withdrawQuota;
+      if (q) {
+        quotaEl.style.display = '';
+        quotaEl.textContent = `提现额度：可用 ${money(q.available)} USDT · 已解锁 ${money(q.unlocked)} · 已用 ${money(q.used)}（跟单本金 30 天线性解锁，每日 00:00 释放 1/30）`;
+      } else {
+        quotaEl.style.display = 'none';
+        quotaEl.textContent = '';
+      }
+    }
     const vipCard = el('aim-vip-card');
     if (vipCard) {
       const expireDate = next.unlockExpiresAt ? new Date(next.unlockExpiresAt).toLocaleDateString('zh-CN') : '';

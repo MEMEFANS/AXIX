@@ -64,6 +64,13 @@
             <div class="awd-quote-row"><span>✅ 对方实收</span><b id="at-q-net" style="color:#50d2c2">0 AIX</b></div>
           </div>
           <button id="at-submit" class="awd-submit" style="background:linear-gradient(135deg,#f26c78,#c8324a)">⚠️ 确认互转（手续费由您承担）</button>
+          <div style="margin-top:14px;border-top:1px solid #1c2a28;padding-top:10px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px">
+              <span style="font-size:12px;color:#9fb0ad;font-weight:600">最近互转记录</span>
+              <a href="javascript:void(0)" id="at-history-all" style="font-size:11px;color:#50d2c2;text-decoration:none">全部记录 →</a>
+            </div>
+            <div id="at-history"></div>
+          </div>
         </div>
       </div>`;
     document.body.appendChild(modal);
@@ -71,6 +78,11 @@
     modal.querySelector('#at-amount').addEventListener('input', refreshFee);
     modal.querySelectorAll('.at-pct').forEach(b => b.addEventListener('click', () => fillPct(b.dataset.pct)));
     modal.querySelector('#at-submit').addEventListener('click', submit);
+    modal.querySelector('#at-history-all').addEventListener('click', () => {
+      close();
+      if (typeof switchTab === 'function') switchTab('account');
+      setTimeout(() => window.ExchangeAssets?.setView('records'), 800);
+    });
     return modal;
   }
 
@@ -94,10 +106,18 @@
     if ($('at-q-net')) $('at-q-net').textContent = fmtA(net) + ' AIX';
   }
 
+  function amountUnits(value) {
+    const match = /^(\d+)(?:\.(\d{0,18}))?$/.exec(String(value || '').trim());
+    if (!match) throw new Error('请输入有效的 AIX 数量（最多 18 位小数）');
+    return BigInt(match[1]) * 10n ** 18n + BigInt((match[2] || '').padEnd(18, '0'));
+  }
+
   function fillPct(pct) {
-    const bal = Number(window.__atTransferBalanceA || 0);
-    const amt = bal * (Number(pct) / 100);
-    if ($('at-amount')) $('at-amount').value = amt > 0 ? (Math.floor(amt * 1e8) / 1e8).toString() : '0';
+    const units = amountUnits(window.__atTransferBalanceA || '0') * BigInt(pct) / 100n;
+    // Truncate to eight display decimals without rounding above the ledger balance.
+    const ticks = units / 10n ** 10n;
+    const fraction = (ticks % 100000000n).toString().padStart(8, '0').replace(/0+$/, '');
+    if ($('at-amount')) $('at-amount').value = (ticks / 100000000n).toString() + (fraction ? '.' + fraction : '');
     refreshFee();
   }
 
@@ -106,7 +126,7 @@
     try {
       const prof = await api('/api/a-token/profile');
       window.__atTransferMyUid = prof?.userId || '';
-      window.__atTransferBalanceA = Number(prof?.balances?.A || 0);
+      window.__atTransferBalanceA = String(prof?.balances?.A || '0');
       if ($('at-balance')) $('at-balance').textContent = fmtA(window.__atTransferBalanceA) + ' AIX';
     } catch {
       window.__atTransferMyUid = '';
@@ -140,8 +160,8 @@
       const n = Number(amt);
       if (!Number.isFinite(n) || n <= 0) { setStatus('请输入有效的 AIX 数量', 'error'); return; }
       if (n < 20) { setStatus('AIX 互转最低 20 个起', 'error'); return; }
-      const bal = Number(window.__atTransferBalanceA || 0);
-      if (n > bal) { setStatus(`AIX 余额不足 · 当前可用 ${fmtA(bal)} AIX`, 'error'); return; }
+      const bal = window.__atTransferBalanceA || '0';
+      if (amountUnits(amt) > amountUnits(bal)) { setStatus(`AIX 余额不足 · 当前可用 ${fmtA(bal)} AIX`, 'error'); return; }
       setStatus('正在提交...', 'info');
       // 钱包签名确认互转（签名绑定幂等编号，后端按编号幂等防重放/双转）
       if (!connectedProvider || !connectedWalletAddress) { setStatus('请先连接钱包', 'error'); return; }
@@ -166,12 +186,46 @@
       if ($('at-amount')) $('at-amount').value = '';
       refreshFee();
       await loadProfileIntoModal();
+      loadHistory();
       if (typeof loadWalletProfile === 'function') loadWalletProfile();
     } catch (e) {
       if (Number(e?.code) === 4001 || /denied|rejected|cancel/i.test(e?.message || '')) { setStatus('已取消互转', 'info'); return; }
-      setStatus(e.message?.includes('请') ? e.message : '互转失败，请重试', 'error');
+      setStatus(e.message || '互转失败，请重试', 'error');
     } finally {
       if (btn) btn.disabled = false;
+    }
+  }
+
+  // ── 最近互转记录（/api/a-token/my-transfers 最近 5 条）：互转弹窗内直接看 ──
+  function shortAddr(a) { return a ? `${String(a).slice(0, 6)}…${String(a).slice(-4)}` : '—'; }
+  function historyEmpty(text) { return `<div style="font-size:11px;color:#6b7f7c;padding:8px 0">${text}</div>`; }
+  function historyRow(t) {
+    const out = t.direction === 'out';
+    const when = new Date(Number(t.createdAt) || 0).toLocaleString('zh-CN', { hour12: false, timeZone: 'Asia/Shanghai', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+    // 转出展示总额（自担手续费），转入按净额到账
+    const amt = fmtA(out ? t.amount : (t.payload?.net ?? t.amount));
+    const who = out ? ('ID ' + escapeHtml(t.toUserId || '')) : shortAddr(t.counterparty);
+    return `<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 0;border-top:1px dashed #1c2a28;font-size:12px">
+      <span style="display:flex;align-items:center;gap:6px;min-width:0;overflow:hidden">
+        <span class="aix-tf-badge ${out ? 'out' : 'in'}">${out ? '转出' : '转入'}</span>
+        <span style="color:#c6d4d1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${who}</span>
+        <span style="color:#6b7f7c;white-space:nowrap">${when}</span>
+      </span>
+      <b style="color:${out ? '#f26c78' : '#50d2c2'};white-space:nowrap">${out ? '−' : '+'}${amt} AIX</b>
+    </div>`;
+  }
+  async function loadHistory() {
+    const host = $('at-history');
+    if (!host) return;
+    if (!window.currentWalletProfile?.authenticated) { host.innerHTML = historyEmpty('连接钱包后可查看互转记录'); return; }
+    host.innerHTML = historyEmpty('加载中…');
+    try {
+      const data = await api('/api/a-token/my-transfers');
+      const list = Array.isArray(data?.transfers) ? data.transfers : [];
+      if (!list.length) { host.innerHTML = historyEmpty('暂无互转记录'); return; }
+      host.innerHTML = list.slice(0, 5).map(historyRow).join('');
+    } catch {
+      host.innerHTML = historyEmpty('记录加载失败，请重试');
     }
   }
 
@@ -187,6 +241,7 @@
       return;
     }
     await loadProfileIntoModal();
+    loadHistory();
   }
 
   function close() {

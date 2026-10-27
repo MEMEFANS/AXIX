@@ -2,7 +2,7 @@
 (() => {
   const scripts = new Map(), pages = new Map(), ready = new Set();
   const version = '20261011-pages-1';
-  const versions = { 'support-chat':'20261011-security-2', 'a-token-trade':'20261017-min100-1', 'a-token-transfer':'20261017-rules-1', 'platform-client':'20261012-assets-1', assets:'20261015-balance-1', 'wallet-funds':'20261017-rules-1', 'ai-managed':'20261015-balance-1' };
+  const versions = { 'support-chat':'20261011-security-2', 'a-token-trade':'20261026-quota-label-1', 'a-token-transfer':'20261021-records-1', 'platform-client':'20261012-assets-1', assets:'20261027-refresh-1', 'wallet-funds':'20261024-depbal-3', 'ai-managed':'20261025-wquota-1' };
   const js = name => `/js/${name}.js?v=${versions[name] || version}`;
   const chart = '/vendor/lightweight-charts.js?v=1';
   const deps = {

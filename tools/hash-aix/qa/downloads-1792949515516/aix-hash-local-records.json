@@ -1,0 +1,52 @@
+{
+  "kind": "local-simulation",
+  "exportedAt": "2026-10-25T17:32:01.635Z",
+  "records": [
+    {
+      "version": 1,
+      "kind": "local-simulation",
+      "id": "local-2-019ce5d40807",
+      "nonce": 2,
+      "clientSeed": "isolated-QA-browser-v1",
+      "seed": "68f25022f90e958fc74ab2300a89af2680f3d4e6ef85cf74b51be68345ad6fe8",
+      "commitment": "019ce5d408075b7b211dd3ddcf3e2f3b01b51bd4df32e60f839fbb6beff16072",
+      "createdAt": 1792949593901,
+      "closesAt": 1792949608901,
+      "revealsAt": 1792949611901,
+      "choice": null,
+      "stakeCents": 0,
+      "status": "revealed",
+      "revealedAt": 1792949611901,
+      "hash": "c3481585aa0698d7a8bb9461ee3459dfd7865123495017900c80d5f55cdfdb7f",
+      "digit": 15,
+      "hexDigit": "f",
+      "won": null,
+      "payoutCents": 0,
+      "netCents": 0,
+      "payoutMultiplier": 1.98
+    },
+    {
+      "version": 1,
+      "kind": "local-simulation",
+      "id": "local-1-f0bdc183ea8a",
+      "nonce": 1,
+      "clientSeed": "AIX-starlight",
+      "seed": "c3e3c64933080d3bee49f25fa220b5d0d9a8b380c7d68cec5c5b9c6b54565d6d",
+      "commitment": "f0bdc183ea8abdc90f83ed0089fe96877d9d8169aa79321c7c42595f3401a883",
+      "createdAt": 1792949515901,
+      "closesAt": 1792949530901,
+      "revealsAt": 1792949533901,
+      "choice": "even",
+      "stakeCents": 1000,
+      "status": "revealed",
+      "revealedAt": 1792949533901,
+      "hash": "805b707e9a07b51641e32aa89f7f7acbc32bed8792235ee894c3cbbb36d9c6ed",
+      "digit": 13,
+      "hexDigit": "d",
+      "won": false,
+      "payoutCents": 0,
+      "netCents": -1000,
+      "payoutMultiplier": 1.98
+    }
+  ]
+}

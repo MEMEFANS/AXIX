@@ -1,0 +1,1 @@
+{"passed": 7, "tests": {"a-token-pro-reporting.test.js": true, "a-token-pro-rotation-reporting.test.js": true, "a-token-pro-recipient.test.js": true, "a-token-reconcile.test.js": true, "a-token-team-loading.test.js": true, "a-token-ecosystem.test.js": true, "a-token-income.test.js": true}}

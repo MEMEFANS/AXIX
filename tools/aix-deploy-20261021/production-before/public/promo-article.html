@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>AxiX 平台长文介绍</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { width:1080px; font-family:"Microsoft YaHei","PingFang SC",sans-serif; color:#b9cbc7;
+    background:
+      radial-gradient(900px 600px at 50% 0%, rgba(79,209,181,.12), transparent 55%),
+      linear-gradient(175deg,#07100f 0%,#0a1112 40%,#081211 100%);
+    padding:0 0 90px; position:relative; }
+  .wm { position:absolute; inset:0; display:flex; align-items:flex-start; justify-content:center;
+    font-size:200px; font-weight:900; letter-spacing:20px; color:rgba(79,209,181,.035); pointer-events:none; line-height:1; padding-top:120px; }
+  .head { padding:70px 90px 0; }
+  .brandbar { display:flex; align-items:center; gap:18px; }
+  .brandbar img { width:64px; height:64px; border-radius:15px; box-shadow:0 0 26px rgba(79,209,181,.4); }
+  .brandbar .b { font-size:30px; font-weight:900; color:#eaf6f3; }
+  .brandbar .b i { font-style:normal; color:#4fd1b5; }
+  .title { margin-top:80px; }
+  .kicker { font-size:26px; letter-spacing:12px; color:#7fe6d3; font-weight:800; }
+  h1 { margin-top:26px; font-size:76px; line-height:1.45; font-weight:900; color:#eaf6f3; }
+  h1 em { font-style:normal; background:linear-gradient(100deg,#8ff0dc,#4fd1b5);
+    -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .lede { margin-top:44px; font-size:29px; line-height:2; color:#8fa9a3; }
+  .art { padding:0 90px; position:relative; }
+  .sec { margin-top:90px; }
+  .secnum { font-size:100px; font-weight:900; line-height:1; color:transparent;
+    -webkit-text-stroke:2px rgba(79,209,181,.5); }
+  .sec h2 { margin-top:18px; font-size:44px; font-weight:900; color:#eaf6f3; letter-spacing:2px; }
+  .sec h2 em { font-style:normal; color:#4fd1b5; }
+  .sec p { margin-top:28px; font-size:27px; line-height:2.05; }
+  .sec p b { color:#4fd1b5; font-weight:800; }
+  .pull { margin-top:34px; border-left:6px solid #4fd1b5; background:rgba(79,209,181,.06);
+    border-radius:0 18px 18px 0; padding:30px 36px; font-size:27px; line-height:1.95; color:#c9ded9; font-weight:700; }
+  .pull b { color:#4fd1b5; }
+  .list { margin-top:30px; display:flex; flex-direction:column; gap:18px; }
+  .li { display:flex; gap:18px; font-size:26px; line-height:1.8; }
+  .li::before { content:""; flex:0 0 13px; height:13px; border-radius:50%; margin-top:16px;
+    background:linear-gradient(135deg,#8ff0dc,#4fd1b5); box-shadow:0 0 10px rgba(79,209,181,.6); }
+  .li b { color:#4fd1b5; }
+  .numrow { margin-top:36px; display:flex; gap:22px; }
+  .nc { flex:1; text-align:center; background:linear-gradient(180deg,#101b1d,#0c1517);
+    border:1px solid #29413e; border-radius:20px; padding:34px 10px 28px; }
+  .nc .v { font-size:64px; font-weight:900; color:#4fd1b5; line-height:1; text-shadow:0 0 34px rgba(79,209,181,.45); }
+  .nc .v small { font-size:28px; }
+  .nc .t { margin-top:12px; font-size:22px; color:#7d9691; }
+  .stat3 { margin-top:36px; background:linear-gradient(180deg,rgba(79,209,181,.08),rgba(79,209,181,.02));
+    border:2px solid #2b6157; border-radius:24px; padding:38px 42px; text-align:center; }
+  .stat3 .t { font-size:30px; font-weight:900; color:#eaf6f3; }
+  .stat3 .t em { font-style:normal; color:#4fd1b5; }
+  .stat3 .s { margin-top:16px; font-size:24px; line-height:1.9; color:#a9bfb9; }
+  .stat3 .s b { color:#4fd1b5; }
+  .stat3 .n { margin-top:22px; font-size:19px; color:#5f7a73; line-height:1.7; }
+  .end { margin-top:100px; text-align:center; padding:0 60px; }
+  .end .q { font-size:40px; font-weight:900; line-height:1.8; color:#eaf6f3; }
+  .end .q b { color:#4fd1b5; }
+  .end .s { margin-top:20px; font-size:24px; color:#7d9691; }
+  .btn { display:inline-block; margin-top:48px; font-size:42px; font-weight:900; color:#04211b; letter-spacing:8px;
+    background:linear-gradient(135deg,#8ff0dc,#4fd1b5); border-radius:999px; padding:30px 110px;
+    box-shadow:0 20px 60px rgba(79,209,181,.35); }
+  .foot { margin-top:52px; text-align:center; font-size:21px; color:#3d5a53; letter-spacing:5px; line-height:2; }
+</style>
+</head>
+<body>
+<div class="wm">AXIX</div>
+
+<div class="head">
+  <div class="brandbar">
+    <img src="assets/brand/logo.png" alt="AxiX">
+    <div class="b">Axi<i>X</i> Exchange · 平台介绍</div>
+  </div>
+  <div class="title">
+    <div class="kicker">AXIX INSIGHT</div>
+    <h1>把机构级的交易方法论，<br>装进<em>每个人的钱包</em></h1>
+    <div class="lede">加密市场从来不缺机会，缺的是把专业能力真正交到普通用户手里的产品。这一篇，讲清楚 AxiX Exchange 是什么、凭什么、怎么玩。</div>
+  </div>
+</div>
+
+<div class="art">
+  <div class="sec">
+    <div class="secnum">01</div>
+    <h2>普通用户的<em>两个老问题</em></h2>
+    <p>过去几年，普通人参与数字资产只有两条路：要么自己学交易、天天盯盘，门槛高、时间成本大；要么把钱交给一个看不见后台的平台——收益怎么来的不知道，出金要看脸色。</p>
+    <p>与此同时，机构的世界是另一番景象：<b>信号驱动、严格风控、多策略并行</b>。方法论早就在那里，只是从来没有人认真地把它"向下兼容"给普通用户。</p>
+    <div class="pull">AxiX 想做的，就是把机构世界的那套打法，<b>原封不动地搬进每个人的钱包</b>。</div>
+  </div>
+
+  <div class="sec">
+    <div class="secnum">02</div>
+    <h2>AxiX Exchange <em>是什么</em></h2>
+    <p>AxiX 是部署在 <b>BNB Smart Chain</b> 上的一站式数字资产平台，钱包直连、无需注册，五大板块一个账户全部打通：</p>
+    <div class="list">
+      <div class="li"><span><b>交易市场</b> —— 现货、永续合约、AIX/USDT 三大交易区，币安级实时行情，专业 K 线与订单簿</span></div>
+      <div class="li"><span><b>AIX 生态</b> —— 算力矿机每日产出直达钱包，四档质押每日收益结算，长期持有通缩资产</span></div>
+      <div class="li"><span><b>合约跟单</b> —— 机构信号驱动自动开平仓，策略胜率公开，收益定时结算，USDT 随时赎回</span></div>
+      <div class="li"><span><b>团队体系</b> —— 直推好友跟单收益 10% 永久分成，团队级差 A1~A10，A10 均分手续费分红池</span></div>
+      <div class="li"><span><b>移动端</b> —— 手机全页面适配，7 国语言，随时随地交易管理</span></div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="secnum">03</div>
+    <h2>机构方法论的<em>底气</em></h2>
+    <p>AxiX 合约跟单的策略框架，参考自 <b>Aethon Fund</b> —— 2026 年 7 月正式启动的 AI 对冲基金，初始资本 <b>5000 万美元</b>，获 BusinessWire、Hedgeweek 等权威媒体报道。其创始团队深耕信号研究 <b>20 年</b>，前身 Prospero.ai 的前瞻选股组合自 2022 年以来，以实盘可跟踪的收益曲线<b>跑赢 S&amp;P 500 指数 7.5 倍</b>。</p>
+    <p>更重要的是透明：跟单页面上，<b>策略明细与历史胜率全部公开</b>——跟谁、怎么跟、历史表现如何，一目了然；每个周期的收益结算都记录在案，可回查、可对账。</p>
+    <div class="stat3">
+      <div class="t">AxiX <em>×</em> Aethon Fund</div>
+      <div class="s">合作性质为<b>策略方法论与风控框架参考（Methodology Reference）</b><br>不构成投资关联，用户参与的是 AxiX 平台内的合约跟单</div>
+      <div class="n">消息来源：BusinessWire 官方新闻稿（2026-07-14）· Hedgeweek · FinTech Global</div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="secnum">04</div>
+    <h2>AIX：把通缩<em>写进每一笔交易</em></h2>
+    <p>平台代币 AIX 的价值逻辑不靠讲故事，靠<b>机制</b>：</p>
+    <div class="list">
+      <div class="li"><span>每笔 AIX 卖出手续费，<b>50% 当场销毁</b>——流通量只减不增</span></div>
+      <div class="li"><span>另外 <b>50% 进入 A10 分红池</b>，每日 00:00 自动结算给 A10 级别持有者</span></div>
+      <div class="li"><span><b>算力矿机</b>：两档规格（100 / 1500 AIX），激活后每日产出直达钱包</span></div>
+      <div class="li"><span><b>质押</b>：活期 0.30%/日 至 90 天 1.20%/日，AIX 与收益每日到账，定期到期结清</span></div>
+    </div>
+    <p>交易越多，销毁越多，分红池越大——这是一个<b>自我强化的循环</b>，也是 AIX 长期价值的锚。</p>
+  </div>
+
+  <div class="sec">
+    <div class="secnum">05</div>
+    <h2>三个数字，<em>看平台诚意</em></h2>
+    <div class="numrow">
+      <div class="nc"><div class="v">0</div><div class="t">提现手续费<br>提多少到多少</div></div>
+      <div class="nc"><div class="v">10<small>U</small></div><div class="t">提现门槛<br>低门槛灵活出金</div></div>
+      <div class="nc"><div class="v">7×24</div><div class="t">行情不间断<br>币安级数据源</div></div>
+    </div>
+    <p>充值链上自动入金，提现链上可查。所有收益规则——矿机产出、质押利率、费率阶梯——<b>全部明码标价写进机制</b>，不玩黑箱。</p>
+  </div>
+
+  <div class="sec">
+    <div class="secnum">06</div>
+    <h2>三步，<em>现在就开始</em></h2>
+    <div class="list">
+      <div class="li"><span><b>连接钱包</b> —— OKX / MetaMask 等主流 Web3 钱包一键登录，无需注册</span></div>
+      <div class="li"><span><b>充值 USDT</b> —— BNB Smart Chain 链上到账，自动入金</span></div>
+      <div class="li"><span><b>开始参与</b> —— 现货、合约、矿机、质押、跟单，任你组合</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="end">
+  <div class="q">不承诺一夜暴富，<br>只提供<b>每一分收益都查得到出处</b>的平台。</div>
+  <div class="s">真实机制 · 真实数据 · 真实链上记录</div>
+  <div class="btn">立即体验 AxiX</div>
+  <div class="foot">AXIX EXCHANGE · BNB SMART CHAIN<br>本文不构成任何投资建议，数字资产有风险，参与需谨慎</div>
+</div>
+</body>
+</html>

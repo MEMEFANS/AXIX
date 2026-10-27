@@ -7,26 +7,118 @@ const USDT_DECIMALS = 6;
 const A = (n) => BigInt(n) * 10n ** BigInt(A_TOKEN_DECIMALS);
 
 // A1-A10 等级常量：个人持有门槛 + 团队持有门槛 + 级差收益比例(bps)
+// 2026-10-24 用户确认：级差每档 10% → 8.8%（880bps × 档级），A9 封顶 79.2%
 const TEAM_LEVELS = [
-  { level: 1,  personalHeld: 1000,    teamHeld: 5000,        rateBps: 1000, label: 'A1' },
-  { level: 2,  personalHeld: 2000,    teamHeld: 10000,       rateBps: 2000, label: 'A2' },
-  { level: 3,  personalHeld: 4000,    teamHeld: 50000,       rateBps: 3000, label: 'A3' },
-  { level: 4,  personalHeld: 8000,    teamHeld: 100000,      rateBps: 4000, label: 'A4' },
-  { level: 5,  personalHeld: 16000,   teamHeld: 500000,      rateBps: 5000, label: 'A5' },
-  { level: 6,  personalHeld: 32000,   teamHeld: 1000000,     rateBps: 6000, label: 'A6' },
-  { level: 7,  personalHeld: 64000,   teamHeld: 5000000,     rateBps: 7000, label: 'A7' },
-  { level: 8,  personalHeld: 128000,  teamHeld: 10000000,    rateBps: 8000, label: 'A8' },
-  { level: 9,  personalHeld: 256000,  teamHeld: 50000000,    rateBps: 9000, label: 'A9' },
-  { level: 10, personalHeld: 500000,  teamHeld: 100000000,   rateBps: 10000, label: 'A10 享受交易手续费分红' },
+  { level: 1,  personalHeld: 1000,    teamHeld: 5000,        rateBps: 880, label: 'A1' },
+  { level: 2,  personalHeld: 2000,    teamHeld: 10000,       rateBps: 1760, label: 'A2' },
+  { level: 3,  personalHeld: 4000,    teamHeld: 50000,       rateBps: 2640, label: 'A3' },
+  { level: 4,  personalHeld: 8000,    teamHeld: 100000,      rateBps: 3520, label: 'A4' },
+  { level: 5,  personalHeld: 16000,   teamHeld: 500000,      rateBps: 4400, label: 'A5' },
+  { level: 6,  personalHeld: 32000,   teamHeld: 1000000,     rateBps: 5280, label: 'A6' },
+  { level: 7,  personalHeld: 64000,   teamHeld: 5000000,     rateBps: 6160, label: 'A7' },
+  { level: 8,  personalHeld: 128000,  teamHeld: 10000000,    rateBps: 7040, label: 'A8' },
+  { level: 9,  personalHeld: 256000,  teamHeld: 50000000,    rateBps: 7920, label: 'A9' },
+  { level: 10, personalHeld: 500000,  teamHeld: 100000000,   rateBps: 8800, label: 'A10 享受交易手续费分红' },
 ];
 
 const DIRECT_RATE_BPS = 1500n;   // 直推 15%
 const INDIRECT_RATE_BPS = 1000n; // 间推 10%
 const PARITY_RATE_BPS = 1000n;    // 平级 10%
 
-export function createATokenTeamService({ database, walletService }) {
+export function createATokenTeamService({ database, walletService, rotationAddresses = '', rotationHideViewers = '', reportingExclusions = null }) {
   const transaction = createAixTransaction(database, walletService);
   const k = (v) => String(v || '').toLowerCase();
+  // 轮换收款地址（逗号分隔，含套餐专属格式 '2:0x..'）用于展示统计排除：
+  // 只对链上收款地址生效、不计入上级看到的「激活矿机数」台数；未配置则不隐藏。
+  const hiddenRotationSet = new Set(String(rotationAddresses || '').split(',')
+    .map(entry => k(String(entry).split(':').pop().trim()))
+    .filter(addr => /^0x[0-9a-f]{40}$/.test(addr)));
+  // 需要隐去轮换激活统计的查看者（逗号分隔）：这些地址本人查看团队页时，
+  // 其整棵下级里经轮换收款地址确认的激活不计入「团队激活矿机」；其他查看者不受影响。
+  if (reportingExclusions !== null && (!Array.isArray(reportingExclusions.transactionHashes) || !Array.isArray(reportingExclusions.viewers)
+    || !reportingExclusions.transactionHashes.every(hash => /^0x[0-9a-f]{64}$/i.test(hash))
+    || !reportingExclusions.viewers.every(addr => /^0x[0-9a-f]{40}$/i.test(addr)))) {
+    throw new Error('Invalid Pro reporting exclusions configuration');
+  }
+  if (reportingExclusions?.collectionAddresses !== undefined &&
+      (!Array.isArray(reportingExclusions.collectionAddresses) ||
+       !reportingExclusions.collectionAddresses.every(addr => /^0x[0-9a-f]{40}$/i.test(addr)))) {
+    throw new Error('Invalid Pro reporting collection addresses');
+  }
+  const reportingCollections = new Set((reportingExclusions?.collectionAddresses || []).map(k));
+  const reportingTxs = reportingExclusions === null ? null : new Set(reportingExclusions.transactionHashes.map(k));
+  const reportingViewers = reportingExclusions === null ? rotationHideViewers : reportingExclusions.viewers.join(',');
+  const hiddenViewerSet = new Set(String(reportingViewers || '').split(',')
+    .map(addr => k(String(addr).trim()))
+    .filter(addr => /^0x[0-9a-f]{40}$/.test(addr)));
+  // 轮换地址确认激活归属钱包（lower(wallet) -> {mini,pro}，每笔对应一台矿机）。
+  // 激活会持续新增，故带 TTL 缓存，避免每次请求都按收款地址回查。
+  const HIDDEN_ACTIVATION_TTL = 30_000;
+  let _hiddenActByWallet = null;
+  let _hiddenActBuiltAt = 0;
+  function hiddenActivationsByWallet() {
+    const now = Date.now();
+    if (_hiddenActByWallet && now - _hiddenActBuiltAt < HIDDEN_ACTIVATION_TTL) return _hiddenActByWallet;
+    const map = new Map();
+    // A verified transaction list overrides the expected collection address stored at submit time.
+    if (reportingTxs) {
+      const proWallets = database.listATokenMinerWalletsByPlan('pro1500');
+      const include = row => {
+        if (row?.status !== 'confirmed' || String(row.plan) !== '2' || row.paymentAsset === 'AIX' || !proWallets.has(k(row.wallet))) return;
+        const hasBnbMiner = database.listATokenMiners(row.wallet).some(miner =>
+          miner.plan === 'pro1500' && !String(miner.activationId || '').startsWith('ata_aix_'));
+        if (hasBnbMiner) map.set(k(row.wallet), { mini: 0, pro: 1 });
+      };
+      for (const hash of reportingTxs) include(database.getATokenActivationByTx(hash));
+      // New payments join the historical list only when their actual chain recipient was verified.
+      for (const address of reportingCollections) {
+        for (const row of database.listConfirmedATokenActivationsByCollection?.(address) || []) {
+          if (k(row.payload?.verifiedCollectionAddress) === address) include(row);
+        }
+      }
+      _hiddenActByWallet = map;
+      _hiddenActBuiltAt = now;
+      return map;
+    }
+    for (const addr of hiddenRotationSet) {
+      for (const row of database.listConfirmedATokenActivationsByCollection?.(addr) || []) {
+        const w = k(row?.wallet);
+        if (!w) continue;
+        const cur = map.get(w) || { mini: 0, pro: 0 };
+        if (String(row?.plan) === '1') cur.mini += 1; else cur.pro += 1;
+        map.set(w, cur);
+      }
+    }
+    _hiddenActByWallet = map;
+    _hiddenActBuiltAt = now;
+    return map;
+  }
+  // 某查看者整棵下级中，轮换地址激活的台数（按档位）
+  function hiddenRotationSubtreeCounts(downlines) {
+    const acc = { mini: 0, pro: 0, users: 0 };
+    if (!downlines?.size) return acc;
+    const miniWallets = reportingTxs ? database.listATokenMinerWalletsByPlan('mini120') : null;
+    for (const [w, c] of hiddenActivationsByWallet()) {
+      if (downlines.has(w)) {
+        const visiblePro = reportingTxs && database.listATokenMiners(w).filter(m => m.plan === 'pro1500').length > c.pro;
+        acc.mini += c.mini; acc.pro += visiblePro ? 0 : c.pro;
+        // A member with a visible Mini miner still counts as an activated member.
+        acc.users += reportingTxs ? (miniWallets.has(w) || visiblePro ? 0 : 1) : c.mini + c.pro;
+      }
+    }
+    return acc;
+  }
+  // 该钱包经轮换收款地址确认的激活笔数（每笔对应一台矿机）
+  function hiddenMinerCountFor(wallet, viewer) {
+    if (reportingTxs) return hiddenViewerSet.has(k(viewer)) ? (hiddenActivationsByWallet().get(k(wallet))?.pro || 0) : 0;
+    if (!hiddenRotationSet.size) return 0;
+    const rows = database.listATokenActivationsByWallet?.(wallet) || [];
+    let hidden = 0;
+    for (const row of rows) {
+      if (row?.status === 'confirmed' && hiddenRotationSet.has(k(row?.payload?.collectionAddress))) hidden += 1;
+    }
+    return hidden;
+  }
 
   // ── 推荐链：返回 [直推人, 间推人, 三推人, ...] ──
   // 热路径缓存（2026-10-12 0 点卡死优化）：0 点 6000+ 台矿机发奖时每台都要沿链查上级，
@@ -54,12 +146,18 @@ export function createATokenTeamService({ database, walletService }) {
     _chainRawWallet = raw;
     _chainBuiltAt = now;
   }
+  // 推荐链向上追溯的最大层数（2026-10-24 用户确认：团队奖最多向上发 9 代；级差最多发 10 代 → 链走 10 代足够）
+  const MAX_REWARD_CHAIN_DEPTH = 10;
+  // 级差只发前 10 代（链位置 0~9）
+  const LEVEL_DIFF_MAX_DEPTH = 10;
+  // 团队奖只发前 9 代（链位置 0~8，首个有级别上级拿满档）
+  const TEAM_AWARD_MAX_DEPTH = 9;
   function getReferralChain(address) {
     ensureChainMaps();
     const chain = [];
     let cur = k(address);
     const visited = new Set([cur]);
-    while (chain.length < 10) {
+    while (chain.length < MAX_REWARD_CHAIN_DEPTH) {
       const referrerRaw = _chainParent.get(cur);
       if (!referrerRaw) break;
       const rk = k(referrerRaw);
@@ -174,7 +272,12 @@ export function createATokenTeamService({ database, walletService }) {
   function teamActivationBreakdown(address, excludeList = []) {
     const links = database.listReferralLinks();
     const stats = realTeamStats(address, links);
-    const { mini, pro } = planMinerWallets();
+    const { mini, pro: rawPro } = planMinerWallets();
+    const hidden = reportingTxs && hiddenViewerSet.has(k(address))
+      ? new Map([...hiddenActivationsByWallet()].filter(([w, c]) => database.listATokenMiners(w).filter(m => m.plan === 'pro1500').length <= c.pro)) : new Map();
+    const pro = new Set([...rawPro].filter(w => !hidden.has(w)));
+    const hiddenPro = [...stats.downlines].filter(w => rawPro.has(w) && hidden.has(w)).length;
+    const hiddenDirectPro = [...stats.directSet].filter(w => rawPro.has(w) && hidden.has(w)).length;
     const ak = k(address);
     const childrenMap = stats.childrenMap;
     const directRows = [];
@@ -201,13 +304,14 @@ export function createATokenTeamService({ database, walletService }) {
     return {
       address: ak,
       directCount: stats.directCount, indirectCount: stats.indirectCount, teamCount: stats.teamCount,
-      teamMini: stats.teamMini, teamPro: stats.teamPro,
-      directMini: stats.directMini, directPro: stats.directPro,
+      teamMini: stats.teamMini, teamPro: stats.teamPro - hiddenPro,
+      directMini: stats.directMini, directPro: stats.directPro - hiddenDirectPro,
+      rawTeamPro: stats.teamPro, excludedRotationPro: hiddenPro,
       directRows,
       excluded: excludedRows.map(r => r.wallet),
       excludedMini: s(excludedRows, 'mini'), excludedPro: s(excludedRows, 'pro'), excludedMembers: s(excludedRows, 'members'),
       netMini: stats.teamMini - s(excludedRows, 'mini'),
-      netPro: stats.teamPro - s(excludedRows, 'pro'),
+      netPro: stats.teamPro - hiddenPro - s(excludedRows, 'pro'),
       netTeamCount: stats.teamCount - s(excludedRows, 'members'),
     };
   }
@@ -285,6 +389,8 @@ export function createATokenTeamService({ database, walletService }) {
   function getTeamStatsView(address) {
     const links = database.listReferralLinks();
     const r = realTeamStats(address, links);
+    const hiddenTeam = reportingTxs && hiddenViewerSet.has(k(address)) ? hiddenRotationSubtreeCounts(r.downlines) : { pro: 0 };
+    const hiddenDirect = reportingTxs && hiddenViewerSet.has(k(address)) ? hiddenRotationSubtreeCounts(r.directSet) : { pro: 0 };
     const real = {
       directCount: r.directCount, indirectCount: r.indirectCount, teamCount: r.teamCount,
       directMini: r.directMini, directPro: r.directPro, teamMini: r.teamMini, teamPro: r.teamPro,
@@ -303,9 +409,9 @@ export function createATokenTeamService({ database, walletService }) {
       indirectCount: real.indirectCount + acc.dIndirect,
       teamCount: real.teamCount + acc.dTeam,
       directMini: real.directMini + acc.dDirectMini,
-      directPro: real.directPro + acc.dDirectPro,
+      directPro: Math.max(0, real.directPro + acc.dDirectPro - hiddenDirect.pro),
       teamMini: real.teamMini + acc.dTeamMini + ownDirectMini,
-      teamPro: real.teamPro + acc.dTeamPro + ownDirectPro,
+      teamPro: Math.max(0, real.teamPro + acc.dTeamPro + ownDirectPro - hiddenTeam.pro),
       teamHoldA: formatUnits(acc.teamHoldUnits, A_TOKEN_DECIMALS),
       directHoldA: formatUnits(acc.directHoldUnits, A_TOKEN_DECIMALS),           // 虚拟直推矿机业绩
       directRealHoldA: formatUnits(directRealHoldUnits, A_TOKEN_DECIMALS),       // 真实直推业绩
@@ -322,7 +428,14 @@ export function createATokenTeamService({ database, walletService }) {
     } catch {}
     effective.level = effectiveLevel;
     const stored = database.getATokenTeamStatsOverride?.(address) || null;
-    return { real, effective, stored };
+    const reportingEnabled = !!reportingTxs && hiddenViewerSet.has(k(address));
+    const reporting = { enabled: reportingEnabled,
+      excludedTeamPro: hiddenTeam.pro, excludedDirectPro: hiddenDirect.pro,
+      realTeamPro: Math.max(0, real.teamPro - hiddenTeam.pro),
+      realDirectPro: Math.max(0, real.directPro - hiddenDirect.pro),
+      excludedDirectWallets: reportingEnabled ? [...r.directSet].filter(wallet => hiddenActivationsByWallet().has(k(wallet))) : [],
+    };
+    return { real, effective, stored, reporting };
   }
 
   // ── 团队持有：记忆化递归（每钱包质押本金查一次、子树和算一次，整体 O(n)，防环）──
@@ -560,6 +673,8 @@ export function createATokenTeamService({ database, walletService }) {
     //    - 算出 =0：同级，链上不发奖（平级奖改为按日结算，见 settleParityRewards）
     //    - A0 中间层：档位 0，不影响合计（透明穿透）
     //    - A10：不拿团队奖/级差/平级，截断整条链
+    //    - 层数限制（2026-10-24 用户确认）：级差只发前 10 代（链位置 i<10）；
+    //      第 10 代以外只允许发团队奖（eaten=0 时首个有级别上级拿满档）
     const rateBpsOf = (lvl) => (lvl > 0 ? BigInt(TEAM_LEVELS[lvl - 1].rateBps) : 0n);
     {
       let eatenBps = rateBpsOf(userLevel);   // 已被下方占用的档位合计（从产单人档位起算）
@@ -570,10 +685,13 @@ export function createATokenTeamService({ database, walletService }) {
         const mineBps = rateBpsOf(uplineLevel);
         const takeBps = mineBps - eatenBps;
         if (takeBps > 0n) {
+          const isTeamAward = eatenBps === 0n;
+          // 团队奖超过 9 代不发；级差超过 10 代不发、也不占档位空间（2026-10-24 用户确认）
+          if (isTeamAward ? i >= TEAM_AWARD_MAX_DEPTH : i >= LEVEL_DIFF_MAX_DEPTH) continue;
           const amt = (totalReward * takeBps) / 10000n;
           // 命名：下方无级别占用 → 团队奖（拿满档位）；下方有级别拿过 → 级差（拿差值）
           const pushAt = results.length;
-          credit(chain[i], eatenBps === 0n ? 'team' : 'level_diff', amt, { level: uplineLevel, rateBps: Number(takeBps) });
+          credit(chain[i], isTeamAward ? 'team' : 'level_diff', amt, { level: uplineLevel, rateBps: Number(takeBps) });
           // 无资格被跳过 → 档位不占空间（与倒挂同理），更高级别仍按原剩余空间分
           if (results[pushAt]?.skipped !== 'ineligible') eatenBps += mineBps;
         }
@@ -794,7 +912,8 @@ export function createATokenTeamService({ database, walletService }) {
         teamA: Number(formatUnits(effTeamHeld, A_TOKEN_DECIMALS)),
         level: lvl,
         joinedAt: item.createdAt,
-        minerCount: database.countATokenMinersByWallet?.(item.wallet) || 0,
+        // 按查看者的展示统计规则扣除指定激活，不修改矿机记录。
+        minerCount: Math.max(0, (database.countATokenMinersByWallet?.(item.wallet) || 0) - hiddenMinerCountFor(item.wallet, address)),
         directCount: hisDirectCount + dAcc.dDirect,
       };
     });
@@ -832,6 +951,9 @@ export function createATokenTeamService({ database, walletService }) {
       if (miniMinerWallets.has(w)) realTeamMini += 1;
       if (proMinerWallets.has(w)) realTeamPro += 1;
     }
+    // 指定查看者本人查看时：其整棵下级里经轮换收款地址激活的矿机不计入「团队激活矿机」
+    const hiddenTeam = hiddenViewerSet.has(k(address)) ? hiddenRotationSubtreeCounts(downlines) : { mini: 0, pro: 0, users: 0 };
+    const hiddenDirect = reportingTxs && hiddenViewerSet.has(k(address)) ? hiddenRotationSubtreeCounts(directWalletSet) : { pro: 0 };
 
     // 团队持币统计：下级钱包 AIX 余额 + active 质押本金 + active 矿机剩余（与级别判定口径一致）
     let teamHoldUnits = 0n;
@@ -897,11 +1019,11 @@ export function createATokenTeamService({ database, walletService }) {
       directCount: directs.length + statsAcc.dDirect,
       indirectCount: indirectWalletSet.size + statsAcc.dIndirect,
       directMini: realDirectMini + statsAcc.dDirectMini,
-      directPro: realDirectPro + statsAcc.dDirectPro,
+      directPro: Math.max(0, realDirectPro + statsAcc.dDirectPro - hiddenDirect.pro),
       directMinerUsers: directMinerUsers + statsAcc.dDirectMini + statsAcc.dDirectPro,
-      teamMini: realTeamMini + statsAcc.dTeamMini + ownDirectMini,
-      teamPro: realTeamPro + statsAcc.dTeamPro + ownDirectPro,
-      teamMinerUsers: teamMinerUsers + statsAcc.dTeamMini + statsAcc.dTeamPro + ownDirectMini + ownDirectPro,
+      teamMini: Math.max(0, realTeamMini + statsAcc.dTeamMini + ownDirectMini - hiddenTeam.mini),
+      teamPro: Math.max(0, realTeamPro + statsAcc.dTeamPro + ownDirectPro - hiddenTeam.pro),
+      teamMinerUsers: Math.max(0, teamMinerUsers + statsAcc.dTeamMini + statsAcc.dTeamPro + ownDirectMini + ownDirectPro - hiddenTeam.users),
       teamCount: downlines.size + statsAcc.dTeam,
       statsOverridden: statsAcc.own,
       teamHoldA: formatUnits(teamHoldUnits, A_TOKEN_DECIMALS),
@@ -921,7 +1043,28 @@ export function createATokenTeamService({ database, walletService }) {
     };
   }
 
-  return { snapshot, snapshotAll, getLevel, setManualLevel, calcLevel, distributeMinerReward, distributeStakeReward, distributeToA10Pool,
+  // Admin display totals use the union of the selected teams; nested teams are counted once.
+  function reportingMinerSummary() {
+    const raw = database.adminMinerSummary();
+    if (!reportingTxs) return raw;
+    const links = database.listReferralLinks();
+    const eligible = new Set();
+    for (const viewer of hiddenViewerSet) for (const w of realTeamStats(viewer, links).downlines) eligible.add(w);
+    const rows = raw.rows.map(row => ({ ...row }));
+    let excludedPro = 0;
+    for (const w of hiddenActivationsByWallet().keys()) {
+      if (!eligible.has(w)) continue;
+      const miner = database.listATokenMiners(w).filter(row => row.plan === 'pro1500' && !String(row.activationId || '').startsWith('ata_aix_'))
+        .sort((a, b) => Number(a.startedAt) - Number(b.startedAt) || String(a.id).localeCompare(String(b.id)))[0];
+      if (!miner) continue;
+      const group = rows.find(row => row.plan === 'pro1500' && row.status === miner.status);
+      if (group && group.c > 0) { group.c -= 1; excludedPro += 1; }
+    }
+    const by = Object.fromEntries(rows.map(row => [`${row.status || 'unknown'}:${row.plan || 'all'}`, Number(row.c)]));
+    return { ...raw, rows, by, total: raw.total - excludedPro, excludedPro, rawTotal: raw.total, rawBy: raw.by };
+  }
+
+  return { reportingMinerSummary, snapshot, snapshotAll, getLevel, setManualLevel, calcLevel, distributeMinerReward, distributeStakeReward, distributeToA10Pool,
     settleParityRewards:(...args) => transaction(() => settleParityRewards(...args)),
     settleA10Pool:(...args) => transaction(() => settleA10Pool(...args)), profile, summary, getTeamStatsView, teamActivationBreakdown, TEAM_LEVELS };
 }

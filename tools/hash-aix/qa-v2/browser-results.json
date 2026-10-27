@@ -1,0 +1,102 @@
+{
+  "fixture": "isolated-local-qa",
+  "startedAt": "2026-10-26T18:11:20.180Z",
+  "checks": [
+    {
+      "name": "Fresh quick round publishes commitment, waits for input and creates no automatic results",
+      "pass": true
+    },
+    {
+      "name": "Phone first viewport shows eight selected digits and the complete confirmation button",
+      "pass": true
+    },
+    {
+      "name": "Confirmation, refresh and exact reveal preserve one stake and produce one complete settlement card",
+      "pass": true
+    },
+    {
+      "name": "Result proof recomputes the actual commitment, hash, digit and credit return",
+      "pass": true
+    },
+    {
+      "name": "Mode and player seed apply to the next round; legacy timed schedule and reduced motion work",
+      "pass": true
+    },
+    {
+      "name": "Observe opens a real quick round without consuming credits or recording a wager",
+      "pass": true
+    },
+    {
+      "name": "History filters real participated rounds and exports the same three records",
+      "pass": true
+    },
+    {
+      "name": "Hash game, history, verification and guide fit 320px",
+      "pass": true
+    },
+    {
+      "name": "Hash game, history, verification and guide fit 390px",
+      "pass": true
+    },
+    {
+      "name": "Hash game, history, verification and guide fit 1440px",
+      "pass": true
+    },
+    {
+      "name": "Lobby reads actual game progress without creating rounds or changing either game save",
+      "pass": true
+    },
+    {
+      "name": "Lobby category, Chinese and English search, clear and empty-state reset work",
+      "pass": true
+    },
+    {
+      "name": "Favorites persist on reload; removing the last favorite restores a usable keyboard focus",
+      "pass": true
+    },
+    {
+      "name": "Opening a game records its real visit and updates resume and activity",
+      "pass": true
+    },
+    {
+      "name": "Lobby discovery, library, activity and guide fit 320px",
+      "pass": true
+    },
+    {
+      "name": "Lobby discovery, library, activity and guide fit 390px",
+      "pass": true
+    },
+    {
+      "name": "Lobby discovery, library, activity and guide fit 1440px",
+      "pass": true
+    },
+    {
+      "name": "Runner links back to the lobby at 320px and preserves existing runner progress",
+      "pass": true
+    },
+    {
+      "name": "Cross-tab cleared lobby state resets favorites and the resume action",
+      "pass": true
+    },
+    {
+      "name": "Website game ecosystem opens the real lobby; Escape closes it and restores focus",
+      "pass": true
+    },
+    {
+      "name": "Desktop lobby return and visible phone close button both close the embedded space",
+      "pass": true
+    }
+  ],
+  "errors": [],
+  "screenshots": [
+    "C:\\Users\\Administrator\\Desktop\\AXIX\\tools\\hash-aix\\qa-v2\\hash-mobile-selected.png",
+    "C:\\Users\\Administrator\\Desktop\\AXIX\\tools\\hash-aix\\qa-v2\\hash-mobile-result.png",
+    "C:\\Users\\Administrator\\Desktop\\AXIX\\tools\\hash-aix\\qa-v2\\hash-desktop-result.png",
+    "C:\\Users\\Administrator\\Desktop\\AXIX\\tools\\hash-aix\\qa-v2\\lobby-desktop.png",
+    "C:\\Users\\Administrator\\Desktop\\AXIX\\tools\\hash-aix\\qa-v2\\lobby-mobile.png",
+    "C:\\Users\\Administrator\\Desktop\\AXIX\\tools\\hash-aix\\qa-v2\\website-lobby-desktop.png"
+  ],
+  "cleanedUp": true,
+  "finishedAt": "2026-10-26T18:11:27.277Z",
+  "ok": true
+}

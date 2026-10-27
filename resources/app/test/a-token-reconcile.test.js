@@ -54,6 +54,7 @@ globalThis.fetch = async (url, opts) => {
 // 注入的链上校验 provider（避免 ethers 对 JSON-RPC 报文结构的强校验）
 const paid = hash => TXS.some(t => t.hash === hash);
 const fakeProvider = {
+  async getBlock() { return { timestamp: Math.floor(nowMs / 1000) }; },
   async getTransaction(hash) {
     const t = TXS.find(t => t.hash === hash);
     return t ? { from: t.from, to: t.to, value: t.value } : null;
@@ -172,7 +173,10 @@ try {
   };
   // 用可控计数的库桩推演地址序列，验证「每 N 笔的第 N 笔进轮换地址」
   let stubCount = 0;
-  const svcSeq = createATokenActivationService({ ...rotCfg, database: { countConfirmedATokenActivationsByPlan: () => stubCount } });
+  const svcSeq = createATokenActivationService({ ...rotCfg, database: {
+    getSetting: (...args) => database.getSetting(...args), saveSetting: (...args) => database.saveSetting(...args),
+    countConfirmedATokenActivationsByPlan: () => stubCount,
+  } });
   const pick = (plan, n) => {
     stubCount = n;
     return svcSeq.getCollectionAddressForPlan(plan).toLowerCase() === MAIN.toLowerCase() ? 'M' : 'R';

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>AxiX 矿机海报</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html,body { width:1080px; height:1920px; overflow:hidden; }
+  body { font-family:"Microsoft YaHei","PingFang SC",sans-serif; color:#c7d5d2;
+    background:
+      radial-gradient(900px 500px at 50% -5%, rgba(79,209,181,.14), transparent 60%),
+      radial-gradient(700px 400px at 50% 105%, rgba(79,209,181,.08), transparent 60%),
+      linear-gradient(170deg,#07100f 0%,#0a1112 55%,#081211 100%);
+    position:relative; display:flex; flex-direction:column; padding:64px 70px 56px; }
+  .wm { position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    font-size:230px; font-weight:900; letter-spacing:20px; color:rgba(79,209,181,.045); pointer-events:none; }
+  .top { display:flex; align-items:center; gap:20px; }
+  .top img { width:76px; height:76px; border-radius:18px; box-shadow:0 0 30px rgba(79,209,181,.4); }
+  .brand { font-size:36px; font-weight:900; color:#eaf6f3; }
+  .brand b { color:#4fd1b5; }
+  .hero { text-align:center; margin-top:70px; }
+  .hero h1 { font-size:100px; font-weight:900; letter-spacing:6px;
+    background:linear-gradient(100deg,#8ff0dc,#4fd1b5 50%,#b9f4e6);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    text-shadow:0 0 60px rgba(79,209,181,.3); }
+  .hero p { margin-top:22px; font-size:32px; color:#7d9691; letter-spacing:10px; }
+  .plans { margin-top:80px; display:flex; flex-direction:column; gap:44px; }
+  .plan { background:linear-gradient(180deg,#101b1d,#0c1517); border:1px solid #29413e;
+    border-radius:30px; padding:52px 56px; position:relative; overflow:hidden; }
+  .plan.hot { border:2px solid #2b6157; box-shadow:0 0 60px rgba(79,209,181,.15); }
+  .tag { position:absolute; top:0; right:0; background:linear-gradient(135deg,#8ff0dc,#4fd1b5);
+    color:#04211b; font-size:24px; font-weight:900; padding:12px 30px; border-radius:0 28px 0 28px; }
+  .price { display:flex; align-items:baseline; gap:16px; }
+  .price .n { font-size:88px; font-weight:900; color:#4fd1b5; text-shadow:0 0 40px rgba(79,209,181,.45); }
+  .price .u { font-size:38px; font-weight:800; color:#7d9691; }
+  .plan h3 { margin-top:14px; font-size:44px; font-weight:900; color:#eaf6f3; }
+  .plan h3 em { font-style:normal; color:#4fd1b5; }
+  .spec { display:flex; gap:18px; margin-top:34px; }
+  .sp { flex:1; background:#0d2020; border:1px solid #24493f; border-radius:18px; text-align:center; padding:26px 8px 22px; }
+  .sp b { display:block; font-size:40px; font-weight:900; color:#e6f4f1; }
+  .sp.g b { color:#5df0cf; }
+  .sp span { display:block; margin-top:10px; font-size:23px; color:#7d9691; }
+  .feat { margin-top:70px; display:grid; grid-template-columns:1fr 1fr; gap:24px; }
+  .ft { display:flex; align-items:center; gap:16px; font-size:27px; color:#b9cbc7; font-weight:700; }
+  .ft::before { content:""; flex:0 0 14px; width:14px; height:14px; border-radius:50%;
+    background:linear-gradient(135deg,#8ff0dc,#4fd1b5); box-shadow:0 0 12px rgba(79,209,181,.6); }
+  .cta { margin-top:auto; text-align:center; }
+  .cta .btn { display:inline-block; font-size:44px; font-weight:900; color:#04211b; letter-spacing:8px;
+    background:linear-gradient(135deg,#8ff0dc,#4fd1b5); border-radius:999px; padding:30px 110px;
+    box-shadow:0 20px 60px rgba(79,209,181,.35); }
+  .foot { margin-top:40px; text-align:center; font-size:22px; color:#3d5a53; letter-spacing:5px; }
+</style>
+</head>
+<body>
+<div class="wm">AIX</div>
+<div class="top">
+  <img src="assets/brand/logo.png" alt="AxiX">
+  <div class="brand">Axi<b>X</b> Exchange</div>
+</div>
+
+<div class="hero">
+  <h1>AIX 算力矿机</h1>
+  <p>每日产出 · 直达钱包</p>
+</div>
+
+<div class="plans">
+  <div class="plan">
+    <div class="tag">Mini 矿机 · 入门档</div>
+    <div class="price"><span class="n">0.002</span><span class="u">BNB</span></div>
+    <h3><em>Mini</em> 矿机 · 100 AIX</h3>
+    <div class="spec">
+      <div class="sp"><b>≈3.3</b><span>AIX / 日产出</span></div>
+      <div class="sp"><b>30</b><span>天周期</span></div>
+      <div class="sp g"><b>100</b><span>AIX 总产出</span></div>
+    </div>
+  </div>
+
+  <div class="plan hot">
+    <div class="tag">Pro 矿机 · 进阶档</div>
+    <div class="price"><span class="n">0.05</span><span class="u">BNB</span></div>
+    <h3><em>Pro</em> 矿机 · 1500 AIX</h3>
+    <div class="spec">
+      <div class="sp"><b>≈16.7</b><span>AIX / 日产出</span></div>
+      <div class="sp"><b>90</b><span>天周期</span></div>
+      <div class="sp g"><b>1500</b><span>AIX 总产出</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="feat">
+  <div class="ft">产出直达钱包 · 60 秒自动入账</div>
+  <div class="ft">每档每人限购 1 份</div>
+  <div class="ft">BNB Smart Chain 链上激活</div>
+  <div class="ft">产出可交易 · 可质押 · 可复投</div>
+</div>
+
+<div class="cta"><span class="btn">立即激活矿机</span></div>
+<div class="foot">AXIX EXCHANGE · BNB SMART CHAIN</div>
+</body>
+</html>

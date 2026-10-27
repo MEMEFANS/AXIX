@@ -1,0 +1,11 @@
+{
+  "provider": "Kakou Media API",
+  "model": "gpt-image-2",
+  "jobId": "img_720a4ba746664e48a9a475e0a2b98953",
+  "status": "succeeded",
+  "chargedUsd": 0.2,
+  "resolution": "2496x1664",
+  "source": "output/imagegen/run-aix/hub-v4-source.png",
+  "runtime": "resources/app/public/games/run-aix/assets/hub-v4.jpg",
+  "runtimeDimensions": "1200x800"
+}

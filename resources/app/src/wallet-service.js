@@ -22,14 +22,20 @@ import { openDatabase } from './database.js';
 const LOGIN_TTL_MS = 5 * 60_000;
 const SESSION_TTL_MS = 24 * 60 * 60_000;
 const REQUEST_ID = /^[A-Za-z0-9._:-]{8,80}$/;
+// 轻量 EVM 地址形状校验（不计算 EIP-55 校验和）。
+// 2026-10-22 全站卡顿根因：assertState 全量校验曾用 ethers isAddress() 逐个校验 2.3 万用户地址，
+// 其内部为算校验和每次都要跑一遍纯 JS Keccak-256（单个 ~0.3ms）→ 单次 saveState 即 7~12s 纯 CPU，
+// 事件循环饱和、全站排队。内部账本地址全部来自自家数据库 / normalizeAddress（已强校验过），
+// 自检只需保证形状合法即可，故改用正则。
+const EVM_ADDRESS_RE = /^0x[0-9a-fA-F]{40}$/;
 const MAX_PENDING_DEPOSITS = 10;
 const PENDING_DEPOSIT_TTL_MS = 7 * 24 * 60 * 60_000;
-// 充值规则：最低 10 USDT，且必须为 10 的整数倍（10/20/30…）；账本 1 USDT = 10^LEDGER_DECIMALS 单位
+// 充值规则：最低 1 USDT，且必须为 1 USDT 的整数倍；账本 1 USDT = 10^LEDGER_DECIMALS 单位
 const LEDGER_DECIMALS = 6;
 const LEDGER_UNIT_PER_USDT = 10n ** BigInt(LEDGER_DECIMALS);
-const MIN_DEPOSIT_LEDGER_UNITS = 10n * LEDGER_UNIT_PER_USDT;
-// 充值步长：金额必须是 10 USDT 的整数倍
-const DEPOSIT_STEP_LEDGER_UNITS = 10n * LEDGER_UNIT_PER_USDT;
+const MIN_DEPOSIT_LEDGER_UNITS = 1n * LEDGER_UNIT_PER_USDT;
+// 充值步长：金额必须是 1 USDT 的整数倍
+const DEPOSIT_STEP_LEDGER_UNITS = 1n * LEDGER_UNIT_PER_USDT;
 const MAX_ADMIN_TEST_CREDIT_UNITS = 100_000_000n * 10n ** BigInt(LEDGER_DECIMALS);
 const TRANSFER_ABI = [
   'function transfer(address to, uint256 amount) returns (bool)',
@@ -70,9 +76,41 @@ export function createWalletService(options = {}) {
     throw new Error('账户封禁名单格式无效');
   }
   const blockedWallets = new Set(Object.keys(accountBlocks.wallets).map(address => address.toLowerCase()));
-  function assertAccountAllowed(address) {
-    if (blockedWallets.has(String(address || '').toLowerCase())) throw new Error('该账户已被封禁，无法登录或使用平台');
+  const silentBlockedWallets = new Set(Object.entries(accountBlocks.wallets)
+    .filter(([, record]) => record?.silent === true).map(([address]) => address.toLowerCase()));
+  const revokedSilentSessions = new Map();
+  for (const [address, record] of Object.entries(accountBlocks.wallets)) {
+    if (!silentBlockedWallets.has(address.toLowerCase()) || !Array.isArray(record?.revokedSessions)) continue;
+    for (const session of record.revokedSessions) {
+      const hash = String(session?.tokenHash || '').toLowerCase();
+      const expiresAt = Number(session?.expiresAt);
+      if (!/^[a-f0-9]{64}$/.test(hash) || !Number.isFinite(expiresAt)) continue;
+      revokedSilentSessions.set(hash, Math.max(revokedSilentSessions.get(hash) || 0, expiresAt));
+    }
   }
+  function isSilentAccountBlocked(address) {
+    return silentBlockedWallets.has(String(address || '').toLowerCase());
+  }
+  function isSilentSessionBlocked(token) {
+    if (!token) return false;
+    const key = sessionKey(token);
+    const now = Date.now();
+    if ((revokedSilentSessions.get(key) || 0) > now) return true;
+    const session = state.sessions[key];
+    return Boolean(session && session.expiresAt > now && isSilentAccountBlocked(session.address));
+  }
+  function assertAccountAllowed(address) {
+    if (!blockedWallets.has(String(address || '').toLowerCase())) return;
+    if (isSilentAccountBlocked(address)) throw Object.assign(new Error('账户操作不可用'), { code:'ACCOUNT_ACTION_DISABLED' });
+    throw new Error('该账户已被封禁，无法登录或使用平台');
+  }
+  // 是否在封禁名单（含静默封禁）：供互转等服务做定向拦截；静默语义由调用方自行区分
+  function isAccountBlocked(address) {
+    return blockedWallets.has(String(address || '').toLowerCase());
+  }
+  // 跟单提现额度钩子（2026-10-25，ai-managed-service 注入）：USDT 提现申请时校验并占用额度，驳回时返还
+  let withdrawalQuotaHook = null;
+  function setWithdrawalQuotaHook(hook) { withdrawalQuotaHook = hook || null; }
   // 运行时拉黑：写入持久化名单 + 立即失效该钱包所有登录会话（客服检测到攻击载荷时调用）
   function blockWallet(address, reason = '') {
     const key = String(address || '').trim().toLowerCase();
@@ -231,7 +269,7 @@ export function createWalletService(options = {}) {
       throw new Error('自动提现设置状态无效');
     }
     for (const user of Object.values(state.users)) {
-      if (!user || typeof user !== 'object' || !isAddress(String(user.address || ''))) {
+      if (!user || typeof user !== 'object' || !EVM_ADDRESS_RE.test(String(user.address || ''))) {
         throw new Error('钱包资金账本包含无效账户');
       }
       if (!user.balances || typeof user.balances !== 'object' || Array.isArray(user.balances)) {
@@ -471,6 +509,21 @@ export function createWalletService(options = {}) {
     };
   }
 
+  // 服务端代查某地址在某网络的代币链上余额（balanceOf）。
+  // 2026-10-24：充值页钱包余额原先由浏览器直连公共 RPC 读取，部分网络环境不可达导致一直「读取失败」，
+  // 改为服务端经内部 provider（已带代理/容错）代查，前端只调本站 API。
+  async function readTokenBalance(networkId, address) {
+    const target = String(address || '').trim().toLowerCase();
+    if (!/^0x[0-9a-f]{40}$/.test(target)) throw new Error('地址格式无效');
+    const network = (networkId && networks.get(networkId)) || [...networks.values()].find(n => n.public);
+    if (!network?.provider || !network?.tokenContract) throw new Error('网络不可用');
+    const data = `0x70a08231${target.slice(2).padStart(64, '0')}`; // balanceOf(address)
+    const hex = await network.provider.call({ to: network.tokenContract, data });
+    const decimals = Number(network.tokenDecimals || 18);
+    const units = BigInt(hex && hex !== '0x' ? hex : '0x0');
+    return { network: network.id, address: target, balance: formatUnits(units, decimals) };
+  }
+
   function presentDeposit(record) {
     const asset = assets[record.asset];
     const network = networks.get(record.network);
@@ -586,8 +639,8 @@ export function createWalletService(options = {}) {
       if (!transferLog) throw new Error('链上 USDT 到账日志不匹配');
       if (chainAmountUnits <= 0n) throw new Error('充值金额必须大于 0');
       const amountUnits = chainToLedgerUnits(chainAmountUnits, network);
-      if (amountUnits < MIN_DEPOSIT_LEDGER_UNITS) throw new Error('最小充值金额为 10 USDT');
-      if (amountUnits % DEPOSIT_STEP_LEDGER_UNITS !== 0n) throw new Error('充值金额必须为 10 的整数倍（10/20/30…）');
+      if (amountUnits < MIN_DEPOSIT_LEDGER_UNITS) throw new Error('最小充值金额为 1 USDT，请修改充值数量');
+      if (amountUnits % DEPOSIT_STEP_LEDGER_UNITS !== 0n) throw new Error('充值金额必须为 1 USDT 的整数倍，请修改充值数量');
       const currentBlock = await network.provider.getBlockNumber();
       const confirmations = Math.max(0, currentBlock - receipt.blockNumber + 1);
       // RPC verification is asynchronous; another request may have confirmed
@@ -680,8 +733,8 @@ export function createWalletService(options = {}) {
       if (receivedChainUnits <= 0n) throw new Error('跨链目标 USDT 未转入平台结算地址');
       const amountUnits = chainToLedgerUnits(receivedChainUnits, target);
       const sentLedgerUnits = chainToLedgerUnits(BigInt(status.sending.amount), source);
-      if (sentLedgerUnits < MIN_DEPOSIT_LEDGER_UNITS) throw new Error('最小充值金额为 10 USDT');
-      if (sentLedgerUnits % LEDGER_UNIT_PER_USDT !== 0n) throw new Error('充值金额必须为整数 USDT');
+      if (sentLedgerUnits < MIN_DEPOSIT_LEDGER_UNITS) throw new Error('最小充值金额为 1 USDT，请修改充值数量');
+      if (sentLedgerUnits % LEDGER_UNIT_PER_USDT !== 0n) throw new Error('充值金额必须为整数 USDT，请修改充值数量');
       if (amountUnits * 10_000n < sentLedgerUnits * BigInt(bridgeService.minimumReceivedBps || 9900)) throw new Error('跨链实际到账低于平台风控线');
       const currentBlock = await target.provider.getBlockNumber();
       const confirmations = Math.max(0, currentBlock - Number(destinationReceipt.blockNumber) + 1);
@@ -794,6 +847,7 @@ export function createWalletService(options = {}) {
     try { recovered = verifyMessage(message, String(signature)); }
     catch { throw new Error('钱包签名验证失败，请重新签名'); }
     const owner = normalizeAddress(address);
+    assertAccountAllowed(owner);
     if (!owner || normalizeAddress(recovered).toLowerCase() !== owner.toLowerCase()) {
       throw new Error('钱包签名与当前账户不一致');
     }
@@ -862,7 +916,10 @@ export function createWalletService(options = {}) {
     const canAutomaticallyPay = state.withdrawalAutomation.enabled
       && amountUnits <= BigInt(state.withdrawalAutomation.reviewThresholdUnits)
       && automaticPaidOrPending + amountUnits <= BigInt(state.withdrawalAutomation.dailyLimitUnits);
+    // 跟单提现额度：仅 USDT 提现占用；未跟单用户 hook 内直接放行
+    if (asset.symbol === 'USDT' && withdrawalQuotaHook?.assert) withdrawalQuotaHook.assert(owner, amountUnits);
     subtractBalance(owner, asset.symbol, amountUnits);
+    if (asset.symbol === 'USDT' && withdrawalQuotaHook?.consume) withdrawalQuotaHook.consume(owner, amountUnits);
     const record = {
       id: `wd_${crypto.randomBytes(8).toString('hex')}`,
       wallet: owner,
@@ -1441,6 +1498,8 @@ export function createWalletService(options = {}) {
       const canRejectFailed = record.status === 'payout_failed' && (!record.txHash || record.chainFailed);
       if (record.status !== 'pending_review' && record.status !== 'pending_funds' && !canRejectFailed) throw new Error('该提现已经进入链上出款，不能退款');
       addBalance(record.wallet, record.asset, BigInt(record.amountUnits));
+      // 驳回时返还已占用的跟单提现额度（仅 USDT）
+      if (record.asset === 'USDT' && withdrawalQuotaHook?.refund) withdrawalQuotaHook.refund(record.wallet, BigInt(record.amountUnits));
       record.status = 'rejected';
       record.reason = String(body.reason || '人工审核未通过').slice(0, 200);
       record.processedAt = nowIso();
@@ -1694,6 +1753,9 @@ export function createWalletService(options = {}) {
     creditBalance,
     debitBalance,
     getSession,
+    isAccountBlocked,
+    isSilentAccountBlocked,
+    isSilentSessionBlocked,
     getWalletTokenBalance,
     getWalletTokenBalances,
     logout,
@@ -1707,7 +1769,9 @@ export function createWalletService(options = {}) {
     recordPaidPayout,
     recordSignedPayout,
     publicConfig,
+    readTokenBalance,
     requestWithdrawal,
+    setWithdrawalQuotaHook,
     verifyOperationSignature,
     submitDeposit,
     updateWithdrawalAutomationSettings,

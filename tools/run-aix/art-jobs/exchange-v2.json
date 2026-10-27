@@ -1,0 +1,11 @@
+﻿{
+    "code":  0,
+    "message":  "accepted",
+    "data":  {
+                 "created_at":  "2026-10-19T02:28:41.265314+08:00",
+                 "id":  "img_ed0d06aebe1d492fadfb171d40b918d5",
+                 "poll_url":  "/v1/media/tasks/img_ed0d06aebe1d492fadfb171d40b918d5",
+                 "status":  "queued",
+                 "type":  "image"
+             }
+}

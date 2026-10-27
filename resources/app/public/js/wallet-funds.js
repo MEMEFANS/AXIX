@@ -90,25 +90,33 @@ function updateDepositNetwork() {
 }
 
 // 充值页展示当前连接钱包在该网络的 USDT 链上余额（与提交时的余额预检查同口径）
+// 2026-10-24 修复：改走配置链的公共 RPC（browserRpcUrl）直读，不再经过用户钱包的 provider——
+// 钱包当前链不在 BSC 时 eth_call 会返回空结果导致一直「读取失败」；且恢复登录但没有 provider 的会话也能读到。
 async function refreshDepositWalletBalance() {
   const hint = $('deposit-wallet-balance');
   if (!hint) return;
   // 充值面板未展开时不发起链上读取，避免无谓的 RPC 调用
   if ($('account-funding-forms')?.hidden !== false) return;
   const network = selectedDepositNetwork();
-  if (!network?.tokenContract || !connectedWalletAddress || !connectedProvider) { hint.textContent = '钱包 USDT 余额 -'; return; }
+  if (!network?.tokenContract) { hint.textContent = '钱包 USDT 余额 -'; return; }
+  // 地址优先取实时连接，其次取已登录会话（恢复登录但 provider 未就绪时也能显示余额）
+  const address = connectedWalletAddress || window.currentWalletProfile?.address || '';
+  if (!address) { hint.textContent = '连接钱包后显示钱包 USDT 余额'; return; }
   hint.textContent = '钱包 USDT 余额读取中…';
   try {
-    const balanceHex = await connectedProvider.request({ method:'eth_call', params:[
-      { to:network.tokenContract, data:`0x70a08231${connectedWalletAddress.slice(2).padStart(64, '0')}` }, 'latest',
-    ]});
-    const decimals = Number(network.tokenDecimals || 18);
-    const amount = Number(BigInt(balanceHex)) / 10 ** decimals;
+    // 服务端代查链上余额（浏览器直连公共 RPC 在部分网络环境不可达，2026-10-24）
+    const res = await fetch(`/api/wallet/deposit-balance?address=${encodeURIComponent(address)}&network=${encodeURIComponent(network.id || '')}`, { cache:'no-store' });
+    const json = await res.json();
+    const amount = Number(json?.balance);
+    if (!res.ok || !Number.isFinite(amount)) throw new Error(json?.error || 'query failed');
     hint.textContent = `钱包 USDT 余额 ${amount.toLocaleString('en-US', { maximumFractionDigits: 6 })} USDT`;
   } catch {
     hint.textContent = '钱包 USDT 余额读取失败，请重试';
   }
 }
+
+// 钱包连接/登录态恢复完成后自动补刷新充值页余额（覆盖用户先开面板、钱包后恢复就绪的时序）
+window.addEventListener('walletstatechange', () => { refreshDepositWalletBalance().catch(() => {}); });
 
 async function ensureDepositNetwork(provider, network) {
   const current = await provider.request({ method:'eth_chainId' });
@@ -149,9 +157,9 @@ async function submitWalletDeposit() {
     await ensureDepositNetwork(connectedProvider, network);
     const asset = walletConfig.assets.find(item => item.symbol === 'USDT');
     const ledgerUnits = decimalToUnits($('deposit-amount').value, asset.decimals);
-    // 充值规则：最低 10 USDT，且必须为 10 的整数倍（10/20/30…）：弹钱包前直接拦截
-    if (ledgerUnits < 10_000_000n) throw new Error('最小充值金额为 10 USDT');
-    if (ledgerUnits % 10_000_000n !== 0n) throw new Error('充值金额必须为 10 的整数倍（10/20/30…）');
+    // 充值规则：最低 1 USDT，且必须为 1 USDT 的整数倍：弹钱包前直接拦截
+    if (ledgerUnits < 1_000_000n) throw new Error('最小充值金额为 1 USDT，请修改充值数量');
+    if (ledgerUnits % 1_000_000n !== 0n) throw new Error('充值金额必须为 1 USDT 的整数倍，请修改充值数量');
     const units = ledgerUnits * 10n ** BigInt(network.tokenDecimals - asset.decimals);
     // 余额预检查：链上读 USDT balanceOf，余额不足直接提示，不弹钱包确认
     setAccountStatus('deposit-status', '正在检查钱包 USDT 余额...');
@@ -181,7 +189,8 @@ async function submitWalletDeposit() {
     const raw = String(error?.message || error?.data?.message || '');
     if (/exceeds balance|insufficient balance/i.test(raw)) { setAccountStatus('deposit-status', 'USDT 余额不足，请检查钱包余额后重试', 'error'); return; }
     if (/insufficient funds|not enough/i.test(raw)) { setAccountStatus('deposit-status', '钱包余额不足，无法完成本次充值', 'error'); return; }
-    setAccountStatus('deposit-status', error.message?.includes('请') ? error.message : '充值失败，请重试', 'error');
+    // 后端业务校验信息均为中文，直接透传；技术性英文错误用兜底文案
+    setAccountStatus('deposit-status', error.message || '充值失败，请重试', 'error');
   }
   finally { button.disabled = false; }
 }

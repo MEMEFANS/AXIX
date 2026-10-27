@@ -1,0 +1,9 @@
+{
+  "baselineFailed": true,
+  "expected": 8,
+  "baselineRequests": 10,
+  "afterSyncRequests": 11,
+  "addedScript": "/js/account-action-guard.js",
+  "stdout": "",
+  "stderr": "node:internal/modules/run_main:107\r\n    triggerUncaughtException(\r\n    ^\r\n\r\nAssertionError [ERR_ASSERTION]: /vendor/wallet/connector.js, /js/theme.js, /games/run-aix/launcher.js, /js/i18n.js, /js/core.js, /js/wallet.js, /js/portal-shared.js, /js/page-loader.js, /js/earn.js, /js/announcement.js\r\n\r\n10 !== 8\r\n\r\n    at file:///C:/Users/Administrator/Desktop/AXIX/resources/app/test/.silent-baseline-mobile-check.mjs:66:10 {\r\n  generatedMessage: false,\r\n  code: 'ERR_ASSERTION',\r\n  actual: 10,\r\n  expected: 8,\r\n  operator: 'strictEqual',\r\n  diff: 'simple'\r\n}\r\n\r\nNode.js v24.19.0\r\n"
+}

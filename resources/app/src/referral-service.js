@@ -9,7 +9,43 @@ const short = value => `${String(value).slice(0, 6)}...${String(value).slice(-4)
 const ID_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 
 export function createReferralService({ database, walletService }) {
-  function links() { return database.listReferralLinks(); }
+  // ── 推荐关系缓存（2026-10-22 全站卡顿修复）──
+  // 旧实现 links() 每次调用都全表扫 platform_referral_links（2.3 万行、逐行 JSON.parse）：
+  // referral profile 一次请求要扫 (2+直推数) 遍，AIX 卖单/互转的费率阶梯也每笔全扫一遍，
+  // keccak 修复后这里是全站 CPU 最大的热点（实测 profile 中占主线程 20~34%）。
+  // 借鉴 a-token-team-service 的链图缓存：15s TTL 内存 map，任何 upsert 后立即失效。
+  // 代价：新绑定的推荐关系最多 15s 后对统计/费率可见；绑定写库本身即时生效，不影响绑定正确性。
+  const LINKS_TTL_MS = 15_000;
+  let _linkRows = null, _linksByWallet = null, _linksByChild = null, _linksByCode = null, _linksAt = 0;
+  function linksMaps() {
+    const now = Date.now();
+    if (_linksByWallet && now - _linksAt < LINKS_TTL_MS) {
+      return { list: _linkRows, byWallet: _linksByWallet, byChild: _linksByChild, byCode: _linksByCode };
+    }
+    const rows = database.listReferralLinks();
+    _linkRows = rows;
+    _linksByWallet = new Map();
+    _linksByChild = new Map();
+    _linksByCode = new Map();
+    for (const item of rows) {
+      const w = key(item.wallet);
+      if (!_linksByWallet.has(w)) _linksByWallet.set(w, item); // 首个优先，与旧 find() 语义一致
+      if (item.code && !_linksByCode.has(item.code)) _linksByCode.set(item.code, item);
+      const p = key(item.referrerWallet);
+      if (p) {
+        let arr = _linksByChild.get(p);
+        if (!arr) { arr = []; _linksByChild.set(p, arr); }
+        arr.push(item);
+      }
+    }
+    _linksAt = now;
+    return { list: _linkRows, byWallet: _linksByWallet, byChild: _linksByChild, byCode: _linksByCode };
+  }
+  function invalidateLinks() { _linksByWallet = null; _linksAt = 0; }
+  function links() { return linksMaps().list; }
+  function upsertLink(link) { const row = database.upsertReferralLink(link); invalidateLinks(); return row; }
+  const byWalletOf = value => linksMaps().byWallet.get(key(value)) || null;
+  function directOf(address) { return linksMaps().byChild.get(key(address)) || []; }
   // 统一用户ID：与 AIX 互转使用的 8 位用户ID同表同值，保证「邀请码 = 用户ID」
   function ensureUnifiedUserId(address) {
     const normalized = String(address || '').toLowerCase();
@@ -31,17 +67,17 @@ export function createReferralService({ database, walletService }) {
   function resolveReferrer(referralCode) {
     const c = String(referralCode || '').trim().toUpperCase();
     if (!c) return null;
-    const byCode = links().find(item => item.code === c);
+    const byCode = linksMaps().byCode.get(c) || null;
     if (byCode) return byCode;
     const uidRow = database.getATokenUserId?.(c);
     if (uidRow?.wallet) {
-      const byUid = links().find(item => key(item.wallet) === key(uidRow.wallet));
+      const byUid = byWalletOf(uidRow.wallet);
       if (byUid) return byUid;
     }
-    return links().find(item => codeFor(item.wallet) === c) || null;
+    return links().find(item => codeFor(item.wallet) === c) || null; // 旧版 10 位码兼容，罕见路径
   }
   function ensure(address, referralCode = '') {
-    const existing = links().find(item => key(item.wallet) === key(address));
+    const existing = byWalletOf(address);
     const referrer = referralCode ? resolveReferrer(referralCode) : null;
     if (referrer && key(referrer.wallet) === key(address)) throw new Error('不能绑定自己的推荐链接');
     if (referrer && !existing?.referrerWallet) {
@@ -60,12 +96,12 @@ export function createReferralService({ database, walletService }) {
     if (existing) {
       const nextReferrer = existing.referrerWallet || referrer?.wallet || null;
       if (unified && existing.code !== unified) {
-        return database.upsertReferralLink({ wallet:address, code:unified, referrerWallet:nextReferrer, createdAt:existing.createdAt });
+        return upsertLink({ wallet:address, code:unified, referrerWallet:nextReferrer, createdAt:existing.createdAt });
       }
       if (existing.referrerWallet || !referrer) return existing;
-      return database.upsertReferralLink({ wallet:address, code:existing.code, referrerWallet:referrer.wallet, createdAt:existing.createdAt });
+      return upsertLink({ wallet:address, code:existing.code, referrerWallet:referrer.wallet, createdAt:existing.createdAt });
     }
-    return database.upsertReferralLink({ wallet:address, code:unified || codeFor(address), referrerWallet:referrer?.wallet || null, createdAt:new Date().toISOString() });
+    return upsertLink({ wallet:address, code:unified || codeFor(address), referrerWallet:referrer?.wallet || null, createdAt:new Date().toISOString() });
   }
   function activePrincipal(address) {
     // 有效本金三选一即可：
@@ -87,7 +123,7 @@ export function createReferralService({ database, walletService }) {
     if (stakeActive > 0n) return stakeActive;
     return 0n;
   }
-  function directOf(address) { return links().filter(item => key(item.referrerWallet) === key(address)); }
+  // directOf 已上移至链接缓存区（linksMaps().byChild，避免每笔卖单/互转全表扫）
   // 代理后台专用：返回 rootWallet 的全部下级钱包闭包（直推+间推，BFS 遍历推荐关系），小写地址 Set
   function getDownlineWallets(rootWallet) {
     const root = key(rootWallet);
@@ -157,22 +193,19 @@ export function createReferralService({ database, walletService }) {
     const allRewards = [...aiRewards, ...tradeRewards];
     const earned = allRewards.filter(item => item.status !== 'pending').reduce((sum, item) => sum + BigInt(item.amountUnits || '0'), 0n);
     const claimable = allRewards.filter(item => item.status === 'pending').reduce((sum, item) => sum + BigInt(item.amountUnits || '0'), 0n);
-    const isEffective = w => {
-      if (activePrincipal(w) > 0n) return true;
-      const fills = database.platformRecords('fills', w, { limit:1000 });
-      const fees = fills.reduce((sum, f) => sum + BigInt(f.feeUnits || '0'), 0n);
-      return fees > 0n;
-    };
-    return { code:mine.code, link:`/?ref=${mine.code}`, directValid:direct.filter(item => isEffective(item.wallet)).length,
-      directInvalid:direct.filter(item => !isEffective(item.wallet)).length,
-      indirectValid:indirect.filter(item => isEffective(item.wallet)).length,
-      indirectInvalid:indirect.filter(item => !isEffective(item.wallet)).length,
+    // 有效/无效计数直接复用 presentRow 的 valid（= activePrincipal>0 || 手续费>0），
+    // 不再对每个下级重复拉 fills(1000)/矿机/质押做二次判定（与旧 isEffective 结果完全一致）
+    const lvl = n => rows.filter(r => r.level === n);
+    return { code:mine.code, link:`/?ref=${mine.code}`, directValid:lvl(1).filter(r => r.valid).length,
+      directInvalid:lvl(1).filter(r => !r.valid).length,
+      indirectValid:lvl(2).filter(r => r.valid).length,
+      indirectInvalid:lvl(2).filter(r => !r.valid).length,
       directRate:Number(directRateBps(address)) / 10000, indirectRate:Number(indirectRateBps(address)) / 10000,
       earned:formatUnits(earned, USDT_DECIMALS), claimable:formatUnits(claimable, USDT_DECIMALS), rows };
   }
   function distributeAiReward(userAddress, userReward, batch, slotAt) {
-    const child = links().find(item => key(item.wallet) === key(userAddress));
-    const direct = child?.referrerWallet ? links().find(item => key(item.wallet) === key(child.referrerWallet)) : null;
+    const child = byWalletOf(userAddress);
+    const direct = child?.referrerWallet ? byWalletOf(child.referrerWallet) : null;
     // 仅 1 代直推，固定 10%，不再有间推
     if (!direct) return;
     const rate = directRateBps();
@@ -184,7 +217,7 @@ export function createReferralService({ database, walletService }) {
     database.insertAiReward({ id:rewardId, batchId:batch.id, wallet:direct.wallet, amountUnits:reward.toString(), rewardDate:new Date(slotAt).toISOString().slice(0,10), slotAt, createdAt:slotAt, source:'platform', kind:'referral', level:1, fromWallet:userAddress, status:'pending' });
   }
   function distributeTradingFee(userAddress, feeUnits, executionId, createdAt = Date.now()) {
-    const child = links().find(item => key(item.wallet) === key(userAddress));
+    const child = byWalletOf(userAddress);
     if (!child?.referrerWallet) return 0n;
     const reward = BigInt(feeUnits) / 2n;
     if (reward <= 0n) return 0n;

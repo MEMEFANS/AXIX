@@ -1,0 +1,33 @@
+{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "billing": {
+      "charged_amount": 0.2,
+      "currency": "USD",
+      "quoted_amount": 0.2,
+      "released_amount": 0
+    },
+    "created_at": "2026-10-26T01:10:42.861159+08:00",
+    "error": null,
+    "finished_at": "2026-10-26T01:11:07.721284+08:00",
+    "id": "img_fade1ad6117045058892ebebdb09faa6",
+    "model": "gpt-image-2",
+    "output_retention_expires_at": "2026-11-02T01:11:07.721284+08:00",
+    "result": {
+      "outputs": [
+        {
+          "filename": "image-1.png",
+          "width": 2496,
+          "height": 1664,
+          "mime_type": "image/png",
+          "size_bytes": 7705782
+        }
+      ],
+      "note": "Ephemeral signed download URLs removed after saving the source image."
+    },
+    "status": "succeeded",
+    "type": "image",
+    "updated_at": "2026-10-26T01:11:07.721284+08:00"
+  }
+}

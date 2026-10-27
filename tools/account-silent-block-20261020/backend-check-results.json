@@ -1,0 +1,14 @@
+{
+  "ok": true,
+  "checks": [
+    "live restricted session rejected; normal login and balance preserved",
+    "persisted revoked-session tombstone survives restart and expires correctly",
+    "new and already signed login challenges blocked; ordinary ban unchanged",
+    "33 restricted HTTP routes return empty 204 idle before downstream handlers",
+    "admin routes and normal wallet pass through; same-origin enforcement remains first",
+    "HTTP login guards work without a cookie; normal signing and session cookie unaffected",
+    "existing deleted-account and wallet-session regressions pass against candidate service"
+  ],
+  "httpRestrictedRoutes": 33,
+  "timestamp": "2026-10-20T14:45:42.693Z"
+}

@@ -1,0 +1,687 @@
+{
+  "startedAt": "2026-10-23T21:00:03.429Z",
+  "url": "http://127.0.0.1:4173/run-aix.html",
+  "browserPort": 9233,
+  "method": "Isolated browser; actual UI/controller, ordinary lane input, real engine advanced in <=50ms steps. No rules or result alterations.",
+  "checks": [
+    {
+      "name": "Six distinct routes render",
+      "pass": true,
+      "detail": [
+        "home",
+        "worlds",
+        "collection",
+        "records",
+        "settings",
+        "guide"
+      ]
+    },
+    {
+      "name": "Fresh progression locks levels 2–6",
+      "pass": true,
+      "detail": [
+        {
+          "id": "level-1",
+          "disabled": false
+        },
+        {
+          "id": "level-2",
+          "disabled": true
+        },
+        {
+          "id": "level-3",
+          "disabled": true
+        },
+        {
+          "id": "level-4",
+          "disabled": true
+        },
+        {
+          "id": "level-5",
+          "disabled": true
+        },
+        {
+          "id": "level-6",
+          "disabled": true
+        }
+      ]
+    },
+    {
+      "name": "Pause/resume during countdown keeps distance frozen",
+      "pass": true,
+      "detail": 0
+    },
+    {
+      "name": "Real canvas pointer swipes change right and left lanes",
+      "pass": true,
+      "detail": {
+        "rightLane": 2,
+        "leftLane": 1
+      }
+    },
+    {
+      "name": "Real held boost accelerates, release cruises, and pause releases held input",
+      "pass": true,
+      "detail": {
+        "beforeBoost": {
+          "distance": 1.1407674128498628,
+          "speed": 5.825015190067597,
+          "rocket": false
+        },
+        "heldBoost": {
+          "distance": 15.896677948348817,
+          "speed": 14.268923196935065,
+          "rocket": true,
+          "held": true
+        },
+        "releasedBoost": {
+          "distance": 32.63257982301273,
+          "speed": 9.841235338038349,
+          "rocket": false,
+          "held": false
+        },
+        "resumedCruise": {
+          "state": "running",
+          "distance": 55.28724454780533,
+          "rocket": false,
+          "held": false
+        }
+      }
+    },
+    {
+      "name": "Training reaches real 200m summary without unlocking campaign",
+      "pass": true,
+      "detail": {
+        "id": "11b5bf19-d16c-42fd-9e07-c1b0cfb40eef",
+        "date": 1792789208909,
+        "levelId": "training",
+        "distance": 200,
+        "completed": true,
+        "stars": 3,
+        "reason": "finish",
+        "hits": 0,
+        "dodges": 2,
+        "crystals": 3,
+        "totalCrystals": 4,
+        "elapsed": 18.555,
+        "bestCombo": 3,
+        "hearts": 3,
+        "maxHearts": 3
+      }
+    },
+    {
+      "name": "Keyboard lane controls and running pause/resume work",
+      "pass": true,
+      "detail": {
+        "state": "running",
+        "lane": 1
+      }
+    },
+    {
+      "name": "Six campaign levels finish through lane input and sequential summaries",
+      "pass": true,
+      "detail": [
+        {
+          "id": "bca3b5fd-241a-4228-bee6-e19e58dcfbab",
+          "date": 1792789209351,
+          "levelId": "level-1",
+          "distance": 200,
+          "completed": true,
+          "stars": 3,
+          "reason": "finish",
+          "hits": 0,
+          "dodges": 4,
+          "crystals": 3,
+          "totalCrystals": 3,
+          "elapsed": 15.704,
+          "bestCombo": 7,
+          "hearts": 3,
+          "maxHearts": 3
+        },
+        {
+          "id": "0c410eec-271d-4728-aa0b-9487cb6fb1e5",
+          "date": 1792789209689,
+          "levelId": "level-2",
+          "distance": 250,
+          "completed": true,
+          "stars": 3,
+          "reason": "finish",
+          "hits": 0,
+          "dodges": 7,
+          "crystals": 4,
+          "totalCrystals": 4,
+          "elapsed": 17,
+          "bestCombo": 11,
+          "hearts": 3,
+          "maxHearts": 3
+        },
+        {
+          "id": "34e81041-2af4-497c-856f-8a95c29299c7",
+          "date": 1792789210034,
+          "levelId": "level-3",
+          "distance": 300,
+          "completed": true,
+          "stars": 3,
+          "reason": "finish",
+          "hits": 0,
+          "dodges": 9,
+          "crystals": 3,
+          "totalCrystals": 4,
+          "elapsed": 17.95,
+          "bestCombo": 12,
+          "hearts": 3,
+          "maxHearts": 3
+        },
+        {
+          "id": "936c1cb5-d15c-4c43-89ba-b38c9d3c6c9d",
+          "date": 1792789210376,
+          "levelId": "level-4",
+          "distance": 350,
+          "completed": true,
+          "stars": 3,
+          "reason": "finish",
+          "hits": 0,
+          "dodges": 11,
+          "crystals": 4,
+          "totalCrystals": 5,
+          "elapsed": 18.75,
+          "bestCombo": 15,
+          "hearts": 3,
+          "maxHearts": 3
+        },
+        {
+          "id": "07bc9c9f-d44a-4c27-9834-fb40dbd45d77",
+          "date": 1792789210726,
+          "levelId": "level-5",
+          "distance": 400,
+          "completed": true,
+          "stars": 3,
+          "reason": "finish",
+          "hits": 0,
+          "dodges": 15,
+          "crystals": 6,
+          "totalCrystals": 6,
+          "elapsed": 19.41,
+          "bestCombo": 21,
+          "hearts": 3,
+          "maxHearts": 3
+        },
+        {
+          "id": "59d48a64-dcc9-4933-9c84-3fdd1c254214",
+          "date": 1792789211058,
+          "levelId": "level-6",
+          "distance": 500,
+          "completed": true,
+          "stars": 3,
+          "reason": "finish",
+          "hits": 0,
+          "dodges": 17,
+          "crystals": 7,
+          "totalCrystals": 7,
+          "elapsed": 22.052,
+          "bestCombo": 24,
+          "hearts": 3,
+          "maxHearts": 3
+        }
+      ]
+    },
+    {
+      "name": "Earned stars unlock collection and skin selection writes profile",
+      "pass": true,
+      "detail": [
+        {
+          "id": "aurora",
+          "disabled": true
+        },
+        {
+          "id": "nebula",
+          "disabled": false
+        },
+        {
+          "id": "sunrise",
+          "disabled": false
+        }
+      ]
+    },
+    {
+      "name": "Daily preview waits for start",
+      "pass": true,
+      "detail": "同一天的航路固定，可以反复挑战。\n新航路已就绪，等你留下第一份成绩。"
+    },
+    {
+      "name": "Daily retry has identical seeded road",
+      "pass": true,
+      "detail": {
+        "first": {
+          "id": "446dd730-e32b-429f-a7c2-fdf8eba77c07",
+          "date": 1792789211530,
+          "levelId": "daily",
+          "distance": 300,
+          "completed": true,
+          "stars": 3,
+          "reason": "finish",
+          "hits": 0,
+          "dodges": 8,
+          "crystals": 4,
+          "totalCrystals": 4,
+          "elapsed": 17.958,
+          "bestCombo": 12,
+          "hearts": 3,
+          "maxHearts": 3
+        },
+        "second": {
+          "id": "5255ad5a-8ce1-41bf-bd3a-40accefec823",
+          "date": 1792789211866,
+          "levelId": "daily",
+          "distance": 300,
+          "completed": true,
+          "stars": 3,
+          "reason": "finish",
+          "hits": 0,
+          "dodges": 8,
+          "crystals": 4,
+          "totalCrystals": 4,
+          "elapsed": 17.95,
+          "bestCombo": 12,
+          "hearts": 3,
+          "maxHearts": 3
+        },
+        "warningCount": 10,
+        "warnings": [
+          {
+            "id": "bnb",
+            "lane": 2,
+            "distance": 54
+          },
+          {
+            "id": "ltc",
+            "lane": 1,
+            "distance": 92.799647
+          },
+          {
+            "id": "sol",
+            "lane": 1,
+            "distance": 130.675135
+          },
+          {
+            "id": "doge",
+            "lane": 2,
+            "distance": 130.675135
+          },
+          {
+            "id": "gas",
+            "lane": 1,
+            "distance": 167.212914
+          },
+          {
+            "id": "sol",
+            "lane": 0,
+            "distance": 202.048762
+          },
+          {
+            "id": "liquidation",
+            "lane": 2,
+            "distance": 237.423211
+          },
+          {
+            "id": "doge",
+            "lane": 2,
+            "distance": 271.149695
+          },
+          {
+            "id": "bear",
+            "lane": 2,
+            "distance": 304.609852
+          },
+          {
+            "id": "bear",
+            "lane": 0,
+            "distance": 337.179609
+          }
+        ]
+      }
+    },
+    {
+      "name": "A daily run finished after China midnight stays on its launch-day route",
+      "pass": true,
+      "detail": {
+        "completed": true,
+        "recordDay": "2029-01-01"
+      }
+    },
+    {
+      "name": "Adventure writes only its separate player profile",
+      "pass": true,
+      "detail": [
+        "run-aix:player-profile:v1"
+      ]
+    },
+    {
+      "name": "Campaign, daily records, equipped skin and settings survive reload",
+      "pass": true,
+      "detail": {
+        "completed": [
+          "level-1",
+          "level-2",
+          "level-3",
+          "level-4",
+          "level-5",
+          "level-6"
+        ],
+        "stars": 18,
+        "selectedSkin": "nebula",
+        "settings": {
+          "sound": false,
+          "haptics": true,
+          "reducedMotion": true
+        },
+        "totalRuns": 10
+      }
+    },
+    {
+      "name": "320×640 routes have no horizontal overflow and play controls fit",
+      "pass": true,
+      "detail": {
+        "routes": [
+          {
+            "name": "home",
+            "width": 320,
+            "height": 640,
+            "scrollWidth": 320,
+            "bodyWidth": 320
+          },
+          {
+            "name": "worlds",
+            "width": 320,
+            "height": 640,
+            "scrollWidth": 320,
+            "bodyWidth": 320
+          },
+          {
+            "name": "collection",
+            "width": 320,
+            "height": 640,
+            "scrollWidth": 320,
+            "bodyWidth": 320
+          },
+          {
+            "name": "records",
+            "width": 320,
+            "height": 640,
+            "scrollWidth": 320,
+            "bodyWidth": 320
+          },
+          {
+            "name": "settings",
+            "width": 320,
+            "height": 640,
+            "scrollWidth": 320,
+            "bodyWidth": 320
+          },
+          {
+            "name": "guide",
+            "width": 320,
+            "height": 640,
+            "scrollWidth": 320,
+            "bodyWidth": 320
+          }
+        ],
+        "controls": [
+          {
+            "id": "pause-game",
+            "x": 9,
+            "y": 13.5,
+            "width": 32,
+            "height": 32,
+            "bottom": 45.5,
+            "right": 41
+          },
+          {
+            "id": "move-left",
+            "x": 9,
+            "y": 546,
+            "width": 58,
+            "height": 61,
+            "bottom": 607,
+            "right": 67
+          },
+          {
+            "id": "move-right",
+            "x": 253,
+            "y": 546,
+            "width": 58,
+            "height": 61,
+            "bottom": 607,
+            "right": 311
+          },
+          {
+            "id": "boost",
+            "x": 76,
+            "y": 546,
+            "width": 168,
+            "height": 61,
+            "bottom": 607,
+            "right": 244
+          },
+          {
+            "id": "world",
+            "x": 10,
+            "y": 60,
+            "width": 300,
+            "height": 473,
+            "bottom": 533,
+            "right": 310
+          }
+        ]
+      }
+    },
+    {
+      "name": "390×844 routes have no horizontal overflow and play controls fit",
+      "pass": true,
+      "detail": {
+        "routes": [
+          {
+            "name": "home",
+            "width": 390,
+            "height": 844,
+            "scrollWidth": 390,
+            "bodyWidth": 390
+          },
+          {
+            "name": "worlds",
+            "width": 390,
+            "height": 844,
+            "scrollWidth": 390,
+            "bodyWidth": 390
+          },
+          {
+            "name": "collection",
+            "width": 390,
+            "height": 844,
+            "scrollWidth": 390,
+            "bodyWidth": 390
+          },
+          {
+            "name": "records",
+            "width": 390,
+            "height": 844,
+            "scrollWidth": 390,
+            "bodyWidth": 390
+          },
+          {
+            "name": "settings",
+            "width": 390,
+            "height": 844,
+            "scrollWidth": 390,
+            "bodyWidth": 390
+          },
+          {
+            "name": "guide",
+            "width": 390,
+            "height": 844,
+            "scrollWidth": 390,
+            "bodyWidth": 390
+          }
+        ],
+        "controls": [
+          {
+            "id": "pause-game",
+            "x": 13,
+            "y": 16.5,
+            "width": 32,
+            "height": 32,
+            "bottom": 48.5,
+            "right": 45
+          },
+          {
+            "id": "move-left",
+            "x": 13,
+            "y": 745,
+            "width": 66,
+            "height": 66,
+            "bottom": 811,
+            "right": 79
+          },
+          {
+            "id": "move-right",
+            "x": 311,
+            "y": 745,
+            "width": 66,
+            "height": 66,
+            "bottom": 811,
+            "right": 377
+          },
+          {
+            "id": "boost",
+            "x": 88,
+            "y": 745,
+            "width": 214,
+            "height": 66,
+            "bottom": 811,
+            "right": 302
+          },
+          {
+            "id": "world",
+            "x": 14,
+            "y": 66,
+            "width": 362,
+            "height": 666,
+            "bottom": 732,
+            "right": 376
+          }
+        ]
+      }
+    },
+    {
+      "name": "1440×1000 routes have no horizontal overflow and play controls fit",
+      "pass": true,
+      "detail": {
+        "routes": [
+          {
+            "name": "home",
+            "width": 1440,
+            "height": 1000,
+            "scrollWidth": 1425,
+            "bodyWidth": 1425
+          },
+          {
+            "name": "worlds",
+            "width": 1440,
+            "height": 1000,
+            "scrollWidth": 1425,
+            "bodyWidth": 1425
+          },
+          {
+            "name": "collection",
+            "width": 1440,
+            "height": 1000,
+            "scrollWidth": 1425,
+            "bodyWidth": 1425
+          },
+          {
+            "name": "records",
+            "width": 1440,
+            "height": 1000,
+            "scrollWidth": 1440,
+            "bodyWidth": 1440
+          },
+          {
+            "name": "settings",
+            "width": 1440,
+            "height": 1000,
+            "scrollWidth": 1440,
+            "bodyWidth": 1440
+          },
+          {
+            "name": "guide",
+            "width": 1440,
+            "height": 1000,
+            "scrollWidth": 1440,
+            "bodyWidth": 1440
+          }
+        ],
+        "controls": [
+          {
+            "id": "pause-game",
+            "x": 483,
+            "y": 15,
+            "width": 35,
+            "height": 35,
+            "bottom": 50,
+            "right": 518
+          },
+          {
+            "id": "move-left",
+            "x": 483,
+            "y": 901,
+            "width": 66,
+            "height": 66,
+            "bottom": 967,
+            "right": 549
+          },
+          {
+            "id": "move-right",
+            "x": 891,
+            "y": 901,
+            "width": 66,
+            "height": 66,
+            "bottom": 967,
+            "right": 957
+          },
+          {
+            "id": "boost",
+            "x": 558,
+            "y": 901,
+            "width": 324,
+            "height": 66,
+            "bottom": 967,
+            "right": 882
+          },
+          {
+            "id": "world",
+            "x": 484,
+            "y": 66,
+            "width": 472,
+            "height": 822,
+            "bottom": 888,
+            "right": 956
+          }
+        ]
+      }
+    },
+    {
+      "name": "No JS exceptions, rejected promises, failed requests, HTTP errors or broken loaded images",
+      "pass": true,
+      "detail": {
+        "pageErrors": [],
+        "exceptionCount": 0,
+        "requestFailures": [],
+        "statuses": [],
+        "broken": []
+      }
+    }
+  ],
+  "errors": [],
+  "passed": true,
+  "finishedAt": "2026-10-23T21:00:15.439Z"
+}

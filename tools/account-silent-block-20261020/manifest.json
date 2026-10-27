@@ -1,0 +1,14 @@
+{
+  "candidate": {
+    "src/wallet-service.js": "5b7c1cccaaaaacf81de375f2b1c159a15e08be83b1dea06880a3578184ea5c6e",
+    "src/server.js": "9a088d7cecaa21b1289326b87dce84b1818efc90f2e7df5b2dd66a1531215e4b",
+    "public/js/account-action-guard.js": "d26f85530ad2a60fe99a521797ded2141b541054d8de4c9461622daed920054e",
+    "public/index.html": "77efbb3418a007ce5e44f3d5a0e83c8dfcac8160a241052c12af0c3b950cfcb2"
+  },
+  "expected": {
+    "src/wallet-service.js": "298798bf8a781145bea9db05e039b688d069013abd9bffa80868f96ae9ba01d3",
+    "src/server.js": "cdbab2e3c1a5f7fa30c17bb8365aeabb729a6c8a57150852ae41634da2edf0f5",
+    "public/js/account-action-guard.js": null,
+    "public/index.html": "008efd10a534b69b620ffbdd830579e4ad3726bab1396312b2ca6c1543f6d572"
+  }
+}

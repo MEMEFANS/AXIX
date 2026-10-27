@@ -1,0 +1,43 @@
+{
+  "fixture": "isolated-two-tab-qa",
+  "startedAt": "2026-10-25T18:15:36.400Z",
+  "checks": [
+    {
+      "name": "simultaneous first navigation 1: both tabs join one active round",
+      "pass": true,
+      "detail": {
+        "round": "local-1-f6f8a5d2622f"
+      }
+    },
+    {
+      "name": "simultaneous first navigation 2: both tabs join one active round",
+      "pass": true,
+      "detail": {
+        "round": "local-1-1689e32ecbb5"
+      }
+    },
+    {
+      "name": "simultaneous first navigation 3: both tabs join one active round",
+      "pass": true,
+      "detail": {
+        "round": "local-1-214d3ca60e9e"
+      }
+    },
+    {
+      "name": "concurrent confirmation: one ticket, one deduction, both tabs display the accepted choice",
+      "pass": true
+    },
+    {
+      "name": "both tabs reveal same record and settle payout exactly once",
+      "pass": true,
+      "detail": {
+        "outcome": "5",
+        "payoutCents": 3960
+      }
+    }
+  ],
+  "errors": [],
+  "cleanedUp": true,
+  "finishedAt": "2026-10-25T18:15:37.962Z",
+  "ok": true
+}

@@ -1,0 +1,12 @@
+{
+  "runtime": "resources/app/public/games/hash-aix/assets/hash-core.jpg",
+  "prompt": "tools/hash-aix/art-jobs/hash-core-prompt.txt",
+  "status": "succeeded",
+  "runtimeDimensions": "1200x800",
+  "sourceDimensions": "2496x1664",
+  "chargedUsd": 0.2,
+  "jobId": "img_fade1ad6117045058892ebebdb09faa6",
+  "model": "gpt-image-2",
+  "provider": "Kakou Media API",
+  "source": "output/imagegen/hash-aix/hash-core-source.png"
+}

@@ -18,6 +18,6 @@
     "pending requests are isolated across wallets; old balances cannot overwrite new ones",
     "simultaneous reads coalesce; hung reads fail within their deadline"
   ],
-  "overviewWithChartHeldMs": 88,
-  "scriptCount": 39
+  "overviewWithChartHeldMs": 106,
+  "scriptCount": 41
 }

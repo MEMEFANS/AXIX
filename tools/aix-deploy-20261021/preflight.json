@@ -1,0 +1,54 @@
+{
+  "readonly": true,
+  "hashes": {
+    "src/a-token-activation-service.js": "9b00f763d9da44287d5842f4872f094c256ecfd730b8c0299972cca7b3d2b690",
+    "src/a-token-api.js": "776089e420d1a7765e7cf0004abbbea201b110c5fdfd279fdc97da583298eddc",
+    "src/a-token-miner-service.js": "b2439b8f0933a51b32dd4d765c8eae991af87259b9e6f1fb18fe296226ea6f28",
+    "src/a-token-service.js": "adcb4fb717be57e4d2377ec3766170dd45e11e82071ac5d548f13b99ea6dc634",
+    "src/a-token-team-service.js": "09f49f3bfb9d8805727a11edd582c706b5ac5a2153e3b5caf34856f6f808cbf5",
+    "src/database.js": "a76c5a8adf2af3f2fed92fdb67077d80197fda3f7e387e94a663c48dfdedc1f8",
+    "src/a-token-admin-api.js": "0c08f4542f9bbe46fa5522224a56d921e882da2debd5eefcc801b5b774af2d49",
+    "src/server.js": "9a088d7cecaa21b1289326b87dce84b1818efc90f2e7df5b2dd66a1531215e4b",
+    "src/wallet-service.js": "5b7c1cccaaaaacf81de375f2b1c159a15e08be83b1dea06880a3578184ea5c6e",
+    "public/js/earn.js": "dfcc2841c8295959c0dab67c019ff06fd99d5cb817354b0f086f6057427b0307",
+    "public/js/a-token-trade.js": "cc97f76c287d07c6088c875edab5f3a30ed9d5118f70d013d5a4b8ef26e52b82",
+    "public/js/operator-admin.js": "ada8c650106ce3ca2e3951d4d3c4a6de7e940ff39d02dc651da347842e375410",
+    "public/js/page-loader.js": "a116f9c5dd57947041761e7479dd799aec206d4afce53d1e52adcc8e2422eabe",
+    "public/index.html": "77efbb3418a007ce5e44f3d5a0e83c8dfcac8160a241052c12af0c3b950cfcb2",
+    "public/admin.html": "e9c808a1c71d050d27f5f1126ace0bd31c054d49f73a924c8cd6612643a68abf",
+    "public/promo-miner.html": "0406d5fdc99c56ac04af0fae68499c895f3ba64b69d8a37de6bef97c9c2134e7",
+    "public/promo-guide.html": "d8d9f0c24e1958cc43fc921cd8b543efc7fbd161c2e9b0fa9cabc1cd91cae5a5",
+    "public/promo-article.html": "cf029efd0bb7aeb138d3c4b71c54677ac9997c8286931e1dd1ca5621773b324b",
+    "public/js/account-action-guard.js": "d26f85530ad2a60fe99a521797ded2141b541054d8de4c9461622daed920054e",
+    "package.json": "94e2367cf5e434b7607c2e499e6444b4fa446eef110f4517c148011946f25a06"
+  },
+  "info": {
+    "blockCount": 122,
+    "silentBlockCount": 3,
+    "aixCutoverPresent": false,
+    "activationCount": 22986,
+    "minerCount": 22947,
+    "activationIndexes": [
+      [
+        "sqlite_autoindex_a_token_activations_1",
+        null
+      ],
+      [
+        "a_token_activations_tx_unique",
+        "CREATE UNIQUE INDEX a_token_activations_tx_unique\n      ON a_token_activations(tx_hash COLLATE NOCASE)"
+      ],
+      [
+        "a_token_activations_wallet_idx",
+        "CREATE INDEX a_token_activations_wallet_idx\n      ON a_token_activations(wallet, created_at DESC)"
+      ],
+      [
+        "a_token_activations_status_idx",
+        "CREATE INDEX a_token_activations_status_idx\n      ON a_token_activations(status, created_at DESC)"
+      ]
+    ],
+    "service": "active",
+    "restarts": "0",
+    "node": "v22.23.2",
+    "diskFreeBytes": 34717282304
+  }
+}

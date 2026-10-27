@@ -1,6 +1,7 @@
 import crypto from 'node:crypto';
 import { formatUnits } from 'ethers';
 import { createATokenRevenueService } from './a-token-revenue-service.js';
+import { activationMessage } from './a-token-activation-service.js';
 
 const A_TOKEN_DECIMALS = 18;
 function formatATokenDisplay(units) {
@@ -69,22 +70,19 @@ export function createATokenApi({
     if (isGet && pathname === '/api/a-token/plans') {
       const meta = activationService.getMeta ? activationService.getMeta() : {};
       const plans = activationService.getPlans();
-      const collectionAddressByPlan = {};
-      plans.forEach(p => {
-        collectionAddressByPlan[p.plan] = activationService.getCollectionAddressForPlan
-          ? activationService.getCollectionAddressForPlan(p.plan)
-          : (activationService.collectionAddress || '');
-      });
       return send(res, 200, {
         activation: plans,
         activationMeta: meta,
-        collectionAddress: activationService.collectionAddress || '',
-        collectionAddressByPlan,
+        paymentMode: 'aix_balance',
+        paymentAsset: 'AIX',
+        collectionAddress: '',
+        collectionAddressByPlan: {},
         chainId: 56,
         confirmations: Number(process.env.A_TOKEN_ACTIVATION_CONFIRMATIONS || 12),
         activationEnabled: aTokenService.isActivationEnabled ? aTokenService.isActivationEnabled() : true,
         withdrawEnabled: aTokenService.isWithdrawEnabled ? aTokenService.isWithdrawEnabled() : true,
-        staking: Object.values(stakingService.STAKE_PLANS).map(p => ({ ...p, minUnits: undefined })),
+        // 活期已下线（2026-10-25）：套餐列表不再返回 current，前端不再展示入口；历史记录仍可读
+        staking: Object.values(stakingService.STAKE_PLANS).filter(p => p.planId !== 'current').map(p => ({ ...p, minUnits: undefined })),
         miner: Object.values(minerService.MINER_PLANS).map(p => ({ ...p, totalUnits: undefined })),
       });
     }
@@ -142,6 +140,8 @@ export function createATokenApi({
         try { prof.locked = orderService?.myLocks?.(session.address) || { usdt: '0', a: '0' }; } catch { prof.locked = { usdt: '0', a: '0' }; }
         // 卖出阶梯费率档案（前端下单面板直接展示当前费率）
         try { prof.sellFee = orderService?.sellFeeProfile?.(session.address) || null; } catch { prof.sellFee = null; }
+        // 可卖额度（2026-10-25）：只有质押释放的产出可卖，前端卖出面板展示
+        try { prof.sellQuota = orderService?.sellQuota?.(session.address) || null; } catch { prof.sellQuota = null; }
         return send(res, 200, prof);
       }
       if (isGet && pathname === '/api/a-token/team/summary') {
@@ -182,6 +182,10 @@ export function createATokenApi({
       }
       if (isGet && pathname === '/api/a-token/activations') {
         return send(res, 200, { activations: activationService.listByWallet(session.address) });
+      }
+      if (isGet && pathname === '/api/a-token/activation-request') {
+        const params = new URLSearchParams(request.url?.split('?')[1] || '');
+        return send(res, 200, { record: activationService.getRequest(session.address, params.get('plan'), params.get('requestId')) });
       }
       // 我的委托（含 OPEN / FILLED / CANCELLED）
       if (isGet && pathname === '/api/a-token/orders') {
@@ -399,13 +403,26 @@ export function createATokenApi({
         return send(res, 200, { ok:true, stake:result });
       }
       if (pathname === '/api/a-token/activate') {
-        if (aTokenService.isActivationEnabled && !aTokenService.isActivationEnabled()) {
-          return send(res, 503, { error: '矿机激活暂未开放，请留意平台公告', code: 'ACTIVATION_DISABLED' });
+        // Cached clients may only recover BNB payments made before the cutover.
+        if (body.txHash) {
+          const record = await withAccountLock(session.address, () => activationService.submit(session.address, String(body.plan ?? ''), String(body.txHash)));
+          const verified = await activationService.verify(record);
+          return send(res, 200, { ok: true, activation: verified });
         }
-        // 提交（串行锁）→ 链上校验（异步）
-        const record = await withAccountLock(session.address, () => activationService.submit(session.address, String(body.plan ?? ''), String(body.txHash ?? '')));
-        const verified = await activationService.verify(record).catch(e => ({ status:'pending', reason:e?.message || String(e), record }));
-        return send(res, 200, { ok:true, activation: verified });
+        const requestId = String(request.headers['idempotency-key'] || '').trim();
+        const planKey = String(body.plan ?? '');
+        let quantity = Math.floor(Number(body.quantity));
+        if (!Number.isFinite(quantity) || quantity < 1) quantity = 1;
+        if (quantity > 100) throw apiError('单次最多激活 100 台，请分批操作', 'VALIDATION_ERROR');
+        const result = await withAccountLock(session.address, () => {
+          const previous = activationService.getRequest(session.address, planKey, requestId);
+          if (previous) return previous;
+          walletService.verifyOperationSignature({ address: session.address,
+            message: activationMessage(planKey, requestId, String(body.timestamp ?? ''), quantity),
+            signature: String(body.signature ?? '') });
+          return activationService.activate(session.address, planKey, requestId, quantity);
+        });
+        return send(res, 200, { ok: true, activation: { status: result.status, record: result } });
       }
 
       send(res, 404, { error:'接口不存在', code:'NOT_FOUND' });

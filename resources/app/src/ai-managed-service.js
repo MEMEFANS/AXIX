@@ -259,6 +259,12 @@ export function createAiManagedService({ platformService, walletService, fetchCa
       }
       batch.status = 'exited';
       batch.exitedAt = now;
+      // 跟单提现额度：本金提走后该批次额度作废，同时冲销其已解锁部分占用的额度（追加跟单可重新累积）
+      const exitedQuota = batchUnlockedQuota(batch, now);
+      if (exitedQuota > 0n) {
+        const usedNow = BigInt(state.quotaUsedUnits || '0');
+        state.quotaUsedUnits = (usedNow > exitedQuota ? usedNow - exitedQuota : 0n).toString();
+      }
       changed = true;
       console.log(`[AI托管] ${address} 退出跟单到账，返还本金 ${formatUnits(net, USDT_DECIMALS)} USDT（批次 ${batch.id.slice(-8)}）`);
     }
@@ -335,6 +341,12 @@ export function createAiManagedService({ platformService, walletService, fetchCa
         batch.status = 'expired';
         batch.lastSlotAt = expiryMs;
         if (batch.ledger === 'wallet') walletService.creditBalance?.(address, 'USDT', BigInt(batch.principalUnits));
+        // 到期返还本金同样作报废次额度并冲销其已解锁占用
+        const expiredQuota = batchUnlockedQuota(batch, now);
+        if (expiredQuota > 0n) {
+          const usedNow = BigInt(state.quotaUsedUnits || '0');
+          state.quotaUsedUnits = (usedNow > expiredQuota ? usedNow - expiredQuota : 0n).toString();
+        }
         changed = true;
       }
     }
@@ -393,7 +405,9 @@ export function createAiManagedService({ platformService, walletService, fetchCa
       monthlyRate:active[0] ? Number(active[0].monthlyPct || AI_MANAGED_MONTHLY_MID) : AI_MANAGED_MONTHLY_MID, dailyRate:active[0] ? Number(active[0].rateBps) / 10000 : 0,
       principal:formatUnits(principal, USDT_DECIMALS), managedBalance:formatUnits(principal + earned, USDT_DECIMALS), dayEarned:formatUnits(earned, USDT_DECIMALS),
       dayTarget:formatUnits(target, USDT_DECIMALS), totalEarned:formatUnits(BigInt(state.totalEarnedUnits || '0'), USDT_DECIMALS), progress:target > 0n ? Number(earned * 1_000_000n / target) / 1_000_000 : 0,
-      availableBalance:formatUnits(walletService.balanceUnits(address, 'USDT'), USDT_DECIMALS), batches:state.batches.map(b => ({ ...b, principal:formatUnits(BigInt(b.principalUnits), USDT_DECIMALS), totalEarned:formatUnits(BigInt(b.totalEarnedUnits || '0'), USDT_DECIMALS) })), records };
+      availableBalance:formatUnits(walletService.balanceUnits(address, 'USDT'), USDT_DECIMALS),
+      withdrawQuota: (() => { const q = quotaInfoOf(state); return q.engaged ? { unlocked: formatUnits(q.unlocked, USDT_DECIMALS), used: formatUnits(q.used, USDT_DECIMALS), available: formatUnits(q.available, USDT_DECIMALS) } : null; })(),
+      batches:state.batches.map(b => ({ ...b, principal:formatUnits(BigInt(b.principalUnits), USDT_DECIMALS), totalEarned:formatUnits(BigInt(b.totalEarnedUnits || '0'), USDT_DECIMALS) })), records };
   }
   async function start(address, value, options = {}) {
     const capital = amount(value, '托管金额'), now = clock(), state = read(address), plan = planFor();
@@ -468,6 +482,48 @@ export function createAiManagedService({ platformService, walletService, fetchCa
     return present(read(address), address);
   }
   async function stateFor(address) { return present(await processAddress(address), address); }
+  // ── 跟单提现额度（2026-10-25）：跟单本金按 30 天线性解锁 USDT 提现额度 ──
+  // 每天北京 00:00 解锁 本金/30，可累计；退出跟单（本金返还）后该批次不再产生额度。
+  // 只约束跟单用户：从未跟单的钱包不拦截。已消耗额度（quotaUsedUnits）持久化在 state 里。
+  const QUOTA_UNLOCK_DAYS = 30;
+  const bjDaySlot = (t) => Math.floor((Number(t) + timezoneOffsetMs) / dayMs);
+  function batchUnlockedQuota(batch, now) {
+    const days = Math.max(0, Math.min(QUOTA_UNLOCK_DAYS, bjDaySlot(now) - bjDaySlot(Number(batch.startedAt) || now)));
+    return BigInt(batch.principalUnits || '0') * BigInt(days) / BigInt(QUOTA_UNLOCK_DAYS);
+  }
+  function quotaInfoOf(state, now = clock()) {
+    const engaged = Array.isArray(state.batches) && state.batches.length > 0;
+    const contributing = engaged ? state.batches.filter(b => b.status === 'active' || b.status === 'exiting') : [];
+    const unlocked = contributing.reduce((s, b) => s + batchUnlockedQuota(b, now), 0n);
+    const used = BigInt(state.quotaUsedUnits || '0');
+    return { engaged, unlocked, used, available: unlocked > used ? unlocked - used : 0n };
+  }
+  function assertWithdrawQuota(address, amountUnits) {
+    const q = quotaInfoOf(read(address));
+    if (!q.engaged) return; // 未跟单用户不受额度限制
+    const want = BigInt(amountUnits);
+    if (want > q.available) {
+      throw new Error(`可用提现额度不足：跟单本金按 30 天解锁提现额度（每天北京 00:00 解锁 1/30），当前可提 ${formatUnits(q.available, USDT_DECIMALS)} USDT，请减少金额或明日再试`);
+    }
+  }
+  function consumeWithdrawQuota(address, amountUnits) {
+    const state = read(address);
+    if (!Array.isArray(state.batches) || !state.batches.length) return;
+    state.quotaUsedUnits = (BigInt(state.quotaUsedUnits || '0') + BigInt(amountUnits)).toString();
+    persist(address, state);
+  }
+  function refundWithdrawQuota(address, amountUnits) {
+    const state = read(address);
+    if (!Array.isArray(state.batches) || !state.batches.length) return;
+    const used = BigInt(state.quotaUsedUnits || '0');
+    const back = BigInt(amountUnits);
+    state.quotaUsedUnits = (used > back ? used - back : 0n).toString();
+    persist(address, state);
+  }
+  function withdrawQuotaInfo(address) {
+    const q = quotaInfoOf(read(address));
+    return { engaged: q.engaged, unlocked: formatUnits(q.unlocked, USDT_DECIMALS), used: formatUnits(q.used, USDT_DECIMALS), available: formatUnits(q.available, USDT_DECIMALS) };
+  }
   async function processAll() { if (processing) return processing; processing = (async () => {
     const primary = platformService.internalStrategyAccounts();
     const dbExtra = (db?.listAiManagedActiveWallets ? db.listAiManagedActiveWallets() : []).map(String);
@@ -513,5 +569,6 @@ export function createAiManagedService({ platformService, walletService, fetchCa
   const timer = setInterval(() => processAll().catch(error => console.error('[AI 托管]', error?.message || error)), 60_000); timer.unref?.();
   let pointsService = null;
   function setPointsService(service) { pointsService = service || null; }
-  return { processAll, stopCopyTrade, start, unlock, stateFor, setPointsService, stop:() => clearInterval(timer) };
+  return { processAll, stopCopyTrade, start, unlock, stateFor, setPointsService, stop:() => clearInterval(timer),
+    withdrawQuota: { assert: assertWithdrawQuota, consume: consumeWithdrawQuota, refund: refundWithdrawQuota, info: withdrawQuotaInfo } };
 }

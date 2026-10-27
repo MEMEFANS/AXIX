@@ -1,0 +1,159 @@
+{
+  "fixture": "isolated-local-visual-qa",
+  "startedAt": "2026-10-25T18:15:26.683Z",
+  "checks": [
+    {
+      "name": "1440px game",
+      "pass": true
+    },
+    {
+      "name": "1440px history",
+      "pass": true
+    },
+    {
+      "name": "1440px verify",
+      "pass": true
+    },
+    {
+      "name": "1440px rules",
+      "pass": true
+    },
+    {
+      "name": "1440px runner lobby",
+      "pass": true
+    },
+    {
+      "name": "1440px real pointer navigation: hash → runner → hash",
+      "pass": true
+    },
+    {
+      "name": "390px game",
+      "pass": true
+    },
+    {
+      "name": "390px history",
+      "pass": true
+    },
+    {
+      "name": "390px verify",
+      "pass": true
+    },
+    {
+      "name": "390px rules",
+      "pass": true
+    },
+    {
+      "name": "390px runner lobby",
+      "pass": true
+    },
+    {
+      "name": "390px real pointer navigation: hash → runner → hash",
+      "pass": true
+    },
+    {
+      "name": "320px game",
+      "pass": true
+    },
+    {
+      "name": "320px history",
+      "pass": true
+    },
+    {
+      "name": "320px verify",
+      "pass": true
+    },
+    {
+      "name": "320px rules",
+      "pass": true
+    },
+    {
+      "name": "320px runner lobby",
+      "pass": true
+    },
+    {
+      "name": "320px real pointer navigation: hash → runner → hash",
+      "pass": true
+    },
+    {
+      "name": "390px revealed game",
+      "pass": true
+    },
+    {
+      "name": "390px populated history",
+      "pass": true
+    },
+    {
+      "name": "mobile history shows chosen prediction and stake",
+      "pass": true
+    },
+    {
+      "name": "320px populated history",
+      "pass": true
+    },
+    {
+      "name": "320px populated proof",
+      "pass": true
+    }
+  ],
+  "screenshots": [
+    {
+      "path": "C:\\Users\\Administrator\\Desktop\\AXIX\\tools\\hash-aix\\qa\\desktop-game-ready.png",
+      "width": 1440,
+      "height": 1191
+    },
+    {
+      "path": "C:\\Users\\Administrator\\Desktop\\AXIX\\tools\\hash-aix\\qa\\mobile-game-ready.png",
+      "width": 390,
+      "height": 1419
+    },
+    {
+      "path": "C:\\Users\\Administrator\\Desktop\\AXIX\\tools\\hash-aix\\qa\\mobile-game-ready-viewport.png",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "path": "C:\\Users\\Administrator\\Desktop\\AXIX\\tools\\hash-aix\\qa\\small-game-ready.png",
+      "width": 320,
+      "height": 1417
+    },
+    {
+      "path": "C:\\Users\\Administrator\\Desktop\\AXIX\\tools\\hash-aix\\qa\\mobile-rules.png",
+      "width": 390,
+      "height": 2003
+    },
+    {
+      "path": "C:\\Users\\Administrator\\Desktop\\AXIX\\tools\\hash-aix\\qa\\small-rules.png",
+      "width": 320,
+      "height": 2046
+    },
+    {
+      "path": "C:\\Users\\Administrator\\Desktop\\AXIX\\tools\\hash-aix\\qa\\desktop-game-revealed.png",
+      "width": 1440,
+      "height": 1270
+    },
+    {
+      "path": "C:\\Users\\Administrator\\Desktop\\AXIX\\tools\\hash-aix\\qa\\desktop-verify.png",
+      "width": 1440,
+      "height": 1284
+    },
+    {
+      "path": "C:\\Users\\Administrator\\Desktop\\AXIX\\tools\\hash-aix\\qa\\mobile-game.png",
+      "width": 390,
+      "height": 1571
+    },
+    {
+      "path": "C:\\Users\\Administrator\\Desktop\\AXIX\\tools\\hash-aix\\qa\\mobile-history.png",
+      "width": 390,
+      "height": 895
+    },
+    {
+      "path": "C:\\Users\\Administrator\\Desktop\\AXIX\\tools\\hash-aix\\qa\\small-verify.png",
+      "width": 320,
+      "height": 1888
+    }
+  ],
+  "errors": [],
+  "cleanedUp": true,
+  "finishedAt": "2026-10-25T18:15:36.035Z",
+  "ok": true
+}

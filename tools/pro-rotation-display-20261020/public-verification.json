@@ -1,0 +1,10 @@
+{
+  "ok": true,
+  "checkedAt": "2026-10-19T19:08:00.427Z",
+  "origin": "https://axix.cc",
+  "bnbActivationPreserved": true,
+  "mainCollectionAddress": "0xa71e0Cfb92643Ccf1fADcD45FcFb29B7b39c56E6",
+  "nextProCollectionAddress": "0x1266D38865460cF7d0c06985AC5587a5e85De2c0",
+  "adminVersion": "20261020-pro-rotation-1",
+  "adminScriptMatchesCandidate": true
+}

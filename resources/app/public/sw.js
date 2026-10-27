@@ -6,7 +6,7 @@
  *  - 其余同源 GET     → 不接管，走浏览器默认行为
  * 注意：修改静态文件需升级对应 ?v= 版本号，或递增 SW_VERSION 重建缓存。
  */
-const SW_VERSION = 'axix-static-v12';
+const SW_VERSION = 'axix-static-v14';
 const STATIC_PREFIXES = ['/js/', '/styles/', '/vendor/', '/assets/'];
 
 self.addEventListener('install', () => {
@@ -38,8 +38,9 @@ self.addEventListener('fetch', (event) => {
   if (request.mode === 'navigate') {
     event.respondWith((async () => {
       // 网络优先：8s 超时；首轮失败再补一次尝试，避免服务器繁忙（如重启初始化期）误判离线。
+      // cache:'no-cache' 强制绕过浏览器 HTTP 缓存重新协商 HTML，防止启发式缓存让用户长时间停留在旧页面。
       const tryNetwork = (ms) => Promise.race([
-        fetch(request).catch(() => null),
+        fetch(request, { cache: 'no-cache' }).catch(() => null),
         new Promise(resolve => setTimeout(() => resolve(null), ms))
       ]);
       let fresh = await tryNetwork(8000);

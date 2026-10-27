@@ -1,0 +1,26 @@
+{
+  "checkedAt": "2026-10-20T02:07:15.9169527+08:00",
+  "activation": [
+    {
+      "plan": "1",
+      "minerPlan": "mini120",
+      "bnb": "0.002",
+      "name": "Mini 矿机",
+      "label": "0.002 BNB · Mini 矿机 · 100A / 30天 · 每人限购 1 份"
+    },
+    {
+      "plan": "2",
+      "minerPlan": "pro1500",
+      "bnb": "0.05",
+      "name": "Pro 矿机",
+      "label": "0.05 BNB · Pro 矿机 · 1500A / 90天 · 每人限购 1 份"
+    }
+  ],
+  "collectionAddress": "0xa71e0Cfb92643Ccf1fADcD45FcFb29B7b39c56E6",
+  "collectionAddressByPlan": {
+    "1": "0xa71e0Cfb92643Ccf1fADcD45FcFb29B7b39c56E6",
+    "2": "0x1266D38865460cF7d0c06985AC5587a5e85De2c0"
+  },
+  "activationEnabled": true,
+  "chainId": 56
+}

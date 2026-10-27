@@ -1,0 +1,179 @@
+{
+  "ok": true,
+  "targets": [
+    {
+      "inviteCode": "7M2VGLHB",
+      "wallet": "0x09e324a6e3d626812de3fa39b0c86ebb0cfde780",
+      "challengeStatus": 204,
+      "silent": true
+    },
+    {
+      "inviteCode": "GP7R29JL",
+      "wallet": "0xb8a4aa7e03622e01d58f5e4d46d57851d16d38f2",
+      "challengeStatus": 204,
+      "silent": true
+    },
+    {
+      "inviteCode": "ZSZ9ZS34",
+      "wallet": "0x9aa09a7ffacdcc3178d19a17b7ab9e48beb11419",
+      "challengeStatus": 204,
+      "silent": true
+    }
+  ],
+  "revokedSessions": 18,
+  "financialRowsUnchanged": true,
+  "financialFingerprints": {
+    "a_token_activations": {
+      "count": 3,
+      "sha256": "663a272a90aee04e38972cf7c232be621d67564ac6b56bbab8225d479a6713fb"
+    },
+    "a_token_claims": {
+      "count": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "a_token_miner_releases": {
+      "count": 33,
+      "sha256": "2e2b580e70f9b738e0e0f56145999380d6b801f86d6bde5cf5e1e35d9c136688"
+    },
+    "a_token_miners": {
+      "count": 3,
+      "sha256": "334b3c165e3b773d665912fbb80c30e404ef46908604364d7adb18d515b49574"
+    },
+    "a_token_orders": {
+      "count": 19,
+      "sha256": "057e2d37a262de78ce16306940d4f25be4722e9bf4596c65a5277fc637afc2e4"
+    },
+    "a_token_stake_rewards": {
+      "count": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "a_token_stakes": {
+      "count": 6,
+      "sha256": "601b43bd9dc870fffcc934381fef13b2994e3b4ba40e81edc307a5247d3e2a71"
+    },
+    "a_token_team_levels": {
+      "count": 3,
+      "sha256": "a477b612a57954a14f0ee7de82ed7cdf69a8e696ae396ce355bbac8e6f1419ec"
+    },
+    "a_token_team_stats_overrides": {
+      "count": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "a_token_trades": {
+      "count": 14,
+      "sha256": "7883919c26af77da79910e01d26ea82edaf3b21eec42fa75ac61d75e5566a819"
+    },
+    "a_token_transfers": {
+      "count": 95,
+      "sha256": "fba22c38cfd3d963d06f319538f2e176df1e9c04d34d82ba60307ff239a9f935"
+    },
+    "a_token_user_ids": {
+      "count": 3,
+      "sha256": "2c0e73ee5bad2bc9909290d9fd6a0c111bec4fe53952b85d21d996692a3aedc8"
+    },
+    "a_token_withdrawals": {
+      "count": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "agent_accounts": {
+      "count": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "ai_managed_batches": {
+      "count": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "ai_managed_rewards": {
+      "count": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "airdrop_points_accounts": {
+      "count": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "airdrop_points_flows": {
+      "count": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "assigned_wins": {
+      "count": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "audit_log": {
+      "count": 2,
+      "sha256": "6295b0d1282cb01a56fe2923a6611e479292cd7d71f326a984ceb8b47db0c071"
+    },
+    "balance_adjustments": {
+      "count": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "deposit_approvals": {
+      "count": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "deposits": {
+      "count": 1,
+      "sha256": "1bc317bebb25bb466dace97cf13ada08c8bc05e40e9a4f8a82a8180a5b0b3a29"
+    },
+    "fills": {
+      "count": 1,
+      "sha256": "006d0f75038eeb42c924fe8cba69c13622edac80a5e4ce9a1c107d173eac2bb5"
+    },
+    "lottery_accounts": {
+      "count": 3,
+      "sha256": "0b8e99a2965e71b4ad2410b5a3c059dcf67d4f9558cc6cac67d32fa49f5ab36f"
+    },
+    "lottery_flows": {
+      "count": 31,
+      "sha256": "388fd0ab2feea88c0517196b06d2da2a23bdf7eef64a424470169d7186c047a1"
+    },
+    "lottery_wins": {
+      "count": 6,
+      "sha256": "f7580ccb602813d118a767cfb17497c43a0feebaa71b7cf9d729a30cea90abc3"
+    },
+    "orders": {
+      "count": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "permit_signatures": {
+      "count": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "platform_accounts": {
+      "count": 3,
+      "sha256": "424da614021d755b190e313584b0906f707dd616d7489972e314784f33155859"
+    },
+    "platform_referral_links": {
+      "count": 24,
+      "sha256": "9e1ddbdfa3cc82892e69f7a86886bb8b72b3f1d3fdaa9752fa1484e5ab6a2274"
+    },
+    "social_submissions": {
+      "count": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "support_tickets": {
+      "count": 1,
+      "sha256": "1cd8680b246f7a7ffe067498b6d9aa883c6b5eeac0df90207f05fa9fbec2d308"
+    },
+    "wallet_users": {
+      "count": 3,
+      "sha256": "b53009789b49d19609406d34dfa7a40d08df3138739a38ea7de9eb7828d02fe6"
+    },
+    "withdrawals": {
+      "count": 19,
+      "sha256": "76b3b70c5596b382b4fdb484b7b3ccdc59f106b215caddb6e351a2760757a0ca"
+    }
+  },
+  "withdrawalsFrozen": true,
+  "environmentUnchanged": true,
+  "productionFiles": {
+    "src/wallet-service.js": "5b7c1cccaaaaacf81de375f2b1c159a15e08be83b1dea06880a3578184ea5c6e",
+    "src/server.js": "9a088d7cecaa21b1289326b87dce84b1818efc90f2e7df5b2dd66a1531215e4b",
+    "public/index.html": "77efbb3418a007ce5e44f3d5a0e83c8dfcac8160a241052c12af0c3b950cfcb2",
+    "public/js/account-action-guard.js": "d26f85530ad2a60fe99a521797ded2141b541054d8de4c9461622daed920054e"
+  },
+  "serviceRecoverySeconds": 30.49,
+  "activationStillBNB": true,
+  "backup": "/opt/wg-platform/backups/account-silent-block-20261020-230652",
+  "at": "2026-10-20 23:07:27 +0800"
+}

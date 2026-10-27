@@ -291,7 +291,7 @@
 
   // ── 套餐配置 stale-while-revalidate：先用 localStorage 旧数据立即渲染，后台拉新覆盖 ──
   // plans 为准静态配置（套餐/开关），缓存上限 24h；开关类状态以后端接口实际返回为准（后端强制拦截）
-  const PLANS_CACHE_KEY = 'axix:plans:v1';
+  const PLANS_CACHE_KEY = 'axix:plans:aix:v2';
   const PLANS_CACHE_MAX_MS = 86_400_000;
   function readPlansCache() {
     try {
@@ -309,17 +309,17 @@
   // plans 是准静态套餐配置；弱网完全拉不到时用内置兜底先渲染，激活开关以后端实际拦截为准。
   const FALLBACK_PLANS = {
     activation: [
-      { plan: '1', minerPlan: 'mini120', bnb: '0.002', name: 'Mini 矿机', label: '0.002 BNB · Mini 矿机 · 100A / 30天 · 每人限购 1 份' },
-      { plan: '2', minerPlan: 'pro1500', bnb: '0.05', name: 'Pro 矿机', label: '0.05 BNB · Pro 矿机 · 1500A / 90天 · 每人限购 1 份' }
+      { plan: '1', minerPlan: 'mini120', aix: '20', name: 'Mini 矿机', label: '20 AIX · Mini 矿机 · 100 AIX / 30天 · 每钱包终身一次' },
+      { plan: '2', minerPlan: 'pro1500', aix: '400', name: 'Pro 矿机', label: '400 AIX · Pro 矿机 · 1500 AIX / 90天 · 激活无上限' }
     ],
-    activationMeta: { cap: 1000000, activatedCount: 0 },
-    collectionAddress: '0xa71e0Cfb92643Ccf1fADcD45FcFb29B7b39c56E6',
+    activationMeta: { cap: null, unlimited: true, activatedCount: 0 },
+    paymentMode: 'aix_balance',
+    collectionAddress: '',
     chainId: 56,
     confirmations: 12,
     activationEnabled: true,
     withdrawEnabled: false,
     staking: [
-      { planId: 'current', label: '活期', days: 0, dailyRateBps: 30, flexible: true },
       { planId: 's30', label: '1号 30天', days: 30, dailyRateBps: 80, flexible: false },
       { planId: 's60', label: '2号 60天', days: 60, dailyRateBps: 100, flexible: false },
       { planId: 's90', label: '3号 90天', days: 90, dailyRateBps: 120, flexible: false }
@@ -386,7 +386,8 @@
 
     // 已登录：拉取个人数据后渲染。
     if (window.currentWalletProfile?.authenticated) {
-      retryPendingActivation(); // 激活提交兜底：上次付款后提交失败的存单自动补交（异步，不阻塞渲染）
+      retryPendingActivation();
+      retryAixActivation(); // 使用同一请求编号恢复未确认的 AIX 激活。
       // 先用 localStorage 缓存秒渲染，避免等待 API 时白屏
       const cachedProfile = readProfileCache(window.currentWalletConnection?.address);
       if (cachedProfile) {
@@ -455,28 +456,22 @@
     const stakeCards = stakePlans.map(p => stakeCardHtml(p)).join('');
     const planCards = activationPlans.map(p => activationCardHtml(p, false)).join('');
 
-    const activatedCount = plansCache?.activationMeta?.activatedCount || 0;
-    const cap = Number(plansCache?.activationMeta?.cap) > 0 ? Number(plansCache.activationMeta.cap) : 1000000;
-    const capPct = Math.min(100, (activatedCount / cap * 100)).toFixed(2);
 
     return `
       ${walletConnectedHint}
       <div class="earn-v2-head-banner">
         <h2>🎉 AIX 代币赚取生态 · 激活享矿机 · 质押赚收益</h2>
-        <p>BSC 主网 · 链上付款 · 矿机自动日结</p>
+        <p>可用 AIX 激活 · 激活代币全额销毁 · 矿机自动日结</p>
       </div>
 
       ${slowNetworkNotice()}
 
-      <div class="cap-wrap">
-        <div class="cap-title">激活名额进度<small>激活用户赠送矿机，满额后关闭赠送</small></div>
-        <div class="cap-bar"><div class="cap-fill" style="width:${capPct}%"></div></div>
-      </div>
+      <div class="cap-wrap"><div class="cap-title">AIX 激活矿机<small>Mini 终身限一次 · Pro 激活无上限</small></div><p style="margin:8px 0 0;color:#a8bab6;font-size:12px">激活费用全额计入 AIX 交易大厅累计销毁${profileCache?.balances?.A != null ? ' · 可用余额 ' + fmtA(profileCache.balances.A) + ' AIX' : ''}</p></div>
 
       <div class="earn-activation-v2-grid">${planCards || P.empty('暂无激活套餐')}</div>
 
       <div class="portal-section" style="border-radius:14px;overflow:hidden">
-        <div class="portal-section-head"><h2>📦 质押收益</h2><span>日结到账 · 随进随出 · 固定档到期自动结清</span></div>
+        <div class="portal-section-head"><h2>📦 质押收益</h2><span>日结到账 · 固定档到期自动结清</span></div>
         <div class="stake-v2-grid" style="padding:16px">${stakeCards || P.empty('暂无质押套餐')}</div>
       </div>
 
@@ -493,8 +488,15 @@
     const daily = isMini ? '3.33' : '16.67';
     const total = isMini ? '100' : '1500';
     const days = isMini ? '30' : '90';
-    // 每个钱包每个套餐仅可激活一次：pending/confirmed 均占名额，按钮置灰防止重复支付 BNB
-    const myAct = (profileCache?.activations || []).find(a => String(a.plan) === String(p.plan) && a.status !== 'rejected');
+    // Pro 卡片在「有效期」后显示 AIX 余额与可购台数（未登录显示占位）
+    const balA = profileCache?.balances?.A;
+    const maxBuy = balA != null ? Math.floor(Number(balA) / Number(p.aix)) : null;
+    const balanceStats = isMini ? '' : `
+            <div class="stat-item"><span>AIX 余额</span><strong>${balA != null ? fmtA(balA) + ' AIX' : '登录后可见'}</strong></div>
+            <div class="stat-item"><span>可购台数</span><strong>${maxBuy == null ? '—' : (maxBuy > 0 ? maxBuy + ' 台' : '余额不足')}</strong></div>`;
+    // Mini 包含历史激活与赠送，终身一次；Pro 始终支持再次激活。
+    const myAct = isMini ? (profileCache?.activations || []).find(a => String(a.plan) === '1' && a.status !== 'rejected') : null;
+    const miniOwned = isMini && (profileCache?.miners || []).some(m => m.plan === 'mini120');
     const activationEnabled = plansCache?.activationEnabled !== false;
     let btnHtml;
     if (!activationEnabled) {
@@ -503,23 +505,23 @@
       const connected = Boolean(window.currentWalletConnection?.address);
       const label = connected ? '钱包已连接 · 确认身份后激活' : '连接钱包后激活';
       btnHtml = `<button class="btn-activate" type="button" onclick="${connected ? 'openPlatformAccount' : 'connectWallet'}(this)">${label}</button>`;
-    } else if (myAct?.status === 'confirmed') {
+    } else if (miniOwned || myAct?.status === 'confirmed') {
       btnHtml = `<button class="btn-activate" style="pointer-events:none;opacity:.55;cursor:default">已激活 ✔</button>`;
     } else if (myAct?.status === 'pending') {
       btnHtml = `<button class="btn-activate" style="pointer-events:none;opacity:.55;cursor:default">激活确认中…</button>`;
     } else {
-      btnHtml = `<button class="btn-activate" onclick="window.earnActivate('${escapeHtml(p.plan)}')">立即激活 · ${escapeHtml(p.bnb)} BNB</button>`;
+      btnHtml = `<button class="btn-activate" onclick="window.earnActivate('${escapeHtml(p.plan)}')">${activationInFlight ? '正在处理…' : '立即激活 · ' + escapeHtml(p.aix) + ' AIX'}</button>`;
     }
     return `
       <div class="act-card ${cls}">
         <div class="act-banner ${cls}">
           <div class="act-banner-row">
             <span class="act-plan-tag ${cls}">${isMini ? '⚡ MINI 矿机' : '👑 PRO 矿机'}</span>
-            <span class="portal-chip"><span class="act-copy-full">BNB 链上 · 限 ${days} 天</span><span class="act-copy-short">BNB · ${days}天</span></span>
+            <span class="portal-chip"><span class="act-copy-full">AIX 激活 · ${days} 天</span><span class="act-copy-short">AIX · ${days}天</span></span>
           </div>
           <div class="act-miner-art ${cls}"><img src="/assets/miner-${isMini ? 'mini' : 'pro'}.svg?v=1" alt="${isMini ? 'Mini' : 'Pro'} 矿机" loading="lazy"></div>
           <div class="act-plan-title"><span class="act-copy-full">${escapeHtml(cleanAixText(p.label))}</span><span class="act-copy-short">${isMini ? 'Mini 矿机 · 30天' : 'Pro 矿机 · 90天'}</span></div>
-          <div class="act-bnb">${escapeHtml(p.bnb)}<small>BNB</small></div>
+          <div class="act-bnb">${escapeHtml(p.aix)}<small>AIX</small></div>
           <div class="act-arrow">
             <strong><span class="act-copy-full">${total} AIX 总产出</span><span class="act-copy-short">总量 ${total} AIX</span></strong>
             <div class="arrow-box">→</div>
@@ -531,7 +533,9 @@
             <div class="stat-item"><span>矿机总产出</span><strong>${total} AIX</strong></div>
             <div class="stat-item"><span>日产目标</span><strong>${daily} AIX/天</strong></div>
             <div class="stat-item"><span>有效期</span><strong>${days} 天</strong></div>
+            ${balanceStats}
           </div>
+          <p style="font-size:12px;color:#a8bab6;margin:0 0 12px">${isMini ? '每钱包终身限激活一次' : '可重复激活、同时持有多台，无激活名额上限'} · 激活代币全额销毁</p>
           ${btnHtml}
         </div>
       </div>`;
@@ -539,8 +543,8 @@
   function stakeCardHtml(p, showButton = true) {
     const monthlyRate = p.days > 0 ? (Number(p.dailyRateBps) * 30 / 100).toFixed(0) : (Number(p.dailyRateBps) * 30 / 100).toFixed(1);
     const dailyRatePct = (Number(p.dailyRateBps) / 100).toFixed(2);
-    const minMap = { current: '100 AIX', s30: '1,000 AIX', s60: '2,000 AIX', s90: '5,000 AIX' };
-    const minA = minMap[p.planId] || '100 AIX';
+    const minMap = { s30: '1,000 AIX', s60: '1,000 AIX', s90: '1,000 AIX' };
+    const minA = minMap[p.planId] || '1,000 AIX';
     const periodLabel = p.flexible ? '随进随出' : p.days + ' 天到期';
     const expectedLabel = p.flexible ? '收益每日到账' : '到期共 ' + (Number(p.dailyRateBps) * Number(p.days) / 100).toFixed(1) + '%';
     const planClass = p.planId || 'current';
@@ -584,17 +588,13 @@
   function renderActivation() {
     const plans = (plansCache?.activation || []).map(p => ({ ...p, label: cleanAixText(p.label) }));
     const myActivations = profileCache?.activations || [];
-    const collectionAddress = plansCache?.collectionAddress || '';
-    const activatedCount = plansCache?.activationMeta?.activatedCount || 0;
-    const cap = Number(plansCache?.activationMeta?.cap) > 0 ? Number(plansCache.activationMeta.cap) : 1000000;
-    const capPct = Math.min(100, (activatedCount / cap * 100)).toFixed(2);
 
     const planCards = plans.map(p => activationCardHtml(p, true)).join('');
 
     const myRows = myActivations.map(a => `<tr>
-      <td data-label="套餐">${a.plan === '1' ? 'Mini 矿机 · 0.002 BNB' : 'Pro 矿机 · 0.05 BNB'}</td>
+      <td data-label="套餐">${a.plan === '1' ? 'Mini 矿机' : 'Pro 矿机'} · ${a.paymentAsset === 'AIX' ? escapeHtml(a.payload?.aix || '') + ' AIX' : (a.plan === '1' ? '0.002' : '0.05') + ' BNB（历史）'}</td>
       <td data-label="规格"><span class="act-copy-full">${a.plan === '1' ? 'Mini 矿机（30天，日产约 3.3 AIX 共 100 AIX）' : 'Pro 矿机（90天，日产约 16.6 AIX 共 1500 AIX）'}</span><span class="act-copy-short">${a.plan === '1' ? '100 AIX · 30天' : '1500 AIX · 90天'}</span></td>
-      <td data-label="交易哈希"><code title="${escapeHtml(a.txHash || '')}">${escapeHtml(String(a.txHash || '').slice(0, 12))}…</code></td>
+      <td data-label="支付凭证">${a.paymentAsset === 'AIX' ? '<span title="' + escapeHtml(a.id) + '">可用 AIX · 已全额销毁</span>' : '<code title="' + escapeHtml(a.txHash || '') + '">' + escapeHtml(String(a.txHash || '').slice(0, 12)) + '…</code>'}</td>
       <td data-label="状态"><span class="status-chip ${a.status}">${({ pending: '链上确认中', confirmed: '已确认 ✔', rejected: '已驳回' })[a.status] || a.status}</span></td>
       <td data-label="确认时间">${a.confirmedAt ? new Date(a.confirmedAt).toLocaleString('zh-CN', { hour12: false }) : '-'}</td>
     </tr>`).join('') || `<tr><td colspan="5" class="ev2-empty"><div class="big-emoji">🎁</div>暂无激活记录，激活后矿机会立即出现在「矿机」页面</td></tr>`;
@@ -608,22 +608,19 @@
 
       ${teamSummaryCard()}
 
-      <div class="cap-wrap">
-        <div class="cap-title">激活名额进度<small>激活用户赠送矿机，满额后关闭赠送</small></div>
-        <div class="cap-bar"><div class="cap-fill" style="width:${capPct}%"></div></div>
-      </div>
+      <div class="cap-wrap"><div class="cap-title">AIX 激活矿机<small>Mini 终身限一次 · Pro 激活无上限</small></div><p style="margin:8px 0 0;color:#a8bab6;font-size:12px">激活费用全额计入 AIX 交易大厅累计销毁${profileCache?.balances?.A != null ? ' · 可用余额 ' + fmtA(profileCache.balances.A) + ' AIX' : ''}</p></div>
 
       <div class="earn-activation-v2-grid">${planCards}</div>
 
       <div class="portal-section" style="border-radius:14px;overflow:hidden">
         <div class="portal-section-head">
           <h2>📒 我的激活记录</h2>
-          <span>${myActivations.length} 条${!collectionAddress ? ' · 当前未配置链上自动校验，后台将人工确认' : ' · 链上自动校验（' + (plansCache?.confirmations || 12) + ' 区块确认）'}</span>
+          <span>${myActivations.length} 条 · AIX 激活即时到账</span>
         </div>
         <div class="portal-table-wrap">
           <table class="portal-table">
             <thead><tr>
-              <th>套餐</th><th>矿机规格</th><th>交易哈希</th><th>状态</th><th>确认时间</th>
+              <th>套餐</th><th>矿机规格</th><th>支付凭证</th><th>状态</th><th>确认时间</th>
             </tr></thead>
             <tbody>${myRows}</tbody>
           </table>
@@ -678,7 +675,7 @@
           <span class="miner-expire">${expired ? '已到期' : '⏱ ' + timeLeft(Number(m.expiresAt) - Date.now()) + ' 后到期'}</span>
         </div>
       </div>`;
-    }).join('') || `<div class="ev2-empty" style="grid-column:1/-1"><div class="big-emoji">⛏️</div>暂无矿机<br><span style="margin-top:6px;display:block;font-size:12px;max-width:420px">去「激活」页面付款 0.002 / 0.05 BNB 激活，链上确认后矿机自动发放。</span></div>`;
+    }).join('') || `<div class="ev2-empty" style="grid-column:1/-1"><div class="big-emoji">⛏️</div>暂无矿机<br><span style="margin-top:6px;display:block;font-size:12px;max-width:420px">去「激活」页面使用可用 AIX 激活：Mini 20 AIX，Pro 400 AIX，激活后立即发放。</span></div>`;
 
     return `
       <section class="miner-page-hero">
@@ -853,7 +850,7 @@
                     <td data-label="级别" style="padding:6px;color:${c};font-weight:700">${t.label.split(' ')[0]}</td>
                     <td data-label="个人持有" style="padding:6px;color:#9ba8a5">${t.personalHeld.toLocaleString()} AIX</td>
                     <td data-label="团队持币 AIX" style="padding:6px;color:#9ba8a5">${t.teamHeld.toLocaleString()} AIX</td>
-                    <td data-label="收益比例" style="padding:6px;color:${c}">${t.level === 10 ? '手续费分红' : (t.rateBps / 100) + '%'}</td>
+                    <td data-label="收益比例" style="padding:6px;color:${c}">${t.level === 10 ? '手续费分红' : (t.level * 10) + '%'}</td>
                   </tr>`;
                 }).join('')}
               </tbody>
@@ -949,9 +946,9 @@
   }
 
   function openStakeModal(planId) {
-    const minMap = { current: '100', s30: '1000', s60: '2000', s90: '5000' };
-    const labelMap = { current: '活期', s30: '1号 · 30天', s60: '2号 · 60天', s90: '3号 · 90天' };
-    const min = minMap[planId] || '100';
+    const minMap = { s30: '1000', s60: '1000', s90: '1000' };
+    const labelMap = { s30: '1号 · 30天', s60: '2号 · 60天', s90: '3号 · 90天' };
+    const min = minMap[planId] || '1000';
     const label = labelMap[planId] || planId;
     closeStakeModal();
 
@@ -1059,15 +1056,14 @@
     } catch (e) { showErr(friendlyError(e, '赎回失败')); }
   };
 
-  // 激活提交成功后立即本地把 activation 合并进 profileCache.activations，
-  // 防止紧随其后的 profile 刷新失败时（网络抖动/session 过期）按钮回到"立即激活"，
-  // 导致用户误以为没激活而重复支付 BNB（后端虽会拒绝重复激活，但链上 BNB 已付出无法退回）。
+  // 按记录 ID 合并本地激活历史，保留同一钱包的多次 Pro 激活。
   function applyActivationLocally(planKey, status, activation) {
     if (!profileCache) profileCache = {};
     if (!Array.isArray(profileCache.activations)) profileCache.activations = [];
     const list = profileCache.activations;
-    const idx = list.findIndex(a => String(a.plan) === String(planKey));
-    const entry = { ...(activation || {}), plan: planKey, status };
+    const record = activation?.record || activation || {};
+    const idx = record.id ? list.findIndex(a => a.id === record.id) : -1;
+    const entry = { ...record, plan: planKey, status };
     if (idx >= 0) list[idx] = { ...list[idx], ...entry };
     else list.unshift(entry);
   }
@@ -1108,144 +1104,195 @@
     }
   }
 
-  // 激活防重入锁：从点击到"付款已确认（钱包已广播交易）"之间，重复点击静默忽略，
-  // 但不改变按钮外观——只有钱包确认付款后才由 renderSubTab 置灰。
-  // 未真正付款（用户取消签名等）则解锁，按钮保持可点；已付款保持锁定。
+  // Keep the same request ID across timeouts, reloads and re-signing.
+  const AIX_RETRY_KEY = 'axix_activation_aix_request_v1';
   let activationInFlight = false;
-  let activationPaid = false;
+  const activationWallet = () => String(window.currentWalletConnection?.address || '').toLowerCase();
+  const aixRetryStorageKey = () => AIX_RETRY_KEY + ':' + activationWallet();
+  function readAixRetry() {
+    try { return JSON.parse(localStorage.getItem(aixRetryStorageKey()) || 'null'); } catch { return null; }
+  }
+  function saveAixRetry(r) {
+    localStorage.setItem(AIX_RETRY_KEY + ':' + r.wallet, JSON.stringify(r));
+  }
+  function clearAixRetry(r) {
+    localStorage.removeItem(AIX_RETRY_KEY + ':' + r.wallet);
+  }
+  async function activationSucceeded(record, wallet) {
+    if (wallet !== activationWallet()) return;
+    applyActivationLocally(record.plan, record.status, record);
+    clearProfileCache();
+    window.dispatchEvent(new CustomEvent('aix:balance-changed'));
+    const qty = Number(record.payload?.quantity) || 1;
+    showOk('激活成功' + (qty > 1 ? '（' + qty + ' 台）' : '') + '，' + (Number(record.payload?.aix || 0) * qty) + ' AIX 已全额销毁，矿机已发放');
+    const fresh = await authApi('profile').catch(() => null);
+    if (wallet !== activationWallet()) return;
+    if (fresh) { profileCache = fresh; writeProfileCache(wallet, fresh); }
+    renderSubTab();
+  }
+  async function aixRequestStatus(r) {
+    return (await authApi('activation-request?plan=' + encodeURIComponent(r.plan) + '&requestId=' + encodeURIComponent(r.requestId))).record;
+  }
+  async function submitAixRequest(r) {
+    return (await authApi('activate', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Idempotency-Key': r.requestId },
+      body: JSON.stringify({ plan: r.plan, signature: r.signature, timestamp: r.timestamp, quantity: Number(r.quantity) || 1 }) })).activation.record;
+  }
+  async function retryAixActivation() {
+    const r = readAixRetry();
+    if (!r || r.wallet !== activationWallet() || activationInFlight) return;
+    activationInFlight = true;
+    let submitted = false;
+    try {
+      let record = await aixRequestStatus(r);
+      if (r.wallet !== activationWallet()) return;
+      if (!record && Date.now() - Number(r.timestamp) < 240000) { submitted = true; record = await submitAixRequest(r); }
+      if (record) { clearAixRetry(r); await activationSucceeded(record, r.wallet); }
+      else showOk('有一笔激活尚未确认，点击激活可继续同一笔请求');
+    } catch (e) {
+      if (submitted && e.status === 400) { clearAixRetry(r); showErr(e.message); }
+    }
+    finally { activationInFlight = false; renderSubTab(); }
+  }
+  function closeProQuantityModal() {
+    const modal = document.getElementById('earn-pro-qty-modal');
+    if (modal) modal.remove();
+    document.body.classList.remove('stake-modal-open');
+  }
+
+  // Pro 批量激活台数弹窗：确认 resolve(台数)，取消 resolve(null)。复用质押弹窗样式。
+  function openProQuantityModal(plan) {
+    return new Promise(resolve => {
+      closeProQuantityModal();
+      const per = Number(plan.aix);
+      const perTotal = Number(plan.total);
+      const perDaily = perTotal / Number(plan.days);
+      const balA = profileCache?.balances?.A;
+      const maxAffordable = Math.floor(Number(balA || 0) / per);
+      const modal = document.createElement('div');
+      modal.id = 'earn-pro-qty-modal';
+      modal.className = 'stake-modal';
+      modal.setAttribute('role', 'presentation');
+      modal.innerHTML = `
+        <div class="stake-dialog" role="dialog" aria-modal="true" aria-labelledby="pro-qty-title">
+          <div class="stake-dialog-head">
+            <div><span class="stake-dialog-kicker">AIX 激活</span><h3 id="pro-qty-title">Pro 矿机 · 选择台数</h3></div>
+            <button type="button" class="stake-dialog-close" data-pro-qty-close aria-label="关闭">×</button>
+          </div>
+          <div class="stake-dialog-body">
+            <div class="stake-plan-summary"><span>单价</span><strong>${per} AIX / 台</strong><small>每台 ${Number(plan.days)} 天总产出 ${perTotal} AIX · 激活代币全额销毁</small></div>
+            <label class="stake-amount-label" for="pro-qty-input">购买台数（单次最多 100 台）</label>
+            <div class="stake-amount-field"><input id="pro-qty-input" type="number" inputmode="numeric" min="1" max="100" step="1" value="1" autocomplete="off" aria-describedby="pro-qty-summary"><button type="button" class="stake-max-btn" data-pro-qty-max title="按余额可购上限">Max</button></div>
+            <div class="stake-balance-line">AIX 余额 <b>${balA != null ? fmtA(balA) : '—'} AIX</b></div>
+            <div id="pro-qty-summary" class="stake-amount-hint">合计销毁 ${per} AIX · 总产出 ${perTotal} AIX · 日产约 ${perDaily.toFixed(2)} AIX/天</div>
+            <div id="pro-qty-error" class="stake-amount-error" role="alert" aria-live="polite"></div>
+            <div class="stake-quick-amounts" aria-label="快捷台数">
+              <button type="button" data-pro-qty-quick="1">1 台</button>
+              <button type="button" data-pro-qty-quick="5">5 台</button>
+              <button type="button" data-pro-qty-quick="10">10 台</button>
+            </div>
+          </div>
+          <div class="stake-dialog-actions"><button type="button" class="stake-cancel" data-pro-qty-close>取消</button><button type="button" class="stake-confirm" data-pro-qty-submit>下一步</button></div>
+        </div>`;
+      document.body.appendChild(modal);
+      document.body.classList.add('stake-modal-open');
+      const input = modal.querySelector('#pro-qty-input');
+      const errorEl = modal.querySelector('#pro-qty-error');
+      const summary = modal.querySelector('#pro-qty-summary');
+      const close = value => { closeProQuantityModal(); resolve(value); };
+      const setError = message => { errorEl.textContent = message || ''; input.classList.toggle('invalid', Boolean(message)); };
+      const readQty = () => Math.floor(Number(input.value));
+      const updateSummary = () => {
+        const q = Math.max(1, readQty() || 1);
+        summary.textContent = `合计销毁 ${per * q} AIX · 总产出 ${perTotal * q} AIX · 日产约 ${(perDaily * q).toFixed(2)} AIX/天`;
+      };
+      const validate = () => {
+        const q = readQty();
+        if (!Number.isFinite(q) || q < 1) { setError('请输入有效台数'); return null; }
+        if (q > 100) { setError('单次最多 100 台'); return null; }
+        if (q > maxAffordable) { setError(`AIX 余额不足：最多可购 ${Math.max(0, maxAffordable)} 台`); return null; }
+        setError('');
+        return q;
+      };
+      modal.querySelectorAll('[data-pro-qty-close]').forEach(button => button.addEventListener('click', () => close(null)));
+      modal.addEventListener('click', event => { if (event.target === modal) close(null); });
+      modal.querySelectorAll('[data-pro-qty-quick]').forEach(button => button.addEventListener('click', () => { input.value = button.dataset.proQtyQuick; input.focus(); setError(''); updateSummary(); }));
+      modal.querySelector('[data-pro-qty-max]').addEventListener('click', () => {
+        const q = Math.min(100, maxAffordable);
+        if (q < 1) { setError('AIX 余额不足，无法购买'); return; }
+        input.value = q; input.focus(); setError(''); updateSummary();
+      });
+      input.addEventListener('input', () => { setError(''); updateSummary(); });
+      input.addEventListener('keydown', event => {
+        if (event.key === 'Enter') { const q = validate(); if (q) close(q); }
+        if (event.key === 'Escape') close(null);
+      });
+      modal.querySelector('[data-pro-qty-submit]').addEventListener('click', () => {
+        const q = validate();
+        if (q) close(q); else input.focus();
+      });
+      requestAnimationFrame(() => { input.focus(); input.select(); });
+    });
+  }
 
   window.earnActivate = async (planKey) => {
     if (activationInFlight) return;
     activationInFlight = true;
-    activationPaid = false;
-    try { await earnActivateCore(planKey); }
-    finally { if (!activationPaid) activationInFlight = false; }
-  };
-
-  async function earnActivateCore(planKey) {
-    const paymentWallet = window.currentWalletConnection?.address?.toLowerCase();
-    const paymentProvider = typeof connectedProvider !== 'undefined' ? connectedProvider : null;
-    const requirePaymentWallet = () => {
-      if (!paymentWallet || paymentWallet !== window.currentWalletConnection?.address?.toLowerCase()
-        || (typeof connectedProvider !== 'undefined' && paymentProvider !== connectedProvider)) {
-        throw new Error('钱包账户已切换，请重新验证');
-      }
+    const wallet = activationWallet();
+    const provider = typeof connectedProvider !== 'undefined' ? connectedProvider : null;
+    const assertWallet = () => {
+      if (!wallet || wallet !== activationWallet() || provider !== connectedProvider) throw new Error('钱包账户已切换，请重新验证');
     };
-    // Cached/fallback cards are for browsing. Always use fresh configuration and ownership data before payment.
+    let pending;
+    let requestSent = false;
     try {
+      pending = readAixRetry();
+      if (pending) {
+        const record = await aixRequestStatus(pending);
+        assertWallet();
+        if (record) { clearAixRetry(pending); await activationSucceeded(record, wallet); return; }
+        // Finish the unresolved purchase before creating another one.
+        planKey = pending.plan;
+      }
       plansCache = await fetchPlansFresh();
-      requirePaymentWallet();
-      writePlansCache(plansCache);
-    } catch (error) { showErr(error.message); return; }
-    const plan = (plansCache?.activation || []).find(p => p.plan === planKey);
-    if (!plan) return;
-    // 开关关闭时直接拦截，不触发链上转账
-    if (plansCache?.activationEnabled === false) { showErr('矿机激活暂未开放，请留意平台公告'); return; }
-    // 付款前二次防护：每个钱包每个套餐仅可激活一次。先刷新最新激活状态，
-    // 已激活/确认中直接拦截，避免用户链上重复支付 BNB 后才被后端驳回。
-    try { profileCache = await authApi('profile'); requirePaymentWallet(); }
-    catch (error) { showErr(error.message); return; }
-    const existingAct = (profileCache?.activations || []).find(a => String(a.plan) === String(planKey) && a.status !== 'rejected');
-    if (existingAct) {
-      showErr(existingAct.status === 'confirmed' ? '该套餐您已激活，每个钱包仅限激活一次' : '该套餐正在链上确认中，无需重复支付');
-      renderSubTab();
-      return;
-    }
-    const collectionAddress = (plansCache?.collectionAddressByPlan && plansCache.collectionAddressByPlan[plan.plan]) || plansCache?.collectionAddress || '';
-    const chainId = plansCache?.chainId || 56;
-    function bnbToWei(bnbStr) {
-      const s = String(bnbStr || '0').trim();
-      const [intPart = '0', decPart = ''] = s.split('.');
-      const decimals = decPart.padEnd(18, '0').slice(0, 18);
-      const combined = (intPart + decimals).replace(/^0+(?=.)/, '') || '0';
-      return BigInt(combined);
-    }
-    const bnbWei = bnbToWei(plan.bnb);
-    if (bnbWei <= 0n) { showErr('套餐金额无效'); return; }
-
-    function friendlyError2(e) {
-      if (Number(e?.code) === 4001 || /denied|rejected|cancel/i.test(e?.message || '')) return '已取消';
-      return e?.message === 'SESSION_REQUIRED' ? '请先连接并确认钱包' : (e?.message || '激活失败');
-    }
-
-    if (!collectionAddress) {
-      const txHash = await promptDialog(`请输入您已发送 ${plan.bnb} BNB 至平台收款地址后的 BSC 链交易哈希（txHash）：`, '');
-      if (!txHash) return;
-      const manualWallet = window.currentWalletConnection?.address
-        || (typeof connectedWalletAddress !== 'undefined' ? connectedWalletAddress : '');
-      if (manualWallet) saveActivationRetry(manualWallet, planKey, txHash); // 兜底落盘
-      try {
-        const result = await authApi('activate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ plan: planKey, txHash }) });
-        clearActivationRetry();
-        const status = result.activation?.status || 'pending';
-        const reason = result.activation?.reason || '';
-        if (status === 'confirmed') {
-          showOk('激活成功，矿机已发放');
-        } else {
-          showOk(`已提交，${reason || '链上确认中'}，确认后将自动发放矿机`);
-          pollActivationStatus();
-        }
-        applyActivationLocally(planKey, status, result.activation);
-        profileCache = await authApi('profile').catch(() => profileCache);
-        renderSubTab();
-      } catch (e) {
-        const pending = readActivationRetry();
-        showErr(friendlyError2(e) + (pending ? '；该笔交易将被自动补交，无需重复转账' : ''));
+      assertWallet();
+      if (plansCache.paymentMode !== 'aix_balance') throw new Error('激活规则正在更新，请稍后刷新页面');
+      if (plansCache.activationEnabled === false) throw new Error('矿机激活暂未开放');
+      const plan = plansCache.activation.find(p => p.plan === planKey);
+      if (!plan || !['20', '400'].includes(plan.aix)) throw new Error('激活套餐无效，请刷新页面');
+      profileCache = await authApi('profile');
+      assertWallet();
+      if (planKey === '1' && ((profileCache.activations || []).some(a => a.plan === '1' && a.status !== 'rejected')
+          || (profileCache.miners || []).some(m => m.plan === 'mini120'))) throw new Error('Mini 矿机每个钱包终身仅可激活一次');
+      // 台数：Pro 弹窗选择（续单沿用 pending 保存的台数），Mini 固定 1 台
+      let quantity = Number(pending?.quantity) || 1;
+      if (planKey === '2' && !pending) {
+        const picked = await openProQuantityModal(plan);
+        assertWallet();
+        if (!picked) return;
+        quantity = picked;
       }
-      return;
-    }
-
-    // wallet.js keeps these as top-level lexical bindings rather than
-    // `window` properties. Reading only `window.connectedWalletAddress` made
-    // an already-connected wallet look disconnected on the activation page.
-    const activeWalletAddress = window.currentWalletConnection?.address
-      || (typeof connectedWalletAddress !== 'undefined' ? connectedWalletAddress : '');
-    const activeProvider = typeof connectedProvider !== 'undefined' ? connectedProvider : null;
-    if (!activeWalletAddress || !activeProvider) {
-      showErr('请先连接钱包');
-      return;
-    }
-    try {
-      // Make sure the platform session is ready before asking the wallet to
-      // send BNB. Otherwise a first-time user could approve the payment and
-      // only then be stopped by the session check in authApi().
-      if (!window.currentWalletProfile?.authenticated && typeof ensurePlatformSession === 'function') {
-        await ensurePlatformSession();
-      }
-      requirePaymentWallet();
-      showOk('请在钱包中切换到 BSC 链并确认 BNB 支付');
-      await activeProvider.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: '0x' + Number(chainId).toString(16) }] }).catch(async (e) => {
-        if (e.code === 4902) {
-          await activeProvider.request({ method: 'wallet_addEthereumChain', params: [{ chainId: '0x' + Number(chainId).toString(16), chainName: 'BNB Smart Chain', nativeCurrency: { name: 'BNB', symbol: 'BNB', decimals: 18 }, rpcUrls: ['https://bsc-dataseed.binance.org'], blockExplorerUrls: ['https://bscscan.com'] }] });
-        } else throw e;
-      });
-      requirePaymentWallet();
-      const txHash = await activeProvider.request({ method: 'eth_sendTransaction', params: [{ from: activeWalletAddress, to: collectionAddress, value: '0x' + bnbWei.toString(16) }] });
-      // 钱包已确认付款（交易已广播）：锁定防重入，并立即把按钮置灰为"激活确认中…"，
-      // 不依赖后端响应，避免用户以为没成功而重复付款。
-      activationPaid = true;
-      applyActivationLocally(planKey, 'pending');
-      renderSubTab();
-      // 钱已付出：先落兜底存单，提交失败下次进站自动补交
-      saveActivationRetry(activeWalletAddress, planKey, txHash);
-      const result = await authApi('activate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ plan: planKey, txHash }) });
-      clearActivationRetry();
-      const status = result.activation?.status || 'pending';
-      const reason = result.activation?.reason || '';
-      if (status === 'confirmed') {
-        showOk('激活成功，矿机已发放');
-      } else {
-        showOk(`支付成功，${reason || '链上确认中'}，确认后将自动发放矿机，请稍候…`);
-        pollActivationStatus();
-      }
-      applyActivationLocally(planKey, status, result.activation);
-      profileCache = await authApi('profile').catch(() => profileCache);
-      renderSubTab();
+      const totalAix = Number(plan.aix) * quantity;
+      const units = value => { const [n, d = ''] = String(value || '0').split('.'); return BigInt(n) * 10n ** 18n + BigInt(d.padEnd(18, '0').slice(0,18)); };
+      if (units(profileCache.balances?.A) < units(String(totalAix))) throw new Error('可用 AIX 余额不足，激活 ' + quantity + ' 台需 ' + totalAix + ' AIX');
+      if (!provider) throw new Error('请先连接钱包');
+      if (!await confirmDialog('确认使用可用余额中的 ' + totalAix + ' AIX 激活 ' + quantity + ' 台 ' + plan.name + '？代币将全额销毁，' + plan.days + ' 天总产出 ' + (Number(plan.total) * quantity) + ' AIX。' + (pending ? '本次将继续上次未确认的激活。' : ''))) return;
+      assertWallet();
+      const requestId = pending?.requestId || ('act_' + crypto.randomUUID().replaceAll('-', ''));
+      const timestamp = String(Date.now());
+      const message = 'AxiX 矿机激活确认：套餐 ' + planKey + '，销毁 ' + totalAix + ' AIX，编号 ' + requestId + '，时间：' + timestamp;
+      const signature = await provider.request({ method: 'personal_sign', params: [message, wallet] });
+      assertWallet();
+      pending = { wallet, plan: planKey, requestId, timestamp, signature, quantity };
+      saveAixRetry(pending); // Persist before POST. A storage failure must never cause a purchase.
+      requestSent = true;
+      const record = await submitAixRequest(pending);
+      clearAixRetry(pending);
+      await activationSucceeded(record, wallet);
     } catch (e) {
-      const pending = readActivationRetry();
-      showErr(friendlyError2(e) + (pending ? '；您的支付已完成，提交将自动补交，无需重复付款' : ''));
-    }
-  }
+      if (requestSent && pending && e.status === 400) clearAixRetry(pending);
+      showErr(friendlyError(e, '激活失败') + (requestSent && readAixRetry() ? '；结果待确认，再次点击会核对同一笔激活，请勿另行付款' : ''));
+    } finally { activationInFlight = false; renderSubTab(); }
+  };
 
   // 激活提交后轮询状态:BSC 12 确认约 36 秒,每 8 秒查一次,最多 15 次(2 分钟);
   // 确认成功提示并刷新矿机列表,超时则提示稍后自动到账(服务端定时任务兜底)。

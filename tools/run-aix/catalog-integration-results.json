@@ -1,0 +1,18 @@
+{
+  "ok": true,
+  "passed": 5,
+  "checks": [
+    "disabled and zero-weight entries never spawn; configured behavior and line do spawn",
+    "relative weighted selection follows configured 1:9 frequency over 20,000 obstacles",
+    "minimum spawn metres and scene membership are respected at boundary distances",
+    "allowed lanes never occupy a safe lane; unmatched slots are safely skipped",
+    "in-flight engine and restored snapshot preserve old catalog; configure before new round reads saved changes"
+  ],
+  "metrics": {
+    "weighted": {
+      "btc": 1987,
+      "eth": 18013,
+      "btcPercent": 9.934999999999999
+    }
+  }
+}

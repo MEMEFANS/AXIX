@@ -1,0 +1,15 @@
+{
+  "files": {
+    "src/a-token-activation-service.js": "1a2b94f6a90653d487895442f4e01c246f8a1c2ceb54719eda09bd6759b55efb",
+    "src/a-token-api.js": "ae8a28795eef5e4a361124f918e95d8fe5cffcd001a434d79da8b724f7eaa180",
+    "src/a-token-miner-service.js": "c18bf2b99f195924808c87bc82c2d08e5881749535c1e12563fc74381b3c0893",
+    "src/a-token-service.js": "3b15285a81fd4757af84dda177227671a02a0f751de82f80f868cd967148a76a",
+    "src/database.js": "022d52454aa92dffed7ebb596d3ba19cc60ac1ce4776e0ce6c003e0cb8b63bf4",
+    "public/js/earn.js": "08027077162748cd925907f5af1c9c26726e469925a982fa850cf8a0fced9422",
+    "public/js/a-token-trade.js": "31be5ef4af705520b4c1df232234eb95de574c2ba8e727ce6c7ce93ef059ecde",
+    "public/js/operator-admin.js": "5162c7e803bc14ca95d59f1c1ed88995334d12b0dabb985392305716c05ee529",
+    "public/index.html": "d93245775bfbd0455525c2fe7e47937e2d46d564f0d905d5f49c971ee54f1266",
+    "public/admin.html": "ad87ac8bed0b48de0f259913add2837af72773065efcee02ec7688a74691fc2f",
+    "public/js/page-loader.js": "dd1952ca5b400180b65158db3660739d0d68213b426199869fe5a2c4f0870924"
+  }
+}

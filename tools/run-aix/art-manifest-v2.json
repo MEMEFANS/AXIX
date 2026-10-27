@@ -1,0 +1,81 @@
+﻿{
+    "provider":  "Kakou Media API",
+    "model":  "gpt-image-2",
+    "createdLocalDate":  "2026-10-19",
+    "totalChargedUsd":  0.99999999999999989,
+    "assets":  [
+                   {
+                       "asset":  "bnb-v2",
+                       "model":  "gpt-image-2",
+                       "status":  "succeeded",
+                       "chargedUsd":  0.1,
+                       "id":  "img_19a740487a1848a38c9fa26d90bcfda8"
+                   },
+                   {
+                       "asset":  "btc-v2",
+                       "model":  "gpt-image-2",
+                       "status":  "succeeded",
+                       "chargedUsd":  0.1,
+                       "id":  "img_b18ac2fbc6184f96942f38df723ada12"
+                   },
+                   {
+                       "asset":  "city-v2",
+                       "model":  "gpt-image-2",
+                       "status":  "succeeded",
+                       "chargedUsd":  0.1,
+                       "id":  "img_2a5f7dc40ac2468dbbd3186460a41b5c"
+                   },
+                   {
+                       "asset":  "eth-v2",
+                       "model":  "gpt-image-2",
+                       "status":  "succeeded",
+                       "chargedUsd":  0.1,
+                       "id":  "img_8bfd39cc1f714a459cd6e067292875c3"
+                   },
+                   {
+                       "asset":  "exchange-v2",
+                       "model":  "gpt-image-2",
+                       "status":  "succeeded",
+                       "chargedUsd":  0.1,
+                       "id":  "img_ed0d06aebe1d492fadfb171d40b918d5"
+                   },
+                   {
+                       "asset":  "ghost-v2",
+                       "model":  "gpt-image-2",
+                       "status":  "succeeded",
+                       "chargedUsd":  0.1,
+                       "id":  "img_604a39f74d6c4803ae87365e5813997a"
+                   },
+                   {
+                       "asset":  "hero-v2",
+                       "model":  "gpt-image-2",
+                       "status":  "succeeded",
+                       "chargedUsd":  0.1,
+                       "id":  "img_8132682affbb40aca24dd1a7a41e39e0"
+                   },
+                   {
+                       "asset":  "hole-v2",
+                       "model":  "gpt-image-2",
+                       "status":  "succeeded",
+                       "chargedUsd":  0.1,
+                       "id":  "img_44e4b20735b245d7aaaaaf3004552465"
+                   },
+                   {
+                       "asset":  "ocean-v2",
+                       "model":  "gpt-image-2",
+                       "status":  "succeeded",
+                       "chargedUsd":  0.1,
+                       "id":  "img_330c396bde58403b87fe7075ccb59def"
+                   },
+                   {
+                       "asset":  "spike-v2",
+                       "model":  "gpt-image-2",
+                       "status":  "succeeded",
+                       "chargedUsd":  0.1,
+                       "id":  "img_ced4889b0577419eac2ab1d805e72743"
+                   }
+               ],
+    "promptsDirectory":  "tools/run-aix/art-jobs",
+    "originalsDirectory":  "output/imagegen/run-aix",
+    "runtimeDirectory":  "resources/app/public/games/run-aix/assets"
+}

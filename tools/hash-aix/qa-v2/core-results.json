@@ -1,0 +1,24 @@
+{
+  "ok": true,
+  "passed": 18,
+  "checks": [
+    "SHA-256 vectors and all 16 last digits follow the public 50/50 rules",
+    "Commitment precedes a single wager and current seed changes apply only to the next round",
+    "Close, reveal and repeated settlement have precise timing and integral credit accounting",
+    "An observed round records an actual result with no invented stake, payout or win",
+    "Refresh and two local tabs preserve the pending commitment and settle only once",
+    "Shared-storage concurrent entries cannot apply two stakes to the same local round",
+    "Invalid choices, stake sizes and future seeds leave balances and rounds unchanged",
+    "Disabled and exhausted storage remain playable in the current page",
+    "Unreadable stored data is reported and preserved rather than silently replaced",
+    "Calculation verification rejects inconsistent displayed outcomes and payouts",
+    "Long synthetic play retains 100 genuine local records and exact lifetime totals",
+    "Free refill is explicit, blocked by an unsettled entry, and tracked separately from results",
+    "Quick rounds wait indefinitely for an explicit action with an unchanged commitment",
+    "Quick confirmation locks immediately, deducts once and reveals exactly after 1,600 ms",
+    "Pending quick rounds survive refresh and concurrent sessions settle the shared stake once",
+    "Quick observation is explicit, repeat-safe and never consumes or returns credits",
+    "Legacy records without a mode and a pending timed round coexist with new quick records",
+    "Invalid round modes and invalid quick entries never change the local ledger"
+  ]
+}

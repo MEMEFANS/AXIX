@@ -1,0 +1,1457 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<meta name="format-detection" content="telephone=no" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<title>AxiX 交易所 · 合约跟单 × 机构信号驱动</title>
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/brand/favicon-32.png?v=3">
+<link rel="icon" type="image/png" sizes="64x64" href="/assets/brand/icon-64.png?v=3">
+<link rel="alternate icon" href="/favicon.ico?v=3">
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/brand/icon-180.png?v=3">
+<meta name="theme-color" content="#101a1c">
+<link rel="modulepreload" href="/vendor/wallet/connector.js?v=16">
+<script src="/js/account-action-guard.js?v=20261020-1"></script>
+<script defer src="/js/theme.js?v=2"></script>
+<script>
+(() => {
+  const local = ['127.0.0.1', 'localhost', '::1'].includes(location.hostname);
+  window.WG_OPERATOR_MODE = local && new URLSearchParams(location.search).get('operator') === '1';
+  if (window.WG_OPERATOR_MODE) document.documentElement.classList.add('operator-mode');
+})();
+</script>
+<!-- 首屏关键 CSS（render-blocking，仅 base/portal/mobile 三部分） -->
+<link rel="stylesheet" href="/styles/critical.css?v=12">
+<!-- 非首屏 CSS（media=print 异步下载，不阻塞渲染；8 个文件合并为 1 个请求） -->
+<link rel="stylesheet" href="/styles/lazy.css?v=5" media="print" onload="this.media='all'">
+</head>
+<body>
+
+<!-- ── Header ── -->
+<div class="header">
+  <div class="header-logo"><i class="brand-mark"></i> AxiX <small class="header-slogan" aria-hidden="true">有信号，不瞎猜 · Measure, don't guess.</small></div>
+  <div class="header-sep operator-only"></div>
+  <span class="hdot idle operator-only" id="hdr-de-dot" title=""></span><span id="hdr-de" class="badge badge-paper operator-only">DE: PAPER</span>
+  <span class="hdot idle operator-only" id="hdr-ex-dot" title=""></span><span id="hdr-ex" class="badge badge-paper operator-only">EX: PAPER</span>
+  <span class="hdot idle operator-only" id="hdr-rs-dot" title=""></span><span id="hdr-rs" class="badge badge-paper operator-only">RS: PAPER</span>
+  <div class="main-tabs">
+    <button class="tab-btn" data-nav-zh="平台简介" onclick="switchTab('whitepaper')">平台简介</button>
+    <span class="tab-sep" aria-hidden="true"></span>
+    <button class="tab-btn active" data-nav-zh="AxiX矿机" onclick="switchTab('earn')">AxiX矿机</button>
+    <button class="tab-btn" data-nav-zh="积分抽奖" onclick="switchTab('points')">积分抽奖</button>
+    <span class="tab-sep" aria-hidden="true"></span>
+    <button class="tab-btn" data-nav-zh="现货交易" data-trade-nav="spot" onclick="openTradePage('spot')">现货交易</button>
+    <button class="tab-btn" data-nav-zh="合约交易" data-trade-nav="perp" onclick="openTradePage('perp')">合约交易</button>
+    <button class="tab-btn" data-nav-zh="股票" data-trade-nav="stock" onclick="openStockPage()">股票</button>
+    <button class="tab-btn" data-nav-zh="AxiX合约跟单" onclick="switchTab('ai-managed')">AxiX合约跟单</button>
+    <button class="tab-btn" data-nav-zh="AxiX交易大厅" onclick="switchTab('a-token-trade')">AxiX交易大厅</button>
+    <button class="tab-btn" data-nav-zh="策略台" data-strategy-nav onclick="switchTab('overview')">策略台</button>
+    <span class="tab-sep" aria-hidden="true"></span>
+    <button class="tab-btn" data-nav-zh="合约风云榜" onclick="switchTab('leaderboard')">合约风云榜</button>
+    <button class="tab-btn" data-nav-zh="合约推荐" onclick="switchTab('referrals')">合约推荐</button>
+    <span class="tab-sep" aria-hidden="true"></span>
+    <button class="tab-btn" data-nav-zh="我的资产" onclick="switchTab('account')">我的资产</button>
+    <button class="tab-btn" data-nav-zh="在线客服" onclick="switchTab('support')">在线客服</button>
+    <button class="tab-btn" data-nav-zh="社群链接" onclick="switchTab('community')">社群链接</button>
+    <button class="tab-btn operator-only" onclick="switchTab('portfolio')">投资组合</button>
+    <button class="tab-btn operator-only" onclick="switchTab('vaults')">金库</button>
+    <button class="tab-btn operator-only" onclick="switchTab('staking')">质押</button>
+    <button class="tab-btn operator-only" onclick="switchTab('ledger')">机器人账本</button>
+    <button class="tab-btn operator-only" onclick="switchTab('ai')">AI 助手</button>
+  </div>
+  <div class="header-right">
+    <button id="lang-toggle" class="lang-toggle" type="button" title="切换语言" aria-label="切换语言">🌐</button>
+    <div class="wallet-control">
+      <button id="wallet-connect-btn" class="wallet-connect" aria-haspopup="menu" aria-expanded="false" onclick="handleWalletButton(this)">连接钱包</button>
+      <div id="wallet-account-menu" class="wallet-account-menu" role="menu" hidden>
+        <button id="wallet-menu-auth" type="button" role="menuitem" class="primary" onclick="verifyWalletFromMenu(this)">🔐 身份验证</button>
+        <button type="button" role="menuitem" onclick="openWalletAccount()">钱包资金</button>
+        <button type="button" role="menuitem" class="danger" onclick="disconnectWallet()">断开钱包</button>
+      </div>
+    </div>
+    <span id="hdr-conn" class="conn warn operator-only" title="后端连接状态"><span class="cdot"></span><span id="hdr-conn-txt">连接中…</span></span>
+    <span class="muted" id="hdr-time"></span>
+    <button id="mobile-nav-toggle" class="mobile-nav-toggle" type="button" aria-label="打开导航菜单" aria-expanded="false" onclick="toggleMobileNav()"><span></span><span></span><span></span></button>
+  </div>
+</div>
+
+<!-- ── 平台公告横幅（后台「平台公告」可编辑，最多 2 条，中英双语；内容由 announcement.js 注入） ── -->
+<div id="platform-announce-list" data-no-translate></div>
+
+<!-- 公告详情弹窗：点「展开」打开，点遮罩 / × / Esc 关闭 -->
+<div id="platform-announce-modal" class="pa-modal" data-no-translate hidden>
+  <div class="pa-modal-mask" data-pa-close></div>
+  <div class="pa-modal-card" role="dialog" aria-modal="true" aria-labelledby="pa-modal-title">
+    <div class="pa-modal-head">
+      <b id="pa-modal-title">📢 平台公告</b>
+      <button type="button" class="pa-modal-close" data-pa-close aria-label="关闭">×</button>
+    </div>
+    <div class="pa-modal-body" id="pa-modal-body"></div>
+  </div>
+</div>
+
+<div id="mobile-nav-backdrop" class="mobile-nav-backdrop" aria-hidden="true" onclick="toggleMobileNav(false)"></div>
+
+<div id="tab-trade" class="tab-panel">
+  <div class="trade-terminal">
+    <div class="terminal-marketbar">
+      <button class="terminal-symbol market-trigger" id="trade-market-trigger" type="button"><span class="coin-mark"><img id="trade-symbol-logo" src="/assets/tokens/btc.png" alt="BTC"></span><div><b id="trade-symbol">BTC / USDT</b><span id="trade-product-label">永续合约</span></div><span class="market-chevron">⌄</span></button>
+      <div class="ticker-stat ticker-price-stat"><select id="trade-price-mode" aria-label="价格类型"><option value="last" selected>最新价格</option><option value="mark">标记价格</option></select><b id="trade-mark-price">—</b></div>
+      <div class="ticker-stat"><span>24h 涨跌</span><b id="trade-change">—</b></div>
+      <div class="ticker-stat"><span>24h 最高</span><b id="trade-high">—</b></div>
+      <div class="ticker-stat"><span>24h 最低</span><b id="trade-low">—</b></div>
+      <div class="ticker-stat"><span>24h 成交额 (USDT)</span><b id="trade-volume">—</b></div>
+      <div class="ticker-stat ticker-funding-stat" id="trade-funding-stat" hidden><span>资金费率 (8h) / 倒计时</span><b><span id="trade-funding-rate">—</span> · <span id="trade-funding-countdown">—:—:—</span></b></div>
+    </div>
+    <div class="terminal-grid">
+      <section class="terminal-chart">
+        <div class="terminal-toolbar">
+          <div class="terminal-tabs" id="trade-chart-tabs"><button class="active" data-chart-view="chart">图表</button><button data-chart-view="details">详情</button></div>
+          <div class="timeframe-tabs" id="trade-timeframes">
+            <button data-sec="60">1m</button><button data-sec="300">5m</button><button data-sec="900">15m</button><button class="active" data-sec="3600">1h</button><button data-sec="14400">4h</button><button data-sec="86400">1D</button>
+          </div>
+        </div>
+        <div class="chart-indicator-bar" id="trade-indicators"><span>主图</span><button class="indicator-toggle" data-period="7">MA(7)</button><button class="indicator-toggle" data-period="25">MA(25)</button><button class="indicator-toggle" data-period="99">MA(99)</button><button class="indicator-toggle" data-indicator="ema" data-period="7">EMA(7)</button><button class="indicator-toggle" data-indicator="ema" data-period="25">EMA(25)</button><button class="indicator-toggle" data-indicator="ema" data-period="99">EMA(99)</button><button class="indicator-toggle" data-indicator="boll">BOLL(20,2)</button><span>副图</span><button class="indicator-toggle" data-indicator="vol">VOL</button><button class="indicator-toggle" data-indicator="macd">MACD(12,26,9)</button><button class="indicator-toggle" id="trade-alert-btn" type="button" title="价格提醒" style="margin-left:auto">⏰ 提醒</button></div>
+        <div id="trade-chart"></div>
+        <div class="trade-chart-subview" id="trade-chart-details" hidden>
+          <div><span>交易对</span><b id="trade-detail-symbol">BTC/USDT</b></div><div><span>产品</span><b id="trade-detail-product">现货</b></div>
+          <div><span>最新价格</span><b id="trade-detail-price">—</b></div><div><span>24h 涨跌</span><b id="trade-detail-change">—</b></div>
+          <div><span>24h 最高</span><b id="trade-detail-high">—</b></div><div><span>24h 最低</span><b id="trade-detail-low">—</b></div>
+          <div><span>24h 成交额</span><b id="trade-detail-volume">—</b></div><div><span>结算资产</span><b>USDT</b></div>
+        </div>
+      </section>
+      <aside class="orderbook-panel">
+        <div class="terminal-section-title">
+          <div class="terminal-tabs" id="trade-book-tabs">
+            <button class="active" data-book-view="book" type="button">订单簿</button>
+            <button data-book-view="trades" type="button">最近成交</button>
+            <button data-book-view="depth" type="button">深度图</button>
+          </div>
+          <select id="trade-book-precision" class="book-precision-select" aria-label="订单簿聚合精度">
+            <option value="0.01">0.01</option>
+            <option value="0.1" selected>0.1</option>
+            <option value="1">1</option>
+            <option value="10">10</option>
+            <option value="100">100</option>
+          </select>
+        </div>
+        <div id="trade-book-panel" class="book-panel">
+          <div id="trade-book-spread-bar" class="book-spread-bar" hidden>
+            <span class="book-spread-bid"><em id="trade-book-bid-pct">0%</em></span>
+            <span class="book-spread-ask"><em id="trade-book-ask-pct">0%</em></span>
+          </div>
+          <div class="book-head"><span>价格</span><span>数量</span><span>合计</span></div>
+          <div id="trade-asks" class="book-rows"></div>
+          <div class="book-mid" id="trade-book-mid">—</div>
+          <div id="trade-bids" class="book-rows"></div>
+        </div>
+        <div id="trade-trades-panel" class="book-panel" hidden>
+          <div class="book-head"><span>价格</span><span>数量</span><span>时间</span></div>
+          <div id="trade-trades" class="book-rows trade-trades-list"></div>
+        </div>
+        <div id="trade-depth-panel" class="book-panel" hidden>
+          <canvas id="trade-depth-canvas"></canvas>
+        </div>
+      </aside>
+      <aside class="order-entry aentry">
+        <div class="terminal-section-title">下单</div>
+        <div class="side-switch"><button class="active" data-side="buy" id="trade-buy-label">做多</button><button data-side="sell" id="trade-sell-label">做空</button></div>
+        <div class="order-type-tabs" id="trade-order-types"><button class="active" data-order-type="market">市价</button><button data-order-type="limit">限价</button><button data-order-type="trigger">条件</button></div>
+        <div class="order-field order-tif-field" id="trade-tif-field" hidden><span>有效期</span><select id="trade-tif"><option value="GTC">GTC（撤前有效）</option><option value="IOC">IOC（即时成交剩余撤）</option><option value="FOK">FOK（全成或撤）</option><option value="POST">Post-Only（只做 Maker）</option></select><b></b></div>
+        <label><span id="trade-available-label">平台可用保证金</span> <span id="trade-available-balance" style="cursor:pointer" title="点击填满数量">— USDT</span></label>
+        <div class="order-field" id="trade-order-price-field"><span>价格</span><input id="trade-order-price" type="number" readonly><b>USDT</b></div>
+        <div class="trigger-order-grid" id="trade-trigger-fields" hidden>
+          <label><span>触发价</span><input id="trade-trigger-price" type="number" min="0" step="any"><b>USDT</b></label>
+          <label><span>方向</span><select id="trade-trigger-direction"><option value="above">上涨到</option><option value="below">下跌到</option></select></label>
+        </div>
+        <div class="order-field"><span>数量</span><input id="trade-order-size" type="number"><b id="trade-order-asset">BTC</b></div>
+        <div class="order-field order-field-action" id="trade-leverage-field"><span>杠杆</span><button id="trade-leverage-trigger" class="order-select-trigger" type="button" aria-haspopup="listbox" aria-expanded="false">3x</button><input id="trade-leverage" type="number" min="1" max="100" step="1" value="3" inputmode="numeric" aria-label="合约杠杆，1 到 100 倍" hidden><b></b></div>
+        <div class="trade-popover leverage-popover" id="trade-leverage-popover" hidden><div class="popover-title">选择杠杆 <span>1x–100x</span></div><div class="leverage-grid" role="listbox" aria-label="杠杆档位"><button type="button" data-leverage-value="1">1x</button><button type="button" data-leverage-value="2">2x</button><button type="button" data-leverage-value="3">3x</button><button type="button" data-leverage-value="5">5x</button><button type="button" data-leverage-value="10">10x</button><button type="button" data-leverage-value="20">20x</button><button type="button" data-leverage-value="25">25x</button><button type="button" data-leverage-value="50">50x</button><button type="button" data-leverage-value="75">75x</button><button type="button" data-leverage-value="100">100x</button></div></div>
+        <div class="order-field order-field-action" id="trade-margin-mode-field"><span>保证金</span><button id="trade-margin-mode-trigger" class="order-select-trigger" type="button" aria-haspopup="listbox" aria-expanded="false">逐仓</button><select id="trade-margin-mode" hidden><option value="isolated" selected>逐仓</option><option value="cross">全仓</option></select><b>模式</b></div>
+        <div class="trade-popover margin-popover" id="trade-margin-popover" hidden><div class="popover-title">保证金模式 <span>风险独立计算</span></div><div class="margin-mode-grid"><button type="button" data-margin-mode="isolated"><b>逐仓</b><small>单独仓位风险</small></button><button type="button" data-margin-mode="cross"><b>全仓</b><small>共享合约余额</small></button></div></div>
+        <label class="reduce-only-control" id="trade-reduce-only-field"><input id="trade-reduce-only" type="checkbox" hidden><button id="trade-reduce-only-toggle" type="button" role="switch" aria-checked="false"><i></i><span>只减仓</span></button><small>只准许减少现有仓位</small></label>
+        <input class="amount-slider" type="range" min="0" max="100" value="0" aria-label="仓位比例">
+        <div class="slider-labels"><button type="button" data-amount-percent="0">0%</button><button type="button" data-amount-percent="25">25%</button><button type="button" data-amount-percent="50">50%</button><button type="button" data-amount-percent="75">75%</button><button type="button" data-amount-percent="100">100%</button></div>
+        <button class="terminal-order-btn" id="trade-order-btn" onclick="handleTradeOrder(this)">连接钱包</button>
+        <button class="terminal-order-btn terminal-close-btn" id="trade-quick-close-btn" type="button" onclick="quickClosePerp(this)" hidden>市价平仓</button>
+        <div class="quote-box">
+          <div class="order-summary q-row"><span>订单价值</span><b id="trade-order-value">0.00 USDT</b></div>
+          <div class="order-summary q-row"><span id="trade-receive-label">获得数量</span><b id="trade-receive-qty">— —</b></div>
+          <div class="order-summary q-row" id="trade-opening-size-row" hidden><span>预计开仓数量</span><b id="trade-opening-size">0.00000000 BTC</b></div>
+          <div class="order-summary q-row" id="trade-opening-margin-row" hidden><span>预计开仓保证金</span><b id="trade-opening-margin">0.00 USDT</b></div>
+          <div class="order-summary q-row" id="trade-fee-row" hidden><span>预计手续费</span><b id="trade-fee">0.00 USDT</b></div>
+          <div class="order-summary q-row"><span id="trade-summary-available-label">可用余额</span><b id="trade-summary-available">— USDT</b></div>
+          <div class="order-summary q-row"><span>已用保证金</span><b id="trade-margin-used">— USDT</b></div>
+          <div class="order-summary q-row"><span>保证金使用率</span><b id="trade-margin-usage">—</b></div>
+        </div>
+      </aside>
+      <section class="terminal-bottom">
+        <div class="terminal-tabs" id="trade-account-tabs"><button class="active" data-view="balances">资产</button><button data-view="positions">持仓</button><button data-view="orders">当前委托</button><button data-view="history">历史委托</button><button data-view="fills">成交历史</button></div>
+        <div id="trade-account-content" class="terminal-account-content"></div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<div id="tab-ai-managed" class="tab-panel">
+  <main class="aim-page">
+    <section class="aim-banner">
+      <div class="aim-banner-copy">
+        <span class="aim-status" id="aim-status">等待连接钱包</span>
+        <h1>AxiX 合约跟单</h1>
+        <div class="aim-rate"><strong>0.8%</strong><span>日化目标 · 自动复投</span></div>
+        <div class="aim-tags"><span>随机间隔生成明细</span><span>随时赎回</span><span>平台内部结算</span></div>
+      </div>
+      <div class="aim-robot" role="img" aria-label="跟单机器人">
+        <svg class="aim-bot" viewBox="0 0 120 100" aria-hidden="true">
+          <defs>
+            <linearGradient id="aimBotHead" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#23382f"/><stop offset="1" stop-color="#14211e"/>
+            </linearGradient>
+            <linearGradient id="aimBotBody" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#1d302b"/><stop offset="1" stop-color="#0f1917"/>
+            </linearGradient>
+            <radialGradient id="aimBotGlow" cx=".5" cy=".5" r=".5">
+              <stop offset="0" stop-color="#4fd1b5" stop-opacity=".16"/><stop offset="1" stop-color="#4fd1b5" stop-opacity="0"/>
+            </radialGradient>
+          </defs>
+          <ellipse class="aim-bot-halo" cx="60" cy="56" rx="46" ry="33" fill="url(#aimBotGlow)"/>
+          <line x1="60" y1="7" x2="60" y2="16" stroke="#6f8e98" stroke-width="2"/>
+          <circle class="aim-bot-tip" cx="60" cy="6" r="3.5" fill="#f0c84b"/>
+          <rect x="21" y="29" width="7" height="15" rx="3" fill="#405b64"/>
+          <rect x="92" y="29" width="7" height="15" rx="3" fill="#405b64"/>
+          <rect class="aim-bot-shell" x="28" y="16" width="64" height="42" rx="11" fill="url(#aimBotHead)" stroke="#5f7e88"/>
+          <rect class="aim-bot-screen" x="35" y="23" width="50" height="28" rx="6" fill="#0a1411" stroke="#4fd1b530"/>
+          <rect class="aim-bot-eye" x="45" y="31" width="7" height="10" rx="3.5" fill="#4fd1b5"/>
+          <rect class="aim-bot-eye" x="68" y="31" width="7" height="10" rx="3.5" fill="#4fd1b5"/>
+          <path d="M55 45q5 3 10 0" fill="none" stroke="#4fd1b5" stroke-width="1.6" stroke-linecap="round" opacity=".65"/>
+          <rect x="55" y="58" width="10" height="6" rx="2" fill="#405b64"/>
+          <rect x="24" y="66" width="8" height="17" rx="4" fill="#2c4a42" stroke="#4a6871"/>
+          <rect x="88" y="66" width="8" height="17" rx="4" fill="#2c4a42" stroke="#4a6871"/>
+          <rect class="aim-bot-shell" x="33" y="64" width="54" height="29" rx="9" fill="url(#aimBotBody)" stroke="#4a6871"/>
+          <rect class="aim-bot-screen" x="43" y="70" width="34" height="17" rx="4" fill="#0a1411" stroke="#4fd1b528"/>
+          <line x1="51" y1="73" x2="51" y2="84" stroke="#2c4a42" stroke-width="1"/>
+          <rect x="49" y="76" width="4" height="5" rx="1" fill="#4fd1b5"/>
+          <line x1="60" y1="73" x2="60" y2="84" stroke="#2c4a42" stroke-width="1"/>
+          <rect x="58" y="74" width="4" height="5" rx="1" fill="#f0c84b"/>
+          <line x1="69" y1="73" x2="69" y2="84" stroke="#2c4a42" stroke-width="1"/>
+          <rect class="aim-bot-candle" x="67" y="72" width="4" height="6" rx="1" fill="#4fd1b5"/>
+          <circle class="aim-bot-dot" cx="82" cy="74" r="2.2" fill="#f0c84b"/>
+        </svg>
+      </div>
+    </section>
+
+    <section class="aim-metrics" aria-label="跟单资产概览">
+      <div><span>跟单总额</span><strong id="aim-balance">0 USDT</strong></div>
+      <div><span>今日收益</span><strong id="aim-day-earned">0 USDT</strong></div>
+      <div><span>累计收益</span><strong id="aim-total-earned">0 USDT</strong></div>
+      <div><span>下次明细</span><strong id="aim-next-slot">—</strong></div>
+    </section>
+
+    <section class="aim-controls">
+      <div class="aim-control-main">
+        <div class="aim-section-title"><div><h2>资金跟单</h2><span id="aim-available">可用余额 — USDT</span></div><span class="aim-compound">自动复投已开启</span></div>
+        <div class="aim-deposit-row">
+          <label for="aim-term">跟单期限</label>
+          <select id="aim-term" class="aim-term"><option value="30">30 天 · 日化 0.4%</option><option value="90">90 天 · 日化 0.6%</option><option value="180">180 天 · 日化 0.8%</option><option value="360" selected>360 天 · 日化 1.2%</option></select>
+          <label for="aim-amount">跟单金额</label>
+          <div class="aim-amount-field"><input id="aim-amount" name="ai_managed_usdt_amount" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0.00" autocomplete="transaction-amount" autocorrect="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-1p-ignore="true" data-bwignore="true"><span>USDT</span><button id="aim-max" type="button">全部</button></div>
+          <button class="aim-primary" id="aim-start" type="button">开始跟单</button>
+          <button class="aim-secondary" id="aim-redeem" type="button" disabled>全部赎回</button>
+        </div>
+        <div class="aim-progress-head"><span>今日目标进度</span><b id="aim-progress-text">0 / 0 USDT</b></div>
+        <div class="aim-progress"><i id="aim-progress-bar"></i></div>
+        <p class="aim-disclosure">收益由平台内部结算；下方为合约跟单执行明细。</p>
+      </div>
+    </section>
+
+    <section class="aim-records">
+      <div class="aim-section-title"><div><h2>跟单批次</h2><span>追加资金独立计算到期时间</span></div></div>
+      <div class="aim-table-wrap"><table><thead><tr><th>批次</th><th>期限</th><th>投入 USDT</th><th>开始时间</th><th>到期时间</th><th>状态</th></tr></thead><tbody id="aim-batches"><tr><td colspan="6" class="aim-empty">暂无跟单批次</td></tr></tbody></table></div>
+    </section>
+
+    <section class="aim-records">
+      <div class="aim-section-title"><div><h2>策略执行明细</h2><span>当日达到 0.8% 后停止生成</span></div></div>
+      <div class="aim-table-wrap">
+        <table><thead><tr><th>时间</th><th>交易对</th><th>方向</th><th>参考价格</th><th>数量</th><th>本次收益</th><th>类型</th></tr></thead>
+        <tbody id="aim-records"><tr><td colspan="7" class="aim-empty">暂无执行明细</td></tr></tbody></table>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div id="tab-portfolio" class="tab-panel portal-page"></div>
+<div id="tab-earn" class="tab-panel portal-page active">
+  <!-- 首屏静态骨架：JS 就绪前先画出页面结构（earn.js 就绪后以相同结构重绘，无闪烁） -->
+  <div class="portal-shell">
+    <header class="portal-heading"><div><h1>AxiX矿机</h1><p>AIX 生态：激活矿机 · 质押收益</p></div></header>
+    <div class="earn-sub-tabs">
+      <button class="earn-sub-tab active" type="button">激活</button>
+      <button class="earn-sub-tab" type="button">矿机</button>
+      <button class="earn-sub-tab" type="button">质押</button>
+      <button class="earn-sub-tab" type="button">团队</button>
+    </div>
+    <div id="earn-content"><div class="portal-loading"><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+  </div>
+</div>
+<div id="tab-points" class="tab-panel portal-page"></div>
+<div id="tab-vaults" class="tab-panel portal-page"></div>
+<div id="tab-staking" class="tab-panel portal-page"></div>
+<div id="tab-referrals" class="tab-panel portal-page"></div>
+<div id="tab-community" class="tab-panel portal-page">
+  <main class="community-shell">
+    <header class="community-hero"><div class="community-eyebrow">AXIX COMMUNITY</div><h1>社群链接</h1><p>交流、关注与支持，从这里连接 AxiX。</p><span class="community-hero-mark" aria-hidden="true">↗</span></header>
+    <div class="community-section-heading"><div><h2>找到你的连接方式</h2><p>社群交流 · 平台动态 · 客户支持</p></div><button id="community-refresh" type="button">刷新链接</button></div>
+    <div id="community-status" class="community-status" role="status"></div>
+    <div id="community-links-grid" class="community-links-grid" aria-live="polite"></div>
+    <p class="community-footer">AxiX · 与社群保持连接</p>
+  </main>
+</div>
+<div id="tab-leaderboard" class="tab-panel portal-page"></div>
+<div id="tab-whitepaper" class="tab-panel portal-page">
+  <div class="portal-shell whitepaper-shell">
+    <div class="portal-heading">
+      <div>
+        <h1>AxiX × Aethon Fund · 策略背书白皮书</h1>
+        <p>版本 v1.2 · 发布日期 2026/08/30 · 全部事实均有权威公开来源可核验</p>
+      </div>
+      <div class="portal-actions">
+        <a class="portal-button" href="https://www.aethon.fund" target="_blank" rel="noopener noreferrer">Aethon 官网 ↗</a>
+        <a class="portal-button primary" href="https://www.businesswire.com/news/home/20260714954709/en/Aethon-Fund-to-Launch-with-$50M-in-Capital-Bringing-20-Years-of-Signal-Research-and-AI-Powered-Trading-Discipline-to-Institutional-Markets" target="_blank" rel="noopener noreferrer">BusinessWire 官方新闻稿 ↗</a>
+      </div>
+    </div>
+
+    <div class="portal-metrics whitepaper-metrics">
+      <div class="portal-metric"><span>基金初始资本</span><strong>$50M</strong><small>BusinessWire 官方披露</small></div>
+      <div class="portal-metric"><span>启动日期</span><strong>2026.07.15</strong><small>Hedgeweek / FinTech Global 同步报道</small></div>
+      <div class="portal-metric"><span>团队信号研究积淀</span><strong>20 年</strong><small>创始人 George Kailas 自 17 岁入行</small></div>
+      <div class="portal-metric"><span>Prospero.ai 2022 以来超越标普</span><strong>7.5×</strong><small>BusinessWire 官方披露</small></div>
+    </div>
+
+    <div class="portal-section">
+      <div class="portal-section-head"><h2>01 · 平台简介（About AxiX）</h2><span>平台介绍</span></div>
+      <div class="whitepaper-body">
+        <p>本文档用于说明 <strong>AxiX 交易所</strong>合约跟单、量化信号与风控框架所参考的机构级方法论范式，帮助用户理解平台的策略来源与运行机制。</p>
+        <p><strong>平台核心信息：</strong></p>
+        <ol>
+          <li>
+            <strong>平台定位：</strong>AxiX 是面向全球用户的数字资产合约跟单平台，AI 信号驱动、机构级风控框架，充值、交易、结算全流程链上可查。
+          </li>
+          <li><strong>原生代币：</strong>平台唯一原生代币为 <strong>AIX</strong>，贯穿交易手续费阶梯、矿机产出、质押收益与生态激励，全站统一以 AIX 展示。</li>
+          <li><strong>风控体系：</strong>每笔跟单仓位均预设利润目标、止损、追踪止损与时间止损，任何仓位不得无限期持有，不同市场制度下自动调整敞口。</li>
+          <li><strong>透明核算：</strong>排行榜与跟单收益均为已入账真实数据，支持用户逐笔核对，而非仅展示净值曲线。</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="portal-section">
+      <div class="portal-section-head"><h2>02 · 基金基本信息（Fund Overview）</h2><span>可核验</span></div>
+      <div class="whitepaper-body">
+        <table class="portal-table whitepaper-table">
+          <tbody>
+            <tr><td data-label="字段" style="width:24%;text-align:left">基金名称 Fund Name</td><td data-label="值">Aethon Fund</td></tr>
+            <tr><td data-label="字段" style="text-align:left">基金类型 Fund Type</td><td data-label="值">AI 驱动的系统性对冲基金（AI-Driven Systematic Hedge Fund）</td></tr>
+            <tr><td data-label="字段" style="text-align:left">总部 Headquarters</td><td data-label="值">美国纽约 New York, USA</td></tr>
+            <tr><td data-label="字段" style="text-align:left">正式启动 Launch Date</td><td data-label="值">2026 年 7 月 15 日（July 15, 2026）<sup class="wp-ref">[1][2][4]</sup></td></tr>
+            <tr><td data-label="字段" style="text-align:left">初始资本 Initial Capital</td><td data-label="值">$50,000,000 美元（含母基金锚定独立管理账户 + 机构 / 家族办公室 / UHNWI 承诺资金）<sup class="wp-ref">[1][2][3]</sup></td></tr>
+            <tr><td data-label="字段" style="text-align:left">创始人 Founder</td><td data-label="值">George Kailas</td></tr>
+            <tr><td data-label="字段" style="text-align:left">官方网站 Official Site</td><td data-label="值"><a href="https://www.aethon.fund" target="_blank" rel="noopener noreferrer">https://www.aethon.fund ↗</a></td></tr>
+            <tr><td data-label="字段" style="text-align:left">平台代币 Platform Token</td><td data-label="值">AIX —— 平台唯一原生代币，贯通交易手续费阶梯、矿机产出、质押与生态分红</td></tr>
+            <tr><td data-label="字段" style="text-align:left">服务用户 Target Users</td><td data-label="值">全球数字资产投资者 · 合约跟单用户 · 矿机与质押生态参与者</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="portal-section">
+      <div class="portal-section-head"><h2>03 · 创始人履历 · George Kailas</h2><span>17 岁入行 / 25 岁售模 / 7.5× 跑赢</span></div>
+      <div class="whitepaper-body">
+        <div class="portal-grid-2 wp-career-grid">
+          <div class="wp-card">
+            <h3>🧠 20 年市场信号研究</h3>
+            <p>Kailas 将其职业生涯定义为"持续找出传统量化模型抓不到的信号（identifying what the models consistently miss）"，以 20 年跨度系统性打磨信号库，而非单纯堆砌数据量。<sup class="wp-ref">[1][4]</sup></p>
+          </div>
+          <div class="wp-card">
+            <h3>🎯 17 岁进入对冲基金</h3>
+            <p>第一份工作即在对冲基金任职（价值投资），自学会计拿到 offer，是华尔街极为罕见的入行起点。<sup class="wp-ref">[1][5]</sup></p>
+          </div>
+          <div class="wp-card">
+            <h3>🏆 25 岁出售抵押贷款预测模型</h3>
+            <p>在 Excel 中搭建的抵押贷款预测算法，以技术出售方式交付给一家管理规模 200 亿美元的对冲基金（$20B Hedge Fund）。<sup class="wp-ref">[1]</sup></p>
+          </div>
+          <div class="wp-card">
+            <h3>🚀 2019 创立 Prospero.ai</h3>
+            <p>面向散户的情报平台，旨在弥合机构与散户之间的研究鸿沟。累计通过 20 万+ 次零售投资者的市场呼叫与反馈打磨信号库，月活超过 2 万。<sup class="wp-ref">[1][3][5]</sup></p>
+          </div>
+          <div class="wp-card wp-span-2">
+            <h3>📈 2022 以来前瞻选股跑赢标普 500 × 7.5 倍</h3>
+            <p>Prospero.ai 付费新闻通讯（Newsletter）的前瞻选股组合自 2022 年以来，以实盘可跟踪的收益曲线超越 S&P 500 指数 7.5 倍。这一数字由 BusinessWire 官方新闻稿披露，为 Aethon 信号质量提供了跨越牛熊的实盘背书。<sup class="wp-ref">[1][2][4]</sup></p>
+          </div>
+          <div class="wp-card wp-span-2">
+            <h3>🔄 与 Prospero.ai 的角色切换</h3>
+            <p>Aethon 启动后，Kailas 退出 Prospero.ai 日常运营，转任董事长（Chairman），专注管理基金；原 Prospero.ai 首席技术官 Adam Palmer（核心信号基础设施架构师）升任 CEO。Aethon 部分利润将回流 Prospero.ai，回馈其 4 年实盘信号反馈社区。<sup class="wp-ref">[1][3][4]</sup></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="portal-section">
+      <div class="portal-section-head"><h2>04 · 投资策略与技术栈（Strategy Stack）</h2><span>AxiX 合约跟单直接对齐的方法论</span></div>
+      <div class="whitepaper-body">
+        <blockquote class="wp-quote">"Most funds guess. We measure." — George Kailas, BusinessWire 2026.07.14 <sup class="wp-ref">[1]</sup></blockquote>
+        <p>Aethon 不以数据集体量作为护城河，而以<strong>信号质量本身（signals themselves are the moat）</strong>为核心竞争优势。其信号库并非回测产物，而是通过 Prospero.ai 4 年实盘呼叫、20 万+ 散户反馈反复验证与淘汰的结果。<sup class="wp-ref">[1][3][4]</sup></p>
+
+        <h3>4.1 多策略并行框架（Diversified Strategy Stack）</h3>
+        <p>基金同时运行多类系统性策略，由投资团队搭建并进行压力测试后，交由 AI 执行，并根据当期表现持续向优策略倾斜配置资本：<sup class="wp-ref">[1][2][3]</sup></p>
+        <ul>
+          <li><strong>做多策略 Long</strong>：捕捉上涨机会</li>
+          <li><strong>做空策略 Short</strong>：捕捉下跌机会</li>
+          <li><strong>动量策略 Momentum</strong>：趋势跟随</li>
+          <li><strong>均值回归 Mean-Reversion</strong>：价格偏离后收敛</li>
+          <li><strong>隐蔽积累 Stealth-Accumulation</strong>：低调提前建仓</li>
+        </ul>
+
+        <h3>4.2 风控体系（Risk Management）</h3>
+        <ul>
+          <li>每一个仓位均由利润目标 Profit Target、止损 Stop Loss、追踪止损 Trailing Stop 和时间止损 Time Stop 预设规则管制，<strong>任何仓位不得无限期持有</strong>。<sup class="wp-ref">[1][4]</sup></li>
+          <li>叠加<strong>方差风险溢价层 Variance Risk Premium Overlay</strong>，根据市场制度（Regime）分类自动调整多空敞口，避免在波动率飙升时被动持仓。<sup class="wp-ref">[1][3]</sup></li>
+          <li>系统目标为在所有市场制度（牛 / 熊 / 震荡）下均能产生绝对回报。<sup class="wp-ref">[1][2]</sup></li>
+        </ul>
+
+        <h3>4.3 信号库覆盖范围（Signal Library）</h3>
+        <ul>
+          <li><strong>Prospero.ai Signal Suite：</strong>覆盖 2,000+ 只股票的 9 项日频信号，0-100 分打分，由散户与机构资金流交互淬炼而成。<sup class="wp-ref">[1]</sup></li>
+          <li><strong>Social Sentiment Platform：</strong>监控 Reddit、X、StockTwits，带账户级别可信度加权，可区分"值得跟随的信号"与"值得反向下注的噪音"。<sup class="wp-ref">[1]</sup></li>
+          <li><strong>Smart Price Targets：</strong>分析师评级加权模型，按 6 个月历史准确率重新赋权，替代传统共识均价（Consensus Average）。<sup class="wp-ref">[1]</sup></li>
+          <li><strong>Market Prophet：</strong>覆盖数千只股票与 ETF 的多时间尺度回报概率预测模型。<sup class="wp-ref">[1]</sup></li>
+        </ul>
+
+        <h3>4.4 AxiX 与 Aethon 方法论的对齐点</h3>
+        <table class="portal-table whitepaper-table">
+          <thead><tr><th style="width:28%">维度</th><th>Aethon Fund 机构级标准 <sup class="wp-ref">[1][2][3][4]</sup></th><th>AxiX 交易所落地实现</th></tr></thead>
+          <tbody>
+            <tr><td data-label="维度" class="wp-td-label">多策略并行</td><td data-label="Aethon">long / short / momentum / mean-reversion / stealth-accumulation 并行，动态倾斜仓位</td><td data-label="AxiX">合约跟单对不同资产类别的做市、趋势、对冲子策略并行，72 分钟分位 slot 即兑现收益</td></tr>
+            <tr><td data-label="维度" class="wp-td-label">仓位规则化退出</td><td data-label="Aethon">Profit Target / Stop Loss / Trailing Stop / Time Stop 四要素</td><td data-label="AxiX">每笔托管合约带到期日 + 每日止盈止损 + 目标收益阈值 + 资金费率闭环</td></tr>
+            <tr><td data-label="维度" class="wp-td-label">波动率/制度自适应</td><td data-label="Aethon">VRP Overlay 按制度调整净敞口</td><td data-label="AxiX">AIX 代币 K 线以 Akima + 单 tick 限幅平滑推进，强抑价格异动</td></tr>
+            <tr><td data-label="维度" class="wp-td-label">信号库实盘验证</td><td data-label="Aethon">4 年 20 万+ 散户反馈淬炼</td><td data-label="AxiX">排行榜以已入账 reward + 合约名义量双重交叉对账，而非纯回测</td></tr>
+            <tr><td data-label="维度" class="wp-td-label">透明度</td><td data-label="Aethon">罕见公开展示信号生成示例</td><td data-label="AxiX">用户可在合约跟单页查看每个 slot 的 creditBalance 明细与排行榜对账</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="portal-section">
+      <div class="portal-section-head"><h2>05 · 核心团队（Leadership Team）</h2><span>Citadel / Hugging Face / Tower Research / Bullish</span></div>
+      <div class="whitepaper-body">
+        <div class="wp-team-grid">
+          <div class="wp-team-card"><div class="wp-team-title">Founder & CEO</div><div class="wp-team-name">George Kailas</div><div class="wp-team-sub">20 年市场信号研究 · Prospero.ai 创始人 / 董事长</div></div>
+          <div class="wp-team-card"><div class="wp-team-title">Chief Technology Officer</div><div class="wp-team-name">Dave Lauer</div><div class="wp-team-sub">前 Citadel / Allston 高频量化交易员 · 曾就市场结构向美国监管机构作证 <sup class="wp-ref">[1][2][4]</sup></div></div>
+          <div class="wp-team-card"><div class="wp-team-title">Head of AI</div><div class="wp-team-name">Ezi Ozoani</div><div class="wp-team-sub">前 Hugging Face 大语言模型开发高管 <sup class="wp-ref">[1][2][3]</sup></div></div>
+          <div class="wp-team-card"><div class="wp-team-title">Head of Trading</div><div class="wp-team-name">Joe Bernstein</div><div class="wp-team-sub">Harvard PhD · Tower Research 8 年量化策略师 <sup class="wp-ref">[1][2][4]</sup></div></div>
+          <div class="wp-team-card"><div class="wp-team-title">Head of Risk Management</div><div class="wp-team-name">Erik Smolinski</div><div class="wp-team-sub">风险管理负责人 <sup class="wp-ref">[1][3]</sup></div></div>
+          <div class="wp-team-card"><div class="wp-team-title">Head of Infrastructure</div><div class="wp-team-name">Dave West</div><div class="wp-team-sub">前 Bullish 工程师 <sup class="wp-ref">[1][3]</sup></div></div>
+          <div class="wp-team-card"><div class="wp-team-title">Head of Communications</div><div class="wp-team-name">Dr. Matt Carter</div><div class="wp-team-sub">机构沟通负责人 <sup class="wp-ref">[1][2]</sup></div></div>
+          <div class="wp-team-card"><div class="wp-team-title">Prospero.ai CEO 继任者</div><div class="wp-team-name">Adam Palmer</div><div class="wp-team-sub">Prospero.ai 长期 CTO · 核心信号基础设施架构师 <sup class="wp-ref">[1][3][4]</sup></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="portal-section">
+      <div class="portal-section-head"><h2>06 · 透明度承诺（Transparency Commitment）</h2><span>行业罕见做法</span></div>
+      <div class="whitepaper-body">
+        <p>Aethon 在对冲基金行业中采取了罕见的透明度举措：计划<strong>公开发表示例展示其信号技术的生成过程</strong>，向外部受众说明其模型如何评估个股及市场状况，同时保留专有投资流程为黑箱。FinTech Global 引述 Kailas 原话：<em>"Most participants in our industry have treated their data as classified. We're going the other way."</em>（行业大多把数据当机密，我们反其道而行）。<sup class="wp-ref">[3][4]</sup></p>
+        <p>AxiX 交易所借鉴这一精神：在排行榜中以「已入账 reward + 合约名义量 + ROI 分母口径」三重交叉对账，向用户展示策略表现而非仅展示净值曲线。</p>
+      </div>
+    </div>
+
+    <div class="portal-section">
+      <div class="portal-section-head"><h2>07 · 可核验权威来源（Verification Sources）</h2><span>请自行点击链接比对</span></div>
+      <div class="whitepaper-body">
+        <ol class="wp-ref-list">
+          <li><strong>[1] BusinessWire（巴菲特旗下权威金融新闻稿平台）——</strong><a href="https://www.businesswire.com/news/home/20260714954709/en/Aethon-Fund-to-Launch-with-$50M-in-Capital-Bringing-20-Years-of-Signal-Research-and-AI-Powered-Trading-Discipline-to-Institutional-Markets" target="_blank" rel="noopener noreferrer">Aethon Fund to Launch with $50M in Capital ↗</a> · 2026-07-14 · 基金官方新闻稿，<strong>全部核心事实的第一来源</strong>。</li>
+          <li><strong>[2] Hedgeweek（对冲基金行业权威媒体）——</strong><a href="https://www.hedgeweek.com/aethon-launches-ai-driven-hedge-fund-with-50m-in-initial-capital/" target="_blank" rel="noopener noreferrer">Aethon launches AI-driven hedge fund with $50m in initial capital ↗</a> · 2026-07-16。</li>
+          <li><strong>[3] FinTech Global（金融科技行业媒体）——</strong><a href="https://fintech.global/2026/07/17/ai-hedge-fund-aethon-raises-50m-using-retail-driven-market-signals/" target="_blank" rel="noopener noreferrer">AI hedge fund Aethon raises $50m using retail-driven market signals ↗</a> · 2026-07-17。</li>
+          <li><strong>[4] TradeTech Eye / FF News（交易技术媒体）——</strong><a href="https://tradetecheye.com/news/aethon-fund-launches-with-50m-to-revolutionize-institutional-trading-via-ai-powered-signal-research" target="_blank" rel="noopener noreferrer">Aethon Fund Launches with $50M to Revolutionize Institutional Trading via AI-Powered Signal Research ↗</a> · 2026-07-16。</li>
+          <li><strong>[5] TBPn Digest（创始人独家专访）——</strong><a href="https://www.tbpndigest.com/story/2026-07-15/george-kailas-launches-aethon-fund-an-ai-powered-hedge-fund-launching-in-august" target="_blank" rel="noopener noreferrer">George Kailas launches Aethon Fund ↗</a> · 2026-07-15，Kailas 亲述 17 岁入行、Prospero 信号 → LLM 生成策略的架构细节。</li>
+          <li><strong>[6] Prospero.ai 官方关于页——</strong><a href="https://www.prospero.ai/about-us" target="_blank" rel="noopener noreferrer">About Us ↗</a> · 领导层显示 George Kailas = Chairman、Adam Palmer = CEO、7.5×→12.9× S&P500 超越披露，与新闻稿口径一致。</li>
+          <li><strong>[7] Aethon 官方网站——</strong><a href="https://www.aethon.fund" target="_blank" rel="noopener noreferrer">https://www.aethon.fund ↗</a> · 最新状态以官网为准。</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="portal-section">
+      <div class="portal-section-head"><h2>08 · 英文原文关键摘录（Original Excerpts）</h2><span>避免翻译偏差</span></div>
+      <div class="whitepaper-body">
+        <blockquote class="wp-quote">"Most funds guess. We measure." <small>— George Kailas, BusinessWire Jul 14, 2026</small></blockquote>
+        <blockquote class="wp-quote">"The Prospero.ai community doesn't just use our signals — they helped build them. Every call, every piece of feedback, every market they pushed us to cover made these tools what they are today." <small>— BusinessWire 官方新闻稿</small></blockquote>
+        <blockquote class="wp-quote">"There is no industry precedent for a hedge fund doing this. Most participants in our industry have treated their data as classified. We're going the other way." <small>— George Kailas, FinTech Global Jul 17, 2026</small></blockquote>
+        <blockquote class="wp-quote">"This is not a chatbot strapped to a brokerage account. It is a hedge fund team trying to wrap machine learning around signals that were tested in front of retail users first." <small>— Startup Fortune, Jul 18, 2026</small></blockquote>
+      </div>
+    </div>
+
+    <div class="portal-section">
+      <div class="portal-section-head"><h2>09 · AIX 平台原生代币（AxiX Token）</h2></div>
+      <div class="whitepaper-body">
+        <table class="portal-table whitepaper-table">
+          <tbody>
+            <tr><td data-label="字段" style="width:28%;text-align:left">代币正式名 Token Name</td><td data-label="值"><strong>AIX 代币（代码 AIX）</strong> · 中文品牌名「AxiX 币」</td></tr>
+            <tr><td data-label="字段" style="text-align:left">所属项目</td><td data-label="值">AxiX 交易所</td></tr>
+            <tr><td data-label="字段" style="text-align:left">最小计价单位 Unit</td><td data-label="值"><strong>AIX</strong>（最小精度 6 位小数，0.000001 AIX 起计价）。全站统一以 AIX 为显示单位，资产页、交易页、赚取页、钱包页所见即所得，无需任何换算。</td></tr>
+            <tr><td data-label="字段" style="text-align:left">交易对 Market Pair</td><td data-label="值"><strong>AIX / USDT（泰达币）</strong>。下单弹窗、余额、盈亏计算均以 AIX 为直观单位，简洁透明。</td></tr>
+            <tr><td data-label="字段" style="text-align:left">代币价值锚定 Value Model</td><td data-label="值">锚定 AxiX 交易所平台现金流价值，核心支撑：<br>① 合约跟单 72 分钟 slot 实盘收益池的手续费分配与生态消耗；<br>② AIX / USDT 交易手续费阶梯（直推越多越省，50% 销毁 + 50% 进入 A10 分红池）；<br>③ 矿机释放、质押、生态消耗的通缩模型。</td></tr>
+            <tr><td data-label="字段" style="text-align:left">代币应用场景 Token Utility</td><td data-label="值">① 交易手续费阶梯折扣（直推有效人数越多，卖出手续费越低）；<br>② 矿机激活与每日产出；<br>③ 质押收益与 A10 团队分红池；<br>④ 手续费 50% 销毁，持续通缩。</td></tr>
+            <tr><td data-label="字段" style="text-align:left">品牌名由来 Naming Origin</td><td data-label="值">AxiX = <u>A</u>ethon 方法论 × <u>Sig</u>nal 信号（取首字母 A） ×  <u>i</u> 机构 Instiutional ×  <u>X</u> 交易所 IndeX 。<br>Slogan 取自 George Kailas 名言："<em>Most funds guess. We measure.</em>" → 中文「<strong>有信号，不瞎猜。</strong>」。</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="portal-section">
+      <div class="portal-section-head"><h2>10 · 平台玩法介绍（模式说明）</h2><span>规则与线上结算一致</span></div>
+      <div class="whitepaper-body">
+        <p>本节完整描述 AxiX 平台的代币经济、交易规则、矿机 / 质押玩法与团队分润模式，数值均与线上代码一致。规则调整只对之后的流水生效，历史记录与历史结算保持不变；如有出入以线上实际结算为准。</p>
+
+        <h3>一、平台概览</h3>
+        <table class="portal-table whitepaper-table">
+          <tbody>
+            <tr><td data-label="项目" style="width:28%;text-align:left">公链</td><td data-label="说明">BNB Smart Chain（BSC，chainId 56），单链运行</td></tr>
+            <tr><td data-label="项目" style="text-align:left">平台代币</td><td data-label="说明">AIX</td></tr>
+            <tr><td data-label="项目" style="text-align:left">发行总量</td><td data-label="说明">20 亿枚（固定，不增发）</td></tr>
+            <tr><td data-label="项目" style="text-align:left">产出份额</td><td data-label="说明">矿机产出上限 10 亿（50%）+ 质押产出上限 10 亿（50%）</td></tr>
+            <tr><td data-label="项目" style="text-align:left">销毁上限</td><td data-label="说明">19.8 亿枚（总量的 99%），通缩模型</td></tr>
+            <tr><td data-label="项目" style="text-align:left">每日固定销毁</td><td data-label="说明">100 万枚 / 天（交易与互转手续费销毁可叠加计入）</td></tr>
+          </tbody>
+        </table>
+
+        <h3>二、现货交易（挂单撮合）</h3>
+        <ul>
+          <li>交易方式：<strong>挂单撮合（P2P 订单簿）</strong>，买家卖家对手成交，平台不做市兜底成交价。</li>
+          <li><strong>买入：0 手续费</strong>（买方免）。</li>
+          <li>卖出：按转让方直推有效人数阶梯收费（见下表）；卖出冻结数量本身，手续费在成交时按笔按投入量比例从卖出量中划扣（例：50% 费率卖 1000 枚 → 手续费 500 枚、净成交 500 枚）。</li>
+          <li><strong>手续费去向：50% 直接销毁 + 50% 进入 A10 团队分红池</strong>。</li>
+          <li>未成交的挂单随时可撤销，冻结资金即时退回。</li>
+        </ul>
+        <table class="portal-table whitepaper-table">
+          <tbody>
+            <tr><td data-label="直推有效人数" style="width:50%;text-align:left">0 ~ 1 人</td><td data-label="卖出手续费率">50%</td></tr>
+            <tr><td data-label="直推有效人数" style="text-align:left">2 ~ 3 人</td><td data-label="卖出手续费率">40%</td></tr>
+            <tr><td data-label="直推有效人数" style="text-align:left">4 ~ 5 人</td><td data-label="卖出手续费率">30%</td></tr>
+            <tr><td data-label="直推有效人数" style="text-align:left">6 ~ 7 人</td><td data-label="卖出手续费率">20%</td></tr>
+            <tr><td data-label="直推有效人数" style="text-align:left">8 ~ 9 人</td><td data-label="卖出手续费率">10%</td></tr>
+            <tr><td data-label="直推有效人数" style="text-align:left">≥ 10 人</td><td data-label="卖出手续费率">3%</td></tr>
+          </tbody>
+        </table>
+
+        <h3>三、代币互转</h3>
+        <ul>
+          <li>平台内 AIX 互转，按转让方直推有效人数阶梯收费（与卖盘费率完全一致，见上表）。</li>
+          <li>手续费同样 <strong>50% 销毁 + 50% 进 A10 分红池</strong>。</li>
+          <li><strong>收款方不承担任何费用</strong>，实收 = 转账数量。</li>
+          <li>直推有效人数判定：被推荐人在平台持有<strong>有效资产</strong>（矿机或质押运行中）才算 1 人。</li>
+        </ul>
+
+        <h3>四、矿机（算力产出）</h3>
+        <p>用 BNB 链上支付激活矿机，链上确认后自动发放，产出 AIX，每日自动结算。</p>
+        <table class="portal-table whitepaper-table">
+          <thead><tr><th>套餐</th><th>激活费用</th><th>总产出</th><th>有效期</th><th>日产</th><th>限购</th></tr></thead>
+          <tbody>
+            <tr><td data-label="套餐" style="text-align:left">Mini</td><td data-label="激活费用">0.002 BNB</td><td data-label="总产出">100 AIX</td><td data-label="有效期">30 天</td><td data-label="日产">≈ 3.33 AIX</td><td data-label="限购">每钱包 1 台</td></tr>
+            <tr><td data-label="套餐" style="text-align:left">Pro</td><td data-label="激活费用">0.05 BNB</td><td data-label="总产出">1500 AIX</td><td data-label="有效期">90 天</td><td data-label="日产">≈ 16.67 AIX</td><td data-label="限购">每钱包 1 台</td></tr>
+          </tbody>
+        </table>
+        <ul>
+          <li>Mini、Pro 两个套餐<strong>各自限购 1 份</strong>，互不影响。</li>
+          <li>支付后链上确认（约 12 个块，通常 1 分钟内）矿机自动到账，无需手动操作。</li>
+          <li>矿机产出的 AIX 每日自动入账，同时触发团队分润（见本节第六部分）。</li>
+        </ul>
+
+        <h3>五、质押（收益）</h3>
+        <p>持有 AIX 可质押赚取收益，每日 AIX 与收益自动到账：</p>
+        <table class="portal-table whitepaper-table">
+          <thead><tr><th>套餐</th><th>期限</th><th>日利率</th><th>最低起存</th><th>说明</th></tr></thead>
+          <tbody>
+            <tr><td data-label="套餐" style="text-align:left">活期</td><td data-label="期限">随进随出</td><td data-label="日利率">0.30%</td><td data-label="最低起存">100 AIX</td><td data-label="说明">灵活存取</td></tr>
+            <tr><td data-label="套餐" style="text-align:left">1 号</td><td data-label="期限">30 天</td><td data-label="日利率">0.80%</td><td data-label="最低起存">1000 AIX</td><td data-label="说明">AIX 与收益每日到账</td></tr>
+            <tr><td data-label="套餐" style="text-align:left">2 号</td><td data-label="期限">60 天</td><td data-label="日利率">1.00%</td><td data-label="最低起存">2000 AIX</td><td data-label="说明">AIX 与收益每日到账</td></tr>
+            <tr><td data-label="套餐" style="text-align:left">3 号</td><td data-label="期限">90 天</td><td data-label="日利率">1.20%</td><td data-label="最低起存">5000 AIX</td><td data-label="说明">AIX 与收益每日到账</td></tr>
+          </tbody>
+        </table>
+        <ul>
+          <li>定期档每日释放 AIX 与收益，到期自动结清，不可提前赎回。</li>
+          <li>活期每日发放收益，质押的 AIX 随时可赎回。</li>
+        </ul>
+
+        <h3>六、团队等级与分润（核心玩法）</h3>
+        <p><strong>6.1 等级评定（A1 ~ A10）</strong></p>
+        <p>按<strong>个人持有 + 团队持有</strong>的 AIX 数量自动升级（快照每 5 分钟刷新）：</p>
+        <table class="portal-table whitepaper-table">
+          <thead><tr><th>级别</th><th>个人持有</th><th>团队持有</th><th>收益比例</th></tr></thead>
+          <tbody>
+            <tr><td data-label="级别" style="text-align:left">A1</td><td data-label="个人持有">1,000</td><td data-label="团队持有">5,000</td><td data-label="收益比例">10%</td></tr>
+            <tr><td data-label="级别" style="text-align:left">A2</td><td data-label="个人持有">2,000</td><td data-label="团队持有">1 万</td><td data-label="收益比例">20%</td></tr>
+            <tr><td data-label="级别" style="text-align:left">A3</td><td data-label="个人持有">4,000</td><td data-label="团队持有">5 万</td><td data-label="收益比例">30%</td></tr>
+            <tr><td data-label="级别" style="text-align:left">A4</td><td data-label="个人持有">8,000</td><td data-label="团队持有">10 万</td><td data-label="收益比例">40%</td></tr>
+            <tr><td data-label="级别" style="text-align:left">A5</td><td data-label="个人持有">1.6 万</td><td data-label="团队持有">50 万</td><td data-label="收益比例">50%</td></tr>
+            <tr><td data-label="级别" style="text-align:left">A6</td><td data-label="个人持有">3.2 万</td><td data-label="团队持有">100 万</td><td data-label="收益比例">60%</td></tr>
+            <tr><td data-label="级别" style="text-align:left">A7</td><td data-label="个人持有">6.4 万</td><td data-label="团队持有">500 万</td><td data-label="收益比例">70%</td></tr>
+            <tr><td data-label="级别" style="text-align:left">A8</td><td data-label="个人持有">12.8 万</td><td data-label="团队持有">1000 万</td><td data-label="收益比例">80%</td></tr>
+            <tr><td data-label="级别" style="text-align:left">A9</td><td data-label="个人持有">25.6 万</td><td data-label="团队持有">5000 万</td><td data-label="收益比例">90%</td></tr>
+            <tr><td data-label="级别" style="text-align:left">A10</td><td data-label="个人持有">50 万</td><td data-label="团队持有">1 亿</td><td data-label="收益比例">享受交易手续费分红</td></tr>
+          </tbody>
+        </table>
+        <p><strong>6.2 矿机产出分润（每笔产出实时分配）</strong></p>
+        <p>下级矿机每产出 1 笔 AIX，上级链按以下顺序获得分润：</p>
+        <table class="portal-table whitepaper-table">
+          <thead><tr><th>顺序</th><th>对象</th><th>金额</th><th>说明</th></tr></thead>
+          <tbody>
+            <tr><td data-label="顺序" style="text-align:left">①</td><td data-label="对象">直推上线（推荐人）</td><td data-label="金额">固定 <strong>15%</strong></td><td data-label="说明">无论级别，必发</td></tr>
+            <tr><td data-label="顺序" style="text-align:left">②</td><td data-label="对象">间推上线（推荐人的推荐人）</td><td data-label="金额">固定 <strong>10%</strong></td><td data-label="说明">无论级别，必发</td></tr>
+            <tr><td data-label="顺序" style="text-align:left">③</td><td data-label="对象">沿链向上第一个级别更高的上级</td><td data-label="金额"><strong>级差 = 上级比例 − 矿工比例</strong></td><td data-label="说明">见下方细则</td></tr>
+          </tbody>
+        </table>
+        <ul>
+          <li><strong>平级奖（按日发放）</strong>：仅针对<strong>直推且与你同级别</strong>的下级，每天取该下级当日团队收益（团队奖 + 级差，不含直推 15% / 间推 10%）的 <strong>10%</strong> 作为平级奖，每天一条记录。</li>
+          <li><strong>A10 特例</strong>：若沿链第一个够级别的上级是 A10 → <strong>级差到此为止不再向上发</strong>，A10 改为均分交易手续费分红池。</li>
+          <li><strong>矿工无级别（A0）</strong>：第一个有级别的上级直接拿其比例全额（如 A6 上级拿 60%）。</li>
+          <li>无级别的上级跳过，继续向上找。</li>
+        </ul>
+        <p><strong>示例</strong>：一台矿机产出 100 AIX，矿工本人 A2（20%）：</p>
+        <ol>
+          <li>直推拿 15 AIX；</li>
+          <li>间推拿 10 AIX；</li>
+          <li>链上第一个更高级上级是 A6（60%）→ 级差 60% − 20% = 40% → 拿 40 AIX；</li>
+          <li>合计上级链共分得 65 AIX，矿工本人 100 AIX 全额照常到账。</li>
+        </ol>
+        <p><strong>6.3 A10 分红池</strong></p>
+        <ul>
+          <li>所有卖盘手续费、互转手续费的 <strong>50%</strong> 实时进入该池。</li>
+          <li><strong>每天 00:00 自动日结</strong>：池内余额均分给所有 A10 用户，直接发 AIX 入账。</li>
+          <li>A10 不参与级差 / 平级，收益全部来自该池（级别越高人数越少，单份越大）。</li>
+        </ul>
+
+        <h3>七、合约跟单</h3>
+        <ul>
+          <li>跟单采用 <strong>VIP 会员制</strong>：销毁 <strong>100 AIX</strong> 开通 <strong>30 天</strong>跟单权益（永久销毁、不返还），到期续费需重新销毁。</li>
+          <li>跟单<strong>最低 100 USDT 起步</strong>，月化收益 <strong>15%–20%</strong> 随机浮动。</li>
+          <li>不再跟单时可<strong>停止跟单</strong>：提交后进入等待退出跟单，本金 <strong>24 小时后自动全额返还</strong>，不扣除任何罚金。</li>
+          <li>跟单收益的推荐佣金：<strong>直推 10%、间推 0</strong>（与矿机分润 15% / 10% 是两套独立体系）。</li>
+        </ul>
+
+        <h3>八、充值与提现</h3>
+        <table class="portal-table whitepaper-table">
+          <tbody>
+            <tr><td data-label="项目" style="width:28%;text-align:left">充值</td><td data-label="规则"><strong>10 USDT 起充</strong>，跨链全额入账，0 手续费</td></tr>
+            <tr><td data-label="项目" style="text-align:left">提现</td><td data-label="规则">单笔最低 <strong>10 USDT</strong></td></tr>
+            <tr><td data-label="项目" style="text-align:left">网络</td><td data-label="规则">仅支持 BNB Smart Chain（BSC）</td></tr>
+            <tr><td data-label="项目" style="text-align:left">提现到账</td><td data-label="规则">全部自动放款，链上出款</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="portal-section whitepaper-footer">
+      <p>© 2026 AxiX 交易所 · AI 信号驱动 · 机构级风控 · 链上透明可查。本文档介绍平台策略方法论与 AIX 代币生态，具体功能与规则以平台内页面为准。</p>
+    </div>
+
+  </div>
+</div>
+<div id="tab-a-token-trade" class="tab-panel portal-page"></div>
+<div id="tab-support" class="tab-panel portal-page"></div>
+
+<div class="market-picker-backdrop" id="trade-market-picker" hidden>
+  <div class="market-picker-dialog">
+    <div class="market-search"><span>⌕</span><input id="trade-market-search" placeholder="搜索市场" autocomplete="off"><button type="button" id="trade-market-close">×</button></div>
+    <div class="market-category-tabs"><button data-market-product="perp" class="active">合约</button><button data-market-product="spot">现货</button><button data-market-scope="stock">股票</button><button data-market-category="favorites">自选</button></div>
+    <div class="market-list-head"><span>市场</span><span>最后价格</span><span>24小时变化</span><span>24h 成交额 (USDT)</span></div>
+    <div id="trade-market-list"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- TAB: 总览 -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div id="tab-overview" class="tab-panel">
+<div class="wrap">
+
+  <!-- 三策略汇总卡 -->
+  <div class="total-row" style="margin-top:4px">
+    <div class="total-card">
+      <div class="lbl">策略总权益</div>
+      <div class="val" id="tot-equity">—</div>
+      <div class="sub">余额合计 <span id="tot-balance">—</span></div>
+    </div>
+    <div class="total-card">
+      <div class="lbl">总盈亏</div>
+      <div class="val" id="tot-pnl">—</div>
+      <div class="sub">已实现 <span id="tot-realized">—</span> / 未实现 <span id="tot-unrealized">—</span></div>
+    </div>
+    <div class="total-card">
+      <div class="lbl">策略累计交易量</div>
+      <div class="val" id="tot-volume">—</div>
+      <div class="sub">完成网格 <span id="tot-rungs">—</span> 格</div>
+    </div>
+    <div class="total-card">
+      <div class="lbl">运行状态</div>
+      <div class="val" id="tot-running" style="font-size:14px;margin-top:6px">—</div>
+      <div class="sub" id="tot-modes">—</div>
+    </div>
+  </div>
+
+  <!-- 三交易所独立概览 -->
+  <div class="overview-grid">
+    <!-- 策略 1 -->
+    <div class="ov-card de">
+      <div class="ov-exname" style="color:var(--de-color)">
+        <span class="run-dot" id="ov-de-dot"></span>
+        策略 1
+        <span id="ov-de-badge" class="badge badge-paper" style="margin-left:auto">PAPER</span>
+      </div>
+      <div id="ov-de-health" class="exhealth eh-idle">—</div>
+      <div class="ov-pnl" id="ov-de-pnl">—</div>
+      <div class="ov-sub" id="ov-de-ret">收益率 —</div>
+      <div style="margin-top:10px">
+        <div class="ov-stat"><span class="lbl">余额</span><span class="val" id="ov-de-bal">—</span></div>
+        <div class="ov-stat"><span class="lbl">权益</span><span class="val" id="ov-de-eq">—</span></div>
+        <div class="ov-stat"><span class="lbl">已实现</span><span class="val" id="ov-de-rpnl">—</span></div>
+        <div class="ov-stat"><span class="lbl">未实现</span><span class="val" id="ov-de-upnl">—</span></div>
+        <div class="ov-stat"><span class="lbl">交易量</span><span class="val" id="ov-de-vol">—</span></div>
+        <div class="ov-stat"><span class="lbl">完成网格</span><span class="val" id="ov-de-rungs">—</span></div>
+        <div class="ov-stat"><span class="lbl">最新价</span><span class="val" id="ov-de-price">—</span></div>
+        <div class="ov-stat"><span class="lbl">当前市场</span><span class="val" id="ov-de-mkt">—</span></div>
+      </div>
+      <div id="ov-de-gridcfg" class="gridcfg" style="display:none"></div>
+      <div id="ov-de-ai" class="ai-box muted" style="display:none;margin-top:8px;font-size:12px"></div>
+      <div id="ov-de-trend" class="trend-box trend-idle">趋势监测：等待数据…</div>
+      <button class="btn btn-ghost" style="margin-top:10px;font-size:12px" onclick="switchTab('de')">进入策略 1 控制台 →</button>
+    </div>
+
+    <!-- 策略 2 -->
+    <div class="ov-card ex">
+      <div class="ov-exname" style="color:var(--ex-color)">
+        <span class="run-dot" id="ov-ex-dot"></span>
+        策略 2
+        <span id="ov-ex-badge" class="badge badge-paper" style="margin-left:auto">PAPER</span>
+      </div>
+      <div id="ov-ex-health" class="exhealth eh-idle">—</div>
+      <div class="ov-pnl" id="ov-ex-pnl">—</div>
+      <div class="ov-sub" id="ov-ex-ret">收益率 —</div>
+      <div style="margin-top:10px">
+        <div class="ov-stat"><span class="lbl">余额</span><span class="val" id="ov-ex-bal">—</span></div>
+        <div class="ov-stat"><span class="lbl">权益</span><span class="val" id="ov-ex-eq">—</span></div>
+        <div class="ov-stat"><span class="lbl">已实现</span><span class="val" id="ov-ex-rpnl">—</span></div>
+        <div class="ov-stat"><span class="lbl">未实现</span><span class="val" id="ov-ex-upnl">—</span></div>
+        <div class="ov-stat"><span class="lbl">交易量</span><span class="val" id="ov-ex-vol">—</span></div>
+        <div class="ov-stat"><span class="lbl">完成网格</span><span class="val" id="ov-ex-rungs">—</span></div>
+        <div class="ov-stat"><span class="lbl">最新价</span><span class="val" id="ov-ex-price">—</span></div>
+        <div class="ov-stat"><span class="lbl">当前市场</span><span class="val" id="ov-ex-mkt">—</span></div>
+      </div>
+      <div id="ov-ex-gridcfg" class="gridcfg" style="display:none"></div>
+      <div id="ov-ex-ai" class="ai-box muted" style="display:none;margin-top:8px;font-size:12px"></div>
+      <div id="ov-ex-trend" class="trend-box trend-idle">趋势监测：等待数据…</div>
+      <button class="btn btn-ghost" style="margin-top:10px;font-size:12px" onclick="switchTab('ex')">进入策略 2 控制台 →</button>
+    </div>
+
+    <!-- 策略 3 -->
+    <div class="ov-card rs">
+      <div class="ov-exname" style="color:var(--rs-color)">
+        <span class="run-dot" id="ov-rs-dot"></span>
+        策略 3
+        <span id="ov-rs-badge" class="badge badge-paper" style="margin-left:auto">PAPER</span>
+      </div>
+      <div id="ov-rs-health" class="exhealth eh-idle">—</div>
+      <div class="ov-pnl" id="ov-rs-pnl">—</div>
+      <div class="ov-sub" id="ov-rs-ret">收益率 —</div>
+      <div style="margin-top:10px">
+        <div class="ov-stat"><span class="lbl">余额</span><span class="val" id="ov-rs-bal">—</span></div>
+        <div class="ov-stat"><span class="lbl">权益</span><span class="val" id="ov-rs-eq">—</span></div>
+        <div class="ov-stat"><span class="lbl">已实现</span><span class="val" id="ov-rs-rpnl">—</span></div>
+        <div class="ov-stat"><span class="lbl">未实现</span><span class="val" id="ov-rs-upnl">—</span></div>
+        <div class="ov-stat"><span class="lbl">交易量</span><span class="val" id="ov-rs-vol">—</span></div>
+        <div class="ov-stat"><span class="lbl">完成网格</span><span class="val" id="ov-rs-rungs">—</span></div>
+        <div class="ov-stat"><span class="lbl">最新价</span><span class="val" id="ov-rs-price">—</span></div>
+        <div class="ov-stat"><span class="lbl">当前市场</span><span class="val" id="ov-rs-mkt">—</span></div>
+      </div>
+      <div id="ov-rs-gridcfg" class="gridcfg" style="display:none"></div>
+      <div id="ov-rs-ai" class="ai-box muted" style="display:none;margin-top:8px;font-size:12px"></div>
+      <div id="ov-rs-trend" class="trend-box trend-idle">趋势监测：等待数据…</div>
+      <button class="btn btn-ghost" style="margin-top:10px;font-size:12px" onclick="switchTab('rs')">进入策略 3 控制台 →</button>
+    </div>
+  </div>
+
+  <div class="overview-report-grid">
+  <!-- 本地规则市况分析（BTC，定时报告） -->
+  <div class="panel">
+    <div class="panel-title">📈 策略市场分析<span id="ov-ai-mkt-time" class="muted" style="font-size:11px;margin-left:10px;font-weight:400"></span></div>
+    <div id="ov-ai-market" class="ai-box muted">等待首次本地规则分析…</div>
+    <div style="display:flex;gap:8px;margin-top:10px;align-items:center;flex-wrap:wrap">
+      <button class="btn btn-ghost" style="margin:0;width:auto;padding:6px 16px;font-size:12px" onclick="aiMarketRun(this)">立即分析</button>
+      <span class="muted" style="font-size:12px">市况报告间隔</span>
+      <input id="ov-ai-mkt-min" type="number" min="0" style="width:72px;padding:5px 8px;font-size:12px">
+      <span class="muted" style="font-size:12px">分钟 ·　哨兵报告间隔</span>
+      <input id="ov-ai-sent-min" type="number" min="0" style="width:72px;padding:5px 8px;font-size:12px">
+      <span class="muted" style="font-size:12px">分钟（0=关闭）</span>
+      <button class="btn btn-ghost" style="margin:0;width:auto;padding:6px 16px;font-size:12px" onclick="aiSaveIntervals(this)">保存间隔</button>
+      <span id="ov-ai-int-status" class="muted" style="font-size:12px"></span>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">每日报告 <span id="ov-daily-date" class="muted" style="font-size:11px;margin-left:8px;font-weight:400"></span></div>
+    <table class="daily-report-table">
+      <thead><tr><th>策略</th><th>累计完成</th><th>胜率</th><th>账本盈亏</th></tr></thead>
+      <tbody id="ov-daily-body"><tr><td colspan="4" class="muted">等待统计数据…</td></tr></tbody>
+    </table>
+    <div id="ov-daily-summary" class="daily-summary muted">汇总计算中…</div>
+  </div>
+  </div>
+
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- TAB: Decibel -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div id="tab-de" class="tab-panel">
+<div class="wrap">
+<div class="strategy-exchange-tabs"><button class="active" data-strategy-key="de" data-strategy-label="策略 1" onclick="switchTab('de')">策略 1</button><button data-strategy-key="ex" data-strategy-label="策略 2" onclick="switchTab('ex')">策略 2</button><button data-strategy-key="rs" data-strategy-label="策略 3" onclick="switchTab('rs')">策略 3</button><span data-strategy-overview>运行中 0 / 3 · 每个策略独立选择投入金额和方向</span></div>
+<div class="grid-left-right strategy-workbench">
+  <!-- Left: Controls -->
+  <div class="strategy-config-column">
+    <div class="panel de strategy-market-panel" style="margin-bottom:14px">
+      <div class="panel-title" style="color:var(--de-color)">策略 1 · 市场与建议</div>
+      <label id="de-market-label">交易对</label>
+      <select id="de-market" class="choice-select" aria-labelledby="de-market-label"></select>
+      <div id="de-market-picker" class="choice-picker" role="group" aria-labelledby="de-market-label"></div>
+      <div id="de-market-lock-note" class="choice-lock-note"></div>
+      <div class="row" style="margin-top:8px">
+        <div>
+          <label id="de-interval-label">K线周期</label>
+          <select id="de-interval" class="choice-select" aria-labelledby="de-interval-label">
+            <option value="900">15m</option>
+            <option value="3600" selected>1h</option>
+            <option value="14400">4h</option>
+            <option value="86400">1d</option>
+          </select>
+          <div id="de-interval-picker" class="choice-picker" role="group" aria-labelledby="de-interval-label"></div>
+        </div>
+        <div style="display:flex;align-items:flex-end">
+          <button class="btn btn-ghost" style="margin:0;padding:7px" id="de-refresh-trend">刷新</button>
+        </div>
+      </div>
+      <div style="margin-top:10px" id="de-rec-box" class="rec-box rec-range">
+        <div class="muted">趋势分析</div>
+        <div class="rec-tag" id="de-rec-tag">分析中…</div>
+        <div class="rec-detail" id="de-rec-detail">—</div>
+        <button class="btn btn-ghost" style="margin-top:8px;padding:6px;font-size:12px" id="de-apply-rec">采用推荐策略 + 自动区间</button>
+      </div>
+    </div>
+
+    <div class="panel de strategy-settings-panel">
+      <div class="panel-title" style="color:var(--de-color)">策略 1 · 参数设置</div>
+      <label>网格类型</label>
+      <div class="modes" id="de-modes">
+        <button type="button" class="mode-btn sel" data-mode="neutral" aria-pressed="true">中性<small>双向震荡</small></button>
+        <button type="button" class="mode-btn" data-mode="long" aria-pressed="false">做多<small>低买高止</small></button>
+        <button type="button" class="mode-btn" data-mode="short" aria-pressed="false">做空<small>高空低止</small></button>
+      </div>
+      <div id="de-mode-lock-note" class="mode-lock-note"></div>
+      <div style="display:flex;align-items:center;gap:10px;margin-top:10px">
+        <span class="muted">风格</span>
+        <div class="risk-toggle" id="de-risk-toggle">
+          <span class="risk-btn sel" data-risk="steady">稳健</span>
+          <span class="risk-btn" data-risk="aggressive">激进</span>
+        </div>
+        <span class="muted" id="de-risk-hint">成交少·更安全</span>
+      </div>
+      <button class="btn btn-smart" id="de-smart-fill">🎯 智能填充参数</button>
+      <div class="muted" id="de-smart-note" style="margin:5px 0 2px"></div>
+      <div class="row">
+        <div><label for="de-lower">下边界</label><input id="de-lower" class="grid-number-input" type="text" inputmode="decimal" autocomplete="off" placeholder="例如 60000"></div>
+        <div><label for="de-upper">上边界</label><input id="de-upper" class="grid-number-input" type="text" inputmode="decimal" autocomplete="off" placeholder="例如 70000"></div>
+      </div>
+      <div class="row">
+        <div><label>网格数量</label><input id="de-grid-count" type="number" value="20" min="2" max="500" step="1"></div>
+        <div><label>每格数量(币)</label><input id="de-size-base" type="number" step="any" value="0.01"></div>
+      </div>
+      <div class="row"><div><label>平台可用 USDT</label><div id="de-capital-available" class="strategy-available-balance">加载中…</div><input id="de-capital" type="hidden" value="0"></div><div class="muted strategy-auto-note">启动时自动使用可用余额，其他策略运行后余额会同步减少</div></div>
+      <div class="row">
+        <div><label>杠杆 (x)</label><input id="de-leverage" type="number" value="3" min="1"></div>
+        <div>
+          <label>区间外止损策略</label>
+          <select id="de-auto-stop">
+            <option value="close" selected>冲破区间平仓</option>
+            <option value="recover">只减仓回收阶梯</option>
+          </select>
+        </div>
+      </div>
+      <div class="risk-preview" id="de-risk-preview"></div>
+      <div class="strategy-actions">
+        <button class="btn btn-start" id="de-start-btn">启动中性策略</button>
+        <button class="btn btn-stop" id="de-stop-btn" disabled>停止并结算</button>
+        <button class="btn btn-ghost" id="de-adjust-btn" disabled>调整运行区间</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right: Monitor -->
+  <div class="strategy-monitor-column">
+    <div class="panel strategy-status-panel" style="margin-bottom:14px">
+      <div class="panel-title">策略 1 · 运行监控</div>
+      <div class="grid-2" style="gap:10px;margin-bottom:10px">
+        <div><div class="kv"><span class="lbl">运行状态</span><span class="val" id="de-st-run">未运行</span></div>
+          <div class="kv"><span class="lbl">最新价</span><span class="val" id="de-st-price">—</span></div>
+          <div class="kv"><span class="lbl">投入资金</span><span class="val" id="de-st-bal">—</span></div>
+          <div class="kv"><span class="lbl">权益</span><span class="val" id="de-st-eq">—</span></div></div>
+        <div><div class="kv"><span class="lbl">持仓</span><span class="val" id="de-st-pos">—</span></div>
+          <div class="kv"><span class="lbl">持仓均价</span><span class="val" id="de-st-entry">—</span></div>
+          <div class="kv"><span class="lbl">已实现盈亏</span><span class="val" id="de-st-rpnl">—</span></div>
+          <div class="kv"><span class="lbl">未实现盈亏</span><span class="val" id="de-st-upnl">—</span></div></div>
+      </div>
+      <div class="kv"><span class="lbl">总盈亏 / 收益率</span><span class="val" id="de-st-total">—</span></div>
+      <div class="kv"><span class="lbl">挂单数 / 完成格</span><span class="val" id="de-st-orders">—</span></div>
+      <button class="btn btn-ghost" id="de-reconnect-btn" style="margin-top:8px;font-size:12px">刷新内部状态</button>
+    </div>
+    <div class="panel strategy-chart-panel">
+      <div class="panel-title price-panel-title">
+        <span>代币价格 / 网格</span>
+        <span class="market-live-price is-unavailable" id="de-chart-price" title="当前行情价"><span class="live-dot"></span><span class="market-symbol" id="de-chart-price-symbol">—</span><span class="market-value" id="de-chart-price-value">—</span></span>
+      </div>
+      <div id="de-range-warn"></div>
+      <div class="strategy-chartbox" id="de-chart"></div>
+    </div>
+    <div class="grid-2 strategy-activity-grid" style="gap:14px">
+      <div class="panel">
+        <div class="panel-title">成交记录</div>
+        <div class="trade-table-wrap"><table class="trade-table"><thead><tr><th>时间</th><th>类型</th><th>方向</th><th>成交价</th><th>数量</th><th>手续费</th><th>本笔盈亏（净）</th></tr></thead><tbody id="de-fills"><tr><td class="empty-row" colspan="7">暂无成交</td></tr></tbody></table></div>
+      </div>
+      <div class="panel">
+        <div class="panel-title">运行日志</div>
+        <div class="log" id="de-alerts"><div class="log-item muted">暂无日志</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- TAB: Extended -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div id="tab-ex" class="tab-panel">
+<div class="wrap">
+<div class="strategy-exchange-tabs"><button data-strategy-key="de" data-strategy-label="策略 1" onclick="switchTab('de')">策略 1</button><button class="active" data-strategy-key="ex" data-strategy-label="策略 2" onclick="switchTab('ex')">策略 2</button><button data-strategy-key="rs" data-strategy-label="策略 3" onclick="switchTab('rs')">策略 3</button><span data-strategy-overview>运行中 0 / 3 · 每个策略独立选择投入金额和方向</span></div>
+<div class="grid-left-right strategy-workbench">
+  <div class="strategy-config-column">
+    <div class="panel ex strategy-market-panel" style="margin-bottom:14px">
+      <div class="panel-title" style="color:var(--ex-color)">策略 2 · 市场与建议</div>
+      <label id="ex-market-label">交易对</label>
+      <select id="ex-market" class="choice-select" aria-labelledby="ex-market-label"></select>
+      <div id="ex-market-picker" class="choice-picker" role="group" aria-labelledby="ex-market-label"></div>
+      <div id="ex-market-lock-note" class="choice-lock-note"></div>
+      <div class="row" style="margin-top:8px">
+        <div>
+          <label id="ex-interval-label">K线周期</label>
+          <select id="ex-interval" class="choice-select" aria-labelledby="ex-interval-label">
+            <option value="900">15m</option>
+            <option value="3600" selected>1h</option>
+            <option value="14400">4h</option>
+            <option value="86400">1d</option>
+          </select>
+          <div id="ex-interval-picker" class="choice-picker" role="group" aria-labelledby="ex-interval-label"></div>
+        </div>
+        <div style="display:flex;align-items:flex-end">
+          <button class="btn btn-ghost" style="margin:0;padding:7px" id="ex-refresh-trend">刷新</button>
+        </div>
+      </div>
+      <div style="margin-top:10px" id="ex-rec-box" class="rec-box rec-range">
+        <div class="muted">趋势分析</div>
+        <div class="rec-tag" id="ex-rec-tag">分析中…</div>
+        <div class="rec-detail" id="ex-rec-detail">—</div>
+        <button class="btn btn-ghost" style="margin-top:8px;padding:6px;font-size:12px" id="ex-apply-rec">采用推荐策略 + 自动区间</button>
+      </div>
+    </div>
+
+    <div class="panel ex strategy-settings-panel">
+      <div class="panel-title" style="color:var(--ex-color)">策略 2 · 参数设置</div>
+      <label>网格类型</label>
+      <div class="modes" id="ex-modes">
+        <button type="button" class="mode-btn sel" data-mode="neutral" aria-pressed="true">中性<small>双向震荡</small></button>
+        <button type="button" class="mode-btn" data-mode="long" aria-pressed="false">做多<small>低买高止</small></button>
+        <button type="button" class="mode-btn" data-mode="short" aria-pressed="false">做空<small>高空低止</small></button>
+      </div>
+      <div id="ex-mode-lock-note" class="mode-lock-note"></div>
+      <div style="display:flex;align-items:center;gap:10px;margin-top:10px">
+        <span class="muted">风格</span>
+        <div class="risk-toggle" id="ex-risk-toggle">
+          <span class="risk-btn sel" data-risk="steady">稳健</span>
+          <span class="risk-btn" data-risk="aggressive">激进</span>
+        </div>
+        <span class="muted" id="ex-risk-hint">成交少·更安全</span>
+      </div>
+      <button class="btn btn-smart" id="ex-smart-fill">🎯 智能填充参数</button>
+      <div class="muted" id="ex-smart-note" style="margin:5px 0 2px"></div>
+      <div class="row">
+        <div><label for="ex-lower">下边界</label><input id="ex-lower" class="grid-number-input" type="text" inputmode="decimal" autocomplete="off" placeholder="例如 60000"></div>
+        <div><label for="ex-upper">上边界</label><input id="ex-upper" class="grid-number-input" type="text" inputmode="decimal" autocomplete="off" placeholder="例如 70000"></div>
+      </div>
+      <div class="row">
+        <div><label>网格数量</label><input id="ex-grid-count" type="number" value="20" min="2" max="500" step="1"></div>
+        <div><label>每格数量(币)</label><input id="ex-size-base" type="number" step="any" value="0.01"></div>
+      </div>
+      <div class="row"><div><label>平台可用 USDT</label><div id="ex-capital-available" class="strategy-available-balance">加载中…</div><input id="ex-capital" type="hidden" value="0"></div><div class="muted strategy-auto-note">启动时自动使用可用余额，其他策略运行后余额会同步减少</div></div>
+      <div class="row">
+        <div><label>杠杆 (x)</label><input id="ex-leverage" type="number" value="3" min="1"></div>
+        <div>
+          <label>区间外止损策略</label>
+          <select id="ex-auto-stop">
+            <option value="close" selected>冲破区间平仓</option>
+            <option value="recover">只减仓回收阶梯</option>
+          </select>
+        </div>
+      </div>
+      <div class="risk-preview" id="ex-risk-preview"></div>
+      <div class="strategy-actions">
+        <button class="btn btn-start" id="ex-start-btn">启动中性策略</button>
+        <button class="btn btn-stop" id="ex-stop-btn" disabled>停止并结算</button>
+        <button class="btn btn-ghost" id="ex-adjust-btn" disabled>调整运行区间</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="strategy-monitor-column">
+    <div class="panel strategy-status-panel" style="margin-bottom:14px">
+      <div class="panel-title">策略 2 · 运行监控</div>
+      <div class="grid-2" style="gap:10px;margin-bottom:10px">
+        <div><div class="kv"><span class="lbl">运行状态</span><span class="val" id="ex-st-run">未运行</span></div>
+          <div class="kv"><span class="lbl">最新价</span><span class="val" id="ex-st-price">—</span></div>
+          <div class="kv"><span class="lbl">投入资金</span><span class="val" id="ex-st-bal">—</span></div>
+          <div class="kv"><span class="lbl">权益</span><span class="val" id="ex-st-eq">—</span></div></div>
+        <div><div class="kv"><span class="lbl">持仓</span><span class="val" id="ex-st-pos">—</span></div>
+          <div class="kv"><span class="lbl">持仓均价</span><span class="val" id="ex-st-entry">—</span></div>
+          <div class="kv"><span class="lbl">已实现盈亏</span><span class="val" id="ex-st-rpnl">—</span></div>
+          <div class="kv"><span class="lbl">未实现盈亏</span><span class="val" id="ex-st-upnl">—</span></div></div>
+      </div>
+      <div class="kv"><span class="lbl">总盈亏 / 收益率</span><span class="val" id="ex-st-total">—</span></div>
+      <div class="kv"><span class="lbl">挂单数 / 完成格</span><span class="val" id="ex-st-orders">—</span></div>
+      <button class="btn btn-ghost" id="ex-reconnect-btn" style="margin-top:8px;font-size:12px">刷新内部状态</button>
+    </div>
+    <div class="panel strategy-chart-panel">
+      <div class="panel-title price-panel-title">
+        <span>代币价格 / 网格</span>
+        <span class="market-live-price is-unavailable" id="ex-chart-price" title="当前行情价"><span class="live-dot"></span><span class="market-symbol" id="ex-chart-price-symbol">—</span><span class="market-value" id="ex-chart-price-value">—</span></span>
+      </div>
+      <div id="ex-range-warn"></div>
+      <div class="strategy-chartbox" id="ex-chart"></div>
+    </div>
+    <div class="grid-2 strategy-activity-grid" style="gap:14px">
+      <div class="panel">
+        <div class="panel-title">成交记录</div>
+        <div class="trade-table-wrap"><table class="trade-table"><thead><tr><th>时间</th><th>类型</th><th>方向</th><th>成交价</th><th>数量</th><th>手续费</th><th>本笔盈亏（净）</th></tr></thead><tbody id="ex-fills"><tr><td class="empty-row" colspan="7">暂无成交</td></tr></tbody></table></div>
+      </div>
+      <div class="panel">
+        <div class="panel-title">运行日志</div>
+        <div class="log" id="ex-alerts"><div class="log-item muted">暂无日志</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- TAB: RISEx -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div id="tab-rs" class="tab-panel">
+<div class="wrap">
+<div class="strategy-exchange-tabs"><button data-strategy-key="de" data-strategy-label="策略 1" onclick="switchTab('de')">策略 1</button><button data-strategy-key="ex" data-strategy-label="策略 2" onclick="switchTab('ex')">策略 2</button><button class="active" data-strategy-key="rs" data-strategy-label="策略 3" onclick="switchTab('rs')">策略 3</button><span data-strategy-overview>运行中 0 / 3 · 每个策略独立选择投入金额和方向</span></div>
+<div class="grid-left-right strategy-workbench">
+  <div class="strategy-config-column">
+    <div class="panel rs strategy-market-panel" style="margin-bottom:14px">
+      <div class="panel-title" style="color:var(--rs-color)">策略 3 · 市场与建议</div>
+      <label id="rs-market-label">交易对</label>
+      <select id="rs-market" class="choice-select" aria-labelledby="rs-market-label"></select>
+      <div id="rs-market-picker" class="choice-picker" role="group" aria-labelledby="rs-market-label"></div>
+      <div id="rs-market-lock-note" class="choice-lock-note"></div>
+      <div class="row" style="margin-top:8px">
+        <div>
+          <label id="rs-interval-label">K线周期</label>
+          <select id="rs-interval" class="choice-select" aria-labelledby="rs-interval-label">
+            <option value="900">15m</option>
+            <option value="3600" selected>1h</option>
+            <option value="14400">4h</option>
+            <option value="86400">1d</option>
+          </select>
+          <div id="rs-interval-picker" class="choice-picker" role="group" aria-labelledby="rs-interval-label"></div>
+        </div>
+        <div style="display:flex;align-items:flex-end">
+          <button class="btn btn-ghost" style="margin:0;padding:7px" id="rs-refresh-trend">刷新</button>
+        </div>
+      </div>
+      <div style="margin-top:10px" id="rs-rec-box" class="rec-box rec-range">
+        <div class="muted">趋势分析</div>
+        <div class="rec-tag" id="rs-rec-tag">分析中…</div>
+        <div class="rec-detail" id="rs-rec-detail">—</div>
+        <button class="btn btn-ghost" style="margin-top:8px;padding:6px;font-size:12px" id="rs-apply-rec">采用推荐策略 + 自动区间</button>
+      </div>
+    </div>
+
+    <div class="panel rs strategy-settings-panel">
+      <div class="panel-title" style="color:var(--rs-color)">策略 3 · 参数设置</div>
+      <label>网格类型</label>
+      <div class="modes" id="rs-modes">
+        <button type="button" class="mode-btn sel" data-mode="neutral" aria-pressed="true">中性<small>双向震荡</small></button>
+        <button type="button" class="mode-btn" data-mode="long" aria-pressed="false">做多<small>低买高止</small></button>
+        <button type="button" class="mode-btn" data-mode="short" aria-pressed="false">做空<small>高空低止</small></button>
+      </div>
+      <div id="rs-mode-lock-note" class="mode-lock-note"></div>
+      <div style="display:flex;align-items:center;gap:10px;margin-top:10px">
+        <span class="muted">风格</span>
+        <div class="risk-toggle" id="rs-risk-toggle">
+          <span class="risk-btn sel" data-risk="steady">稳健</span>
+          <span class="risk-btn" data-risk="aggressive">激进</span>
+        </div>
+        <span class="muted" id="rs-risk-hint">成交少·更安全</span>
+      </div>
+      <button class="btn btn-smart" id="rs-smart-fill">🎯 智能填充参数</button>
+      <div class="muted" id="rs-smart-note" style="margin:5px 0 2px"></div>
+      <div class="row">
+        <div><label for="rs-lower">下边界</label><input id="rs-lower" class="grid-number-input" type="text" inputmode="decimal" autocomplete="off" placeholder="例如 60000"></div>
+        <div><label for="rs-upper">上边界</label><input id="rs-upper" class="grid-number-input" type="text" inputmode="decimal" autocomplete="off" placeholder="例如 70000"></div>
+      </div>
+      <div class="row">
+        <div><label>网格数量</label><input id="rs-grid-count" type="number" value="20" min="2" max="500" step="1"></div>
+        <div><label>每格数量(币)</label><input id="rs-size-base" type="number" step="any" value="0.01"></div>
+      </div>
+      <div class="row"><div><label>平台可用 USDT</label><div id="rs-capital-available" class="strategy-available-balance">加载中…</div><input id="rs-capital" type="hidden" value="0"></div><div class="muted strategy-auto-note">启动时自动使用可用余额，其他策略运行后余额会同步减少</div></div>
+      <div class="row">
+        <div><label>杠杆 (x)</label><input id="rs-leverage" type="number" value="3" min="1"></div>
+        <div>
+          <label>区间外止损策略</label>
+          <select id="rs-auto-stop">
+            <option value="close" selected>冲破区间平仓</option>
+            <option value="recover">只减仓回收阶梯</option>
+          </select>
+        </div>
+      </div>
+      <div class="risk-preview" id="rs-risk-preview"></div>
+      <div class="strategy-actions">
+        <button class="btn btn-start" id="rs-start-btn">启动中性策略</button>
+        <button class="btn btn-stop" id="rs-stop-btn" disabled>停止并结算</button>
+        <button class="btn btn-ghost" id="rs-adjust-btn" disabled>调整运行区间</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="strategy-monitor-column">
+    <div class="panel strategy-status-panel" style="margin-bottom:14px">
+      <div class="panel-title">策略 3 · 运行监控</div>
+      <div class="grid-2" style="gap:10px;margin-bottom:10px">
+        <div><div class="kv"><span class="lbl">运行状态</span><span class="val" id="rs-st-run">未运行</span></div>
+          <div class="kv"><span class="lbl">最新价</span><span class="val" id="rs-st-price">—</span></div>
+          <div class="kv"><span class="lbl">投入资金</span><span class="val" id="rs-st-bal">—</span></div>
+          <div class="kv"><span class="lbl">权益</span><span class="val" id="rs-st-eq">—</span></div></div>
+        <div><div class="kv"><span class="lbl">持仓</span><span class="val" id="rs-st-pos">—</span></div>
+          <div class="kv"><span class="lbl">持仓均价</span><span class="val" id="rs-st-entry">—</span></div>
+          <div class="kv"><span class="lbl">已实现盈亏</span><span class="val" id="rs-st-rpnl">—</span></div>
+          <div class="kv"><span class="lbl">未实现盈亏</span><span class="val" id="rs-st-upnl">—</span></div></div>
+      </div>
+      <div class="kv"><span class="lbl">总盈亏 / 收益率</span><span class="val" id="rs-st-total">—</span></div>
+      <div class="kv"><span class="lbl">挂单数 / 完成格</span><span class="val" id="rs-st-orders">—</span></div>
+      <button class="btn btn-ghost" id="rs-reconnect-btn" style="margin-top:8px;font-size:12px">刷新内部状态</button>
+    </div>
+    <div class="panel strategy-chart-panel">
+      <div class="panel-title price-panel-title">
+        <span>代币价格 / 网格</span>
+        <span class="market-live-price is-unavailable" id="rs-chart-price" title="当前行情价"><span class="live-dot"></span><span class="market-symbol" id="rs-chart-price-symbol">—</span><span class="market-value" id="rs-chart-price-value">—</span></span>
+      </div>
+      <div id="rs-range-warn"></div>
+      <div class="strategy-chartbox" id="rs-chart"></div>
+    </div>
+    <div class="grid-2 strategy-activity-grid" style="gap:14px">
+      <div class="panel">
+        <div class="panel-title">成交记录</div>
+        <div class="trade-table-wrap"><table class="trade-table"><thead><tr><th>时间</th><th>类型</th><th>方向</th><th>成交价</th><th>数量</th><th>手续费</th><th>本笔盈亏（净）</th></tr></thead><tbody id="rs-fills"><tr><td class="empty-row" colspan="7">暂无成交</td></tr></tbody></table></div>
+      </div>
+      <div class="panel">
+        <div class="panel-title">运行日志</div>
+        <div class="log" id="rs-alerts"><div class="log-item muted">暂无日志</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- TAB: 永久成交账本 -->
+<div id="tab-ledger" class="tab-panel">
+<div class="wrap">
+  <div class="total-row" style="margin-top:4px">
+    <div class="total-card"><div class="lbl">已保存成交</div><div class="val" id="ledger-records">0</div><div class="sub">永久明细</div></div>
+    <div class="total-card"><div class="lbl">完成平仓</div><div class="val" id="ledger-completed">0</div><div class="sub">含回收成交</div></div>
+    <div class="total-card"><div class="lbl">成交胜率</div><div class="val" id="ledger-winrate">—</div><div class="sub" id="ledger-winloss">胜 0 / 负 0</div></div>
+    <div class="total-card"><div class="lbl">明细净盈亏</div><div class="val" id="ledger-pnl">0.00</div><div class="sub">手续费 <span id="ledger-fees">0.00</span></div></div>
+  </div>
+  <div class="panel">
+    <div class="panel-title">完整成交账本</div>
+    <div class="ledger-toolbar">
+      <div><label for="ledger-exchange">交易所</label><select id="ledger-exchange" onchange="loadLedger(true)"><option value="all">全部交易所</option><option value="de">Decibel</option><option value="ex">Extended</option><option value="rs">RISEx</option></select></div>
+      <button class="btn btn-ghost" onclick="loadLedger(true)">↻ 刷新</button>
+      <button class="btn btn-ghost" onclick="exportLedger()">⇩ 导出 CSV</button>
+    </div>
+    <div class="trade-table-wrap"><table class="trade-table ledger-table"><thead><tr><th>时间</th><th>交易所</th><th>市场</th><th>类型</th><th>方向</th><th>成交价</th><th>数量</th><th>手续费</th><th>净盈亏</th></tr></thead><tbody id="ledger-body"><tr><td class="empty-row" colspan="9">正在读取账本…</td></tr></tbody></table></div>
+    <div style="display:flex;justify-content:center;margin-top:12px"><button id="ledger-more" class="btn btn-ghost" style="width:auto;margin:0" onclick="loadLedger(false)">加载更多</button></div>
+    <div class="muted ledger-note" id="ledger-note">账本独立保存在用户数据目录，重启、重新打包和重置账户都不会删除。旧版只会迁移当时仍保留的最近成交明细。</div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- TAB: 个人中心 / 多链钱包 -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div id="tab-account" class="tab-panel">
+<div class="wrap account-shell">
+  <div id="account-locked" class="panel account-locked">
+    <h2>连接钱包进入个人中心</h2>
+    <p class="muted">连接钱包即可进入；首次充值、提现或交易时再核对一次钱包，无需邮箱或其他账号。</p>
+    <button id="account-connect-btn" class="btn btn-smart" onclick="connectWallet(this)">连接钱包</button>
+  </div>
+
+  <div id="account-content" style="display:none">
+    <div id="assets-dashboard-view">
+    <section class="assets-header">
+      <div>
+        <h2>资产总览</h2>
+        <div class="assets-wallet"><span class="assets-wallet-dot"></span><span id="account-address">—</span></div>
+        <div class="assets-uid" id="account-uid-row" hidden>
+          <span class="assets-uid-label">用户ID</span>
+          <button type="button" class="assets-uid-copy" id="account-uid-btn" title="点击复制用户ID" onclick="copyAccountUid()">
+            <span id="account-uid">—</span><span class="assets-uid-icon">⧉</span>
+          </button>
+        </div>
+      </div>
+      <div class="assets-header-actions">
+        <button class="assets-icon-btn" title="刷新资产" aria-label="刷新资产" onclick="window.ExchangeAssets?.refresh()">↻</button>
+        <button class="assets-text-btn" onclick="disconnectWallet()">断开钱包</button>
+      </div>
+    </section>
+
+    <section class="assets-overview">
+      <div class="assets-total">
+        <span class="assets-label">总资产估值</span>
+        <strong><span id="assets-total-equity">0.00</span> <small>USDT</small></strong>
+        <span class="assets-subvalue">≈ $<span id="assets-total-usd">0.00</span></span>
+        <div class="assets-quick-actions">
+          <button class="assets-primary-action" onclick="window.ExchangeAssets?.openFunding('deposit')"><span>＋</span>充值</button>
+          <button class="assets-secondary-action" onclick="window.ExchangeAssets?.openFunding('withdraw')"><span>↑</span>提现</button>
+          <button class="assets-secondary-action assets-records-shortcut" onclick="window.ExchangeAssets?.setView('records')"><span>≡</span>资金记录</button>
+        </div>
+      </div>
+      <div class="assets-metrics">
+        <div><span>可用余额</span><b><span id="account-usdc-balance">0</span> USDT</b></div>
+        <div><span>现货资产</span><b><span id="assets-spot-value">0.00</span> USDT</b></div>
+        <div><span>合约权益</span><b><span id="assets-contract-value">0.00</span> USDT</b></div>
+        <div><span>策略与托管</span><b><span id="assets-strategy-value">0.00</span> USDT</b></div>
+      </div>
+    </section>
+
+    <section class="assets-distribution">
+      <div class="assets-section-heading"><div><h3>账户分布</h3></div><span id="assets-updated-at">—</span></div>
+      <div id="assets-allocation" class="assets-allocation"></div>
+    </section>
+
+    <section class="assets-main">
+      <div class="assets-tabs" role="tablist">
+        <button class="active" data-assets-view="balances" onclick="window.ExchangeAssets?.setView('balances')">资产列表</button>
+        <button data-assets-view="records" onclick="window.ExchangeAssets?.setView('records')">资金记录</button>
+        <button data-assets-view="revenue" onclick="window.ExchangeAssets?.setView('revenue')">AIX 收益</button>
+      </div>
+
+      <div id="assets-balances-view">
+        <div class="assets-list-tools">
+          <label class="assets-search"><span>⌕</span><input id="assets-search" type="search" placeholder="搜索币种" oninput="window.ExchangeAssets?.renderAssets()"></label>
+          <label class="assets-zero-filter"><input id="assets-hide-zero" type="checkbox" onchange="window.ExchangeAssets?.renderAssets()">隐藏零资产</label>
+        </div>
+        <div class="assets-table-wrap">
+          <table class="assets-table no-mobile-stack"><thead><tr><th>币种</th><th>总额</th><th>可用</th><th>冻结</th><th>USDT 估值</th><th>操作</th></tr></thead><tbody id="assets-table-body"><tr><td colspan="6" class="account-empty">正在读取资产</td></tr></tbody></table>
+        </div>
+      </div>
+
+      <div id="assets-records-view" hidden>
+        <div class="assets-record-block">
+          <h3>交易及账户流水</h3>
+          <div class="account-history"><table><thead><tr><th>时间</th><th>类型</th><th>市场</th><th>方向</th><th>数量</th><th>价格</th><th>手续费</th><th>盈亏 / 金额</th><th>状态</th></tr></thead><tbody id="capital-history"><tr><td colspan="9" class="account-empty">暂无交易及账户流水</td></tr></tbody></table></div>
+          <div class="rec-cards" id="capital-history-cards"></div>
+        </div>
+        <div class="assets-record-block">
+          <h3>AIX 互转记录</h3>
+          <div class="account-history"><table><thead><tr><th>时间</th><th>方向</th><th>对方</th><th>数量 (AIX)</th><th>手续费 (AIX)</th><th>到账 (AIX)</th><th>状态</th></tr></thead><tbody id="aix-transfer-history"><tr><td colspan="7" class="account-empty">暂无互转记录</td></tr></tbody></table></div>
+          <div class="rec-cards" id="aix-transfer-history-cards"></div>
+        </div>
+        <div class="assets-record-block">
+          <h3>跟单收益</h3>
+          <div class="account-history"><table><thead><tr><th>入账时间</th><th>跟单批次</th><th>资产</th><th>收益</th><th>收益日期</th><th>状态</th></tr></thead><tbody id="ai-managed-reward-history"><tr><td colspan="6" class="account-empty">暂无跟单收益</td></tr></tbody></table></div>
+        </div>
+        <div class="assets-record-block">
+          <h3>充值记录</h3>
+          <div class="account-history"><table><thead><tr><th>时间</th><th>网络</th><th>资产</th><th>数量</th><th>确认进度</th><th>状态</th><th>交易哈希</th></tr></thead><tbody id="deposit-history"><tr><td colspan="7" class="account-empty">暂无充值记录</td></tr></tbody></table></div>
+        </div>
+        <div class="assets-record-block">
+          <h3>提现记录</h3>
+          <div class="account-history"><table><thead><tr><th>时间</th><th>网络</th><th>资产</th><th>数量</th><th>状态</th><th>交易哈希</th></tr></thead><tbody id="withdraw-history"><tr><td colspan="6" class="account-empty">暂无提现记录</td></tr></tbody></table></div>
+        </div>
+      </div>
+
+      <div id="assets-revenue-view" hidden>
+        <div class="assets-record-block">
+          <h3>AIX 收益汇总</h3>
+          <div id="aix-revenue-summary" class="aix-revenue-summary">正在加载…</div>
+        </div>
+        <div class="assets-record-block">
+          <h3>收益明细</h3>
+          <div class="account-history"><table><thead><tr><th>时间</th><th>收益类型</th><th>来源</th><th>比例</th><th>收益 (AIX)</th></tr></thead><tbody id="aix-revenue-list"><tr><td colspan="5" class="account-empty">暂无收益记录</td></tr></tbody></table></div>
+          <div class="rec-cards" id="aix-revenue-cards"></div>
+        </div>
+      </div>
+    </section>
+    </div>
+
+    <section id="account-funding-forms" class="assets-funding" hidden>
+      <header class="assets-funding-page-header">
+        <button class="assets-back-button" onclick="window.ExchangeAssets?.closeFunding()" aria-label="返回资产总览">←</button>
+        <div><h2 id="assets-funding-title">充值</h2><p>资产总览 / <span id="assets-funding-breadcrumb">充值</span></p></div>
+      </header>
+      <div id="assets-deposit-panel" class="assets-funding-pane">
+        <div class="assets-section-heading"><div><h3>充值 USDT</h3><p>10 USDT 起充 · 跨链全额入账 0 手续费</p></div></div>
+        <div class="account-form-row">
+          <div><label for="deposit-network">充值网络</label><select id="deposit-network" onchange="updateDepositNetwork()"></select></div>
+          <div><label for="deposit-amount">充值数量</label><input id="deposit-amount" type="text" inputmode="numeric" placeholder="最小 10 USDT（10 的整数倍）"></div>
+        </div>
+        <p id="deposit-wallet-balance" style="margin:6px 0 0;font-size:12px;opacity:.72">钱包 USDT 余额 -</p>
+        <button id="deposit-submit" class="btn btn-start" onclick="submitWalletDeposit()">从当前钱包充值</button>
+        <div id="deposit-status" class="account-status"></div>
+      </div>
+      <div id="assets-withdraw-panel" class="assets-funding-pane">
+        <div class="assets-section-heading"><div><h3>提现 USDT</h3><p>完成当前钱包签名验证后提交提现</p></div></div>
+        <div class="account-form-row">
+          <div><label for="withdraw-network">提现网络</label><select id="withdraw-network"></select></div>
+          <div><label for="withdraw-amount">提现数量</label><input id="withdraw-amount" type="text" inputmode="decimal" placeholder="输入 USDT 数量"></div>
+        </div>
+        <p id="withdraw-rule-hint" style="margin:6px 0 0;font-size:12px;opacity:.72">单笔最小 10 USDT · 无手续费</p>
+        <button id="withdraw-submit" class="btn btn-smart" onclick="submitWithdrawal()">提交提现申请</button>
+        <div id="withdraw-status" class="account-status"></div>
+      </div>
+    </section>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- TAB: IP配置 -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- TAB: AI 助手 -->
+<div id="tab-ai" class="tab-panel">
+<div class="wrap" style="max-width:860px">
+  <div class="panel" style="margin-top:4px">
+    <div class="panel-title">本地量化分析配置</div>
+    <p class="muted" style="margin-bottom:12px;line-height:1.6">
+      使用内置技术指标和风险阈值分析，不安装模型、不使用在线 AI，也不需要 API Key。分析功能只给建议、风险通知和复盘，不能执行任何交易操作。
+    </p>
+    <div class="ai-grid">
+      <div><label>哨兵巡检间隔（分钟，0=关闭）</label><input id="ai-sentinel-min" type="number" min="0" placeholder="5"></div>
+      <div><label>行情报告间隔（分钟，0=关闭）</label><input id="ai-market-min" type="number" min="0" placeholder="30"></div>
+      <div><label>日报生成时间（0-23 整点）</label><input id="ai-report-hour" type="number" min="0" max="23" placeholder="20"></div>
+      <div><label>Telegram Bot Token（推送用，可选）</label><input id="ai-tg-token" name="telegram_bot_api_token" class="secret-text-input" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-1p-ignore="true" data-bwignore="true" placeholder="123456:ABC-..."></div>
+      <div><label>Telegram Chat ID（可选）</label><input id="ai-tg-chat" placeholder="例：123456789"></div>
+      <div><label>通用 Webhook（可选，POST {"text":...}）</label><input id="ai-webhook" placeholder="https://..."></div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:12px">
+      <button class="btn btn-smart" style="margin:0;width:auto;padding:8px 22px" onclick="aiSaveConfig(this)">保存分析配置</button>
+      <button class="btn btn-ghost" style="margin:0;width:auto;padding:8px 22px" onclick="aiTest(this)">检测规则引擎</button>
+    </div>
+    <div id="ai-cfg-status" class="muted" style="margin-top:8px;font-size:12px">—</div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">🛡 风控哨兵<span id="ai-sent-badge"></span></div>
+    <p class="muted" style="margin-bottom:8px">按设定间隔自动巡检三所状态（健康度/挂单同步/保证金/出区间/告警），发现问题推送通知。</p>
+    <div id="ai-sentinel-box" class="ai-box muted">尚无巡检结果</div>
+    <button class="btn btn-ghost" onclick="aiSentinelRun(this)" style="margin-top:10px;font-size:12px">立即巡检一次</button>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">🚨 出区间规则建议</div>
+    <div id="ai-oor-box" class="ai-box muted">价格冲出网格区间时自动触发分析（平仓/回收/扩区间/维持），并推送通知；已配置的自动策略照常执行，AI 建议仅供复核。</div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">📈 市况分析（当前适不适合跑网格）</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-ghost" style="margin:0;width:auto;padding:7px 16px;font-size:12px" onclick="aiAnalyze('de', this)">分析 Decibel</button>
+      <button class="btn btn-ghost" style="margin:0;width:auto;padding:7px 16px;font-size:12px" onclick="aiAnalyze('ex', this)">分析 Extended</button>
+      <button class="btn btn-ghost" style="margin:0;width:auto;padding:7px 16px;font-size:12px" onclick="aiAnalyze('rs', this)">分析 RISEx</button>
+    </div>
+    <div id="ai-analyze-box" class="ai-box muted" style="margin-top:10px">综合 4小时/1小时/15分钟 三个周期的指标判断市况，给出区间/格数/间距建议。分析的是该所当前配置的市场。</div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">📋 运行复盘日报</div>
+    <div id="ai-report-box" class="ai-box muted">每天到点自动生成并推送；也可手动触发。</div>
+    <button class="btn btn-ghost" onclick="aiReport(this)" style="margin-top:10px;font-size:12px">立即生成日报</button>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">只读分析助手</div>
+    <p class="muted" style="margin-bottom:8px">本地规则引擎基于三所实时状态回答风险、盈亏和网格配置问题。这里只输出文字摘要，不提供任何交易执行入口。</p>
+    <div id="ai-chatlog" class="ai-chatlog"></div>
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <input id="ai-chat-input" placeholder="例：整体风险怎么样？盈亏表现如何？当前网格区间？" style="flex:1" onkeydown="if(event.key==='Enter')aiChatSend()">
+      <button class="btn btn-smart" style="margin:0;width:auto;padding:8px 18px" onclick="aiChatSend()">发送</button>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- JavaScript —— 首屏加载矿机与钱包；其他页面首次进入时加载 -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- Dictionaries are loaded asynchronously by i18n.js; wallet startup does not wait for them. -->
+<script defer src="/js/i18n.js?v=20261017-rules-1"></script>
+<script defer src="/js/core.js?v=20261011-pages-1"></script>
+<script defer src="/js/wallet.js?v=20261011-pages-1"></script>
+<script defer src="/js/portal-shared.js?v=20261011-pages-1"></script>
+<script defer src="/js/page-loader.js?v=20261019-transfer-precision-1"></script>
+<script defer src="/js/earn.js?v=20261015-activation-progress-1"></script>
+<script defer src="/js/announcement.js?v=20261017-announce-4"></script>
+<!-- Wallet scripts are independent of the chart/trading download queue. -->
+<script>
+window.loadWalletConnector = function() {
+  if (window.WGWalletConnector || window.__walletConnectorLoading) return;
+  window.__walletConnectorLoading = true;
+  const script = document.createElement('script');
+  script.type = 'module';
+  script.src = '/vendor/wallet/connector.js?v=16';
+  script.onload = script.onerror = () => { window.__walletConnectorLoading = false; };
+  document.head.appendChild(script);
+};
+window.loadWalletConnector();
+</script>
+<script>
+// Service Worker：静态资源缓存加速（二次访问），API 永不缓存
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js?v=9').catch(() => {}));
+}
+</script>
+<script>
+// 进平台默认显示矿机页（Portal 动态内容需触发一次 switchTab 才会加载）
+// 上方 defer 脚本在 DOMContentLoaded 前按序执行完毕，此处监听事件保证在其后运行
+document.addEventListener('DOMContentLoaded', () => {
+  const page = new URLSearchParams(location.search).get('page');
+  switchTab(page === 'ai-managed' ? page : 'earn').catch(error => console.error('默认页加载失败', error));
+});
+</script>
+</body>
+</html>

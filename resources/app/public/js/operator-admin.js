@@ -255,6 +255,9 @@
     };
     // 团队展示数据编辑卡片（仅前端展示）
     const storedOv = d.statsOverride?.stored || null;
+    const proReporting = d.statsOverride?.reporting;
+    const reportedDirectPro = proReporting?.enabled ? proReporting.realDirectPro : d.statsOverride?.real?.directPro;
+    const reportedTeamPro = proReporting?.enabled ? proReporting.realTeamPro : d.statsOverride?.real?.teamPro;
     const atsField = (id, label, value, realVal) => `
       <label class="ats-field">
         <span>${label}<small>真实 ${Number(realVal) || 0} 人</small></span>
@@ -268,10 +271,10 @@
           ${atsField('ats-direct', '直推人数', d.direct?.count, d.statsOverride?.real?.directCount)}
           ${atsField('ats-indirect', '间推人数', d.indirect?.count, d.statsOverride?.real?.indirectCount)}
           ${atsField('ats-team', '团队总人数', d.team?.count, d.statsOverride?.real?.teamCount)}
-          ${atsField('ats-direct-mini', '直推开通 Mini（0.002 BNB）', d.direct?.actMini, d.statsOverride?.real?.directMini)}
-          ${atsField('ats-direct-pro', '直推开通 Pro（0.05 BNB）', d.direct?.actPro, d.statsOverride?.real?.directPro)}
-          ${atsField('ats-team-mini', '团队开通 Mini（0.002 BNB）', d.team?.actMini, d.statsOverride?.real?.teamMini)}
-          ${atsField('ats-team-pro', '团队开通 Pro（0.05 BNB）', d.team?.actPro, d.statsOverride?.real?.teamPro)}
+          ${atsField('ats-direct-mini', '直推开通 Mini', d.direct?.actMini, d.statsOverride?.real?.directMini)}
+          ${atsField('ats-direct-pro', '直推开通 Pro', d.direct?.actPro, reportedDirectPro)}
+          ${atsField('ats-team-mini', '团队开通 Mini', d.team?.actMini, d.statsOverride?.real?.teamMini)}
+          ${atsField('ats-team-pro', '团队开通 Pro', d.team?.actPro, reportedTeamPro)}
           <label class="ats-field ats-note-field">
             <span>备注（可选，仅后台可见）</span>
             <input id="ats-note" type="text" maxlength="200" value="${esc(storedOv?.note || '')}" placeholder="如：市场扶持展示数据">
@@ -329,7 +332,7 @@
     // 激活记录
     const actRows = (d.activations || []).map(a => `<tr>
       <td><code>${esc(String(a.id||'').slice(-10))}</code></td>
-      <td>${a.plan === '1' ? 'Mini (0.002 BNB)' : a.plan === '2' ? 'Pro (0.05 BNB)' : '-'}</td>
+      <td>${a.plan === '1' ? 'Mini' : 'Pro'} · ${a.paymentAsset === 'AIX' ? esc(a.payload?.aix || '') + ' AIX（已销毁）' : (a.plan === '1' ? '0.002' : '0.05') + ' BNB（历史）'}</td>
       <td><span class="admin-status ${a.status==='confirmed'?'good':a.status==='rejected'?'bad':'warn'}">${a.status==='confirmed'?'已确认':a.status==='rejected'?'已拒绝':'待确认'}</span></td>
       <td>${date(a.createdAt)}</td>
     </tr>`).join('') || emptyRow(4, '暂无激活记录');
@@ -384,8 +387,8 @@
       <div class="admin-detail-section">
         ${subHead(`直推团队（共 ${effPeople(d.direct?.count, d.direct?.realCount)}）`)}
         <div class="admin-detail-stats">
-          <span>激活 Mini(0.002)：<b>${effPeople(d.direct?.actMini, d.direct?.realActMini)}</b></span>
-          <span>激活 Pro(0.05)：<b>${effPeople(d.direct?.actPro, d.direct?.realActPro)}</b></span>
+          <span>激活 Mini：<b>${effPeople(d.direct?.actMini, d.direct?.realActMini)}</b></span>
+          <span>激活 Pro：<b>${effPeople(d.direct?.actPro, d.direct?.realActPro)}</b></span>
           <span>待确认：<b>${d.direct?.pending || 0}</b> 笔</span>
           <span>已拒绝：<b>${d.direct?.rejected || 0}</b> 笔</span>
         </div>
@@ -1224,11 +1227,8 @@
     const aActive = (summary['active:mini120'] || 0) + (summary['active:pro1500'] || 0);
     const aDone = (summary['completed:mini120'] || 0) + (summary['completed:pro1500'] || 0);
     const plans = m.plans || [];
-    const actMeta = m.activationMeta || {};
-    const progCap = Math.max(1, Math.floor(Number(actMeta.cap)) || 1000000);
-    const progCount = Math.max(0, Math.floor(Number(actMeta.activatedCount)) || 0);
-    const progReal = Math.max(0, Math.floor(Number(actMeta.activatedCountReal)) || 0);
-    const progPct = Math.min(100, progCount / progCap * 100).toFixed(2);
+    const today = m.today || {};
+    const tMini = today.by?.mini120 || 0, tPro = today.by?.pro1500 || 0;
     const stat = (label, value, color) => `<div class="admin-a-stat"><small>${esc(label)}</small><b style="color:${color}">${esc(value)}</b></div>`;
     const planDaily = (p) => { const row = plans.find(x=>x.id===p); return row ? aFmt(Number(row.dailyTarget)/1e18, 2) : (p==='mini120'?'3.33':'16.67'); };
     const DAY_MS = 86400_000;
@@ -1256,6 +1256,8 @@
         ${stat('矿机总数', String(total), '#50d2c2')}
         ${stat('Active 数', String(aActive), '#f6c454')}
         ${stat('已完成', String(aDone), '#81918e')}
+        ${stat('今日激活', `${today.total ?? 0} 台（Mini ${tMini} · Pro ${tPro}）`, '#ff9f43')}
+        ${stat('今日激活用户', String(today.wallets ?? 0), '#ff9f43')}
         ${stat('待产出≈', aFmt(items.reduce((a,r)=>a + (r.status==='active'?Number(r.remaining||0):0), 0), 0) + ' A', '#8a7dff')}
       </div>
       <div class="admin-a-card">
@@ -1271,17 +1273,7 @@
           <label style="align-self:flex-end">${aBtn('👤 设置等级', { id:'am-level-set' })}</label>
         </div>
       </div>
-      <div class="admin-a-card">
-        <h3>📈 矿机激活进度（前台展示）</h3>
-        <p>直接填「目标进度 %」即可，会自动换算成「已激活人数」保存。前台进度条 = 已激活人数 ÷ 激活名额总数；已激活人数 = 真实确认激活数 + 后台补量，真实新增激活仍会继续累加（进度会随之缓慢上浮，要锁定时重新保存一次）。</p>
-        <div class="admin-a-form-grid" style="grid-template-columns:1fr 1fr 1fr auto;gap:12px;align-items:flex-end">
-          <label>目标进度 %<input id="am-prog-pct" type="number" min="0" max="100" step="0.01" value="${progPct}"></label>
-          <label>激活名额总数<input id="am-prog-cap" type="number" min="1" step="1" value="${progCap}"></label>
-          <label>已激活人数（前台显示）<input id="am-prog-count" type="number" min="0" step="1" value="${progCount}"></label>
-          <label style="align-self:flex-end">${aBtn('💾 保存进度', { id:'am-prog-save' })}</label>
-        </div>
-        <div class="admin-inline-status" id="am-prog-status">真实确认激活 ${progReal} 人 · 当前前台显示 ${progCount} / ${progCap}（${progPct}%）</div>
-      </div>
+      <div class="admin-a-card"><h3>AIX 激活规则</h3><p>Mini：20 AIX，终身限一次，30 天产出 100 AIX。Pro：400 AIX，可重复激活、同时持有多台，90 天产出 1500 AIX。无激活名额上限；激活费用全额计入销毁。</p></div>
       <div class="admin-a-card">
         <h3>🔎 搜索筛选</h3>
         <div class="admin-a-form-grid" style="grid-template-columns: 2fr 1fr 1fr auto;gap:12px;align-items:flex-end">
@@ -1311,35 +1303,6 @@
       try{ await api(`/api/admin/users/${encodeURIComponent(w)}/level`,{method:'POST',body:JSON.stringify({level:Number(lv)})});
         mark('am-level-set',`✓ 已设为 A${lv}`);
       }catch(e){toast(e.message);}
-    });
-    // 填百分比自动换算人数；改人数/名额反向回算百分比
-    const syncPctFromCount = ()=>{
-      const cap = Number($id('am-prog-cap').value);
-      const count = Number($id('am-prog-count').value);
-      if(!Number.isFinite(cap) || cap < 1 || !Number.isFinite(count)) return;
-      $id('am-prog-pct').value = Math.min(100, count / cap * 100).toFixed(2);
-    };
-    $id('am-prog-pct')?.addEventListener('input', ()=>{
-      const cap = Number($id('am-prog-cap').value);
-      const pct = Number($id('am-prog-pct').value);
-      if(!Number.isFinite(cap) || cap < 1 || !Number.isFinite(pct)) return;
-      $id('am-prog-count').value = Math.round(cap * Math.max(0, Math.min(100, pct)) / 100);
-    });
-    $id('am-prog-cap')?.addEventListener('input', syncPctFromCount);
-    $id('am-prog-count')?.addEventListener('input', syncPctFromCount);
-    $id('am-prog-save')?.addEventListener('click', async ()=>{
-      const cap = Number($id('am-prog-cap').value);
-      const count = Number($id('am-prog-count').value);
-      const st = $id('am-prog-status');
-      if(!Number.isFinite(cap) || cap < 1) return toast('激活名额总数需 ≥ 1');
-      if(!Number.isFinite(count) || count < 0) return toast('已激活人数需 ≥ 0');
-      if(count > cap) return toast('已激活人数不能大于名额总数');
-      st.textContent = '保存中...';
-      try{
-        await aApi('/activation/progress',{method:'POST',body:JSON.stringify({cap, activatedCount:count})});
-        toast('✓ 已保存激活进度');
-        await loadAMiner();
-      }catch(e){ st.textContent = e.message; toast(e.message); }
     });
     $id('am-refresh')?.addEventListener('click', ()=>{
       const q=new URLSearchParams({limit:500});

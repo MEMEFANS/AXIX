@@ -1,0 +1,2 @@
+const fs=require('fs');for(const [p,a,b] of [['resources/app/public/js/page-loader.js',"'a-token-transfer':'20261017-rules-1'","'a-token-transfer':'20261019-precision-1'"]]){let s=fs.readFileSync(p,'utf8');if(!s.includes(a))throw Error('version missing');fs.writeFileSync(p,s.replace(a,b));}
+const p='resources/app/public/index.html';let s=fs.readFileSync(p,'utf8');s=s.replace(/(\/js\/page-loader.js\?v=)[^"\s]+/,'$120261019-transfer-precision-1');fs.writeFileSync(p,s);

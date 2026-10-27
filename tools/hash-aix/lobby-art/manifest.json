@@ -1,0 +1,14 @@
+{
+  "id": "img_1e19ada3108c4f3ba476ba203e603d4b",
+  "status": "succeeded",
+  "provider": "Kakou Media API",
+  "model": "gpt-image-2",
+  "chargedUsd": 0.2,
+  "dimensions": {
+    "width": 2560,
+    "height": 1440
+  },
+  "source": "output/imagegen/lobby/lobby-source.png",
+  "runtime": "resources/app/public/games/lobby/assets/lobby-hero.jpg",
+  "prompt": "tools/hash-aix/lobby-art/prompt.txt"
+}

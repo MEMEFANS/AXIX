@@ -64,15 +64,19 @@ function shanghaiDayStartSec(nowS) {
 function clampDailyPct(v) { return clamp(Number(v ?? 1), -95, 95); }
 
 // 每日模式：获取（或初始化/滚日重置）当日行程锚点。
-// 起始价 = 锚定时刻的当前价，目标 = startPrice × (1 + 涨幅%)，线性推进到次日 00:00 达标。
+// 起始价 = 锚定时刻的当前价，目标 = startPrice × (1 + 涨幅%)，平滑推进到达标。
+// 剩余时间不足 MIN_RAMP_SEC 时自动延展达标期限（可跨 00:00 完成），
+// 避免"深夜设 5% → 剩 2 小时强推"造成的陡峭直线。
+const MIN_RAMP_SEC = 6 * 3600; // 最小推进时长 6 小时
 function ensureDailySchedule(nowS, curPrice, settings, saveSettingsFn) {
   const ds = shanghaiDayStartSec(nowS);
   const st = settings.daily;
-  if (st && st.dayKey === ds && Number(st.startPrice) > 0 && st.endTimeS > nowS) return st;
+  // 计划未到期则一直沿用（含跨日延展的计划）；到期/缺失才重锚
+  if (st && Number(st.startPrice) > 0 && Number(st.endTimeS) > Number(nowS)) return st;
   const fresh = {
     dayKey: ds,
-    startTimeS: Math.max(ds, Number(nowS)), // 中途启用时从当下开始规划今日剩余涨幅
-    endTimeS: ds + 86_400,
+    startTimeS: Math.max(ds, Number(nowS)), // 中途启用时从当下开始规划涨幅
+    endTimeS: Math.max(ds + 86_400, Number(nowS) + MIN_RAMP_SEC),
     startPrice: Number(curPrice),
   };
   saveSettingsFn({ daily: fresh });
@@ -319,6 +323,9 @@ export function createATokenKlineService({ database, aTokenService, clock = () =
     return microState;
   }
 
+  // daily 平滑路径内存缓存：fn 不可序列化（此前存库每次 miss，导致每 tick 重建路径 + 多写一次库）
+  let dailyPathCache = { key: '', fn: null };
+
   // ── 实时 tick（由定时任务每 15~30 秒调用一次）：
   // 1. 基于调控模式在 1m 当前 bar 上制造价格微波动；
   // 2. 聚合推进更高周期当前 bar 的 high/low/close；
@@ -350,14 +357,9 @@ export function createATokenKlineService({ database, aTokenService, clock = () =
       const targetEod = Math.max(0.0001, st.startPrice * (1 + pct / 100));
       const window = Math.max(1, st.endTimeS - st.startTimeS);
       const progress = clamp((nowS - st.startTimeS) / window, 0, 1);
-      // 用 pathCache（挂在 settings 里）避免每次 tick 重算 keypoints；如果 anchor 改变才重建
+      // 路径缓存放内存（dailyPathCache），锚点改变才重建；fn 不可序列化，勿存库
       const cacheKey = `daily_${st.startTimeS}_${st.endTimeS}_${st.startPrice.toFixed(8)}_${targetEod.toFixed(8)}_${settings.volatility}`;
-      let path;
-      try {
-        if (settings.daily?.pathCache && settings.daily.pathCache.key === cacheKey) {
-          path = settings.daily.pathCache.fn;
-        }
-      } catch {}
+      let path = dailyPathCache.key === cacheKey ? dailyPathCache.fn : null;
       if (!path) {
         const kps = buildKeypoints({
           startPrice: Number(st.startPrice),
@@ -366,7 +368,7 @@ export function createATokenKlineService({ database, aTokenService, clock = () =
           seed: (Math.round(st.startTimeS) ^ Math.round(targetEod * 1e7)) >>> 0,
         });
         path = akimaPath(kps);
-        saveSettings({ daily: { ...st, pathCache: { key: cacheKey } } });
+        dailyPathCache = { key: cacheKey, fn: path };
       }
       const smoothPrice = Math.max(0.0001, path(progress));
       // 微观 tick noise：AR(1) 惯性噪声（稳态约 ±0.01%），实时段影线短而连续

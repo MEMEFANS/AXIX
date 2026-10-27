@@ -1,0 +1,48 @@
+{
+  "ok": true,
+  "passed": 11,
+  "failed": 0,
+  "checks": [
+    "skill: initial one-second input grace then >0.2s inactivity fails",
+    "skill: continuous taps and advance lane choices finish at 20/30/60 FPS",
+    "pause and checkpoint resume freeze time and grant a fresh input grace",
+    "probability: early hard collision is nonlethal; inactivity stumbles and resumes",
+    "probability: same seeded outcome is unchanged by different input and lane choices",
+    "probability: 1,200 completed games exactly match chooseOutcome including all five bands",
+    "probability: a 200 m template presents checkpoint before take or continue",
+    "soft slow and weather hazards do not kill either mode and emit visual impacts",
+    "snapshot restore preserves probability target and immutable per-game rules",
+    "snapshot restore rejects corrupt core state and inconsistent template metadata",
+    "same-frame earliest collision prevents crossing 100/200/500 m reward lines"
+  ],
+  "failures": [],
+  "metrics": {
+    "skillControllers": [
+      {
+        "fps": 20,
+        "finishes": 35,
+        "rounds": 35
+      },
+      {
+        "fps": 30,
+        "finishes": 35,
+        "rounds": 35
+      },
+      {
+        "fps": 60,
+        "finishes": 35,
+        "rounds": 35
+      }
+    ],
+    "completedProbabilityGames": {
+      "rounds": 1200,
+      "bands": {
+        "loss": 723,
+        "breakEven": 179,
+        "smallWin": 214,
+        "double": 72,
+        "highWin": 12
+      }
+    }
+  }
+}

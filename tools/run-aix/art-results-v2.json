@@ -1,0 +1,78 @@
+{
+  "passed": 4,
+  "checks": [
+    "十一张资源含跑步精灵表全部加载成功",
+    "主角和六种障碍具有真实透明通道，无整块绿幕背景",
+    "三套竖屏背景尺寸正确，JPEG以正确类型提供",
+    "真实渲染器正确绘制三套场景、精修角色和六种障碍"
+  ],
+  "assets": [
+    {
+      "name": "runCycle",
+      "width": 2048,
+      "height": 2048,
+      "cornerAlpha": 0
+    },
+    {
+      "name": "hero",
+      "width": 640,
+      "height": 640,
+      "cornerAlpha": 0
+    },
+    {
+      "name": "btc",
+      "width": 640,
+      "height": 640,
+      "cornerAlpha": 0
+    },
+    {
+      "name": "eth",
+      "width": 640,
+      "height": 640,
+      "cornerAlpha": 0
+    },
+    {
+      "name": "bnb",
+      "width": 640,
+      "height": 640,
+      "cornerAlpha": 0
+    },
+    {
+      "name": "ghost",
+      "width": 640,
+      "height": 640,
+      "cornerAlpha": 0
+    },
+    {
+      "name": "hole",
+      "width": 640,
+      "height": 640,
+      "cornerAlpha": 0
+    },
+    {
+      "name": "spike",
+      "width": 640,
+      "height": 640,
+      "cornerAlpha": 0
+    },
+    {
+      "name": "city",
+      "width": 832,
+      "height": 1248,
+      "cornerAlpha": 255
+    },
+    {
+      "name": "exchange",
+      "width": 832,
+      "height": 1248,
+      "cornerAlpha": 255
+    },
+    {
+      "name": "ocean",
+      "width": 832,
+      "height": 1248,
+      "cornerAlpha": 255
+    }
+  ],
+  "runtimeErrors": 0
+}

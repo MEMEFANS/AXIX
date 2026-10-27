@@ -36,3 +36,6 @@ _server.*.log
 .trae/
 .DS_Store
 Thumbs.db
+tools/run-aix/.adventure-test-browser/
+tools/run-aix/.adventure-qa-browser/
+tools/run-aix/.lobby-v3-test-browser/

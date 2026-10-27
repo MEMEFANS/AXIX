@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "aix-games-preview",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["tools/run-aix/preview.mjs"],
+      "port": 4173
+    }
+  ]
+}

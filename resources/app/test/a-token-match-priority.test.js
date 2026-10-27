@@ -13,9 +13,8 @@ import { createReferralService } from '../src/referral-service.js';
 // ══════════════════════════════════════════════════════════════
 // P2P 撮合同价档排序规则：
 //   价格仍是主键（卖低买高）；
-//   同价档内 —— 默认轮：买单按金额大者优先（大额买家先成交），
-//                      卖单按挂单时间先来先成交（大单小单都不因金额插队，都能优先卖给大额买家）；
-//              小额轮：买、卖都按金额小者优先，让小卖单偶尔配给小买单。
+//   同价档内 —— 买单：始终按金额小者优先（小额买家先成交，2026-10-23 规则）；
+//                      卖单：默认轮按挂单时间先来先成交，小额轮按金额小者优先。
 //   每 matchSmallFirstWindow 次撮合尝试中有 matchSmallFirstCount 次小额轮。
 // ══════════════════════════════════════════════════════════════
 
@@ -76,26 +75,29 @@ const remainUsdt = (env, id) => BigInt(env.database.getATokenOrder(id)?.input_us
   assert.equal(statusOf(env, 'sell_small'), 'FILLED', '挂得更早的小额卖单应先成交（不被大额单插队）');
   assert.equal(statusOf(env, 'buy_1'), 'FILLED', '买单额度用尽');
   assert.equal(statusOf(env, 'sell_big'), 'OPEN', '大额卖单仍在挂单');
-  pass('默认轮：卖单按挂单时间先来先成交（大单小单都优先卖给大额买家）');
+  pass('默认轮：卖单按挂单时间先来先成交（不因金额插队）');
   closeDatabase(env.root);
 }
 
-// ── 场景 2：默认轮 — 买单按金额大者优先（大额买家先成交，与挂单时间无关）──
-// 小额买单挂得更早、大额买单挂得更晚。卖单额度只够吃掉一笔。
-// 大额优先 → 大额买单成交，小额买单原封不动；若按时间优先 → 会先成交小额买单。
+// ── 场景 2：买单按金额小者优先（小额买家先成交，与挂单时间无关）──
+// 小额买单挂得更晚、大额买单挂得更早。卖 30 A，扣 50% 手续费后净成交 15 A = 1.5 USDT，
+// 只够吃掉小额买单的一部分。
+// 小额优先 → 小额买单先被吃到 1.5 USDT（剩 0.5），大额买单原封不动（3 USDT）；
+// 若大额优先或时间优先 → 大额买单会先被吃，小额买单原封不动（2 USDT）。
 {
-  const env = makeEnv(1, 0); // 纯默认轮
+  const env = makeEnv(1, 0); // 纯默认轮（卖单走时间优先，不影响买单排序）
   const { wallets } = env;
-  seed(env, { id: 'buy_small', wallet: wallets.a, side: 'buy', usdt: 2, createdAt: 400 });
-  seed(env, { id: 'buy_big', wallet: wallets.b, side: 'buy', usdt: 3, createdAt: 500 });
+  seed(env, { id: 'buy_big', wallet: wallets.a, side: 'buy', usdt: 3, createdAt: 400 });
+  seed(env, { id: 'buy_small', wallet: wallets.b, side: 'buy', usdt: 2, createdAt: 500 });
   seed(env, { id: 'sell_1', wallet: wallets.c, side: 'sell', a: 30, createdAt: 2000 });
 
   env.orderService.matchOpenOrders();
 
   assert.equal(statusOf(env, 'sell_1'), 'FILLED', '卖单被吃满');
-  assert.equal(statusOf(env, 'buy_big'), 'OPEN', '大额买单部分成交（仍在挂单）');
-  assert.equal(remainUsdt(env, 'buy_small'), U6(2), '小额买单应原封不动（2 USDT）');
-  pass('默认轮：同价档内买单金额大者优先');
+  assert.equal(statusOf(env, 'buy_small'), 'OPEN', '小额买单部分成交（仍在挂单）');
+  assert.equal(remainUsdt(env, 'buy_small'), 500000n, '小额买单先被吃到 1.5 USDT，剩余 0.5 USDT');
+  assert.equal(remainUsdt(env, 'buy_big'), U6(3), '大额买单应原封不动（3 USDT）');
+  pass('买单：同价档内金额小者优先（小额先成交）');
   closeDatabase(env.root);
 }
 

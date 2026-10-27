@@ -1,0 +1,15 @@
+#!/bin/bash
+DB="sqlite3 file:///var/lib/wg-platform/wg-platform.sqlite?mode=ro"
+echo "=== 1. 1m 最近 6 根（影线应极短） ==="
+$DB "SELECT datetime(time,'unixepoch','+8 hours'), printf('O:%.6f H:%.6f L:%.6f C:%.6f',open,high,low,close) FROM a_token_klines WHERE period='1m' ORDER BY time DESC LIMIT 6;"
+echo "=== 2. 1m 影线宽度抽样（今日全天，全距%分位） ==="
+$DB "SELECT printf('中位 %.4f%%  最大 %.4f%%', (SELECT range_pct FROM (SELECT (high-low)/close*100 AS range_pct FROM a_token_klines WHERE period='1m' AND time>=strftime('%s','2026-10-21 16:00:00') ORDER BY range_pct LIMIT 1 OFFSET (SELECT count(*)/2 FROM a_token_klines WHERE period='1m' AND time>=strftime('%s','2026-10-21 16:00:00')))), (SELECT MAX((high-low)/close*100) FROM a_token_klines WHERE period='1m' AND time>=strftime('%s','2026-10-21 16:00:00')));"
+echo "=== 3. 15m 最近 6 根 ==="
+$DB "SELECT datetime(time,'unixepoch','+8 hours'), printf('O:%.6f H:%.6f L:%.6f C:%.6f',open,high,low,close) FROM a_token_klines WHERE period='15m' ORDER BY time DESC LIMIT 6;"
+echo "=== 4. 4h 今日 6 根（缓爬小阳线） ==="
+$DB "SELECT datetime(time,'unixepoch','+8 hours'), printf('O:%.6f H:%.6f L:%.6f C:%.6f',open,high,low,close) FROM a_token_klines WHERE period='4h' AND time>=strftime('%s','2026-10-21 00:00:00') ORDER BY time;"
+echo "=== 5. 5m 最近 6 根 ==="
+$DB "SELECT datetime(time,'unixepoch','+8 hours'), printf('O:%.6f C:%.6f',open,close) FROM a_token_klines WHERE period='5m' ORDER BY time DESC LIMIT 6;"
+echo "=== 6. tick 与 API ==="
+grep '\[A币K线\] tick ok' /opt/wg-platform/logs/server.stdout.log | tail -2
+curl -s -o /dev/null -w "plans API: %{time_total}s\n" "http://127.0.0.1:8082/api/a-token/plans"

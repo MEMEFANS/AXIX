@@ -1,0 +1,1 @@
+const fs=require('fs');const p='tools/team-pro-display-20261019/payload.json';const d=JSON.parse(fs.readFileSync(p));for(const f of ['test/a-token-team-loading.test.js','test/a-token-ecosystem.test.js'])d[f]=fs.readFileSync('resources/app/'+f).toString('base64');fs.writeFileSync(p,JSON.stringify(d));

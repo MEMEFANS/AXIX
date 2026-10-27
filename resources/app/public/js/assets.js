@@ -10,6 +10,8 @@
   let platform = null;
   let transfersSeq = 0, revenueSeq = 0;
   let aixPriceFallback = 0, aixPriceRequest = null, platformFailed = false;
+  // 可卖额度（2026-10-25）：只有质押释放的产出可以卖，资产页 AIX 行展示
+  let sellQuota = null, sellQuotaFor = '';
 
   function node(id) { return document.getElementById(id); }
   function value(input) { const number = Number(input); return Number.isFinite(number) ? number : 0; }
@@ -21,11 +23,12 @@
   }
   function quantity(input, symbol) {
     if (symbol !== 'A') return amount(input);
-    const number = value(input);
-    if (number > 0 && number < 0.00000001) return '&lt;0.00000001';
-    return number.toLocaleString('en-US', { minimumFractionDigits:2, maximumFractionDigits:8 });
+    // AIX 与其他币种一样只显示 2 位小数（2026-10-26 用户确认口径）
+    return amount(input);
   }
   function setText(id, text) { if (node(id)) node(id).textContent = text; }
+  // AIX 金额显示：与主资产表一致，固定 2 位小数（收益记录/汇总/互转记录共用）
+  const fmtAixFull = v => quantity(v, 'A');
 
   // AIX 兜底价：/api/a-token/pool 为公开接口。平台账户数据加载失败时仍能给 AIX 估值
   function ensureAixPriceFallback() {
@@ -87,6 +90,20 @@
     return { symbol, available, frozen, total, valuation:total * price };
   }
 
+  // 可卖额度（2026-10-25）：平台上只有质押释放的产出可以卖出，资产页 AIX 行同步展示
+  function ensureSellQuota() {
+    const addr = String(wallet?.address || '').toLowerCase();
+    if (!addr) { sellQuota = null; sellQuotaFor = ''; return; }
+    if (sellQuotaFor === addr) return;
+    sellQuotaFor = addr;
+    sellQuota = null;
+    Portal.readJSON('/api/a-token/profile').then(p => {
+      if (String(wallet?.address || '').toLowerCase() !== addr) return;
+      sellQuota = p?.sellQuota || null;
+      renderAssets();
+    }).catch(() => {});
+  }
+
   function renderAssets() {
     const query = String(node('assets-search')?.value || '').trim().toUpperCase();
     const hideZero = Boolean(node('assets-hide-zero')?.checked);
@@ -104,7 +121,10 @@
           ? '<button onclick="window.ExchangeAssets.openAix(\'transfer\',this)">互转</button><button onclick="window.ExchangeAssets.openAix(\'withdrawal\',this)">提现</button><button onclick="window.ExchangeAssets.openTrade(\'A\')">交易</button>'
           : `<button onclick="window.ExchangeAssets.openTrade('${item.symbol}')">交易</button>`;
       const fallbackLogo = `/assets/tokens/${item.symbol.toLowerCase()}.png?v=5`;
-      return `<tr><td><div class="assets-coin"><span class="assets-coin-icon ${item.symbol.toLowerCase()}"><span class="assets-coin-fallback">${disp(item.symbol).slice(0,1)}</span><img src="${logo(item.symbol)}" alt="${disp(item.symbol)}" loading="lazy" onerror="if(!this.dataset.f){this.dataset.f=1;this.src='${remoteLogo(item.symbol)}'}else{this.onerror=null;this.src='${fallbackLogo}'}"></span><span><b>${disp(item.symbol)}</b><small>${names[item.symbol] || disp(item.symbol)}</small></span></div></td><td><span class="assets-total-amount">${quantity(item.total,item.symbol)}</span><small class="assets-mobile-valuation">≈ ${money(item.valuation)} USDT</small></td><td>${quantity(item.available,item.symbol)}</td><td>${quantity(item.frozen,item.symbol)}</td><td>${money(item.valuation)}</td><td class="assets-row-actions">${actions}</td></tr>`;
+      const quotaTip = item.symbol === 'A'
+        ? `<small style="display:block;color:#f6c454;font-size:11px;margin-top:2px">可用额度 ${sellQuota ? quantity(sellQuota.available,'A') : '—'}</small>`
+        : '';
+      return `<tr><td><div class="assets-coin"><span class="assets-coin-icon ${item.symbol.toLowerCase()}"><span class="assets-coin-fallback">${disp(item.symbol).slice(0,1)}</span><img src="${logo(item.symbol)}" alt="${disp(item.symbol)}" loading="lazy" onerror="if(!this.dataset.f){this.dataset.f=1;this.src='${remoteLogo(item.symbol)}'}else{this.onerror=null;this.src='${fallbackLogo}'}"></span><span><b>${disp(item.symbol)}</b><small>${names[item.symbol] || disp(item.symbol)}</small>${quotaTip}</span></div></td><td><span class="assets-total-amount">${quantity(item.total,item.symbol)}</span><small class="assets-mobile-valuation">≈ ${money(item.valuation)} USDT</small></td><td>${quantity(item.available,item.symbol)}</td><td>${quantity(item.frozen,item.symbol)}</td><td>${money(item.valuation)}</td><td class="assets-row-actions">${actions}</td></tr>`;
     }).join('');
   }
 
@@ -115,6 +135,7 @@
       platform = null; ++transfersSeq; ++revenueSeq;
     }
     wallet = profile?.authenticated === false ? null : profile || null;
+    ensureSellQuota();
     renderSummary();
     renderAssets();
   }
@@ -315,13 +336,13 @@
     const total = Number(data.total || 0);
     const stats = data.stats || {};
     const summary = data.summary || [];
-    const statCard = (label, key) => `<div class="aix-rev-item"><div class="lbl">${label}</div><div class="val">${money(stats[key] ?? 0)} <small>AIX</small></div></div>`;
+    const statCard = (label, key) => `<div class="aix-rev-item"><div class="lbl">${label}</div><div class="val">${fmtAixFull(stats[key] ?? 0)} <small>AIX</small></div></div>`;
     if (!summary.length) {
-      host.innerHTML = `<div class="aix-rev-total"><span class="lbl">累计 AIX 收益</span><span class="val">${money(total)}<small>AIX</small></span></div>${statCard('昨日收益','yesterday')}${statCard('矿机产出','miner')}${statCard('质押收益','stake')}${statCard('直推收益(15%)','direct')}${statCard('间推/级差收益','team')}`;
+      host.innerHTML = `<div class="aix-rev-total"><span class="lbl">累计 AIX 收益</span><span class="val">${fmtAixFull(total)}<small>AIX</small></span></div>${statCard('昨日收益','yesterday')}${statCard('矿机产出','miner')}${statCard('质押收益','stake')}${statCard('直推收益(15%)','direct')}${statCard('间推/级差收益','team')}`;
       return;
     }
-    const items = summary.map(s => `<div class="aix-rev-item"><div class="lbl">${s.label}</div><div class="val">${Number(s.amount).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</div></div>`).join('');
-    host.innerHTML = `<div class="aix-rev-total"><span class="lbl">累计 AIX 收益</span><span class="val">${money(total)}<small>AIX</small></span></div>${statCard('昨日收益','yesterday')}${statCard('矿机产出','miner')}${statCard('质押收益','stake')}${statCard('直推收益(15%)','direct')}${statCard('间推/级差收益','team')}<div class="aix-rev-kind-grid">${items}</div>`;
+    const items = summary.map(s => `<div class="aix-rev-item"><div class="lbl">${s.label}</div><div class="val">${fmtAixFull(s.amount)}</div></div>`).join('');
+    host.innerHTML = `<div class="aix-rev-total"><span class="lbl">累计 AIX 收益</span><span class="val">${fmtAixFull(total)}<small>AIX</small></span></div>${statCard('昨日收益','yesterday')}${statCard('矿机产出','miner')}${statCard('质押收益','stake')}${statCard('直推收益(15%)','direct')}${statCard('间推/级差收益','team')}<div class="aix-rev-kind-grid">${items}</div>`;
   }
 
   function renderRevenueList(data) {
@@ -343,7 +364,7 @@
       const label = r.label || r.kind || '—';
       const detail = r.detail || '—';
       const rate = r.rate || '—';
-      const amount = `+${Number(r.amount).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})} AIX`;
+      const amount = `+${fmtAixFull(r.amount)} AIX`;
       return { time, timeShort, label, detail, rate, amount };
     });
     host.innerHTML = rows.map(r => `<tr><td data-label="时间">${r.time}</td><td data-label="类型">${r.label}</td><td data-label="来源">${r.detail}</td><td data-label="比例">${r.rate}</td><td data-label="收益(AIX)" class="up">${r.amount}</td></tr>`).join('');

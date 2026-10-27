@@ -1,0 +1,289 @@
+{
+  "ok": true,
+  "checks": [
+    "默认概率玩法、五档概率、连点规则和模拟资产说明可见",
+    "重复开始只预扣一次；刷新恢复原ID/规则/结果档，放弃不二扣不送安慰积分",
+    "全损规则下一局生效，安慰积分发放、固定概率抽奖花费和奖品入账正确",
+    "200米检查点暂停与继续正常，5倍结果到达500米并仅结算一次",
+    "每日榜和总榜只收录本机已完成对局，作废局不进入榜单",
+    "320×568与390×844操作区完整可用，长说明在弹框内部滚动且按钮可达",
+    "账户仅GET读取profile，无钱包调用或资产POST请求，浏览器runtime异常为零"
+  ],
+  "count": 7,
+  "metrics": {
+    "playing320": {
+      "width": 320,
+      "height": 568,
+      "scrollWidth": 320,
+      "controls": [
+        {
+          "id": "left",
+          "top": 388,
+          "bottom": 460,
+          "left": 18,
+          "right": 82,
+          "width": 64,
+          "height": 72
+        },
+        {
+          "id": "tap",
+          "top": 388,
+          "bottom": 460,
+          "left": 91,
+          "right": 229,
+          "width": 138,
+          "height": 72
+        },
+        {
+          "id": "right",
+          "top": 388,
+          "bottom": 460,
+          "left": 238,
+          "right": 302,
+          "width": 64,
+          "height": 72
+        }
+      ],
+      "modal": {
+        "top": 126.59375,
+        "bottom": 331.390625,
+        "left": 34,
+        "right": 286,
+        "width": 252,
+        "height": 204.796875
+      }
+    },
+    "recovery320": {
+      "width": 320,
+      "height": 568,
+      "scrollWidth": 320,
+      "controls": [
+        {
+          "id": "left",
+          "top": 388,
+          "bottom": 460,
+          "left": 18,
+          "right": 82,
+          "width": 64,
+          "height": 72
+        },
+        {
+          "id": "tap",
+          "top": 388,
+          "bottom": 460,
+          "left": 91,
+          "right": 229,
+          "width": 138,
+          "height": 72
+        },
+        {
+          "id": "right",
+          "top": 388,
+          "bottom": 460,
+          "left": 238,
+          "right": 302,
+          "width": 64,
+          "height": 72
+        }
+      ],
+      "modal": {
+        "top": 96,
+        "bottom": 362,
+        "left": 34,
+        "right": 286,
+        "width": 252,
+        "height": 266
+      }
+    },
+    "resultButtons320": [
+      {
+        "id": "modal-primary",
+        "top": 344.28125,
+        "bottom": 387.28125,
+        "height": 43
+      },
+      {
+        "id": "modal-secondary",
+        "top": 397.28125,
+        "bottom": 436.28125,
+        "height": 39
+      }
+    ],
+    "loss320": {
+      "width": 320,
+      "height": 568,
+      "scrollWidth": 320,
+      "controls": [
+        {
+          "id": "left",
+          "top": 0,
+          "bottom": 0,
+          "left": 0,
+          "right": 0,
+          "width": 0,
+          "height": 0
+        },
+        {
+          "id": "tap",
+          "top": 0,
+          "bottom": 0,
+          "left": 0,
+          "right": 0,
+          "width": 0,
+          "height": 0
+        },
+        {
+          "id": "right",
+          "top": 0,
+          "bottom": 0,
+          "left": 0,
+          "right": 0,
+          "width": 0,
+          "height": 0
+        }
+      ],
+      "modal": {
+        "top": 96,
+        "bottom": 437,
+        "left": 34,
+        "right": 286,
+        "width": 252,
+        "height": 341
+      }
+    },
+    "checkpoint390": {
+      "width": 390,
+      "height": 844,
+      "scrollWidth": 390,
+      "controls": [
+        {
+          "id": "left",
+          "top": 684,
+          "bottom": 752,
+          "left": 18,
+          "right": 82,
+          "width": 64,
+          "height": 68
+        },
+        {
+          "id": "tap",
+          "top": 684,
+          "bottom": 752,
+          "left": 91,
+          "right": 299,
+          "width": 208,
+          "height": 68
+        },
+        {
+          "id": "right",
+          "top": 684,
+          "bottom": 752,
+          "left": 308,
+          "right": 372,
+          "width": 64,
+          "height": 68
+        }
+      ],
+      "modal": {
+        "top": 242.703125,
+        "bottom": 523.296875,
+        "left": 34,
+        "right": 356,
+        "width": 322,
+        "height": 280.59375
+      }
+    },
+    "rules320": {
+      "width": 320,
+      "height": 568,
+      "left": 34,
+      "right": 286,
+      "top": 96,
+      "bottom": 544,
+      "client": 446,
+      "scroll": 672,
+      "overflow": 320
+    },
+    "live320": {
+      "width": 320,
+      "height": 568,
+      "scrollWidth": 320,
+      "controls": [
+        {
+          "id": "left",
+          "top": 388,
+          "bottom": 460,
+          "left": 18,
+          "right": 82,
+          "width": 64,
+          "height": 72
+        },
+        {
+          "id": "tap",
+          "top": 388,
+          "bottom": 460,
+          "left": 91,
+          "right": 229,
+          "width": 138,
+          "height": 72
+        },
+        {
+          "id": "right",
+          "top": 388,
+          "bottom": 460,
+          "left": 238,
+          "right": 302,
+          "width": 64,
+          "height": 72
+        }
+      ],
+      "modal": null
+    },
+    "live390": {
+      "width": 390,
+      "height": 844,
+      "scrollWidth": 390,
+      "controls": [
+        {
+          "id": "left",
+          "top": 684,
+          "bottom": 752,
+          "left": 18,
+          "right": 82,
+          "width": 64,
+          "height": 68
+        },
+        {
+          "id": "tap",
+          "top": 684,
+          "bottom": 752,
+          "left": 91,
+          "right": 299,
+          "width": 208,
+          "height": 68
+        },
+        {
+          "id": "right",
+          "top": 684,
+          "bottom": 752,
+          "left": 308,
+          "right": 372,
+          "width": 64,
+          "height": 68
+        }
+      ],
+      "modal": null
+    },
+    "live": {
+      "distance": 350.86522629336883,
+      "speed": 49.23293083255542,
+      "state": "running"
+    },
+    "apiRequests": [
+      {
+        "url": "http://127.0.0.1:4173/api/a-token/profile",
+        "method": "GET"
+      }
+    ]
+  }
+}

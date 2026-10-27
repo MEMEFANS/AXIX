@@ -1,8 +1,8 @@
 {
   "wallets": 502,
-  "summary_ms": 2.32,
-  "baseline_full_ms": 181.47,
-  "optimized_full_ms": 37.78,
+  "summary_ms": 1.12,
+  "baseline_full_ms": 91.95,
+  "optimized_full_ms": 19.4,
   "baseline_referral_scans": 105,
   "optimized_referral_scans": 4,
   "complete_profile_unchanged": true,

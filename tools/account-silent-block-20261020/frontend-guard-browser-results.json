@@ -1,0 +1,102 @@
+{
+  "fixtureOnly": true,
+  "productionContacted": false,
+  "checks": [
+    "真实 Chrome：正常 JSON、503 响应和普通网络拒绝保持原始行为",
+    "静态资源与跨源 fixture 的 idle 标记不触发冻结",
+    "普通用户的真实鼠标、键盘输入和表单业务 handler 正常执行",
+    "命中 marker 后请求及两条在途请求保持 pending，25 次后续 API 均未发往服务器",
+    "命中后真实点击、键盘、合成点击和表单均无业务执行，无原生弹窗、无运行异常，余额文字保留",
+    "受限状态下静态资源与跨源请求继续保持正常"
+  ],
+  "requests": [
+    {
+      "method": "GET",
+      "path": "/"
+    },
+    {
+      "method": "GET",
+      "path": "/guard.js"
+    },
+    {
+      "method": "GET",
+      "path": "/favicon.ico"
+    },
+    {
+      "method": "GET",
+      "path": "/api/normal"
+    },
+    {
+      "method": "GET",
+      "path": "/api/error"
+    },
+    {
+      "method": "GET",
+      "path": "/api/network-error"
+    },
+    {
+      "method": "GET",
+      "path": "/api/network-error"
+    },
+    {
+      "method": "GET",
+      "path": "/api/network-error"
+    },
+    {
+      "method": "GET",
+      "path": "/fixture-static"
+    },
+    {
+      "method": "GET",
+      "path": "/api/normal"
+    },
+    {
+      "method": "GET",
+      "path": "/api/slow"
+    },
+    {
+      "method": "GET",
+      "path": "/api/slow-error"
+    },
+    {
+      "method": "GET",
+      "path": "/api/mark"
+    },
+    {
+      "method": "GET",
+      "path": "/fixture-static"
+    }
+  ],
+  "fixtureUrl": "http://127.0.0.1:61324/",
+  "temporaryProfile": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\axix-account-guard-fixture-dC88Bh",
+  "cdpPort": 61325,
+  "before": {
+    "actions": 1,
+    "submits": 1,
+    "keys": 1,
+    "pointers": 1,
+    "marker": "pending",
+    "slow": "pending",
+    "slowError": "pending",
+    "later": 0,
+    "text": "x",
+    "balance": "Fixture balance: 1,234"
+  },
+  "after": {
+    "actions": 1,
+    "submits": 1,
+    "keys": 1,
+    "pointers": 1,
+    "marker": "pending",
+    "slow": "pending",
+    "slowError": "pending",
+    "later": 0,
+    "text": "x",
+    "balance": "Fixture balance: 1,234"
+  },
+  "passed": true,
+  "browserClosed": true,
+  "serversClosed": true,
+  "profileRetained": true,
+  "completedAt": "2026-10-20T14:55:57.560Z"
+}

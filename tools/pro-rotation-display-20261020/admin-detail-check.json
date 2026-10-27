@@ -1,0 +1,34 @@
+{
+  "passed": true,
+  "results": [
+    {
+      "root": "resources/app",
+      "syntax": true,
+      "scopedDetails": true,
+      "rawDataPreserved": true,
+      "multipleProAndMini": true,
+      "earlierAixMinerPreserved": true,
+      "activeStatusAccurate": true,
+      "renderedProBaseline": true,
+      "cacheVersion": true,
+      "saveUsesFilteredProBaseline": true,
+      "unchangedSavePreservesTotals": true,
+      "otherViewerUsesRawBaseline": true
+    },
+    {
+      "root": "tools/pro-rotation-display-20261020/candidate",
+      "syntax": true,
+      "scopedDetails": true,
+      "rawDataPreserved": true,
+      "multipleProAndMini": true,
+      "earlierAixMinerPreserved": true,
+      "activeStatusAccurate": true,
+      "renderedProBaseline": true,
+      "cacheVersion": true,
+      "saveUsesFilteredProBaseline": true,
+      "unchangedSavePreservesTotals": true,
+      "otherViewerUsesRawBaseline": true
+    }
+  ],
+  "onlyProDisplaySettingBaselineChanged": true
+}

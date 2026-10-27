@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { width: 1080px; height: 1920px; overflow: hidden; font-family: "Microsoft YaHei", "PingFang SC", sans-serif; }
+  .poster {
+    position: relative; width: 1080px; height: 1920px;
+    background: radial-gradient(ellipse 900px 700px at 50% 0%, #1b2a5e 0%, #0a0e27 55%, #05070f 100%);
+    display: flex; flex-direction: column; align-items: center;
+    padding: 100px 80px 90px;
+  }
+  /* 背景装饰 */
+  .glow1 { position: absolute; width: 600px; height: 600px; top: -180px; right: -160px;
+    background: radial-gradient(circle, rgba(0,212,255,.18) 0%, transparent 70%); border-radius: 50%; }
+  .glow2 { position: absolute; width: 700px; height: 700px; bottom: -240px; left: -220px;
+    background: radial-gradient(circle, rgba(245,196,81,.14) 0%, transparent 70%); border-radius: 50%; }
+  .grid-line { position: absolute; inset: 0;
+    background-image: linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
+    background-size: 90px 90px; }
+
+  .header { position: relative; text-align: center; margin-top: 30px; }
+  .brand { display: inline-flex; align-items: center; gap: 18px; padding: 14px 36px;
+    border: 1px solid rgba(245,196,81,.45); border-radius: 999px; margin-bottom: 44px;
+    background: rgba(245,196,81,.08); }
+  .brand .coin { width: 54px; height: 54px; border-radius: 14px;
+    object-fit: contain; box-shadow: 0 0 18px rgba(245,196,81,.5); background: rgba(255,255,255,.06); }
+  .brand span { font-size: 30px; font-weight: bold; color: #f5c451; letter-spacing: 4px; }
+  h1 { font-size: 96px; font-weight: 900; color: #fff; letter-spacing: 8px; line-height: 1.15;
+    text-shadow: 0 0 40px rgba(0,212,255,.35); }
+  h1 .accent { background: linear-gradient(90deg, #00d4ff, #f5c451);
+    -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .subtitle { margin-top: 26px; font-size: 34px; color: #8ea2c9; letter-spacing: 10px; }
+
+  .divider { width: 160px; height: 5px; border-radius: 3px; margin: 56px 0 60px;
+    background: linear-gradient(90deg, transparent, #00d4ff, #f5c451, transparent); }
+
+  .cards { position: relative; width: 100%; display: flex; flex-direction: column; gap: 46px; }
+  .card {
+    position: relative; border-radius: 32px; padding: 54px 56px 50px;
+    background: linear-gradient(160deg, rgba(255,255,255,.075), rgba(255,255,255,.02));
+    border: 1px solid rgba(255,255,255,.14); overflow: hidden;
+  }
+  .card::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 5px; }
+  .card.mini::before { background: linear-gradient(90deg, #00d4ff, #38e1ff); }
+  .card.pro::before  { background: linear-gradient(90deg, #f5c451, #ffd97a); }
+
+  .card-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 40px; }
+  .card-name { display: flex; align-items: center; gap: 20px; }
+  .card-icon { width: 84px; height: 84px; border-radius: 22px; font-size: 44px;
+    display: flex; align-items: center; justify-content: center; }
+  .mini .card-icon { background: rgba(0,212,255,.14); border: 1px solid rgba(0,212,255,.4); }
+  .pro  .card-icon { background: rgba(245,196,81,.14); border: 1px solid rgba(245,196,81,.45); }
+  .card-title { font-size: 48px; font-weight: 900; color: #fff; letter-spacing: 3px; }
+  .card-tag { font-size: 26px; font-weight: bold; padding: 12px 26px; border-radius: 999px; }
+  .mini .card-tag { color: #00d4ff; border: 1px solid rgba(0,212,255,.55); background: rgba(0,212,255,.08); }
+  .pro  .card-tag { color: #f5c451; border: 1px solid rgba(245,196,81,.55); background: rgba(245,196,81,.08); }
+
+  .flow { display: flex; align-items: center; justify-content: space-between; }
+  .flow-item { text-align: center; flex: 1; }
+  .flow-label { font-size: 28px; color: #8ea2c9; margin-bottom: 14px; letter-spacing: 2px; }
+  .flow-num { font-size: 30px; font-weight: 900; color: #fff; }
+  .flow-num b { font-size: 88px; letter-spacing: 1px; }
+  .mini .flow-num b { color: #38e1ff; text-shadow: 0 0 30px rgba(0,212,255,.45); }
+  .pro  .flow-num b { color: #f5c451; text-shadow: 0 0 30px rgba(245,196,81,.45); }
+  .flow-unit { font-size: 30px; color: #c3cfe6; font-weight: bold; margin-left: 8px; }
+  .flow-arrow { flex: 0 0 120px; text-align: center; font-size: 54px; color: #5b6b8f;
+    display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .flow-arrow small { font-size: 24px; color: #8ea2c9; letter-spacing: 3px; }
+  .card-note { margin-top: 34px; font-size: 27px; color: #a9b7d4; text-align: center; letter-spacing: 2px; }
+  .card-note b { font-weight: bold; }
+  .mini .card-note b { color: #00d4ff; }
+  .pro  .card-note b { color: #f5c451; }
+
+  .info-bar { position: relative; margin-top: 54px; width: 100%;
+    padding: 34px 40px; border-radius: 24px; text-align: center;
+    background: rgba(0,212,255,.06); border: 1px dashed rgba(0,212,255,.4);
+    font-size: 34px; font-weight: bold; color: #bfe9ff; letter-spacing: 3px; }
+
+  .footer { position: relative; margin-top: auto; text-align: center; width: 100%; }
+  .burn {
+    display: flex; align-items: center; justify-content: center; gap: 16px;
+    padding: 30px 36px; border-radius: 20px;
+    background: linear-gradient(90deg, rgba(245,196,81,.14), rgba(255,110,60,.14));
+    border: 1px solid rgba(245,196,81,.4);
+  }
+  .burn .flame { font-size: 40px; }
+  .burn .text { font-size: 32px; font-weight: bold; color: #ffd97a; letter-spacing: 2px; }
+  .burn .text small { display: block; font-size: 24px; font-weight: normal; color: #b9a06a; margin-top: 8px; letter-spacing: 4px; }
+</style>
+</head>
+<body>
+<div class="poster">
+  <div class="glow1"></div>
+  <div class="glow2"></div>
+  <div class="grid-line"></div>
+
+  <div class="header">
+    <div class="brand"><img class="coin" src="file:///c:/Users/Administrator/Desktop/AXIX/resources/app/public/assets/brand/logo.png" alt="AXIX"><span>AXIX · AIX</span></div>
+    <h1><span class="accent">矿机激活</span></h1>
+    <div class="subtitle">质押激活 · 持续产出</div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="cards">
+    <div class="card mini">
+      <div class="card-top">
+        <div class="card-name"><div class="card-icon">⛏️</div><div class="card-title">MINI 矿机</div></div>
+        <div class="card-tag">限购激活一次</div>
+      </div>
+      <div class="flow">
+        <div class="flow-item">
+          <div class="flow-label">激活消耗</div>
+          <div class="flow-num"><b>20</b><span class="flow-unit">枚</span></div>
+        </div>
+        <div class="flow-arrow">➜<small>激活</small></div>
+        <div class="flow-item">
+          <div class="flow-label">总产出</div>
+          <div class="flow-num"><b>100</b><span class="flow-unit">枚</span></div>
+        </div>
+      </div>
+      <div class="card-note">每个账户 <b>限购激活一次</b></div>
+    </div>
+
+    <div class="card pro">
+      <div class="card-top">
+        <div class="card-name"><div class="card-icon">🚀</div><div class="card-title">PRO 矿机</div></div>
+        <div class="card-tag">激活无上限</div>
+      </div>
+      <div class="flow">
+        <div class="flow-item">
+          <div class="flow-label">激活消耗</div>
+          <div class="flow-num"><b>400</b><span class="flow-unit">枚</span></div>
+        </div>
+        <div class="flow-arrow">➜<small>激活</small></div>
+        <div class="flow-item">
+          <div class="flow-label">总产出</div>
+          <div class="flow-num"><b>1500</b><span class="flow-unit">枚</span></div>
+        </div>
+      </div>
+      <div class="card-note">持续产出至 <b>1500 枚产完</b></div>
+    </div>
+  </div>
+
+  <div class="info-bar">⏱ &nbsp;产出时间一样&nbsp; ·&nbsp; 激活无上限</div>
+
+  <div class="footer">
+    <div class="burn">
+      <div class="flame">🔥</div>
+      <div class="text">激活矿机代币真实链上销毁
+        <small>BURN ON-CHAIN · DEFLATIONARY</small>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

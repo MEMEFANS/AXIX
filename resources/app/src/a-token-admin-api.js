@@ -23,7 +23,7 @@ export function createATokenAdminApi({
           pool: aTokenService.poolStats(),
           activation: aTokenService.getActivationMeta(),
           orders: orderService?.stats?.() || null,
-          miners: poolService.database?.adminMinerSummary?.() || null,
+          miners: aTokenTeamService?.reportingMinerSummary?.() || walletService.database?.adminMinerSummary?.() || null,
         });
       }
       // 挂单查询（所有钱包）?status=OPEN|FILLED|CANCELLED&wallet=...&limit=500
@@ -32,10 +32,10 @@ export function createATokenAdminApi({
         const wallet = String(searchParams?.get('wallet') || '').trim();
         const limit = Math.max(1, Math.min(1000, Number(searchParams?.get('limit') || 500)));
         const source = wallet
-          ? poolService.database?.listATokenOrdersByWallet?.(wallet, limit) || []
+          ? walletService.database?.listATokenOrdersByWallet?.(wallet, limit) || []
           : (status
-              ? (poolService.database?.listATokenOpenOrders?.() || []).filter(r => r.status === status)
-              : (poolService.database?.listATokenOpenOrders?.() || []));
+              ? (walletService.database?.listATokenOpenOrders?.() || []).filter(r => r.status === status)
+              : (walletService.database?.listATokenOpenOrders?.() || []));
         return send(res, 200, {
           items: source,
           stats: orderService?.stats?.() || null,
@@ -46,15 +46,19 @@ export function createATokenAdminApi({
         const body = await readBody(request);
         const orderId = String(body.orderId || '').trim();
         const reason = String(body.reason || 'admin_cancelled').slice(0, 120);
-        const order = poolService.database?.getATokenOrder?.(orderId);
+        const order = walletService.database?.getATokenOrder?.(orderId);
         if (!order) return send(res, 404, { error: '订单不存在' });
         if (order.status !== 'OPEN') return send(res, 400, { error: '仅 OPEN 状态订单可撤单' });
         // 解冻
         const wallet = String(order.wallet || '').toLowerCase();
         if (BigInt(order.input_usdt_units || '0') > 0n) aTokenService.creditUsdt(wallet, BigInt(order.input_usdt_units));
-        if (BigInt(order.input_a_units || '0') > 0n) aTokenService.creditA(wallet, BigInt(order.input_a_units));
+        if (BigInt(order.input_a_units || '0') > 0n) {
+          aTokenService.creditA(wallet, BigInt(order.input_a_units));
+          // 2026-10-25：后台撤卖单时返还已占用的可卖额度
+          try { walletService.database?.refundATokenSellQuota?.(wallet, BigInt(order.input_a_units)); } catch {}
+        }
         const now = Date.now();
-        const info = poolService.database?.markATokenOrderCancelled?.(orderId, { cancelledAt: now, updatedAt: now, reason });
+        const info = walletService.database?.markATokenOrderCancelled?.(orderId, { cancelledAt: now, updatedAt: now, reason });
         return send(res, 200, { ok: true, changes: info?.changes || 0 });
       }
 
@@ -139,6 +143,20 @@ export function createATokenAdminApi({
         return send(res, 200, { ok:true, burnEnabled: enabled, pool: aTokenService.poolStats() });
       }
 
+      // ── 活期质押下线退款（2026-10-25）：所有 active 活期质押一次性退本金、停止产出 ──
+      if (request.method === 'POST' && pathname === '/api/admin/a-token/staking/refund-flexible') {
+        if (allowRequest && !allowRequest(request, res, 'a-token-admin', 30, 60_000)) return true;
+        const result = stakingService.refundAllFlexible();
+        return send(res, 200, { ok: true, ...result });
+      }
+
+      // ── 全部质押退回（2026-10-25）：所有在架质押（含固定档）退还剩余未返还本金、停止产出，之后按新规则重开 ──
+      if (request.method === 'POST' && pathname === '/api/admin/a-token/staking/refund-all') {
+        if (allowRequest && !allowRequest(request, res, 'a-token-admin', 30, 60_000)) return true;
+        const result = stakingService.refundAllStakes();
+        return send(res, 200, { ok: true, ...result });
+      }
+
       // ── 矿机激活开关（关闭时用户不可激活矿机）──
       if (request.method === 'POST' && pathname === '/api/admin/a-token/activation/mode') {
         if (allowRequest && !allowRequest(request, res, 'a-token-admin', 30, 60_000)) return true;
@@ -184,6 +202,10 @@ export function createATokenAdminApi({
           const v = Number(body.dailyChangePct);
           if (!Number.isFinite(v)) throw new Error('每日涨跌幅必须是数字（如 1 表示每日 +1%）');
           patch.dailyChangePct = Math.max(-95, Math.min(95, v));
+          // 中途改涨幅必须重锚当日计划（以当前价为起点重新规划），
+          // 否则旧锚点 + 新目标会让路径输出与现价差出好几个百分点，
+          // tick 被 ±0.3% 硬限幅顶格 → K 线出现匀速直线拉升（2026-10-21 事故）
+          patch.daily = null;
         }
         if (body.driftBpsPer1m && typeof body.driftBpsPer1m === 'object') {
           const drift = {};
@@ -228,7 +250,8 @@ export function createATokenAdminApi({
         return send(res, 200, {
           items,
           activationMeta: aTokenService.getActivationMeta(),
-          summary: poolService.database?.adminMinerSummary?.() || null,
+          summary: aTokenTeamService?.reportingMinerSummary?.() || walletService.database?.adminMinerSummary?.() || null,
+          today: walletService.database?.adminMinerTodaySummary?.() || null,
           plans: Object.keys(minerService.MINER_PLANS || {}).map(k => ({
             id: k, days: minerService.MINER_PLANS[k].days,
             dailyTarget: minerService.dailyTargetOf(k).toString(),

@@ -25,6 +25,8 @@
     shiftVisibleRangeOnNewBar:true,
   });
   let atradeOrdersTimer = null;          // 我的委托 5s 轮询
+  let atradeStatsTimer = null;
+  let atradeStatsSeq = 0;
   let atradeBookTimer = null;            // 真实 P2P 盘口 4s 轮询
   let atradeBookSeq = 0;                 // 盘口请求序号，忽略过期响应
   let bookData = { bids: [], asks: [], markPrice: null };
@@ -74,13 +76,17 @@
   let loadSeq = 0;
   const active = () => P.active('a-token-trade');
   function stopPolling() {
-    for (const timer of [atradeBookTimer, atradeOrdersTimer, atradeKlineTimer]) clearInterval(timer);
+    for (const timer of [atradeBookTimer, atradeOrdersTimer, atradeKlineTimer, atradeStatsTimer]) clearInterval(timer);
+    atradeStatsTimer = null;
+    ++atradeStatsSeq;
     atradeBookTimer = atradeOrdersTimer = atradeKlineTimer = null;
     clearTimeout(quoteTimer);
     ++quoteRequestId;
   }
   function activate() {
     if (!active() || !poolStats || atradeBookTimer) return;
+    refreshPoolStats();
+    atradeStatsTimer = setInterval(refreshPoolStats, 5000);
     window.atradeLoadBook().catch(() => {});
     atradeBookTimer = setInterval(() => {
       if (!active()) return;
@@ -103,6 +109,20 @@
       }).catch(() => { if (active()) chartHost.textContent = '图表加载失败，请刷新重试'; });
     }
   }
+  async function refreshPoolStats() {
+    if (!active()) return;
+    const seq = ++atradeStatsSeq;
+    try {
+      const stats = await api('pool');
+      if (!active() || seq !== atradeStatsSeq) return;
+      poolStats = stats;
+      const today = document.getElementById('atrade-burn-today');
+      const total = document.getElementById('atrade-burn-total');
+      if (today) today.textContent = fmtA(stats.todayBurned) + ' AIX';
+      if (total) total.textContent = fmtA(stats.totalBurned) + ' AIX';
+    } catch { /* Retain the last successful public stats during a network outage. */ }
+  }
+  window.addEventListener('aix:balance-changed', refreshPoolStats);
   async function load(context = { isCurrent:() => true }) {
     const host = document.getElementById('atrade-content');
     if (!host) return;
@@ -157,10 +177,15 @@
     const low24h = Number(s.todayLow || price);
     const recentTrades = s.recentTrades || [];
     let changePct = 0;
-    if (recentTrades.length >= 2) {
+    const refChange = s.changePct24h == null ? NaN : Number(s.changePct24h);
+    if (Number.isFinite(refChange)) {
+      // 后端按真实价格轨迹（24h 前 K 线）算的涨跌
+      changePct = refChange;
+    } else if (recentTrades.length >= 2) {
+      // 后端字段缺失时的兜底：最新成交价相对较早成交价（新-旧，涨为正）
       const first = Number(recentTrades[0].priceUsdt || price);
       const last = Number(recentTrades[recentTrades.length - 1].priceUsdt || price);
-      if (last > 0) changePct = (first - last) / last * 100;
+      if (first > 0) changePct = (last - first) / first * 100;
     }
     const up = changePct >= 0;
     const cls = up ? 'up' : 'down';
@@ -191,8 +216,8 @@
       <div class="atrade-spot-meta">
         <div class="meta-kv"><span>今日交易量（AIX）</span><b>${fmtA(volA)} AIX</b></div>
         <div class="meta-kv"><span>今日成交额</span><b>${fmtUsdt(volUsdt)}</b></div>
-        <div class="meta-kv"><span>今日销毁数量</span><b style="color:#f26c78">${fmtA(Number(s.todayBurned || 0))} AIX</b></div>
-        <div class="meta-kv"><span>累计销毁 AIX</span><b style="color:#f26c78">${fmtA(burned)} AIX</b></div>
+        <div class="meta-kv"><span>今日销毁数量</span><b id="atrade-burn-today" style="color:#f26c78">${fmtA(Number(s.todayBurned || 0))} AIX</b></div>
+        <div class="meta-kv"><span title="含矿机激活全额销毁">累计销毁 AIX</span><b id="atrade-burn-total" style="color:#f26c78">${fmtA(burned)} AIX</b></div>
         <div class="meta-kv"><span>A10 团队分红池</span><b style="color:#f6c454">${fmtA(dividendPool)} AIX</b></div>
         <div class="meta-kv"><span>委托求购额度</span><b style="color:#50d2b8">${fmtUsdt(Number(s.depth?.openBuyUsdt || 0))}</b></div>
       </div>
@@ -275,7 +300,10 @@
     return '手续费 (按直推阶梯 · 成交时扣)';
   }
   function quoteBoxSell() {
-    return `<div class="q-row"><span>净得 USDT</span><b class="gain" id="q-sell-usdt">—</b></div>
+    const q = profile?.sellQuota;
+    const quotaTxt = q?.available ? `${fmtA(q.available)} AIX` : '0 AIX';
+    return `<div class="q-row"><span>可用额度（仅质押产出可卖）</span><b style="color:#f6c454" id="q-sell-quota">${quotaTxt}</b></div>
+      <div class="q-row"><span>净得 USDT</span><b class="gain" id="q-sell-usdt">—</b></div>
       <div class="q-row"><span id="q-sell-fee-lbl">${sellFeeLabel()}</span><b class="loss" id="q-sell-fee">—</b></div>
       <div class="q-row"><span>&nbsp;&nbsp;· 销毁 (手续费50%)</span><b style="color:#f26c78" id="q-sell-burn">—</b></div>
       <div class="q-row"><span>&nbsp;&nbsp;· A10分红池 (手续费50%)</span><b style="color:#f6c454" id="q-sell-div">—</b></div>`;
