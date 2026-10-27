@@ -1,6 +1,6 @@
 // 原创 Canvas 美术模块：角色、16 种独立障碍、四阶段反馈与三套多层场景。
 import { SCENES } from './config.js';
-import { artwork, cover } from './sprites.js';
+import { artwork, cover } from './sprites.js?v=20261027b';
 import { drawRunner } from './runner-animation.js';
 import { drawWorld, project } from './world-motion.js';
 import { HAZARD_BY_ID, hazardPhase } from './hazards.js';

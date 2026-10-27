@@ -9,6 +9,9 @@ export const DEFAULT_RULES = Object.freeze({
   lockFloorEnabled: true, floorMultiplier: 2,
   baseSpeed: 18, maxSpeed: 42, rocketSpeed: 56, rocketTapRate: 7,
   speedCurve: .85, speedStep: 0,
+  // 冲刺段：surgeAfter 米之后额外叠加速度（按剩余距离线性放大到 surgeSpeed），
+  // 同时行距再压缩 surgeSpacing 米。默认关闭，闯关关卡的 1000 米后极限冲刺才启用。
+  surgeAfter: 0, surgeSpeed: 0, surgeSpacing: 0,
   tapTimeout: 0.2, inputGrace: 1, continuousTapRequired: true,
   warningDistance: 56, firstSpawnDistance: 8,
   rowSpacingStart: 24, rowSpacingEnd: 17,
@@ -26,6 +29,7 @@ export const RULE_LIMITS = Object.freeze({
   stepDistance: [1, 50, true], stepMultiplier: [0.05, 0.5], maxMultiplier: [2.1, 10], floorMultiplier: [1, 2],
   baseSpeed: [8, 160], maxSpeed: [12, 160], rocketSpeed: [18, 180], rocketTapRate: [3, 12],
   speedCurve: [.5, 2], speedStep: [0, 100],
+  surgeAfter: [0, 2000], surgeSpeed: [0, 400], surgeSpacing: [0, 30],
   tapTimeout: [0.15, 1], inputGrace: [0.5, 5], warningDistance: [30, 220], firstSpawnDistance: [0, 60],
   rowSpacingStart: [14, 120], rowSpacingEnd: [12, 110],
   doubleChanceStart: [0, 1], doubleChanceEnd: [0, 1], changeChanceStart: [0, 1], changeChanceEnd: [0, 1],

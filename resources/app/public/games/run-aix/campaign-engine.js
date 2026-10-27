@@ -1,7 +1,7 @@
 // A non-economic, replayable campaign runner built on the existing road
 // simulation. It deliberately does not call chooseOutcome or PracticeStore.
-import { RunnerEngine } from './engine.js';
-import { getLevel, createCampaignCatalog } from './campaign.js';
+import { RunnerEngine } from './engine.js?v=20261027c';
+import { getLevel, createCampaignCatalog } from './campaign.js?v=20261027c';
 
 const finite = value => Number.isFinite(value);
 

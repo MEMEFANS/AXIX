@@ -58,14 +58,16 @@ export function createCampaignRules(level) {
   const breakevenDistance = maxDistance / 5;
   const checkpointDistance = maxDistance * 2 / 5;
   const stepDistance = maxDistance / 50;
-  // 渐进挑战（2026-10-27）：40 m/s 起步、每 10 米换一档，后段加速到 130 m/s；
+  // 地狱换挡（2026-10-27）：40 → 130 m/s，每 10 米一档；1000 米保本线一过进入
+  // 极限冲刺段——速度继续叠加到 430 m/s、行距再压到 16 米，几乎必然在此段阵亡。
   // 行距 55 → 26 米、双排 25% → 85%、强制换道 40% → 85%。
-  // 预警距离 77 米：开局约 1.9 秒反应，终段约 0.6 秒。
-  // 模拟：普通反应（0.28s）平均约 600 米，冲到终点仍需真本事。
-  // classic 默认值完全不受影响，RULE_LIMITS 放宽后的 baseSpeed [8,160] 仅服务此关卡。
+  // 预警距离 77 米：开局约 1.9 秒反应，冲刺段不足 0.2 秒。
   const baseSpeed = 40;
   const maxSpeed = 130;
   const rocketSpeed = 140;
+  const surgeAfter = 1000;
+  const surgeSpeed = 300;
+  const surgeSpacing = 10;
   const rowSpacingStart = 55;
   const rowSpacingEnd = 26;
   const doubleChanceStart = .25;
@@ -80,6 +82,7 @@ export function createCampaignRules(level) {
     stepDistance, stepMultiplier: .1, maxMultiplier: 5,
     lockFloorEnabled: false, floorMultiplier: 1,
     baseSpeed, maxSpeed, rocketSpeed, speedCurve: 1.5, speedStep: 10, rocketTapRate: 5,
+    surgeAfter, surgeSpeed, surgeSpacing,
     // adventure UI 只有左右换道、没有连点通道（tap 只存在于 classic 页），
     // 强制连点会变成 0.65 秒必死断连。地狱压力全部来自速度/密度/视野。
     tapTimeout: .8, inputGrace: 1.2, continuousTapRequired: false,

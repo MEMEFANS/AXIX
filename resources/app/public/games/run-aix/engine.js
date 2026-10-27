@@ -1,6 +1,6 @@
 import { OBSTACLES } from './config.js';
-import { DEFAULT_RULES, normalizeRules, chooseOutcome, multiplierForDistance, payoutForDistance } from './rules.js';
-import { difficultyAt, targetSpeed, obstacleRow } from './difficulty.js';
+import { DEFAULT_RULES, normalizeRules, chooseOutcome, multiplierForDistance, payoutForDistance } from './rules.js?v=20261027c';
+import { difficultyAt, targetSpeed, obstacleRow } from './difficulty.js?v=20261027c';
 import { loadCatalog, validateCatalog } from './catalog.js';
 
 const STATES = ['countdown', 'running', 'checkpoint', 'paused'];

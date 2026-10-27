@@ -10,9 +10,15 @@ export function difficultyAt(distance, rules = CONFIG) {
   // 赛车连续换挡——campaign 用 10 米一档，全程 150 档，档档不同。
   const gate = rules.speedStep > 0 ? Math.floor(distance / rules.speedStep) * rules.speedStep : distance;
   const gateProgress = Math.max(0, Math.min(1, gate / rules.maxDistance));
+  // 冲刺段（surgeAfter 米之后）：速度额外叠加、行距再压缩，越接近终点越接近反应极限。
+  const surgeSpan = Math.max(1, rules.maxDistance - (rules.surgeAfter || 0));
+  const surge = rules.surgeAfter > 0 && distance > rules.surgeAfter
+    ? Math.min(1, (distance - rules.surgeAfter) / surgeSpan) : 0;
   return {
-    cruise: rules.baseSpeed + (rules.maxSpeed - rules.baseSpeed) * gateProgress ** (rules.speedCurve || .85),
-    rowSpacing: rules.rowSpacingStart + (rules.rowSpacingEnd - rules.rowSpacingStart) * progress,
+    cruise: rules.baseSpeed + (rules.maxSpeed - rules.baseSpeed) * gateProgress ** (rules.speedCurve || .85)
+      + (rules.surgeSpeed || 0) * surge ** 1.15,
+    rowSpacing: Math.max(8, rules.rowSpacingStart + (rules.rowSpacingEnd - rules.rowSpacingStart) * progress
+      - (rules.surgeSpacing || 0) * surge),
     doubleChance: rules.doubleChanceStart + (rules.doubleChanceEnd - rules.doubleChanceStart) * progress,
     changeChance: rules.changeChanceStart + (rules.changeChanceEnd - rules.changeChanceStart) * progress,
   };
@@ -20,7 +26,8 @@ export function difficultyAt(distance, rules = CONFIG) {
 export function targetSpeed(distance, taps, rules = CONFIG) {
   const { cruise } = difficultyAt(distance, rules);
   const boost = taps >= rules.rocketTapRate ? rules.rocketSpeed - rules.maxSpeed : Math.min(8, Math.max(0, taps) * 1.4);
-  return Math.min(rules.rocketSpeed, cruise + boost);
+  // 冲刺段巡航速度会超过 rocketSpeed，封顶必须跟着抬，否则 Ultra 加速会被夹回去。
+  return Math.min(Math.max(rules.rocketSpeed, cruise), cruise + boost);
 }
 export function obstacleRow(random, distance, previousSafe = 1, rules = CONFIG, catalog = DEFAULT_CATALOG) {
   const difficulty = difficultyAt(distance, rules);
