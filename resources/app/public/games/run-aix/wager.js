@@ -1,16 +1,23 @@
-// 奔跑吧 AIX 押注返还曲线（2026-10-27 定稿）：服务端结算与游戏内 HUD 共用这一份。
-// 开跑即有 0.7 倍保底，1500 米通关 1.0 倍保本；里程碑前密后疏——
-// 普通玩家（几百米）就能拿回约 0.9 倍，"少亏"；越往后每档越难、加成越小。
-// 最高返还不超过本金：读屏脚本即使次次通关也只能保本，无法稳定刷钱。
-export const WAGER = Object.freeze({
-  maxDistance: 1500,
-  basePercent: 70,
-  maxPercent: 100,
-  // [起始米数, 返还百分比]，必须单调递增
-  milestones: Object.freeze([
-    [0, 70], [100, 76], [200, 82], [300, 86], [500, 90], [800, 94], [1100, 97], [1500, 100],
-  ].map(Object.freeze)),
-});
+// 奔跑吧 AIX 押注返还曲线（2026-10-27 重建）：服务端结算与游戏内 HUD 共用这一份。
+// 拒绝"只有通关才回本"：开跑即返 0.3 倍，跑到 300 米即保本 1.0 倍，
+// 之后每 30 米 +0.1 倍，1500 米通关 5.0 倍——跑得越远，赚得越多。
+// 里程碑前密后疏：0~300 米爬得快（早死也有返还），300 米后匀速加档。
+export const WAGER = (() => {
+  const milestones = [
+    [0, 30], [50, 45], [100, 60], [150, 75], [200, 85], [250, 95], [300, 100],
+  ];
+  // 330 → 1500，每 30 米 +10%（即 +0.1 倍），1500 米封顶 5.0 倍
+  for (let meters = 330; meters <= 1500; meters += 30) {
+    milestones.push([meters, 100 + ((meters - 300) / 30) * 10]);
+  }
+  return Object.freeze({
+    maxDistance: 1500,
+    basePercent: 30,
+    maxPercent: 500,
+    breakevenDistance: 300,
+    milestones: Object.freeze(milestones.map(Object.freeze)),
+  });
+})();
 
 const stepIndex = distance => {
   const d = Number.isFinite(distance) ? Math.max(0, distance) + 1e-8 : 0;
@@ -19,7 +26,7 @@ const stepIndex = distance => {
   return index;
 };
 
-// 返还百分比（整数，避免浮点）
+// 返还百分比（整数，避免浮点）：100 = 保本，500 = 5 倍
 export const wagerPercent = distance => WAGER.milestones[stepIndex(distance)][1];
 export const wagerMultiplier = distance => wagerPercent(distance) / 100;
 

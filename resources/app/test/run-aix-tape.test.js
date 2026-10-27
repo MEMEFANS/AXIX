@@ -110,7 +110,8 @@ try {
   assert.equal(settle.body.distance, Math.floor(engine.distance));
   assert.equal(crypto.createHash('sha256').update(settle.body.serverSeed).digest('hex'), start.body.commitment);
   const expected = 10n * UNITS * BigInt(wagerPercent(settle.body.distance)) / 100n;
-  assert.ok(expected <= 10n * UNITS, '返还不得超过本金');
+  assert.equal(settle.body.multiplier, wagerPercent(settle.body.distance) / 100, '返还倍率须与返还曲线一致');
+  assert.ok(expected <= 10n * UNITS * 5n, '返还不得超过 5 倍上限');
   assert.equal(balances.get(wallet) - before, expected);
   const again = await call('/api/run-aix/settle', { runId, from: 0, frames, distance: Math.floor(engine.distance) });
   assert.equal(again.body.alreadySettled, true);
@@ -125,10 +126,10 @@ try {
   assert.equal(ahead.body.code, 'CLOCK_AHEAD');
 
   // 7) 两局 daily 不共享随机带（不再是全服同一条可外泄的航路）
-  fakeNow += 31 * 60_000; // 让 run2 过期作废：按 0 米返还 0.7 倍保底
+  fakeNow += 31 * 60_000; // 让 run2 过期作废：按 0 米返还 0.3 倍
   const beforeExpire = balances.get(wallet);
   await call('/api/run-aix/state');
-  assert.equal(balances.get(wallet) - beforeExpire, 7n * UNITS / 10n);
+  assert.equal(balances.get(wallet) - beforeExpire, 3n * UNITS / 10n);
   const run3 = await call('/api/run-aix/start', { stakeA: '1', levelId: 'daily' });
   assert.equal(run3.status, 200, JSON.stringify(run3.body));
   assert.notDeepEqual(run3.body.tape, run2.body.tape);
@@ -140,12 +141,13 @@ try {
   fs.rmSync(root, { recursive: true, force: true });
 }
 
-// 返还曲线：0.7× 起步、前密后疏、通关 1.0×，绝不超过本金
-assert.equal(wagerPercent(0), 70);
-assert.equal(wagerPercent(99), 70);
-assert.equal(wagerPercent(100), 76);
-assert.equal(wagerPercent(300), 86);
-assert.equal(wagerPercent(500), 90);
-assert.equal(wagerPercent(1499), 97);
-assert.equal(wagerPercent(1500), 100);
-assert.equal(wagerPercent(99999), 100);
+// 返还曲线：开跑 0.3×、300 米保本 1.0×、之后每 30 米 +0.1×、1500 米封顶 5×
+assert.equal(wagerPercent(0), 30);
+assert.equal(wagerPercent(49), 30);
+assert.equal(wagerPercent(50), 45);
+assert.equal(wagerPercent(100), 60);
+assert.equal(wagerPercent(300), 100);
+assert.equal(wagerPercent(500), 160);
+assert.equal(wagerPercent(1499), 490);
+assert.equal(wagerPercent(1500), 500);
+assert.equal(wagerPercent(99999), 500);

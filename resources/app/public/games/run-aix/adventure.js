@@ -23,6 +23,7 @@ let primaryAction, secondaryAction, returnFocus = null, currentView = 'home';
 let swipe = null, starting = false;
 // —— AIX 押注经济（2026-10-27）：登录 + 自选押注 + 服务端种子回放结算 ——
 const PENDING_SETTLE_KEY = 'run-aix:pending-settle';
+const LAST_STAKE_KEY = 'run-aix:last-stake';
 const TRACE_MAX_FRAMES = 40000; // 与服务端 TRACE_MAX_FRAMES 一致
 let walletState = { status: 'guest' };
 let activeRun = null;        // { runId, stakeA, commitment }：本局押注凭证
@@ -143,6 +144,8 @@ function settleRun(result) {
   const attempt = retries => {
     postSettle(payload).then(data => {
       lastSettlement = data;
+      // 本局已定案：清掉押注凭证，下一局必须重新走 /start，避免残留状态挡住重开
+      if (activeRun === run) activeRun = null;
       try { localStorage.removeItem(PENDING_SETTLE_KEY); } catch { /* 忽略 */ }
       session.refresh();
       refreshResultStats(result);
@@ -264,7 +267,7 @@ function pauseGame() {
 }
 function exitGame() {
   clearTimeout(resultTimer); clearTimeout(bannerTimer); clearTimeout(settleRetryTimer); closeDialog();
-  engine = null; activeLevel = null; $('play-screen').hidden = true; document.querySelector('.app-shell').inert = false; document.body.classList.remove('game-active');
+  engine = null; activeLevel = null; activeRun = null; $('play-screen').hidden = true; document.querySelector('.app-shell').inert = false; document.body.classList.remove('game-active');
   renderAll(); route(); audio.suspend(); returnFocus?.focus({ preventScroll: true });
 }
 function resultNodes(result) {
@@ -317,31 +320,50 @@ function onEvent(name, data) {
   }
 }
 async function launch(id) {
-  if (starting) return;
+  if (starting) return toast('正在准备上一局，请稍候…');
   if (LEVELS.some(level => level.id === id) && !profile.isUnlocked(id)) return toast('完成前一关，开启下一段旅程。');
   clearTimeout(resultTimer); clearTimeout(settleRetryTimer);
   // 登录门槛：平台接口不可用（纯静态预览）时退化为不计资产的本地试玩
   if (walletState.status === 'ready') return promptStake(id);
   if (walletState.status === 'loading') return toast('正在确认登录状态，稍候再试');
   if (walletState.status === 'unavailable') return beginRun(id, null);
-  showDialog({ kicker: 'WALLET REQUIRED', title: '登录后押注起跑', copy: '星际航线已接入平台 AIX：自选押注，开跑保底 0.7 倍，跑得越远返得越多，通关保本；流水 1% 自动转可卖额度。', primary: '去登录 ↗', action: () => { closeDialog(); requestLogin(); }, secondary: '暂不出发', onSecondary: exitGame });
+  showDialog({ kicker: 'WALLET REQUIRED', title: '登录后押注起跑', copy: '星际航线已接入平台 AIX：自选押注，开跑即返 0.3 倍，300 米保本，1500 米通关 5 倍；流水 1% 自动转可卖额度。', primary: '去登录 ↗', action: () => { closeDialog(); requestLogin(); }, secondary: '暂不出发', onSecondary: exitGame });
 }
-async function promptStake(id) {
-  starting = true;
-  let state = null;
+async function fetchRunState() {
   try {
     const response = await fetch('/api/run-aix/state', { credentials: 'same-origin', cache: 'no-store' });
-    if (response.ok) state = await response.json();
-  } catch { /* 网络异常时仍允许弹框，押注请求会再兜底 */ }
+    return response.ok ? await response.json() : null;
+  } catch { return null; }
+}
+async function promptStake(id, retried = false) {
+  if (starting) return toast('正在准备上一局，请稍候…');
+  starting = true;
+  const state = await fetchRunState();
   starting = false;
-  if (state?.pendingRun) return toast('上一局尚未结算，请等待结算或 30 分钟后自动作废');
+  if (state?.pendingRun) {
+    if (!retried) {
+      // 上一局多半只是结算在途：先补一次结算再重试，避免直接被锁 30 分钟
+      await recoverPendingSettle();
+      return promptStake(id, true);
+    }
+    return showDialog({
+      kicker: 'PREVIOUS RUN', title: '上一局还没结算完',
+      copy: '最后一次结算没有完成。可以点下方立即重试；超过 30 分钟会自动作废，并按跑到的距离返还。',
+      primary: '重试结算 ↗',
+      action: () => { closeDialog(); recoverPendingSettle().then(() => launch(id)); },
+      secondary: '返回大厅', onSecondary: exitGame,
+    });
+  }
   const balance = state?.balanceA || walletState.balance || '0';
   const input = element('input', 'stake-input');
   input.type = 'number'; input.min = state?.minStakeA || '0.1'; input.step = '0.1';
   input.max = String(Math.min(Number(state?.maxStakeA || 500), Number(balance) || 500));
   input.placeholder = '0.1'; input.setAttribute('inputmode', 'decimal'); input.setAttribute('aria-label', '本局押注金额（AIX）');
+  let lastStake = '';
+  try { lastStake = localStorage.getItem(LAST_STAKE_KEY) || ''; } catch { /* 无存储时用默认值 */ }
+  input.value = lastStake && Number(lastStake) > 0 ? lastStake : '1';
   const hint = element('p', 'stake-hint');
-  hint.textContent = `钱包余额 ${balance} AIX · 押注 0.1 – 500 AIX\n保底 0.7 倍 · 300 米 0.86 · 500 米 0.9 · 通关 1.0 倍保本\n流水 1% 自动转 AIX 可卖额度`;
+  hint.textContent = `钱包余额 ${balance} AIX · 押注 0.1 – 500 AIX\n开跑即返 0.3 倍 · 300 米保本 1.0 · 500 米 1.6 · 1500 米通关 5.0 倍\n流水 1% 自动转 AIX 可卖额度`;
   showDialog({ kicker: 'WAGER · 押注起跑', title: '押上 AIX，冲进地狱航线', copy: '按最终距离结算，服务端回放全程操作核定成绩。', stats: [input, hint], primary: '支付押注 · 起跑 ↗', action: () => confirmStake(id, input), secondary: '暂不出发', onSecondary: exitGame });
 }
 async function confirmStake(id, input) {
@@ -356,6 +378,7 @@ async function confirmStake(id, input) {
     const data = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(data.error || '押注失败，请重试');
     activeRun = { runId: data.runId, stakeA: data.stakeA, commitment: data.commitment, tape: (data.tape || []).map(v => v >>> 0) };
+    try { localStorage.setItem(LAST_STAKE_KEY, stakeA); } catch { /* 无存储不影响押注 */ }
     closeDialog();
     beginRun(id, activeRun);
   } catch (error) {
@@ -418,13 +441,13 @@ function updateReturnHud() {
     value.textContent = `×${(percent / 100).toFixed(2)}`;
     if (shownPercent && percent > shownPercent) {
       value.classList.remove('bump'); void value.offsetWidth; value.classList.add('bump');
-      if (engine.state !== 'ended') banner(percent >= WAGER.maxPercent ? '✦ 保本线达成 ✦' : `返还 ↑ ×${(percent / 100).toFixed(2)}`, true, 900);
+      if (engine.state !== 'ended') banner(percent >= WAGER.maxPercent ? '✦ 已达最高返还 ✦' : percent >= 100 ? '✦ 保本线达成 ✦' : `返还 ↑ ×${(percent / 100).toFixed(2)}`, true, 900);
       vibrate(12);
     }
     box.classList.toggle('capped', percent >= WAGER.maxPercent);
     shownPercent = percent;
   }
-  $('play-return-next').textContent = next ? `再 ${next.meters} m +${(next.gain / 100).toFixed(2)}` : '已保本';
+  $('play-return-next').textContent = next ? `再 ${next.meters} m +${(next.gain / 100).toFixed(2)}` : '已封顶 5×';
 }
 function frame(now) {
   const dt = previous ? Math.min((now - previous) / 1000, .05) : .016; previous = now;
@@ -438,7 +461,11 @@ function frame(now) {
       // 逐帧回放日志：记录传给 update 的原始 dt 与本帧输入（结算防作弊的关键）
       if (live && traceFrames.length < TRACE_MAX_FRAMES) traceFrames.push([dt, pendingInputs.splice(0)]);
       else pendingInputs.length = 0;
-      engine.update(dt);
+      try { engine.update(dt); } catch (error) {
+        console.error('Run update failed', error);
+        engine = null; exitGame(); toast('本局运行异常，已退出，请重新开始');
+      }
+      if (!engine) { animation = requestAnimationFrame(frame); return; }
       if (activeRun && engine.state !== 'ended' && tape.length - tapeUsed < TAPE_REFILL) requestAdvance();
     }
     updateHud(); art.render(engine, now / 1000);

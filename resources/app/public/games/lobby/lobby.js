@@ -5,7 +5,7 @@ import { WebsiteSession } from '../run-aix/session.js';
 const $ = id => document.getElementById(id);
 const STORE = 'aix-play:lobby:v1';
 const catalog = [
-  { id: 'runner', title: '奔跑吧 AIX', english: 'COSMIC RUNNER', category: 'adventure', label: '动作冒险', badge: 'AIX 押注', image: '/games/run-aix/assets/hub-v4.jpg', href: '/run-aix.html', desc: 'AIX 押注起跑的星际航线：保底返还 0.7 倍，越跑越多，通关保本。', tags: ['单人闯关', '押注挑战'], glyph: '↗', odds: [['0.7×', ' 保底'], ['1.0×', ' 通关']] },
+  { id: 'runner', title: '奔跑吧 AIX', english: 'COSMIC RUNNER', category: 'adventure', label: '动作冒险', badge: 'AIX 押注', image: '/games/run-aix/assets/hub-v4.jpg', href: '/run-aix.html', desc: 'AIX 押注起跑的星际航线：开跑就返 0.3 倍，300 米保本，1500 米通关 5 倍。', tags: ['单人闯关', '押注挑战'], glyph: '↗', odds: [['0.3×', ' 开跑即返'], ['1.0×', ' 300 米保本'], ['5.0×', ' 通关']] },
   { id: 'hash', title: '哈希星盘', english: 'HASH ORBIT', category: 'quick', label: '轻量休闲', badge: 'AIX 押注', image: '/games/hash-aix/assets/hash-core.jpg', href: '/hash-aix.html', desc: '单双大小，押 AIX 猜哈希末位。先承诺后揭晓，每局可验算。', tags: ['单双 / 大小', '结果可核验'], glyph: '✦', odds: [['1.98×', ' 猜中'], ['50%', ' 概率']] },
 ];
 const ids = new Set(catalog.map(game => game.id));
