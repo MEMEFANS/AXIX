@@ -44,6 +44,13 @@ const seeded = initial => { let value = initial; return () => { value = (Math.im
 function element(tag, className, text) { const node = document.createElement(tag); if (className) node.className = className; if (text !== undefined) node.textContent = text; return node; }
 function image(file, className = '') { const node = element('img', className); node.src = `/games/run-aix/assets/${file}`; node.alt = ''; node.loading = 'lazy'; return node; }
 function toast(text) { clearTimeout(toastTimer); $('toast').textContent = text; $('toast').hidden = false; toastTimer = setTimeout(() => { $('toast').hidden = true; }, 2800); }
+// 带超时的 fetch（2026-10-28）：弱网/切后台时 fetch 可能长时间不返回，
+// 把 starting/advancing 等状态位卡死——表现就是"点开始冒险没反应"
+function fetchJson(url, options = {}, timeoutMs = 8000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  return fetch(url, { ...options, signal: controller.signal }).finally(() => clearTimeout(timer));
+}
 function banner(text, small = true, duration = 1200) {
   clearTimeout(bannerTimer); $('play-banner').textContent = text; $('play-banner').classList.toggle('small', small);
   if (duration) bannerTimer = setTimeout(() => { $('play-banner').textContent = ''; }, duration);
@@ -79,7 +86,7 @@ function savePendingSettle(payload) {
   try { localStorage.setItem(PENDING_SETTLE_KEY, JSON.stringify(payload)); } catch { /* 存储不足只能等服务端 30 分钟作废 */ }
 }
 async function postSettle(payload) {
-  const response = await fetch('/api/run-aix/settle', {
+  const response = await fetchJson('/api/run-aix/settle', {
     method: 'POST', credentials: 'same-origin',
     headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload),
   });
@@ -120,7 +127,7 @@ async function requestAdvance() {
   advancing = true;
   const from = committedFrames;
   try {
-    const response = await fetch('/api/run-aix/advance', {
+    const response = await fetchJson('/api/run-aix/advance', {
       method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ runId: run.runId, from, frames: traceFrames.slice(from), have: tape.length }),
     });
@@ -313,10 +320,10 @@ async function quickRestake(id) {
   if (!stakeA || !(Number(stakeA) > 0)) return launch(id);
   const primary = $('dialog-primary'); if (primary) primary.disabled = true;
   try {
-    const response = await fetch('/api/run-aix/start', {
+    const response = await fetchJson('/api/run-aix/start', {
       method: 'POST', credentials: 'same-origin',
       headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ stakeA, levelId: id }),
-    });
+    }, 10000);
     const data = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(data.error || '押注失败，请重试');
     activeRun = { runId: data.runId, stakeA: data.stakeA, commitment: data.commitment, tape: (data.tape || []).map(v => v >>> 0) };
@@ -360,15 +367,16 @@ async function launch(id) {
 }
 async function fetchRunState() {
   try {
-    const response = await fetch('/api/run-aix/state', { credentials: 'same-origin', cache: 'no-store' });
+    const response = await fetchJson('/api/run-aix/state', { credentials: 'same-origin', cache: 'no-store' });
     return response.ok ? await response.json() : null;
   } catch { return null; }
 }
 async function promptStake(id, retried = false) {
   if (starting) return toast('正在准备上一局，请稍候…');
   starting = true;
-  const state = await fetchRunState();
-  starting = false;
+  // try/finally 保证弱网下状态位必然复位（否则后续点击全部被吞）
+  let state = null;
+  try { state = await fetchRunState(); } finally { starting = false; }
   if (state?.pendingRun) {
     if (!retried) {
       // 上一局多半只是结算在途：先补一次结算再重试，避免直接被锁 30 分钟
@@ -414,10 +422,10 @@ async function confirmStake(id, input) {
   if (!Number.isFinite(Number(stakeA)) || Number(stakeA) <= 0) return toast('请输入押注金额');
   const primary = $('dialog-primary'); primary.disabled = true;
   try {
-    const response = await fetch('/api/run-aix/start', {
+    const response = await fetchJson('/api/run-aix/start', {
       method: 'POST', credentials: 'same-origin',
       headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ stakeA, levelId: id }),
-    });
+    }, 10000);
     const data = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(data.error || '押注失败，请重试');
     activeRun = { runId: data.runId, stakeA: data.stakeA, commitment: data.commitment, tape: (data.tape || []).map(v => v >>> 0) };
@@ -454,7 +462,8 @@ async function beginRun(id, run) {
   if (stakeBadge) { stakeBadge.hidden = !run; stakeBadge.textContent = run ? `✦ 押注 ${run.stakeA} AIX` : ''; }
   banner('准备航路', true, 0);
   try {
-    await artReady;
+    // 极端弱网下资源 Promise 可能久等：6 秒兜底放行，starting 不会永久卡死
+    await Promise.race([artReady, new Promise(resolve => setTimeout(resolve, 6000))]);
     engine = new CampaignEngine({ level, random, onEvent }); applySettings();
     art.resize(); previous = performance.now(); engine.start();
     $('world').focus({ preventScroll: true }); audio.resume();
