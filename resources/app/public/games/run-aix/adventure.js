@@ -252,7 +252,10 @@ function closeDialog() { if ($('game-dialog').open) $('game-dialog').close(); }
 function showDialog({ kicker, title, copy, stats, primary, action, secondary = '返回大厅', onSecondary = exitGame }) {
   $('dialog-kicker').textContent = kicker; $('dialog-title').textContent = title; $('dialog-copy').textContent = copy;
   $('dialog-stats').replaceChildren(...(stats || []));
-  $('dialog-primary').textContent = primary; $('dialog-secondary').textContent = secondary; $('dialog-secondary').hidden = !secondary;
+  // 押注确认等流程会把主按钮置灰；每次开新弹窗必须复位，否则"再试一次/支付押注"变死按钮，
+  // 用户只能整页退出重进（2026-10-28 修复的"每局都要返回重进"根因）
+  $('dialog-primary').textContent = primary; $('dialog-primary').disabled = false;
+  $('dialog-secondary').textContent = secondary; $('dialog-secondary').hidden = !secondary;
   primaryAction = action; secondaryAction = onSecondary;
   if (!$('game-dialog').open) $('game-dialog').showModal();
   $('dialog-primary').focus();
@@ -293,11 +296,37 @@ function resultNodes(result) {
 }
 function presentResult(result) {
   const current = activeLevel;
+  const stake = lastSettlement?.stakeA || activeRun?.stakeA;
   showDialog({ kicker: result.completed ? 'A LITTLE BRAVER THAN BEFORE' : 'EVERY TRY IS A NEW BEGINNING',
     title: result.completed ? '航线，抵达！' : '差一点，再试一次',
     copy: result.completed ? (current.id === 'daily' ? '今日航路已完成。再跑一次，挑战更好的表现。' : '1500 米星际航线，从头到尾由你跑完。带着星光，向更好的自己出发。') : '撞上了。地狱航线只给一条命，再来。',
-    stats: resultNodes(result), primary: '再试一次 ↻',
-    action: () => launch(current.id) });
+    stats: resultNodes(result),
+    primary: stake ? `再跑一局 · 押 ${stake} AIX ↻` : '再试一次 ↻',
+    action: () => (stake ? quickRestake(current.id) : launch(current.id)),
+    secondary: stake ? '调整押注 ↗' : '返回大厅',
+    onSecondary: stake ? () => launch(current.id) : exitGame });
+}
+// 一键同押注再跑：结算完成后无需再进大厅，点一下直接开下一局
+async function quickRestake(id) {
+  let stakeA = '';
+  try { stakeA = localStorage.getItem(LAST_STAKE_KEY) || ''; } catch { /* 忽略 */ }
+  if (!stakeA || !(Number(stakeA) > 0)) return launch(id);
+  const primary = $('dialog-primary'); if (primary) primary.disabled = true;
+  try {
+    const response = await fetch('/api/run-aix/start', {
+      method: 'POST', credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ stakeA, levelId: id }),
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error || '押注失败，请重试');
+    activeRun = { runId: data.runId, stakeA: data.stakeA, commitment: data.commitment, tape: (data.tape || []).map(v => v >>> 0) };
+    beginRun(id, activeRun);
+  } catch (error) {
+    // 余额不足/额度变化等：回退到完整押注弹窗重新选择
+    toast(error.message || '押注失败，请重试');
+    session.refresh();
+    promptStake(id);
+  }
 }
 function onEvent(name, data) {
   audio.effect(name, data);

@@ -243,7 +243,6 @@ export function createRunAixGameApi({ aTokenService, database, send, readBody, g
 
   async function settleRun(wallet, body) {
     const runId = String(body?.runId || '');
-    const frames = framesOf(body);
     return withAccountLock(wallet, () => {
       const run = loadOwnRun(wallet, runId);
       if (run.status !== 'pending') {
@@ -255,13 +254,26 @@ export function createRunAixGameApi({ aTokenService, database, send, readBody, g
         return settlePayload(db.getRunAixRun(runId), true);
       }
       const payload = run.payload || {};
-      const trace = mergeTrace(payload.trace || [], fromOf(body), frames);
-      assertClock(run, trace);
+      // 畸形帧兜底（2026-10-28）：旧缓存客户端/切后台等设备异常会产生超长帧时长，
+      // 硬拒会让这局永远 pending、把下一局挡 30 分钟（用户被迫退出重进）。
+      // 未带错误码的格式类失败一律按 0 米作废结清并返还保底 0.3×，立即解锁下一局；
+      // 带错误码的（TRACE_REWRITE 篡改 / TRACE_GAP 断档 / TRACE_TOO_LONG / CLOCK_AHEAD）维持拒绝。
+      let trace;
+      try {
+        trace = mergeTrace(payload.trace || [], fromOf(body), framesOf(body));
+        assertClock(run, trace);
+      } catch (error) {
+        if (error?.code) throw error;
+        expireRun(run);
+        console.warn(`[奔跑吧AIX] ${wallet} 结算帧异常，按 0 米作废返还保底:`, error?.message || error);
+        return settlePayload(db.getRunAixRun(runId), true);
+      }
       // 回放校验：引擎必须正常终局，且回放距离与客户端口供一致（容差 1 米）
       const { engine } = replayRun(payload.levelId, payload.secret, trace);
       if (engine.state !== 'ended') {
-        db.updateRunAixPayload(runId, { ...payload, trace });
-        throw apiError('输入日志不完整，结算被拒绝', 'TRACE_INCOMPLETE');
+        // 回放未终局＝对局没跑完（多为页面中途关闭）：同样作废保底结清，不再挂起
+        expireRun(run);
+        return settlePayload(db.getRunAixRun(runId), true);
       }
       const replayedDistance = Math.floor(engine.distance);
       const claimed = Number(body?.distance);
