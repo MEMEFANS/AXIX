@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#101321">
   <title>奔跑吧 AIX · 星际冒险</title>
   <link rel="icon" href="/assets/brand/favicon-32.png">
-  <link rel="stylesheet" href="/games/run-aix/adventure.css?v=6">
+  <link rel="stylesheet" href="/games/run-aix/adventure.css?v=7">
 </head>
 <body>
 <div class="app-shell">
@@ -32,7 +32,7 @@
     <section id="view-worlds" class="view" hidden><div class="page-heading"><span class="eyebrow">THE JOURNEY MAP</span><h1>选择你的下一站</h1><p>完成前一关，解锁新的航路。每个世界都有自己的节奏。</p></div><div id="level-map"></div></section>
     <section id="view-collection" class="view" hidden><div class="page-heading"><span class="eyebrow">A LITTLE MORE YOU</span><h1>星际收藏室</h1><p>用冒险获得的星星，解锁小精灵的新色彩。</p></div><div class="skin-grid" id="skin-grid"></div><div class="section-heading"><div><span class="eyebrow">MOMENTS THAT MATTER</span><h2>冒险徽章</h2></div></div><div class="achievement-grid" id="achievement-grid"></div></section>
     <section id="view-records" class="view" hidden><div class="page-heading"><span class="eyebrow">YOUR PERSONAL BEST</span><h1>每一步，都算数</h1><p>只记录你的真实冒险成绩，刷新页面后依然保留。</p></div><div class="stats-grid" id="career-stats"></div><div class="record-panel"><div class="section-heading"><h2>关卡最佳</h2><span class="muted">本机记录</span></div><div id="level-records"></div></div></section>
-    <section id="view-settings" class="view" hidden><div class="page-heading"><span class="eyebrow">MAKE YOURSELF AT HOME</span><h1>按你的节奏来</h1><p>让声音、触感和画面更适合你。</p></div><div class="settings-panel"><label><span><b>音乐与音效</b><small>原创星际配乐与操作反馈</small></span><input id="setting-sound" type="checkbox" role="switch"></label><label><span><b>触觉反馈</b><small>受击与收集时轻微震动，需设备支持</small></span><input id="setting-haptics" type="checkbox" role="switch"></label><label><span><b>减少动态效果</b><small>关闭镜头震动、闪烁与冲刺速度线</small></span><input id="setting-reducedMotion" type="checkbox" role="switch"></label></div><div class="about-panel"><span class="eyebrow">AIX RUNNER · ADVENTURE 5</span><h2>押注起跑的真实航线</h2><p>每局以平台 AIX 押注起跑（0.1 – 500 AIX）：开跑即返 0.3 倍，1000 米保本 1.0 倍；1000 米之后难度陡增，返还同步放大——1200 米 2.0 倍、1500 米通关 5.0 倍。任何距离阵亡都按当前档位返还，不会颗粒无收。累计流水的 1% 自动转为 AIX 可卖额度。航路随机数由服务端分段下发、全程回放核定成绩，超时作废同样按当前距离返还。</p><a href="/run-aix-classic.html">进入独立概率试玩 ↗</a><p class="small-copy">概率试玩保留原有公开比例与模拟积分，是独立玩法。</p></div></section>
+    <section id="view-settings" class="view" hidden><div class="page-heading"><span class="eyebrow">MAKE YOURSELF AT HOME</span><h1>按你的节奏来</h1><p>让声音、触感和画面更适合你。</p></div><div class="settings-panel"><label><span><b>音乐与音效</b><small>原创星际配乐与操作反馈</small></span><input id="setting-sound" type="checkbox" role="switch"></label><label><span><b>触觉反馈</b><small>受击与收集时轻微震动，需设备支持</small></span><input id="setting-haptics" type="checkbox" role="switch"></label><label><span><b>减少动态效果</b><small>关闭镜头震动、闪烁与冲刺速度线</small></span><input id="setting-reducedMotion" type="checkbox" role="switch"></label></div><div class="about-panel"><span class="eyebrow">AIX RUNNER · ADVENTURE 5</span><h2>押注起跑的真实航线</h2><p>每局以平台 AIX 押注起跑（0.1 – 10000 AIX，可选 1 / 10 / 20 / 40 / 80 / 160 / 320 快捷筹码）：开跑即返 0.3 倍，1000 米保本 1.0 倍；1000 米之后难度陡增，返还同步放大——1200 米 2.0 倍、1500 米通关 5.0 倍。任何距离阵亡都按当前档位返还，不会颗粒无收。累计流水的 1% 自动转为 AIX 可卖额度。航路随机数由服务端分段下发、全程回放核定成绩，超时作废同样按当前距离返还。</p><a href="/run-aix-classic.html">进入独立概率试玩 ↗</a><p class="small-copy">概率试玩保留原有公开比例与模拟积分，是独立玩法。</p></div></section>
     <section id="view-guide" class="view" hidden><div class="page-heading"><span class="eyebrow">READY, SET, EXPLORE</span><h1>你的第一份航行指南</h1><p>先熟悉方向，再追求速度。</p></div><div class="guide-grid"><article><span>01</span><h2>登录并押注</h2><p>连接钱包登录后自选押注。押注在起跑时扣除，结算按最终距离返还。</p></article><article><span>02</span><h2>左右，找到空隙</h2><p>左右滑动，或点按屏幕左 / 右半区换道。电脑使用 ← → 或 A / D。一击即死，看清再动。</p></article><article><span>03</span><h2>40 → 130 m/s，1000 米后极限冲刺</h2><p>开局 40 m/s，每 10 米换一档加速到 130 m/s；过 1000 米保本线后进入冲刺段，速度继续叠加、行距再压缩，越接近 1500 米越接近反应极限。</p></article><article><span>04</span><h2>1000 米保本，之后越跑越赚</h2><p>开跑即返 0.3 倍；1000 米保本 1.0 倍，1000 米后难度与返还一起陡增，1200 米 2.0 倍、1500 米通关 5 倍。阵亡也按当前距离返还，流水 1% 自动转可卖额度。</p></article></div><button class="button-primary" id="guide-start">直接开始冒险 ↗</button></section>
   </main>
   <footer class="app-footer"><span>AIX RUNNER <i>·</i> 勇气从第一步开始</span><span>AIX 押注 · 按距离结算</span></footer>
@@ -45,6 +45,6 @@
 </section>
 <dialog id="game-dialog" aria-labelledby="dialog-title"><div class="dialog-inner"><span class="eyebrow" id="dialog-kicker"></span><h2 id="dialog-title"></h2><p id="dialog-copy"></p><div id="dialog-stats"></div><button class="button-primary" id="dialog-primary"></button><button class="dialog-secondary" id="dialog-secondary"></button></div></dialog>
 <div class="toast" id="toast" role="status" hidden></div>
-<script type="module" src="/games/run-aix/adventure.js?v=24"></script>
+<script type="module" src="/games/run-aix/adventure.js?v=25"></script>
 </body>
 </html>

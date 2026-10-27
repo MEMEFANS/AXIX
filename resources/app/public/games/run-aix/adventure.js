@@ -357,14 +357,28 @@ async function promptStake(id, retried = false) {
   const balance = state?.balanceA || walletState.balance || '0';
   const input = element('input', 'stake-input');
   input.type = 'number'; input.min = state?.minStakeA || '0.1'; input.step = '0.1';
-  input.max = String(Math.min(Number(state?.maxStakeA || 500), Number(balance) || 500));
+  input.max = String(Math.min(Number(state?.maxStakeA || 10000), Number(balance) || 10000));
   input.placeholder = '0.1'; input.setAttribute('inputmode', 'decimal'); input.setAttribute('aria-label', '本局押注金额（AIX）');
   let lastStake = '';
   try { lastStake = localStorage.getItem(LAST_STAKE_KEY) || ''; } catch { /* 无存储时用默认值 */ }
   input.value = lastStake && Number(lastStake) > 0 ? lastStake : '1';
+  // 快捷筹码：点选直接填入押注额；输入框手动改动时同步高亮
+  const chips = element('div', 'stake-chips');
+  const CHIP_VALUES = [1, 10, 20, 40, 80, 160, 320];
+  const chipButtons = CHIP_VALUES.map(value => {
+    const chip = element('button', 'stake-chip');
+    chip.type = 'button'; chip.textContent = String(value);
+    chip.setAttribute('aria-label', `快捷押注 ${value} AIX`);
+    chip.onclick = () => { input.value = String(value); syncChips(); };
+    chips.appendChild(chip);
+    return chip;
+  });
+  const syncChips = () => chipButtons.forEach((chip, i) => chip.classList.toggle('selected', Number(input.value) === CHIP_VALUES[i]));
+  input.addEventListener('input', syncChips);
+  syncChips();
   const hint = element('p', 'stake-hint');
-  hint.textContent = `钱包余额 ${balance} AIX · 押注 0.1 – 500 AIX\n开跑即返 0.3 倍 · 1000 米保本 1.0 · 1200 米 2.0 · 1500 米通关 5.0 倍\n流水 1% 自动转 AIX 可卖额度`;
-  showDialog({ kicker: 'WAGER · 押注起跑', title: '押上 AIX，冲进地狱航线', copy: '按最终距离结算，服务端回放全程操作核定成绩。', stats: [input, hint], primary: '支付押注 · 起跑 ↗', action: () => confirmStake(id, input), secondary: '暂不出发', onSecondary: exitGame });
+  hint.textContent = `钱包余额 ${balance} AIX · 押注 0.1 – 10000 AIX\n开跑即返 0.3 倍 · 1000 米保本 1.0 · 1200 米 2.0 · 1500 米通关 5.0 倍\n流水 1% 自动转 AIX 可卖额度`;
+  showDialog({ kicker: 'WAGER · 押注起跑', title: '押上 AIX，冲进地狱航线', copy: '按最终距离结算，服务端回放全程操作核定成绩。', stats: [input, chips, hint], primary: '支付押注 · 起跑 ↗', action: () => confirmStake(id, input), secondary: '暂不出发', onSecondary: exitGame });
 }
 async function confirmStake(id, input) {
   const stakeA = String(input.value || '').trim();

@@ -5,31 +5,31 @@
       "text": "规则复盘（近 240 小时）\nDecibel：未运行。\nExtended：未运行。\nRISEx：未运行。\n建议：继续观察成交密度；若长期无成交，可结合波动率复核区间和格距。"
     },
     "market": {
-      "t": 1793118668947,
+      "t": 1793120529184,
       "source": "Extended",
       "market": "BTC-USD",
-      "price": 80620.51,
+      "price": 80579.67,
       "frames": {
         "4小时": {
           "trend": "range",
           "strength": 0.13,
-          "slopePct": -0.0269,
-          "atrPct": 0.891,
+          "slopePct": -0.0276,
+          "atrPct": 0.897,
           "emaGap": -0.8
         },
         "1小时": {
           "trend": "range",
           "strength": 0.04,
-          "slopePct": 0.0236,
-          "atrPct": 0.477,
-          "emaGap": -0.1
+          "slopePct": 0.035,
+          "atrPct": 0.465,
+          "emaGap": -0.07
         },
         "15分钟": {
           "trend": "range",
-          "strength": 0.07,
-          "slopePct": 0.0358,
-          "atrPct": 0.281,
-          "emaGap": 0.24
+          "strength": 0.06,
+          "slopePct": 0.0292,
+          "atrPct": 0.266,
+          "emaGap": 0.25
         }
       },
       "regime": "震荡",
@@ -37,12 +37,12 @@
       "recommendMode": "neutral",
       "confidence": 0.58,
       "suggestedRange": {
-        "lower": 79008.0998,
-        "upper": 82232.9202
+        "lower": 78968.0766,
+        "upper": 82191.2634
       },
       "suggestedGridCount": 15,
-      "suggestedSpacingPct": 0.275,
-      "reasoning": "3 个周期中，上升 0、下降 0、震荡 3；平均 ATR 0.55%，趋势强度 8%。",
+      "suggestedSpacingPct": 0.271,
+      "reasoning": "3 个周期中，上升 0、下降 0、震荡 3；平均 ATR 0.54%，趋势强度 7.67%。",
       "caution": "规则只基于历史K线指标，震荡状态也可能快速转为单边行情。",
       "currentGrid": null
     },

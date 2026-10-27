@@ -1,6 +1,6 @@
 // 奔跑吧 AIX 押注经济 API /api/run-aix/*（需钱包 session）。
 // 规则（2026-10-27 定稿）：
-//   · 自选押注：每局开跑扣 0.1–500 AIX，按跑到的距离返还（死亡不吞本金）；
+//   · 自选押注：每局开跑扣 0.1–10000 AIX，按跑到的距离返还（死亡不吞本金）；
 //   · 按距离阶梯结算（games/run-aix/wager.js，与 HUD 同源）——
 //     开跑即返 0.3 倍，1000m 保本 1.0 倍，1000m 之后陡增，1200m 2.0 倍、1500m 通关 5.0 倍；
 //   · 流水 1% → AIX 可卖额度：开跑即按押注的 1% 累计（向下取整），
@@ -24,7 +24,7 @@ import { WAGER, wagerPercent } from '../public/games/run-aix/wager.js';
 const A_TOKEN_DECIMALS = 18;
 const UNITS = 10n ** BigInt(A_TOKEN_DECIMALS);
 const MIN_STAKE_UNITS = UNITS / 10n;          // 0.1 AIX
-const MAX_STAKE_UNITS = 500n * UNITS;         // 500 AIX
+const MAX_STAKE_UNITS = 10000n * UNITS;       // 10000 AIX（2026-10-28 由 500 上调）
 const QUOTA_BPS = 100n;                       // 1% 流水 → 可卖额度（万分比 100）
 const MAX_DISTANCE = WAGER.maxDistance;
 const RUN_TTL_MS = 30 * 60_000;               // pending 局 30 分钟未结算自动作废
@@ -146,7 +146,7 @@ export function createRunAixGameApi({ aTokenService, database, send, readBody, g
 
   async function startRun(wallet, body) {
     const stakeUnits = parseA(body?.stakeA);
-    if (stakeUnits < MIN_STAKE_UNITS || stakeUnits > MAX_STAKE_UNITS) throw new Error('单局押注须在 0.1 – 500 AIX 之间');
+    if (stakeUnits < MIN_STAKE_UNITS || stakeUnits > MAX_STAKE_UNITS) throw new Error('单局押注须在 0.1 – 10000 AIX 之间');
     const levelId = LEVEL_IDS.includes(body?.levelId) ? body.levelId : 'level-1';
     return withAccountLock(wallet, () => {
       if (expireStalePending(wallet)) throw apiError('上一局尚未结算，请先完成或等待作废', 'PENDING_RUN', 409);
@@ -317,7 +317,8 @@ export function createRunAixGameApi({ aTokenService, database, send, readBody, g
       },
       turnoverA: fmtA(stats.turnoverUnits),
       runs: stats.runs,
-      sellQuota: { releasedA: fmtA(quota.releasedUnits), usedA: fmtA(quota.usedUnits), availableA: fmtA(BigInt(quota.releasedUnits) - BigInt(quota.usedUnits)) },
+      // 可卖额度显示恒为非负：占用超出释放时按 0 展示（资产页口径一致）
+      sellQuota: { releasedA: fmtA(quota.releasedUnits), usedA: fmtA(quota.usedUnits), availableA: fmtA(BigInt(quota.releasedUnits) > BigInt(quota.usedUnits) ? BigInt(quota.releasedUnits) - BigInt(quota.usedUnits) : 0n) },
       pendingRun: presentRun(pending),
       recentRuns: db.listRunAixRuns(wallet, RECENT_LIMIT).map(presentRun),
     };

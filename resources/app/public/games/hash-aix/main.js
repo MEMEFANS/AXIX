@@ -76,7 +76,7 @@ function validStake() {
   const text = String($('stake').value).trim();
   if (!/^\d+(\.\d{1,2})?$/.test(text)) return false;
   const value = Number(text);
-  return Number.isFinite(value) && value >= Number(game.state?.minStakeA || .1) && value <= Number(game.state?.maxStakeA || 100);
+  return Number.isFinite(value) && value >= Number(game.state?.minStakeA || .1) && value <= Number(game.state?.maxStakeA || 10000);
 }
 function renderControls() {
   const phase = game.phase, record = game.current, balance = Number(game.state?.balanceA || 0);
@@ -92,7 +92,7 @@ function renderControls() {
   $('confirm').disabled = !editable || !selected || !valid || balance < stake;
   $('confirm').hidden = phase === 'locked' || phase === 'revealed'; $('next-round').hidden = phase !== 'revealed';
   $('next-round').disabled = busy || !ready;
-  $('confirm-label').textContent = busy ? '正在结算…' : !ready ? '连接平台中…' : phase === 'locked' ? '正在揭晓…' : !selected ? '请选择预测' : !valid ? '押注需 0.1 – 100 AIX' : balance < stake ? 'AIX 余额不足' : `确认${choiceMap.get(selected).label} · ${fmt(stake)} AIX`;
+  $('confirm-label').textContent = busy ? '正在结算…' : !ready ? '连接平台中…' : phase === 'locked' ? '正在揭晓…' : !selected ? '请选择预测' : !valid ? '押注需 0.1 – 10000 AIX' : balance < stake ? 'AIX 余额不足' : `确认${choiceMap.get(selected).label} · ${fmt(stake)} AIX`;
   $('entry-controls').hidden = phase === 'locked' || phase === 'revealed'; $('round-summary').hidden = phase !== 'revealed';
   $('ticket').hidden = !record || phase !== 'locked';
   if (record && phase === 'locked') {
@@ -285,8 +285,8 @@ function download(name, content) {
 
 for (const button of document.querySelectorAll('[data-choice]')) button.onclick = () => { if (game.phase !== 'open' || busy) return; selected = button.dataset.choice; setMessage(); renderControls(); sound('select'); };
 for (const button of document.querySelectorAll('[data-stake]')) button.onclick = () => { $('stake').value = button.dataset.stake; setMessage(); renderControls(); };
-$('stake').addEventListener('input', () => { setMessage(validStake() ? '' : '押注金额需为 0.1 – 100 之间、最多两位小数。'); renderControls(); });
-for (const [id, delta] of [['stake-minus', -1], ['stake-plus', 1]]) $(id).onclick = () => { const value = Number($('stake').value) || 1; $('stake').value = Math.max(.1, Math.min(100, value + delta)).toFixed(2).replace(/\.?0+$/, ''); setMessage(); renderControls(); };
+$('stake').addEventListener('input', () => { setMessage(validStake() ? '' : '押注金额需为 0.1 – 10000 之间、最多两位小数。'); renderControls(); });
+for (const [id, delta] of [['stake-minus', -1], ['stake-plus', 1]]) $(id).onclick = () => { const value = Number($('stake').value) || 1; $('stake').value = Math.max(.1, Math.min(10000, value + delta)).toFixed(2).replace(/\.?0+$/, ''); setMessage(); renderControls(); };
 $('confirm').onclick = () => action(async () => {
   const result = await game.wager(selected, String($('stake').value).trim(), settings.clientSeed);
   if (result.ok) scheduleReveal();

@@ -134,6 +134,16 @@ try {
   assert.equal(run3.status, 200, JSON.stringify(run3.body));
   assert.notDeepEqual(run3.body.tape, run2.body.tape);
 
+  // 8) 押注上限（2026-10-28 起为 10000）：超出拒绝、顶格接受
+  fakeNow += 31 * 60_000; // 让 run3 过期作废，腾出 pending 位
+  await call('/api/run-aix/state');
+  balances.set(wallet, 20000n * UNITS);
+  const tooBig = await call('/api/run-aix/start', { stakeA: '10001', levelId: 'daily' });
+  assert.equal(tooBig.status, 400, '超过 10000 AIX 应拒绝');
+  const maxOk = await call('/api/run-aix/start', { stakeA: '10000', levelId: 'daily' });
+  assert.equal(maxOk.status, 200, JSON.stringify(maxOk.body));
+  assert.equal(maxOk.body.stakeA, '10000.0', '顶格 10000 AIX 应接受');
+
   console.log(`run-aix tape tests passed: bot reached ${Math.floor(engine.distance)} m with ${advances} advances, payout ×${settle.body.multiplier}`);
 } finally {
   Date.now = realNow;

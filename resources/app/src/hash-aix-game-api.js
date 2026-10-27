@@ -1,6 +1,6 @@
 // 哈希星盘 AIX 押注 API /api/hash-aix/*（需钱包 session）。
 // 规则（2026-10-27 定稿）：
-//   · 自选押注：单/双/大/小，单局 0.1 – 100 AIX；命中返还 1.98×（含本金）；
+//   · 自选押注：单/双/大/小，单局 0.1 – 10000 AIX；命中返还 1.98×（含本金）；
 //   · 1% 流水 → AIX 可卖额度：押注即按 1% 累计（向下取整），写入
 //     平台既有 a_token_sell_quotas——与赔率里含的 1% 抽水口径一致，平台零抽水；
 //   · 必须登录：所有接口都要钱包 session。
@@ -14,7 +14,7 @@ import { parseUnits, formatUnits } from 'ethers';
 const A_TOKEN_DECIMALS = 18;
 const UNITS = 10n ** BigInt(A_TOKEN_DECIMALS);
 const MIN_STAKE_UNITS = UNITS / 10n;          // 0.1 AIX
-const MAX_STAKE_UNITS = 100n * UNITS;         // 100 AIX
+const MAX_STAKE_UNITS = 10000n * UNITS;       // 10000 AIX（2026-10-28 由 100 上调）
 const QUOTA_BPS = 100n;                       // 1% 流水 → 可卖额度
 const PAYOUT_NUMERATOR = 198n;                // 1.98×（含本金）
 const PAYOUT_DENOMINATOR = 100n;
@@ -89,7 +89,8 @@ export function createHashAixGameApi({ aTokenService, database, send, readBody, 
       minStakeA: fmtA(MIN_STAKE_UNITS), maxStakeA: fmtA(MAX_STAKE_UNITS),
       payoutMultiplier: 1.98,
       fairness: { serverSeedHash: seed.serverSeedHash, nonce: seed.nonce, algorithm: 'SHA256(serverSeed:clientSeed:nonce) 末位十六进制' },
-      sellQuota: { releasedA: fmtA(quota.releasedUnits), usedA: fmtA(quota.usedUnits), availableA: fmtA(BigInt(quota.releasedUnits) - BigInt(quota.usedUnits)) },
+      // 可卖额度显示恒为非负：占用超出释放时按 0 展示（资产页口径一致）
+      sellQuota: { releasedA: fmtA(quota.releasedUnits), usedA: fmtA(quota.usedUnits), availableA: fmtA(BigInt(quota.releasedUnits) > BigInt(quota.usedUnits) ? BigInt(quota.releasedUnits) - BigInt(quota.usedUnits) : 0n) },
       stats: statsOf(wallet),
       recent: db.listHashAixBets(wallet, RECENT_LIMIT).map(presentBet),
     };
@@ -99,9 +100,9 @@ export function createHashAixGameApi({ aTokenService, database, send, readBody, 
     const choice = String(body?.choice || '');
     if (!CHOICE_IDS.has(choice)) throw new Error('请选择单双或大小中的一项');
     const stakeText = String(body?.stakeA ?? '').trim();
-    if (!STAKE_RE.test(stakeText)) throw new Error('押注金额需为 0.1 – 100 之间、最多两位小数的 AIX');
+    if (!STAKE_RE.test(stakeText)) throw new Error('押注金额需为 0.1 – 10000 之间、最多两位小数的 AIX');
     const stakeUnits = parseUnits(stakeText, A_TOKEN_DECIMALS);
-    if (stakeUnits < MIN_STAKE_UNITS || stakeUnits > MAX_STAKE_UNITS) throw new Error('单局押注须在 0.1 – 100 AIX 之间');
+    if (stakeUnits < MIN_STAKE_UNITS || stakeUnits > MAX_STAKE_UNITS) throw new Error('单局押注须在 0.1 – 10000 AIX 之间');
     const clientSeed = String(body?.clientSeed ?? '').trim() || 'AIX-starlight';
     if (!CLIENT_SEED_RE.test(clientSeed)) throw new Error('玩家种子需为 1–64 位字母、数字、短横线、下划线或小数点');
     return withAccountLock(wallet, () => {

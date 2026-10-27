@@ -12,6 +12,11 @@
 @media(max-width:650px){.wallet-chip{height:32px;padding:0 12px;font-size:10px}}
 .result-payout{margin:14px 0 0;font-size:11px;color:#bde7d2;background:#101a30a8;border:1px solid #b7e2cb2e;border-radius:9px;padding:11px 13px;line-height:1.7}
 .stake-input{width:100%;margin:6px 0 4px;min-height:47px;border:1px solid #ffffff26;border-radius:9px;background:#101a30c8;color:#eaf3ee;font-size:19px;font-weight:600;text-align:center;letter-spacing:1px}
+.stake-chips{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin:8px 0 2px}
+.stake-chip{min-height:34px;border:1px solid #ffffff26;border-radius:8px;background:#101a30c8;color:#cfe3ff;font-size:12px;font-weight:700;cursor:pointer;transition:background .15s,border-color .15s}
+.stake-chip:hover{background:#1c2a4ac8}
+.stake-chip.selected{background:#2b4b7f;color:#fff;border-color:#5d8ee0}
+@media(max-width:650px){.stake-chips{grid-template-columns:repeat(4,1fr)}.stake-chip{font-size:11px}}
 .stake-hint{font-size:10px;color:#9aa3b8;line-height:1.9;white-space:pre-line;margin:10px 0 0}
 #play-stake{font-size:10px;color:#cdeedd;background:#b7d8d40f;border:1px solid #b7e2cb30;border-radius:12px;padding:4px 10px;white-space:nowrap}
 @media(max-width:650px){.hash-discovery{padding:14px;gap:14px;margin-top:13px}.hash-discovery>img{width:72px;height:80px}.hash-discovery small{font-size:7px;letter-spacing:1px}.hash-discovery b{font-size:14px}.hash-discovery>span>span{font-size:10px}.hash-discovery .card-arrow{font-size:19px}}
