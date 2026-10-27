@@ -38,6 +38,12 @@ export function drawWorld(c, w, h, distance, scene) {
     c.fillStyle=scene===1?'#ffda9d70':'#9aeaff65';c.fillRect(p.x-width*.18,p.y-height*.85,Math.max(1,width*.25),height*.70);
     c.fillStyle='#080e2440';c.beginPath();c.ellipse(p.x,p.y,width*1.3,width*.35,0,0,Math.PI*2);c.fill();
   }
-  const fog=c.createLinearGradient(0,h*.475,0,h*.62);fog.addColorStop(0,'#a99adf90');fog.addColorStop(1,'#a99adf00');
-  c.fillStyle=fog;c.fillRect(0,h*.475,w,h*.145);
+  // 雾化渐变按尺寸缓存（2026-10-28 性能优化）：CanvasGradient 可跨帧复用，不必每帧新建
+  const fogKey = `${w}|${h}`;
+  if (fogCacheKey !== fogKey) {
+    fogCacheKey = fogKey; fogCache = c.createLinearGradient(0, h * .475, 0, h * .62);
+    fogCache.addColorStop(0, '#a99adf90'); fogCache.addColorStop(1, '#a99adf00');
+  }
+  c.fillStyle = fogCache; c.fillRect(0, h * .475, w, h * .145);
 }
+let fogCache = null, fogCacheKey = '';

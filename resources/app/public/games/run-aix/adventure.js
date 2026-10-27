@@ -2,7 +2,7 @@ import { CampaignEngine } from './campaign-engine.js?v=20261027c';
 import { LEVELS, WORLDS, getLevel } from './campaign.js?v=20261027c';
 import { PlayerProfile, SKINS, ACHIEVEMENTS, PROFILE_STORAGE_KEY } from './player-profile.js';
 import { WebsiteSession } from './session.js';
-import { GameArt } from './art.js?v=20261027b';
+import { GameArt } from './art.js?v=20261028a';
 import { GameAudio } from './audio.js';
 import { artReady } from './sprites.js?v=20261027b';
 import { WAGER, wagerPercent, nextStep } from './wager.js?v=20261027b';
@@ -462,7 +462,11 @@ async function beginRun(id, run) {
     console.error('Adventure start failed', error); exitGame(); toast('航路加载失败，请刷新页面重试。');
   } finally { starting = false; }
 }
+let hudTick = 0;
 function updateHud() {
+  // HUD 文本/进度条以 ~15Hz 刷新已足够顺眼；此前每帧写 8 处 DOM 会强制样式重算，
+  // 是低端机掉帧的主因之一（2026-10-28 性能优化）。非 running 状态不节流，保证终局数值及时。
+  if (engine.state === 'running' && ++hudTick % 4 !== 0) return;
   $('play-distance').textContent = Math.floor(engine.distance);
   $('play-hearts').textContent = '♥ '.repeat(engine.hearts).trim() + ' ♡'.repeat(engine.maxHearts - engine.hearts);
   $('play-hearts').setAttribute('aria-label', `剩余${engine.hearts}颗心`);

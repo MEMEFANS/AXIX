@@ -2,7 +2,7 @@
 import { SCENES } from './config.js';
 import { artwork, cover } from './sprites.js?v=20261027b';
 import { drawRunner } from './runner-animation.js';
-import { drawWorld, project } from './world-motion.js';
+import { drawWorld, project } from './world-motion.js?v=20261028a';
 import { HAZARD_BY_ID, hazardPhase } from './hazards.js';
 import { applyHeroImpact, drawImpact, drawWeather, drawWeatherScreen, effectProgress } from './effects.js';
 function ellipse(c, x, y, rx, ry, color) { c.fillStyle = color; c.beginPath(); c.ellipse(x, y, rx, ry, 0, 0, Math.PI * 2); c.fill(); }
@@ -297,14 +297,31 @@ export class GameArt {
     const speedPct = Math.max(0, Math.min(1, (engine.speed - (rRules.baseSpeed || 0)) / Math.max(1, (rRules.maxSpeed || 1) - (rRules.baseSpeed || 0))));
     c.setTransform(ratio, 0, 0, ratio, 0, 0);
     const sceneIndex = Math.max(0, Math.min(2, engine.sceneIndex ?? Math.floor(engine.distance / ((engine.rules?.maxDistance || 500) / 3)))); const scene = SCENES[sceneIndex];
-    const grad = c.createLinearGradient(0, 0, 0, h); grad.addColorStop(0, scene.top); grad.addColorStop(1, scene.bottom); c.fillStyle = grad; c.fillRect(0, 0, w, h);
     const background = artwork[['city', 'exchange', 'ocean'][sceneIndex]];
     if (background) {
-      c.save(); c.translate((engine.visualLane - 1) * -w * .012, 0); cover(c, background, w * 1.025, h * 1.025); c.restore();
-      const shade = c.createLinearGradient(0, 0, 0, h); shade.addColorStop(0, '#0a071b70'); shade.addColorStop(0.35, '#15112600'); shade.addColorStop(1, '#0b10208c');
-      c.fillStyle = shade; c.fillRect(0, 0, w, h);
+      // —— 背景合成缓存（2026-10-28 性能优化）：天空渐变 + 背景图 + 暗角一次性画进离屏画布，
+      // 之后每帧只做一次 blit。此前每帧创建 2 个渐变对象并做 3 次全屏填充，是低端机掉帧的主因。
+      const bgKey = `${sceneIndex}|${Math.round(w)}|${Math.round(h)}|${ratio}`;
+      if (this.bgKey !== bgKey) {
+        this.bgKey = bgKey;
+        const margin = w * .03; this.bgMargin = margin; // 左右各留 3% 给视差位移
+        const cache = document.createElement('canvas');
+        cache.width = Math.max(2, Math.round((w + margin * 2) * ratio));
+        cache.height = Math.max(2, Math.round(h * ratio));
+        const g = cache.getContext('2d');
+        g.setTransform(ratio, 0, 0, ratio, 0, 0);
+        const cw = w + margin * 2;
+        const grad = g.createLinearGradient(0, 0, 0, h); grad.addColorStop(0, scene.top); grad.addColorStop(1, scene.bottom);
+        g.fillStyle = grad; g.fillRect(0, 0, cw, h);
+        cover(g, background, cw, h * 1.025);
+        const shade = g.createLinearGradient(0, 0, 0, h); shade.addColorStop(0, '#0a071b70'); shade.addColorStop(0.35, '#15112600'); shade.addColorStop(1, '#0b10208c');
+        g.fillStyle = shade; g.fillRect(0, 0, cw, h);
+        this.bg = cache;
+      }
+      c.drawImage(this.bg, (engine.visualLane - 1) * -w * .012 - this.bgMargin, 0, w + this.bgMargin * 2, h);
     }
     if (!background) {
+    const grad = c.createLinearGradient(0, 0, 0, h); grad.addColorStop(0, scene.top); grad.addColorStop(1, scene.bottom); c.fillStyle = grad; c.fillRect(0, 0, w, h);
     const glow = c.createRadialGradient(w * 0.7, h * 0.22, 0, w * 0.7, h * 0.22, w * 0.7); glow.addColorStop(0, sceneIndex === 2 ? '#74f9dd30' : '#9a6aff40'); glow.addColorStop(1, '#8866ff00'); c.fillStyle = glow; c.fillRect(0, 0, w, h);
     for (let i = 0; i < 75; i++) {
       const x = ((Math.sin(i * 127.1) + 1) * 0.5 * w); const y = ((Math.cos(i * 79.7) + 1) * 0.5 * h * 0.64 + time * (i % 3 + 1)) % (h * 0.65);
@@ -374,7 +391,8 @@ export class GameArt {
         }
       }
       c.save();
-      if (engine.skinFilter) c.filter = engine.skinFilter;
+      // 'none' 也会让部分浏览器走滤镜慢路径，默认皮肤直接跳过
+      if (engine.skinFilter && engine.skinFilter !== 'none') c.filter = engine.skinFilter;
       if (!engine.reducedMotion && effect && effectP < 1) applyHeroImpact(c, effect, heroX, h * .88, Math.min(w * .23, 110));
       if (artwork.runCycle) drawRunner(c, artwork.runCycle, heroX, h * .88, Math.min(w * .15, h * .12, 68), engine.distance, engine.lane - engine.visualLane, rocket || speedPct > .7);
       else drawHero(c, heroX, py, Math.min(w * .23, 110), worldTime, rocket, engine.state === 'running');
