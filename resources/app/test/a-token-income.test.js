@@ -96,7 +96,8 @@ fixture(({db,at,team,stake,miner,fund,link,activate,advance,now}) => {
   advance(1); const initialMeta=meta();
   const real=team.distributeStakeReward;
   team.distributeStakeReward=(...args)=>{real(...args);throw new Error('injected team failure');};
-  assert.throws(()=>stake.processAll(),/injected/);
+  // 单笔失败由巡检捕获并留待重试：不抛出、不中断整批，该笔事务全量回滚。
+  assert.doesNotThrow(()=>stake.processAll(),'单笔结算失败不应中断整批');
   assert.equal(at.balanceA(child),before); assert.equal(at.balanceA(parent),0n);
   assert.equal(readAixIncome(db,child,'stake').length,0);
   assert.equal(readAixIncome(db,parent,'team').length,0);

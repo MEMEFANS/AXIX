@@ -150,7 +150,12 @@ export function createATokenStakingService({ aTokenService, database, teamServic
 
   function processAll(now = clock()) {
     const stakes = db.listActiveATokenStakes();
-    for (const s of stakes) aTokenService.transaction(() => settleOne(s, now));
+    // 单笔失败只跳过该笔、留待下轮重试（与矿机巡检同策略），
+    // 避免一个封禁/异常账户把整批结算卡死在列表中段（2026-10-27 事故同款风险）。
+    for (const s of stakes) {
+      try { aTokenService.transaction(() => settleOne(s, now)); }
+      catch (e) { console.error(`[A币质押] ${s.wallet} 结算失败，跳过待下轮重试:`, e?.message || e); }
+    }
     return stakes.length;
   }
 
