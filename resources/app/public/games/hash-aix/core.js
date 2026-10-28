@@ -21,15 +21,36 @@ export const RULES = Object.freeze({
   theoreticalReturn: .7425,
 });
 
-// 2026-10-28 规则改版（0、1、E、F 通杀）生效时刻：早于此时间结算的旧回合按旧规则（无通杀、各 50%）核验
-export const LEGACY_RULES_UNTIL = 1793197200000;
+// 规则版本分界：V1（原始，各 50%）→ V2（0/1/E/F 通杀）→ V3（胜负与数字均由哈希推导，37.5% 精确）
+export const LEGACY_RULES_UNTIL = 1793197200000; // V1/V2 分界：早于此结算的回合按 V1 核验
+export const RULES_V3_SINCE = 1793200200000;     // V2/V3 分界：早于此结算的回合按 V2 核验
 
 const digits = Array.from({ length: 16 }, (_, value) => value);
+// V3 亮灯组：每项 8 个数字（选「单」时 1、3、5、7、9、B、D、F 全亮）；
+// 未命中时从对应组（另外 8 个）开出——开出的数字与押注选择始终对应
+export const SETS = Object.freeze({
+  odd: Object.freeze(digits.filter(value => value % 2 === 1)),
+  even: Object.freeze(digits.filter(value => value % 2 === 0)),
+  small: Object.freeze(digits.filter(value => value < 8)),
+  big: Object.freeze(digits.filter(value => value >= 8)),
+});
+const DARK_SETS = Object.freeze({ odd: SETS.even, even: SETS.odd, small: SETS.big, big: SETS.small });
+// V3 结算推导（与服务端 hash-aix-game-api.js 保持一致）：
+// roll = 哈希末 8 位 → roll < 0x60000000 命中（2^32 的 37.5%，精确）；
+// 数字按胜负从亮灯组/对应组以「哈希前 8 位 mod 8」均匀取出
+export function outcomeV3(hash, choice) {
+  if (typeof hash !== 'string' || !HEX.test(hash)) throw new TypeError('Expected a lowercase SHA-256 hash.');
+  const roll = BigInt(`0x${hash.slice(-8)}`);
+  const won = roll < 0x60000000n;
+  const pick = Number(BigInt(`0x${hash.slice(0, 8)}`) % 8n);
+  if (!SETS[choice]) throw new TypeError('Unknown choice.');
+  return { won, digit: (won ? SETS[choice] : DARK_SETS[choice])[pick] };
+}
 export const CHOICES = Object.freeze([
-  ['odd', '单', '末位是单数', digits.filter(value => value >= 2 && value <= 13 && value % 2 === 1)],
-  ['even', '双', '末位是双数', digits.filter(value => value >= 2 && value <= 13 && value % 2 === 0)],
-  ['small', '小', '末位落在小区间', digits.filter(value => value >= 2 && value <= 7)],
-  ['big', '大', '末位落在大区间', digits.filter(value => value >= 8 && value <= 13)],
+  ['odd', '单', '末位是单数', SETS.odd],
+  ['even', '双', '末位是双数', SETS.even],
+  ['small', '小', '末位落在小区间', SETS.small],
+  ['big', '大', '末位落在大区间', SETS.big],
 ].map(([id, label, description, values]) => Object.freeze({
   id, label, description,
   digits: Object.freeze(values.map(value => value.toString(16))),
@@ -142,10 +163,10 @@ export async function verifyRecord(record) {
   return { ...result, expectedHash: hash, expectedCommitment: commitment, expectedDigit: outcome.digit, expectedHexDigit: outcome.hexDigit, expectedPayoutCents: payoutCents };
 }
 
-// 服务端凭证验算（AIX 版，2026-10-28 改版）：字段口径与 /api/hash-aix 返回的 record 一致。
+// 服务端凭证验算（AIX 版，2026-10-28 V3）：字段口径与 /api/hash-aix 返回的 record 一致。
 // 验算四件事：承诺一致（SHA256(serverSeed) === serverSeedHash）、开奖哈希一致
-// （SHA256(serverSeed:clientSeed:nonce) === hash）、末位判定一致（0、1、E、F 通杀）、
-// 1.98× 返还一致。旧回合（rule=1 或 createdAt 早于 LEGACY_RULES_UNTIL）按旧规则核验。
+// （SHA256(serverSeed:clientSeed:nonce) === hash）、判定一致、1.98× 返还一致。
+// 历史回合按版本各自核验：V1（各 50%）→ V2（0/1/E/F 通杀）→ V3（胜负与数字由哈希推导）。
 export async function verifyServerRecord(record) {
   const result = { ok: false, mode: 'server-proof', commitOk: false, hashOk: false, resultOk: false, payoutOk: false };
   const shape = object(record) && typeof record.serverSeed === 'string' && HEX.test(record.serverSeed)
@@ -165,17 +186,27 @@ export async function verifyServerRecord(record) {
     hashHex(`${record.serverSeed}:${record.clientSeed}:${record.nonce}`),
   ]);
   const outcome = outcomeFromHash(hash);
-  const usesDeadZone = record.rule === 2 || (record.rule === undefined && !(typeof record.createdAt === 'number' && record.createdAt < LEGACY_RULES_UNTIL));
-  const won = usesDeadZone
-    ? winningChoice(record.choice, outcome)
-    : record.choice === outcome.parity || record.choice === outcome.size;
+  // 规则版本：rule 字段优先，无字段的历史导出按 createdAt 落入 V1/V2/V3
+  const ruleVersion = [1, 2, 3].includes(record.rule)
+    ? record.rule
+    : typeof record.createdAt === 'number'
+      ? (record.createdAt >= RULES_V3_SINCE ? 3 : record.createdAt >= LEGACY_RULES_UNTIL ? 2 : 1)
+      : 3;
+  const v3 = ruleVersion === 3 ? outcomeV3(hash, record.choice) : null;
+  const won = v3
+    ? v3.won
+    : ruleVersion === 2
+      ? winningChoice(record.choice, outcome)
+      : record.choice === outcome.parity || record.choice === outcome.size;
   const expectedPayoutUnits = won ? BigInt(record.stakeUnits) * BigInt(RULES.payoutNumerator) / BigInt(RULES.payoutDenominator) : 0n;
   result.commitOk = commitment === record.serverSeedHash;
   result.hashOk = hash === record.hash;
-  result.resultOk = outcome.digit === record.digit && outcome.hexDigit === record.hexDigit && won === record.won;
+  result.resultOk = v3
+    ? v3.digit === record.digit && v3.digit.toString(16) === record.hexDigit && won === record.won
+    : outcome.digit === record.digit && outcome.hexDigit === record.hexDigit && won === record.won;
   result.payoutOk = expectedPayoutUnits === BigInt(record.payoutUnits);
   result.ok = result.commitOk && result.hashOk && result.resultOk && result.payoutOk;
-  return { ...result, expectedHash: hash, expectedCommitment: commitment, expectedDigit: outcome.digit, expectedHexDigit: outcome.hexDigit };
+  return { ...result, expectedHash: hash, expectedCommitment: commitment, expectedDigit: v3 ? v3.digit : outcome.digit, expectedHexDigit: v3 ? v3.digit.toString(16) : outcome.hexDigit };
 }
 
 async function readData(raw) {

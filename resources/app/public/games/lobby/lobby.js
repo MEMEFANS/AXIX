@@ -1,6 +1,6 @@
 import { PlayerProfile } from '../run-aix/player-profile.js';
 import { HashSession } from '../hash-aix/core.js';
-import { WebsiteSession } from '../run-aix/session.js';
+import { WebsiteSession } from '../run-aix/session.js?v=20261028b';
 
 const $ = id => document.getElementById(id);
 const STORE = 'aix-play:lobby:v1';

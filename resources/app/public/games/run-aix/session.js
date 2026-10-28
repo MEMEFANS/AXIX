@@ -3,6 +3,7 @@ export class WebsiteSession {
   constructor(onChange) { this.onChange = onChange; this.revision = 0; }
   async refresh() {
     const revision = ++this.revision;
+    clearTimeout(this.retryTimer); this.retryTimer = null;
     this.controller?.abort(); this.controller = new AbortController();
     const signal = this.controller.signal;
     // 2026-10-28：登录态直接以平台会话 API（cookie）为准，不再依赖父页的钱包全局对象——
@@ -19,7 +20,12 @@ export class WebsiteSession {
       const value = String(profile.balances?.A ?? '');
       if (!/^\d+(\.\d+)?$/.test(value) || !/^0x[0-9a-f]{40}$/i.test(profile.wallet || '')) throw new Error('invalid profile');
       this.onChange({ status: 'ready', address: profile.wallet, balance: value });
-    } catch { if (revision === this.revision) this.onChange({ status: 'unavailable' }); }
+    } catch {
+      if (revision !== this.revision) return;
+      this.onChange({ status: 'unavailable' });
+      // 2026-10-28：失败后 4 秒自动重试（部署重启等瞬时不可用可秒级自愈），成功前不叠加多个重试
+      this.retryTimer ||= setTimeout(() => { this.retryTimer = null; if (revision === this.revision) this.refresh(); }, 4000);
+    }
     finally { clearTimeout(timeout); }
   }
   start() {
@@ -31,7 +37,7 @@ export class WebsiteSession {
     this.refresh();
   }
   stop() {
-    ++this.revision; this.controller?.abort(); clearInterval(this.interval);
+    ++this.revision; this.controller?.abort(); clearTimeout(this.retryTimer); clearInterval(this.interval);
     try { window.parent.removeEventListener('walletstatechange', this.listener); } catch {}
     window.removeEventListener('focus', this.listener);
     this.listener = null;

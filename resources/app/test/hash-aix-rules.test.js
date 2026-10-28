@@ -1,92 +1,101 @@
-// 哈希星盘 37.5% 规则测试（2026-10-28 改版）：
-//   0、1、E、F 通杀（庄家通吃）；有效区 2–D：
-//   单 = 3,5,7,9,B,D；双 = 2,4,6,8,A,C；小 = 2–7；大 = 8–D——每项 6/16 = 37.5%；
-//   旧规则（50%，无通杀）下结算的历史记录仍按旧规则核验（rule=1 或 createdAt 早于 LEGACY_RULES_UNTIL）。
+// 哈希星盘 V3 规则测试（2026-10-28）：
+//   胜负与数字均由哈希推导：roll = 哈希末 8 位，roll < 0x60000000 命中（2^32 的 37.5%，精确）；
+//   亮灯组每项 8 个数字（选「单」时 1、3、5、7、9、B、D、F 全亮）；
+//   数字按胜负从亮灯组/对应组均匀取出——赢必在亮灯组、输必不在，开奖与押注始终对应；
+//   历史回合按版本核验：V1（各 50%）→ V2（0/1/E/F 通杀）→ V3。
 import assert from 'node:assert/strict';
 import crypto from 'node:crypto';
-import { CHOICES, RULES, outcomeFromHash, verifyServerRecord, LEGACY_RULES_UNTIL } from '../public/games/hash-aix/core.js';
+import { CHOICES, RULES, outcomeV3, verifyServerRecord, LEGACY_RULES_UNTIL, RULES_V3_SINCE } from '../public/games/hash-aix/core.js';
 
 const sha256 = text => crypto.createHash('sha256').update(String(text)).digest('hex');
-const pad = digit => `${'f'.repeat(63)}${digit}`;
 
 // —— 赔率参数：1.98× 返还、37.5% 命中、理论返还率 74.25% ——
 assert.equal(RULES.payoutMultiplier, 1.98);
 assert.ok(Math.abs(RULES.chance - 0.375) < 1e-9);
 assert.ok(Math.abs(RULES.theoreticalReturn - 0.7425) < 1e-9);
+// 命中阈值精确性：0x60000000 × 8 = 3 × 2^32，即恰为 2^32 的 3/8 = 37.5%
+assert.equal((0x60000000n * 8n) / (1n << 32n), 3n);
 
-// —— 每个选项恰好 6 个命中数字，且全部落在有效区 2–D ——
-for (const choice of CHOICES) {
-  assert.equal(choice.digits.length, 6, `${choice.id} 应恰有 6 个命中数字（37.5%）`);
-  for (const digit of choice.digits) {
-    const value = Number.parseInt(digit, 16);
-    assert.ok(value >= 2 && value <= 13, `${choice.id} 命中数字 ${digit} 不得落在通杀区 0/1/E/F`);
-  }
-}
+// —— 亮灯组：每项 8 个数字；单+双、小+大 恰好瓜分 16 个数字；选「单」时 1 与 F 都亮 ——
 const [odd, even, small, big] = CHOICES;
-const liveSorted = [...odd.digits, ...even.digits].sort();
-assert.deepEqual(liveSorted, [...Array(12)].map((_, i) => (i + 2).toString(16)).sort(), '单+双 应恰好覆盖 2–D');
-assert.deepEqual([...small.digits, ...big.digits].sort(), liveSorted, '小+大 应恰好覆盖 2–D');
-
-// —— 末位判定：通杀区 0/1/E/F 四项全输；有效区单双按奇偶、小 2–7、大 8–D ——
-for (let value = 0; value < 16; value++) {
-  const digit = value.toString(16);
-  const outcome = outcomeFromHash(pad(digit));
-  assert.equal(outcome.digit, value);
-  assert.equal(outcome.hexDigit, digit);
-  assert.equal(outcome.parity, value % 2 ? 'odd' : 'even');
-  assert.equal(outcome.size, value >= 8 ? 'big' : 'small');
-  assert.equal(outcome.live, value >= 2 && value <= 13);
+for (const choice of CHOICES) {
+  assert.equal(choice.digits.length, 8, `${choice.id} 应有 8 个亮灯数字`);
+  assert.equal(new Set(choice.digits).size, 8);
 }
-const deadDigits = [0, 1, 14, 15];
-for (const value of deadDigits) {
-  const outcome = outcomeFromHash(pad(value.toString(16)));
-  assert.equal(outcome.live, false, `末位 ${value.toString(16)} 属通杀区`);
-  for (const choice of CHOICES) assert.equal(choice.digits.includes(outcome.hexDigit), false, `通杀区 ${outcome.hexDigit} 不得成为任何选项的命中数字`);
-}
+const allHex = [...Array(16)].map((_, value) => value.toString(16)).sort();
+assert.deepEqual([...odd.digits, ...even.digits].sort(), allHex, '单+双 应瓜分全部 16 个数字');
+assert.deepEqual([...small.digits, ...big.digits].sort(), allHex, '小+大 应瓜分全部 16 个数字');
+assert.ok(odd.digits.includes('1') && odd.digits.includes('f'), '选「单」时 1 与 F 都要亮起');
 
-// —— 服务端凭证核验 ——
-const serverSeed = 'aa'.repeat(32);
+// —— V3 推导：开奖与押注始终对应 + 核验通过 + 篡改必失败 ——
+const serverSeed = crypto.randomBytes(32).toString('hex');
 const serverSeedHash = sha256(serverSeed);
 const STAKE = '1000000000000000000';   // 1 AIX
 const PAYOUT = '1980000000000000000';  // 1.98 AIX
-function roundWithLastDigit(char) {
+function v3Record(nonce, choice) {
+  const clientSeed = 'AIX-starlight';
+  const hash = sha256(`${serverSeed}:${clientSeed}:${nonce}`);
+  const { won, digit } = outcomeV3(hash, choice);
+  return { serverSeed, serverSeedHash, hash, clientSeed, nonce, choice, digit, hexDigit: digit.toString(16), won,
+    stakeUnits: STAKE, payoutUnits: won ? PAYOUT : '0', rule: 3, createdAt: RULES_V3_SINCE + 1 };
+}
+for (const choice of CHOICES) {
+  for (let nonce = 1; nonce <= 40; nonce++) {
+    const record = v3Record(nonce, choice.id);
+    const lit = new Set(choice.digits);
+    // 赢必在亮灯组、输必不在：开奖数字与押注选择始终对应
+    assert.equal(lit.has(record.hexDigit), record.won, `${choice.id} #${nonce} 开奖数字与胜负不对应`);
+    const result = await verifyServerRecord(record);
+    assert.ok(result.ok, `V3 核验失败：${choice.id} #${nonce}`);
+    // 篡改胜负（返还同步改）→ 判定不一致，核验失败
+    const flipped = await verifyServerRecord({ ...record, won: !record.won, payoutUnits: record.won ? '0' : PAYOUT });
+    assert.equal(flipped.ok, false, `V3 篡改胜负应核验失败：${choice.id} #${nonce}`);
+    // 篡改数字 → 核验失败
+    const badDigit = record.digit === 0 ? 1 : 0;
+    const tampered = await verifyServerRecord({ ...record, digit: badDigit, hexDigit: badDigit.toString(16) });
+    assert.equal(tampered.ok, false, `V3 篡改数字应核验失败：${choice.id} #${nonce}`);
+  }
+}
+
+// —— 大样本命中率：20000 局收敛到 37.5%（±1.5%）；数字覆盖全部 16 个 ——
+const TOTAL = 20000;
+let wins = 0;
+for (let nonce = 1; nonce <= TOTAL; nonce++) {
+  if (outcomeV3(sha256(`${serverSeed}:freq:${nonce}`), 'odd').won) wins++;
+}
+const rate = wins / TOTAL;
+assert.ok(Math.abs(rate - 0.375) < 0.015, `命中率 ${rate} 偏离 37.5%`);
+{
+  const seen = new Set();
+  for (let nonce = 1; nonce <= 8000; nonce++) seen.add(outcomeV3(sha256(`${serverSeed}:dist:${nonce}`), 'odd').digit);
+  assert.equal(seen.size, 16, '大样本应覆盖全部 16 个数字');
+}
+
+// —— 历史版本核验兼容：V2（0/1/E/F 通杀）与 V1（各 50%）——
+function legacyRound(lastDigitChar) {
   for (let nonce = 1; nonce < 10000; nonce++) {
     const clientSeed = 'AIX-starlight';
     const hash = sha256(`${serverSeed}:${clientSeed}:${nonce}`);
-    if (hash.endsWith(char)) return { clientSeed, nonce, hash, digit: Number.parseInt(char, 16), hexDigit: char };
+    if (hash.endsWith(lastDigitChar)) return { clientSeed, nonce, hash, digit: Number.parseInt(lastDigitChar, 16), hexDigit: lastDigitChar };
   }
-  throw new Error(`找不到末位为 ${char} 的回合`);
+  throw new Error(`找不到末位为 ${lastDigitChar} 的回合`);
 }
-const deadRound = roundWithLastDigit('0'); // 旧规则下 0 属于「小」，新规则通杀
-const record = (round, choice, won, { rule, createdAt } = {}) => ({
-  serverSeed, serverSeedHash, hash: round.hash, clientSeed: round.clientSeed, nonce: round.nonce,
-  choice, digit: round.digit, hexDigit: round.hexDigit, won,
-  stakeUnits: STAKE, payoutUnits: won ? PAYOUT : '0',
-  ...(rule !== undefined ? { rule } : {}), ...(createdAt !== undefined ? { createdAt } : {}),
-});
-
-// 新规则：通杀区判负
-const newLoss = await verifyServerRecord(record(deadRound, 'small', false, { rule: 2, createdAt: LEGACY_RULES_UNTIL + 1 }));
-assert.ok(newLoss.ok, '新规则：末位 0 通杀，判负应核验通过');
-const newLossOldStamp = await verifyServerRecord(record(deadRound, 'small', false, { createdAt: LEGACY_RULES_UNTIL + 1 }));
-assert.ok(newLossOldStamp.ok, '新规则（按 createdAt 判定）：末位 0 通杀，判负应核验通过');
-// 新规则：通杀区伪造命中 → 核验不通过
-const fakeWin = await verifyServerRecord(record(deadRound, 'small', true, { rule: 2, createdAt: LEGACY_RULES_UNTIL + 1 }));
-assert.equal(fakeWin.resultOk, false, '新规则：通杀区伪造命中应核验失败');
-// 旧规则：0 属于小区间，判命中有效
-const legacyWin = await verifyServerRecord(record(deadRound, 'small', true, { rule: 1, createdAt: LEGACY_RULES_UNTIL - 1 }));
-assert.ok(legacyWin.ok, '旧规则：末位 0 属于小、判命中应核验通过');
-const legacyWinNoRule = await verifyServerRecord(record(deadRound, 'small', true, { createdAt: LEGACY_RULES_UNTIL - 1 }));
-assert.ok(legacyWinNoRule.ok, '旧规则（无 rule 字段的历史导出）：判命中应核验通过');
-
-// 有效区：每个选项对全部 16 种末位的命中/未命中逐一核验
-for (const choice of CHOICES) {
-  for (let value = 0; value < 16; value++) {
-    const expected = choice.digits.includes(value.toString(16));
-    const round = roundWithLastDigit(value.toString(16));
-    const result = await verifyServerRecord(record(round, choice.id, expected, { rule: 2, createdAt: LEGACY_RULES_UNTIL + 1 }));
-    assert.ok(result.ok, `新规则：${choice.id} 末位 ${value.toString(16)}（应${expected ? '命中' : '未命中'}）核验失败`);
-  }
+function legacyRecord(round, choice, won, rule, createdAt) {
+  return { serverSeed, serverSeedHash, hash: round.hash, clientSeed: round.clientSeed, nonce: round.nonce, choice,
+    digit: round.digit, hexDigit: round.hexDigit, won, stakeUnits: STAKE, payoutUnits: won ? PAYOUT : '0', rule, createdAt };
 }
+const deadRound = legacyRound('0'); // 末位 0：V1 属于「小」命中；V2 通杀判负
+// V1（rule=1 与无 rule 字段的历史导出）：0 属于小区间，押小命中
+assert.ok(await verifyServerRecord(legacyRecord(deadRound, 'small', true, 1, LEGACY_RULES_UNTIL - 1)), 'V1 应按旧规则核验通过');
+{
+  const { rule, ...noRule } = legacyRecord(deadRound, 'small', true, 1, LEGACY_RULES_UNTIL - 1);
+  assert.ok(await verifyServerRecord(noRule), 'V1（无 rule 字段的历史导出）应按旧规则核验通过');
+}
+// V2：0/1/E/F 通杀，押小判负；伪造命中应失败
+assert.ok(await verifyServerRecord(legacyRecord(deadRound, 'small', false, 2, LEGACY_RULES_UNTIL + 1)), 'V2 通杀判负应核验通过');
+assert.equal((await verifyServerRecord(legacyRecord(deadRound, 'small', true, 2, LEGACY_RULES_UNTIL + 1))).ok, false, 'V2 伪造命中应核验失败');
+// V2 有效区：末位 3 押单命中
+const liveRound = legacyRound('3');
+assert.ok(await verifyServerRecord(legacyRecord(liveRound, 'odd', true, 2, LEGACY_RULES_UNTIL + 1)), 'V2 有效区命中应核验通过');
 
-console.log('hash-aix rules tests passed: 37.5%（6/16）命中、通杀区 0/1/E/F、旧记录旧规则核验');
+console.log('hash-aix V3 tests passed: 37.5% 精确命中、8 数字亮灯组、开奖与押注对应、V1/V2 历史兼容核验');

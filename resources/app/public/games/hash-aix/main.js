@@ -1,5 +1,5 @@
-import { CHOICES, RULES, verifyServerRecord, LEGACY_RULES_UNTIL } from './core.js';
-import { WebsiteSession } from '../run-aix/session.js?v=20261028a';
+import { CHOICES, RULES, verifyServerRecord, LEGACY_RULES_UNTIL, RULES_V3_SINCE } from './core.js';
+import { WebsiteSession } from '../run-aix/session.js?v=20261028b';
 import { ServerSession } from './server-session.js';
 
 const $ = id => document.getElementById(id);
@@ -18,9 +18,9 @@ const signed = value => `${Number(value) > 0 ? '+' : ''}${fmt(value)}`;
 const short = (text, first = 10, last = 8) => text ? `${text.slice(0, first)}…${text.slice(-last)}` : '—';
 const roundLabel = record => `#${String(record.nonce).padStart(6, '0')}`;
 const dateLabel = timestamp => new Date(timestamp).toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
-// 新规则（2026-10-28：0、1、E、F 通杀）判定；旧回合（rule=1 或早于 LEGACY_RULES_UNTIL）按旧规则显示
-const isNewRule = record => record.rule === 2 || (record.rule === undefined && !(typeof record.createdAt === 'number' && record.createdAt < LEGACY_RULES_UNTIL));
-const outcomeLabel = record => (record.digit < 2 || record.digit > 13) && isNewRule(record) ? '区间外' : `${record.digit % 2 ? '单' : '双'} · ${record.digit >= 8 ? '大' : '小'}`;
+// 规则版本显示：仅 V2 时期（通杀区）的旧回合显示「区间外」；V1 与 V3 的数字标签都与押注自然对应
+const isV2Record = record => record.rule === 2 || (record.rule === undefined && typeof record.createdAt === 'number' && record.createdAt >= LEGACY_RULES_UNTIL && record.createdAt < RULES_V3_SINCE);
+const outcomeLabel = record => (record.digit < 2 || record.digit > 13) && isV2Record(record) ? '区间外' : `${record.digit % 2 ? '单' : '双'} · ${record.digit >= 8 ? '大' : '小'}`;
 function el(tag, className, text) { const node = document.createElement(tag); if (className) node.className = className; if (text !== undefined) node.textContent = text; return node; }
 function toast(text) { clearTimeout(toastTimer); $('toast').textContent = text; $('toast').hidden = false; toastTimer = setTimeout(() => { $('toast').hidden = true; }, 3200); }
 function setMessage(text = '') { $('form-message').textContent = text; }

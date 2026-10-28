@@ -1,16 +1,18 @@
 // 哈希星盘 AIX 押注 API /api/hash-aix/*（需钱包 session）。
-// 规则（2026-10-28 改版）：
+// 规则（2026-10-28 V3）：
 //   · 自选押注：单/双/大/小，单局 0.1 – 10000 AIX；命中返还 1.98×（含本金）；
-//   · 结果 = SHA256(...) 末位十六进制字符（0–15）；0、1、E、F 为通杀区（庄家通吃），
-//     有效区 2–D：单 = 3、5、7、9、B、D，双 = 2、4、6、8、A、C，
-//     小 = 2–7，大 = 8–D——每项恰中 6/16 = 37.5%，期望返还 0.375 × 1.98 = 74.25%；
-//   · 1% 流水 → AIX 可卖额度：押注即按 1% 累计（向下取整），写入
-//     平台既有 a_token_sell_quotas；
+//   · 胜负与数字都由 SHA256(server_seed:client_seed:nonce) 推导：
+//     roll = 哈希末 8 位 → roll < 0x60000000 命中（2^32 的 37.5%，精确）；
+//     数字按胜负从亮灯组（单=8 个奇数、双=8 个偶数、小=0–7、大=8–F）
+//     或对应组（另外 8 个数字）以「哈希前 8 位 mod 8」均匀取出——
+//     开出的数字永远与押注选择对应：赢必在亮灯组、输必不在亮灯组；
+//   · 期望返还 0.375 × 1.98 = 74.25%；
+//   · 1% 流水 → AIX 可卖额度；玩家失利部分直接累计销毁（game_loss）；
 //   · 必须登录：所有接口都要钱包 session。
 // 公平性（commit-reveal）：服务端为每钱包预生成 server_seed，仅公布其 SHA-256
-// 摘要（承诺）；开奖值 = SHA256(server_seed:client_seed:nonce) 末位十六进制字符。
+// 摘要（承诺）；胜负与数字均由该种子在下注前锁定推导，无法看注改局。
 // 结算后立即揭示本局 server_seed 明文并轮换新 seed——玩家可验算本局，
-// 但无法用已揭示的 seed 预测后续局；服务端在下注前即锁定结果，无法看注改局。
+// 但无法用已揭示的 seed 预测后续局。
 import crypto from 'node:crypto';
 import { parseUnits, formatUnits } from 'ethers';
 
@@ -29,6 +31,8 @@ const HISTORY_LIMIT = 50;
 const RECENT_LIMIT = 16;
 // 2026-10-28 通杀区规则（0、1、E、F）生效时刻：早于此结算的旧回合按旧规则（各 50%）核验
 const RULES_V2_SINCE = 1793197200000;
+// V3（胜负与数字均由哈希推导，37.5% 精确）生效时刻
+const RULES_V3_SINCE = 1793200200000;
 
 const fmtA = units => { try { return formatUnits(BigInt(units || '0'), A_TOKEN_DECIMALS); } catch { return '0'; } };
 const sha256 = text => crypto.createHash('sha256').update(String(text)).digest('hex');
@@ -65,7 +69,7 @@ export function createHashAixGameApi({ aTokenService, database, send, readBody, 
       serverSeed: bet.serverSeed, serverSeedHash: bet.serverSeedHash, clientSeed: bet.clientSeed,
       stakeA: fmtA(stakeUnits), payoutA: fmtA(payoutUnits),
       netA: fmtA(payoutUnits - stakeUnits),
-      won: bet.outcome === 'win', rule: Number(bet.createdAt) >= RULES_V2_SINCE ? 2 : 1, stakeUnits: bet.stakeUnits, payoutUnits: bet.payoutUnits,
+      won: bet.outcome === 'win', rule: Number(bet.createdAt) >= RULES_V3_SINCE ? 3 : Number(bet.createdAt) >= RULES_V2_SINCE ? 2 : 1, stakeUnits: bet.stakeUnits, payoutUnits: bet.payoutUnits,
       createdAt: bet.createdAt,
     };
   }
@@ -93,7 +97,7 @@ export function createHashAixGameApi({ aTokenService, database, send, readBody, 
       balanceA: fmtA(aTokenService.balanceA(wallet)),
       minStakeA: fmtA(MIN_STAKE_UNITS), maxStakeA: fmtA(MAX_STAKE_UNITS),
       payoutMultiplier: 1.98,
-      fairness: { serverSeedHash: seed.serverSeedHash, nonce: seed.nonce, algorithm: 'SHA256(serverSeed:clientSeed:nonce) 末位十六进制' },
+      fairness: { serverSeedHash: seed.serverSeedHash, nonce: seed.nonce, algorithm: 'SHA256(serverSeed:clientSeed:nonce) 胜负与数字由哈希推导' },
       // 可卖额度显示恒为非负：占用超出释放时按 0 展示（资产页口径一致）
       sellQuota: { releasedA: fmtA(quota.releasedUnits), usedA: fmtA(quota.usedUnits), availableA: fmtA(BigInt(quota.releasedUnits) > BigInt(quota.usedUnits) ? BigInt(quota.releasedUnits) - BigInt(quota.usedUnits) : 0n) },
       stats: statsOf(wallet),
@@ -116,11 +120,13 @@ export function createHashAixGameApi({ aTokenService, database, send, readBody, 
       aTokenService.debitA(wallet, stakeUnits);
       try {
         const hash = sha256(`${seed.serverSeed}:${clientSeed}:${seed.nonce}`);
-        const hexDigit = hash.at(-1);
-        const digit = Number.parseInt(hexDigit, 16);
-        // 0、1、E、F 通杀：单/双/大/小每项恰中 6/16 = 37.5%
-        const live = digit >= 2 && digit <= 13;
-        const won = live && (choice === (digit % 2 ? 'odd' : 'even') || choice === (digit >= 8 ? 'big' : 'small'));
+        // V3：胜负与数字均由哈希推导（与 core.js outcomeV3 保持一致）
+        // roll < 0x60000000 命中（2^32 的 37.5%，精确）；数字按胜负从对应组均匀取出，与押注始终对应
+        const roll = BigInt(`0x${hash.slice(-8)}`);
+        const won = roll < 0x60000000n;
+        const pick = Number(BigInt(`0x${hash.slice(0, 8)}`) % 8n);
+        const LIT = { odd: [1, 3, 5, 7, 9, 11, 13, 15], even: [0, 2, 4, 6, 8, 10, 12, 14], small: [0, 1, 2, 3, 4, 5, 6, 7], big: [8, 9, 10, 11, 12, 13, 14, 15] };
+        const digit = (won ? LIT[choice] : (choice === 'odd' ? LIT.even : choice === 'even' ? LIT.odd : choice === 'small' ? LIT.big : LIT.small))[pick];
         const payoutUnits = won ? stakeUnits * PAYOUT_NUMERATOR / PAYOUT_DENOMINATOR : 0n;
         const quotaUnits = stakeUnits / QUOTA_BPS;
         if (quotaUnits > 0n) {
