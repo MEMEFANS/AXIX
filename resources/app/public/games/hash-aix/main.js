@@ -12,7 +12,7 @@ try { const saved = JSON.parse(localStorage.getItem(settingsKey) || 'null'); if 
 let selected = null, view = 'game', filter = 'all', ready = false, busy = false;
 let verifyId = null, verifyToken = 0, toastTimer, revealTimer, uiTimer;
 let rolling = false, rollFrame = 0; // 开奖滚字动画状态
-let walletState = { status: 'guest' }, audioContext;
+let walletState = { status: 'guest' }, lastBalance = null, audioContext;
 const fmt = value => Number(value || 0).toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const signed = value => `${Number(value) > 0 ? '+' : ''}${fmt(value)}`;
 const short = (text, first = 10, last = 8) => text ? `${text.slice(0, first)}…${text.slice(-last)}` : '—';
@@ -51,7 +51,10 @@ async function sound(type) {
 // —— 钱包登录态（与跑酷同一套只读会话）——
 function renderWallet() {
   const status = walletState.status, login = $('wallet-login');
-  $('balance').textContent = status === 'ready' ? fmt(game.state?.balanceA) : '—';
+  // 与游戏大厅同源：余额以 /api/a-token/profile（WebsiteSession）为准；押注结算后以本局返回值即时覆盖
+  if (status === 'ready' && walletState.balance != null) lastBalance = walletState.balance;
+  if (game.state?.balanceA != null) lastBalance = game.state.balanceA;
+  $('balance').textContent = status !== 'guest' && lastBalance != null ? fmt(lastBalance) : '—';
   login.hidden = status !== 'guest';
   if (status === 'ready') login.hidden = true;
 }
@@ -81,7 +84,7 @@ function validStake() {
   return Number.isFinite(value) && value >= Number(game.state?.minStakeA || .1) && value <= Number(game.state?.maxStakeA || 10000);
 }
 function renderControls() {
-  const phase = game.phase, record = game.current, balance = Number(game.state?.balanceA || 0);
+  const phase = game.phase, record = game.current, balance = Number(game.state?.balanceA ?? walletState.balance ?? 0);
   const editable = ready && !busy && phase === 'open' && walletState.status === 'ready';
   for (const button of document.querySelectorAll('[data-choice]')) {
     const choice = choiceMap.get(button.dataset.choice); button.setAttribute('aria-label', `${choice.label}：${choice.description}`);

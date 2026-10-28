@@ -25,7 +25,7 @@ let swipe = null, starting = false;
 const PENDING_SETTLE_KEY = 'run-aix:pending-settle';
 const LAST_STAKE_KEY = 'run-aix:last-stake';
 const TRACE_MAX_FRAMES = 40000; // 与服务端 TRACE_MAX_FRAMES 一致
-let walletState = { status: 'guest' };
+let walletState = { status: 'guest' }, lastChipBalance = null;
 let activeRun = null;        // { runId, stakeA, commitment }：本局押注凭证
 let lastSettlement = null;   // 最近一次结算响应（结果弹窗展示）
 let pendingInputs = [];      // 本帧积累的输入指令（回放日志）
@@ -60,14 +60,15 @@ function renderWalletChip() {
   const chip = $('wallet-chip'); if (!chip) return;
   chip.classList.toggle('wallet-ready', walletState.status === 'ready');
   if (walletState.status === 'ready') {
+    lastChipBalance = walletState.balance;
     const balance = Number(walletState.balance);
     chip.textContent = `✦ ${Number.isFinite(balance) ? balance.toLocaleString('zh-CN', { maximumFractionDigits: 2 }) : walletState.balance} AIX`;
     chip.setAttribute('aria-label', `钱包 AIX 余额 ${chip.textContent}`);
-  } else if (walletState.status === 'loading') {
-    chip.textContent = '✦ 检测登录…';
-  } else if (walletState.status === 'unavailable') {
-    chip.textContent = '✦ 平台未连接';
+  } else if (walletState.status === 'loading' || walletState.status === 'unavailable') {
+    // 与游戏大厅同源读 /api/a-token/profile；心跳/断连瞬间保留最后已知余额，不闪断
+    if (lastChipBalance == null) chip.textContent = walletState.status === 'loading' ? '✦ 检测登录…' : '✦ 平台未连接';
   } else {
+    lastChipBalance = null;
     chip.textContent = '✦ 未登录 · 点击登录';
   }
 }
