@@ -2078,13 +2078,16 @@ export const server = http.createServer(async (request, res) => {
         if (ims && !adminKind) {
           const since = new Date(ims).getTime();
           if (Number.isFinite(since) && Math.floor(stat.mtime.getTime() / 1000) * 1000 <= since) {
-            res.writeHead(304, { 'Last-Modified': stat.mtime.toUTCString() });
+            res.writeHead(304, { 'Last-Modified': stat.mtime.toUTCString(), 'Cache-Control': 'no-cache' });
             return res.end();
           }
         }
         res.writeHead(200, {
           'Content-Type': MIME['.html'] || 'text/html; charset=utf-8',
           'Last-Modified': stat.mtime.toUTCString(),
+          // 2026-10-28：HTML 必须每次重新验证——否则浏览器启发式缓存会在缓存新鲜期内
+          // 直接用旧页面（旧 ?v= 旧 JS），部署后玩家长时间看不到新版；?v= 失效机制依赖本头
+          'Cache-Control': 'no-cache',
         });
         return fs.createReadStream(full).pipe(res);
       }
