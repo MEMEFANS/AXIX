@@ -22,7 +22,7 @@ export const RULES = Object.freeze({
 });
 
 // 2026-10-28 规则改版（0、1、E、F 通杀）生效时刻：早于此时间结算的旧回合按旧规则（无通杀、各 50%）核验
-export const LEGACY_RULES_UNTIL = 1793197300000;
+export const LEGACY_RULES_UNTIL = 1793197200000;
 
 const digits = Array.from({ length: 16 }, (_, value) => value);
 export const CHOICES = Object.freeze([

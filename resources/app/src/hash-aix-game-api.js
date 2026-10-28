@@ -28,7 +28,7 @@ const STAKE_RE = /^\d+(\.\d{1,2})?$/;         // 两位小数：0.01 AIX 粒度�
 const HISTORY_LIMIT = 50;
 const RECENT_LIMIT = 16;
 // 2026-10-28 通杀区规则（0、1、E、F）生效时刻：早于此结算的旧回合按旧规则（各 50%）核验
-const RULES_V2_SINCE = 1793197300000;
+const RULES_V2_SINCE = 1793197200000;
 
 const fmtA = units => { try { return formatUnits(BigInt(units || '0'), A_TOKEN_DECIMALS); } catch { return '0'; } };
 const sha256 = text => crypto.createHash('sha256').update(String(text)).digest('hex');
