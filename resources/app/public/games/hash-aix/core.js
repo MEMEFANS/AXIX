@@ -26,10 +26,10 @@ export const LEGACY_RULES_UNTIL = 1793197300000;
 
 const digits = Array.from({ length: 16 }, (_, value) => value);
 export const CHOICES = Object.freeze([
-  ['odd', '单', '末位是 2–D 中的奇数', digits.filter(value => value >= 2 && value <= 13 && value % 2 === 1)],
-  ['even', '双', '末位是 2–D 中的偶数', digits.filter(value => value >= 2 && value <= 13 && value % 2 === 0)],
-  ['small', '小', '末位是 2–7', digits.filter(value => value >= 2 && value <= 7)],
-  ['big', '大', '末位是 8–D', digits.filter(value => value >= 8 && value <= 13)],
+  ['odd', '单', '末位是单数', digits.filter(value => value >= 2 && value <= 13 && value % 2 === 1)],
+  ['even', '双', '末位是双数', digits.filter(value => value >= 2 && value <= 13 && value % 2 === 0)],
+  ['small', '小', '末位落在小区间', digits.filter(value => value >= 2 && value <= 7)],
+  ['big', '大', '末位落在大区间', digits.filter(value => value >= 8 && value <= 13)],
 ].map(([id, label, description, values]) => Object.freeze({
   id, label, description,
   digits: Object.freeze(values.map(value => value.toString(16))),

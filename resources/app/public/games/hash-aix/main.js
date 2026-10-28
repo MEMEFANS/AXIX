@@ -20,7 +20,7 @@ const roundLabel = record => `#${String(record.nonce).padStart(6, '0')}`;
 const dateLabel = timestamp => new Date(timestamp).toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
 // 新规则（2026-10-28：0、1、E、F 通杀）判定；旧回合（rule=1 或早于 LEGACY_RULES_UNTIL）按旧规则显示
 const isNewRule = record => record.rule === 2 || (record.rule === undefined && !(typeof record.createdAt === 'number' && record.createdAt < LEGACY_RULES_UNTIL));
-const outcomeLabel = record => (record.digit < 2 || record.digit > 13) && isNewRule(record) ? '通杀' : `${record.digit % 2 ? '单' : '双'} · ${record.digit >= 8 ? '大' : '小'}`;
+const outcomeLabel = record => (record.digit < 2 || record.digit > 13) && isNewRule(record) ? '区间外' : `${record.digit % 2 ? '单' : '双'} · ${record.digit >= 8 ? '大' : '小'}`;
 function el(tag, className, text) { const node = document.createElement(tag); if (className) node.className = className; if (text !== undefined) node.textContent = text; return node; }
 function toast(text) { clearTimeout(toastTimer); $('toast').textContent = text; $('toast').hidden = false; toastTimer = setTimeout(() => { $('toast').hidden = true; }, 3200); }
 function setMessage(text = '') { $('form-message').textContent = text; }
@@ -69,11 +69,10 @@ function renderNotice() {
   $('storage-notice').hidden = !text; $('storage-notice').textContent = text;
 }
 function renderHex() {
-  const dead = digit => digit < 2 || digit > 13; // 0、1、E、F 通杀
   $('hex-ribbon').replaceChildren(...Array.from({ length: 16 }, (_, digit) => {
-    const node = el('span', dead(digit) ? 'dead' : '', digit.toString(16).toUpperCase()); node.dataset.digit = digit.toString(16); return node;
+    const node = el('span', '', digit.toString(16).toUpperCase()); node.dataset.digit = digit.toString(16); return node;
   }));
-  $('rule-digits').replaceChildren(...Array.from({ length: 16 }, (_, digit) => el('span', dead(digit) ? 'dead' : digit % 2 ? '' : 'even', digit.toString(16).toUpperCase())));
+  $('rule-digits').replaceChildren(...Array.from({ length: 16 }, (_, digit) => el('span', digit % 2 ? '' : 'even', digit.toString(16).toUpperCase())));
 }
 function validStake() {
   const text = String($('stake').value).trim();
@@ -103,7 +102,7 @@ function renderControls() {
     $('ticket-status').textContent = '押注已扣除，等待哈希揭晓。';
   }
   const digits = new Set(choiceMap.get(record?.choice || selected)?.digits || []);
-  $('board-hint').textContent = phase === 'revealed' ? `本局末位 ${record.hexDigit.toUpperCase()} · ${outcomeLabel(record)}` : phase === 'locked' ? '种子已锁定，正在展开这一局的答案' : selected ? `已选「${choiceMap.get(selected).label}」· 亮起的 6 个数字均可命中` : '选一边，看看哪些数字属于你';
+  $('board-hint').textContent = phase === 'revealed' ? `本局末位 ${record.hexDigit.toUpperCase()} · ${outcomeLabel(record)}` : phase === 'locked' ? '种子已锁定，正在展开这一局的答案' : selected ? `已选「${choiceMap.get(selected).label}」· 亮起的数字均可命中` : '选一边，看看哪些数字属于你';
   for (const node of $('hex-ribbon').children) {
     node.classList.toggle('chosen', phase !== 'revealed' && digits.has(node.dataset.digit));
     node.classList.toggle('result', phase === 'revealed' && node.dataset.digit === record?.hexDigit);
@@ -146,7 +145,7 @@ function renderPhase() {
   }
   renderControls();
 }
-function recordBall(record) { return el('span', `digit-ball${record.digit % 2 === 0 ? ' even' : ''}${(record.digit < 2 || record.digit > 13) && isNewRule(record) ? ' dead' : ''}`, record.hexDigit.toUpperCase()); }
+function recordBall(record) { return el('span', `digit-ball${record.digit % 2 === 0 ? ' even' : ''}`, record.hexDigit.toUpperCase()); }
 function inspectRecord(id) { verifyId = id; location.hash = 'verify'; renderVerification(); }
 function renderRecent(records) {
   $('recent-digits').replaceChildren(...records.slice(0, 16).map(record => {

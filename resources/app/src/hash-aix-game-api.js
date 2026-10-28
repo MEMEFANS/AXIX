@@ -93,7 +93,7 @@ export function createHashAixGameApi({ aTokenService, database, send, readBody, 
       balanceA: fmtA(aTokenService.balanceA(wallet)),
       minStakeA: fmtA(MIN_STAKE_UNITS), maxStakeA: fmtA(MAX_STAKE_UNITS),
       payoutMultiplier: 1.98,
-      fairness: { serverSeedHash: seed.serverSeedHash, nonce: seed.nonce, algorithm: 'SHA256(serverSeed:clientSeed:nonce) 末位十六进制，0、1、E、F 通杀' },
+      fairness: { serverSeedHash: seed.serverSeedHash, nonce: seed.nonce, algorithm: 'SHA256(serverSeed:clientSeed:nonce) 末位十六进制' },
       // 可卖额度显示恒为非负：占用超出释放时按 0 展示（资产页口径一致）
       sellQuota: { releasedA: fmtA(quota.releasedUnits), usedA: fmtA(quota.usedUnits), availableA: fmtA(BigInt(quota.releasedUnits) > BigInt(quota.usedUnits) ? BigInt(quota.releasedUnits) - BigInt(quota.usedUnits) : 0n) },
       stats: statsOf(wallet),
