@@ -1,7 +1,7 @@
-import { OBSTACLES } from './config.js';
+import { OBSTACLES } from './config.js?v=20261028c';
 import { DEFAULT_RULES, normalizeRules, chooseOutcome, multiplierForDistance, payoutForDistance } from './rules.js?v=20261027c';
 import { difficultyAt, targetSpeed, obstacleRow } from './difficulty.js?v=20261027c';
-import { loadCatalog, validateCatalog } from './catalog.js';
+import { loadCatalog, validateCatalog } from './catalog.js?v=20261028c';
 
 const STATES = ['countdown', 'running', 'checkpoint', 'paused'];
 const finite = (value, min, max) => typeof value === 'number' && Number.isFinite(value) && value >= min && value <= max;

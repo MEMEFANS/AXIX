@@ -1,4 +1,4 @@
-import { HAZARDS } from './hazards.js';
+import { HAZARDS } from './hazards.js?v=20261028c';
 
 // 独立于收益/结局概率的本机障碍配置；每局开始读取一次并保存到对局快照。
 export const CATALOG_STORAGE_KEY = 'run-aix:v3:catalog';

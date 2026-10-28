@@ -1,5 +1,5 @@
 // 原创程序合成配乐：112 BPM，琶音、低音、底鼓、踩镲；无外部版权音源。
-import { HAZARD_BY_ID } from './hazards.js';
+import { HAZARD_BY_ID } from './hazards.js?v=20261028c';
 
 export class GameAudio {
   constructor() { this.enabled = false; this.step = 0; this.revision = 0; this.suspended = false; this.destroyed = false; }

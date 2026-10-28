@@ -1,10 +1,10 @@
 // 原创 Canvas 美术模块：角色、16 种独立障碍、四阶段反馈与三套多层场景。
-import { SCENES } from './config.js';
+import { SCENES } from './config.js?v=20261028c';
 import { artwork, cover } from './sprites.js?v=20261027b';
-import { drawRunner } from './runner-animation.js';
+import { drawRunner } from './runner-animation.js?v=20261028c';
 import { drawWorld, project } from './world-motion.js?v=20261028a';
-import { HAZARD_BY_ID, hazardPhase } from './hazards.js';
-import { applyHeroImpact, drawImpact, drawWeather, drawWeatherScreen, effectProgress } from './effects.js';
+import { HAZARD_BY_ID, hazardPhase } from './hazards.js?v=20261028c';
+import { applyHeroImpact, drawImpact, drawWeather, drawWeatherScreen, effectProgress } from './effects.js?v=20261028c';
 function ellipse(c, x, y, rx, ry, color) { c.fillStyle = color; c.beginPath(); c.ellipse(x, y, rx, ry, 0, 0, Math.PI * 2); c.fill(); }
 function path(c, points, fill, stroke, width = 2) {
   c.beginPath(); points.forEach(([x, y], i) => i ? c.lineTo(x, y) : c.moveTo(x, y)); c.closePath();

@@ -1,5 +1,5 @@
-import { CONFIG, OBSTACLES } from './config.js';
-import { DEFAULT_CATALOG } from './catalog.js';
+import { CONFIG, OBSTACLES } from './config.js?v=20261028c';
+import { DEFAULT_CATALOG } from './catalog.js?v=20261028c';
 
 // Distance determines the baseline. Releasing boost never resets late-game difficulty.
 // speedCurve > 1 puts the acceleration late in the run (越跑越快)；< 1 则前段先快。

@@ -1,9 +1,9 @@
 import { CampaignEngine } from './campaign-engine.js?v=20261027c';
 import { LEVELS, WORLDS, getLevel } from './campaign.js?v=20261027c';
-import { PlayerProfile, SKINS, ACHIEVEMENTS, PROFILE_STORAGE_KEY } from './player-profile.js';
+import { PlayerProfile, SKINS, ACHIEVEMENTS, PROFILE_STORAGE_KEY } from './player-profile.js?v=20261028c';
 import { WebsiteSession } from './session.js?v=20261028b';
 import { GameArt } from './art.js?v=20261028a';
-import { GameAudio } from './audio.js';
+import { GameAudio } from './audio.js?v=20261028c';
 import { artReady } from './sprites.js?v=20261027b';
 import { WAGER, wagerPercent, nextStep } from './wager.js?v=20261028b';
 

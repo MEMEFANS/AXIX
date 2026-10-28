@@ -1,5 +1,5 @@
-import { DEFAULT_RULES, multiplierForDistance, payoutForDistance } from './rules.js';
-import { HAZARDS } from './hazards.js';
+import { DEFAULT_RULES, multiplierForDistance, payoutForDistance } from './rules.js?v=20261028c';
+import { HAZARDS } from './hazards.js?v=20261028c';
 export const CONFIG = DEFAULT_RULES;
 export const SCENES = [
   { name: '星空之城', top: '#111238', bottom: '#343179', accent: '#a59bff' },

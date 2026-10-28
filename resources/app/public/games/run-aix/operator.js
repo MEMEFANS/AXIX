@@ -1,6 +1,6 @@
-import { DEFAULT_RULES, RULE_LIMITS, normalizeRules, loadRules, loadRulesHistory, saveRules, resetRules, rollbackRules, simulateRules } from './rules.js';
-import { loadCatalog, validateCatalog, loadCatalogHistory, saveCatalog, resetCatalog, rollbackCatalog, CATALOG_STORAGE_KEY } from './catalog.js';
-import { HAZARDS } from './hazards.js';
+import { DEFAULT_RULES, RULE_LIMITS, normalizeRules, loadRules, loadRulesHistory, saveRules, resetRules, rollbackRules, simulateRules } from './rules.js?v=20261028c';
+import { loadCatalog, validateCatalog, loadCatalogHistory, saveCatalog, resetCatalog, rollbackCatalog, CATALOG_STORAGE_KEY } from './catalog.js?v=20261028c';
+import { HAZARDS } from './hazards.js?v=20261028c';
 
 const $ = selector => document.querySelector(selector);
 const form = $('#rules-form');

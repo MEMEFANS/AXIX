@@ -1,10 +1,10 @@
-import { RunnerEngine } from './engine.js';
-import { GameArt } from './art.js';
-import { GameAudio } from './audio.js';
-import { WebsiteSession } from './session.js';
-import { PracticeStore } from './store.js';
-import { SCENES } from './config.js';
-import { loadRules, multiplierForDistance } from './rules.js';
+import { RunnerEngine } from './engine.js?v=20261028c';
+import { GameArt } from './art.js?v=20261028c';
+import { GameAudio } from './audio.js?v=20261028c';
+import { WebsiteSession } from './session.js?v=20261028c';
+import { PracticeStore } from './store.js?v=20261028c';
+import { SCENES } from './config.js?v=20261028c';
+import { loadRules, multiplierForDistance } from './rules.js?v=20261028c';
 
 const $ = id => document.getElementById(id);
 const audio = new GameAudio();

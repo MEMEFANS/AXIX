@@ -1,4 +1,4 @@
-import { CONFIG } from './config.js';
+import { CONFIG } from './config.js?v=20261028c';
 
 const KEY = 'run-aix:practice:v1';
 const MAX_BALANCE = 1e9;

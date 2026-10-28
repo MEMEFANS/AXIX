@@ -2,8 +2,8 @@
 //
 // Campaign 与 classic 试玩使用不同的规则和账本：这里没有门槛、收益档位或
 // 开局结果抽取，关卡成绩只由玩家的跑动、闪避和收集表现决定。
-import { DEFAULT_RULES, normalizeRules } from './rules.js';
-import { DEFAULT_CATALOG, validateCatalog } from './catalog.js';
+import { DEFAULT_RULES, normalizeRules } from './rules.js?v=20261028c';
+import { DEFAULT_CATALOG, validateCatalog } from './catalog.js?v=20261028c';
 
 export const WORLDS = Object.freeze([
   Object.freeze({ id: 'world-1', index: 0, title: '星空之城', subtitle: '学会节奏，点亮第一颗星', color: '#a59bff', scene: 0 }),
