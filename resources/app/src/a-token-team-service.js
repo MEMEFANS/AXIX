@@ -132,7 +132,7 @@ export function createATokenTeamService({ database, walletService, rotationAddre
   function ensureChainMaps() {
     const now = Date.now();
     if (_chainParent && now - _chainBuiltAt < REFERRAL_CHAIN_TTL) return;
-    const links = database.listReferralLinks();
+    const links = activeLinks();
     const parent = new Map();
     const raw = new Map();
     for (const item of links) {
@@ -200,6 +200,16 @@ export function createATokenTeamService({ database, walletService, rotationAddre
       }
       return total;
     } catch { return 0n; }
+  }
+
+  // ── 封禁账号剔除（2026-10-29）──
+  // 团伙树挂在封禁账号之下：团队业绩/等级/分润遍历一律双向过滤封禁账号的链接——
+  // 既杜绝向封禁账号发放任何奖励，也把封禁根之下的整棵子树从全量快照/日结中剪除。
+  function isBanned(address) {
+    try { return Boolean(walletService?.isAccountBlocked?.(address)); } catch { return false; }
+  }
+  function activeLinks() {
+    return database.listReferralLinks().filter(item => !isBanned(item.wallet) && !isBanned(item.referrerWallet));
   }
 
   // ── 推荐树：referrer -> [直推...] 一次构建，供批量快照/递归复用 ──
@@ -270,7 +280,7 @@ export function createATokenTeamService({ database, walletService, rotationAddre
   // 后台查询：某地址整个团队（含各级下线）的 mini/pro 激活数，并按直推拆分，便于按直推排除
   // excludeList：要排除的直推钱包（排除其本人及其整棵子树），用于看「去掉某个直推后」的净数
   function teamActivationBreakdown(address, excludeList = []) {
-    const links = database.listReferralLinks();
+    const links = activeLinks();
     const stats = realTeamStats(address, links);
     const { mini, pro: rawPro } = planMinerWallets();
     const hidden = reportingTxs && hiddenViewerSet.has(k(address))
@@ -387,7 +397,7 @@ export function createATokenTeamService({ database, walletService, rotationAddre
 
   // 后台/接口共用视图：真实值 + 生效值（真实+叠加）+ 该地址已保存的覆盖行
   function getTeamStatsView(address) {
-    const links = database.listReferralLinks();
+    const links = activeLinks();
     const r = realTeamStats(address, links);
     const hiddenTeam = reportingTxs && hiddenViewerSet.has(k(address)) ? hiddenRotationSubtreeCounts(r.downlines) : { pro: 0 };
     const hiddenDirect = reportingTxs && hiddenViewerSet.has(k(address)) ? hiddenRotationSubtreeCounts(r.directSet) : { pro: 0 };
@@ -444,27 +454,45 @@ export function createATokenTeamService({ database, walletService, rotationAddre
   function teamHeldOf(address, childrenMap, stakedCache, walletCache, teamCache, visiting) {
     const key = k(address);
     if (teamCache.has(key)) return teamCache.get(key);
-    if (visiting.has(key)) return 0n;
-    visiting.add(key);
-    let total = 0n;
-    for (const child of childrenMap.get(key) || []) {
-      const ck = k(child);
-      if (!stakedCache.has(ck)) stakedCache.set(ck, getStakedPrincipal(child));
-      if (!walletCache.has(ck)) {
-        try { walletCache.set(ck, walletService.balanceUnits(child, 'A')); } catch { walletCache.set(ck, 0n); }
+    // 2026-10-29：改迭代式后序遍历——团伙造出数千层深的推荐链，旧递归在深链上爆栈
+    //（栈上缓存全部作废），快照每个入口重走整链又永远缓存不上 → O(N²) 自旋、事件循环卡死。
+    // 迭代版不爆栈、每节点恰好缓存一次；环上子节点按旧 visiting 语义只计自身持有、不计子树。
+    const stack = [[key, 0]];
+    const onStack = new Set([key]);
+    while (stack.length) {
+      const frame = stack[stack.length - 1];
+      const [ck, idx] = frame;
+      const children = childrenMap.get(ck) || [];
+      if (idx < children.length) {
+        frame[1] += 1;
+        const childKey = k(children[idx]);
+        if (!teamCache.has(childKey) && !onStack.has(childKey)) {
+          onStack.add(childKey);
+          stack.push([childKey, 0]);
+        }
+        continue;
       }
-      total += walletCache.get(ck);       // 下级钱包里持有的 AIX
-      total += stakedCache.get(ck);       // 下级质押中的本金 + 矿机剩余
-      total += teamHeldOf(child, childrenMap, stakedCache, walletCache, teamCache, visiting);
+      stack.pop();
+      onStack.delete(ck);
+      let total = 0n;
+      for (const child of children) {
+        const childKey = k(child);
+        if (!stakedCache.has(childKey)) stakedCache.set(childKey, getStakedPrincipal(child));
+        if (!walletCache.has(childKey)) {
+          try { walletCache.set(childKey, walletService.balanceUnits(child, 'A')); } catch { walletCache.set(childKey, 0n); }
+        }
+        total += walletCache.get(childKey);       // 下级钱包里持有的 AIX
+        total += stakedCache.get(childKey);       // 下级质押中的本金 + 矿机剩余
+        total += teamCache.get(childKey) || 0n;    // 环上子节点的子树不计（与旧递归语义一致）
+      }
+      teamCache.set(ck, total);
     }
-    visiting.delete(key);
-    teamCache.set(key, total);
-    return total;
+    return teamCache.get(key) || 0n;
   }
 
   // ── 团队持有：递归累加所有下级的 A 余额 + 质押本金 + 矿机剩余 ──
   function getTeamHeld(address) {
-    const childrenMap = buildReferralTree(database.listReferralLinks());
+    const childrenMap = buildReferralTree(activeLinks());
     return teamHeldOf(address, childrenMap, new Map(), new Map(), new Map(), new Set());
   }
 
@@ -493,7 +521,7 @@ export function createATokenTeamService({ database, walletService, rotationAddre
     const existing = database.getATokenTeamLevel?.(address);
     const manualLevel = existing?.manualLevel || 0;
     const level = applyFloor(calcLevel(personalUnits, teamUnits), manualLevel);
-    const links = database.listReferralLinks();
+    const links = activeLinks();
     const directValid = links.filter(
       (item) => k(item.referrerWallet) === k(address) && getPersonalHeld(item.wallet) > 0n
     ).length;
@@ -522,7 +550,7 @@ export function createATokenTeamService({ database, walletService, rotationAddre
       return { count: 0, skipped: true, reason: 'throttled' };
     }
     _lastSnapshotAllAt = throttleNow;
-    const links = database.listReferralLinks();
+    const links = activeLinks();
     const childrenMap = buildReferralTree(links);
     const personalCache = new Map();
     const stakedCache = new Map();
@@ -629,6 +657,11 @@ export function createATokenTeamService({ database, walletService, rotationAddre
 
     const credit = (recipient, kind, amount, levelInfo = {}) => {
       if (amount <= 0n) return;
+      // 封禁账号不发放任何团队分润（直推/间推/团队/级差/平级）
+      if (isBanned(recipient)) {
+        results.push({ recipient, kind, amount: amount.toString(), credited: false, skipped: 'banned' });
+        return;
+      }
       // 有效用户闸门：无矿机/无质押/无激活记录的收款方不发（不顺延）
       if (!isEligibleRecipient(recipient)) {
         results.push({ recipient, kind, amount: amount.toString(), credited: false, skipped: 'ineligible' });
@@ -736,13 +769,14 @@ export function createATokenTeamService({ database, walletService, rotationAddre
     const entries = [...sumByChild.entries()].filter(([, s]) => s > 0n);
     if (!entries.length) return { settled: false, reason: 'no team income' };
     snapshotAll();
-    const parentOf = new Map(database.listReferralLinks().map((l) => [k(l.wallet), k(l.referrerWallet || '')]));
+    const parentOf = new Map(activeLinks().map((l) => [k(l.wallet), k(l.referrerWallet || '')]));
     const getRow = database.db.prepare('SELECT amount_units FROM a_token_team_rewards WHERE id=?');
     let count = 0;
     let total = 0n;
     for (const [child, sum] of entries) {
       const parent = parentOf.get(child);
       if (!parent || parent === child) continue;
+      if (isBanned(child) || isBanned(parent)) continue;      // 封禁账号不参与平级奖
       const childLevel = getLevel(child);
       if (childLevel <= 0 || childLevel >= 10) continue;      // 无级别/A10 不参与平级
       if (getLevel(parent) !== childLevel) continue;          // 仅「直推且同级」
@@ -796,7 +830,7 @@ export function createATokenTeamService({ database, walletService, rotationAddre
     const total = BigInt(pool.accumUnits || '0');
     if (total <= 0n) return { settled: false, reason: 'pool empty' };
     snapshotAll();
-    const a10Users = database.listATokenTeamLevelsByLevel(10).sort((a,b) => k(a.wallet).localeCompare(k(b.wallet)));
+    const a10Users = database.listATokenTeamLevelsByLevel(10).filter(u => !isBanned(u.wallet)).sort((a,b) => k(a.wallet).localeCompare(k(b.wallet)));
     const count = a10Users.length;
     if (count === 0) return { settled: false, reason: 'no A10 users', accumUnits: total.toString() };
 
@@ -842,7 +876,7 @@ export function createATokenTeamService({ database, walletService, rotationAddre
 
   // 人数首屏不需要读取收益流水、持仓或重算等级。
   function summary(address) {
-    const links = database.listReferralLinks();
+    const links = activeLinks();
     const childrenMap = buildReferralTree(links);
     const own = k(address);
     const direct = new Set((childrenMap.get(own) || []).map(k).filter(w => w && w !== own));
@@ -880,7 +914,7 @@ export function createATokenTeamService({ database, walletService, rotationAddre
     const pool = database.getA10Pool('current');
 
     // 下级列表（个人持有/等级读快照表，无实时余额递归；无快照行时回退实时）
-    const links = database.listReferralLinks();
+    const links = activeLinks();
     const minerWallets = database.listATokenMinerWallets?.() || new Set();
     const miniMinerWallets = database.listATokenMinerWalletsByPlan?.('mini120') || new Set();
     const proMinerWallets = database.listATokenMinerWalletsByPlan?.('pro1500') || new Set();
@@ -1047,7 +1081,7 @@ export function createATokenTeamService({ database, walletService, rotationAddre
   function reportingMinerSummary() {
     const raw = database.adminMinerSummary();
     if (!reportingTxs) return raw;
-    const links = database.listReferralLinks();
+    const links = activeLinks();
     const eligible = new Set();
     for (const viewer of hiddenViewerSet) for (const w of realTeamStats(viewer, links).downlines) eligible.add(w);
     const rows = raw.rows.map(row => ({ ...row }));

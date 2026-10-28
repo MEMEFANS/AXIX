@@ -705,7 +705,10 @@ const supportService = createSupportService({
 });
 const supportApi = createSupportApi({ service: supportService, send, readBody, getSession: walletSession });
 const fundsAdminApi = createFundsAdminApi({ walletService, minerService:aTokenMinerService, payoutService:withdrawalPayoutService, send, readBody, isSameOrigin, allowRequest, getToken:() => String(process.env.WALLET_ADMIN_TOKEN || '') });
-// 60s 定时：矿机产出 + 质押日结 + 每日固定销毁跨日结算
+// ── 60s 定时：矿机产出 + 质押日结 + 每日固定销毁跨日结算 ──
+// 2026-10-29：团伙深链曾使团队全量快照递归爆栈、O(N²) 自旋卡死（23:23 与 00:11 两次全站无响应）。
+// 已修复：teamHeldOf 改迭代式 + 全链路剔除封禁账号（见 a-token-team-service.js），团队任务恢复启用。
+const TEAM_JOBS_ENABLED = true;
 const aTokenMinerTimer = setInterval(() => {
   try { aTokenMinerService.processAll(); } catch (e) { console.error('[A币矿机]', e?.message || e); }
   try { aTokenService.settleDailyBurn(); } catch (e) { console.error('[A币每日销毁]', e?.message || e); }
@@ -723,6 +726,7 @@ aTokenKlineTimer.unref?.();
 
 // 5 分钟定时：团队等级快照（O(n) 建树记忆化，前端团队页只读快照，不做实时递归）
 const aTokenTeamSnapshotTimer = setInterval(() => {
+  if (!TEAM_JOBS_ENABLED) return;
   try {
     const r = aTokenTeamService.snapshotAll();
     console.log('[团队快照] 已更新', r.count, '个用户等级');
@@ -740,11 +744,11 @@ const aTokenA10SettleTimer = setInterval(() => {
     try { aTokenMinerService.processAll(); } catch (e) { console.error('[A币矿机]', e?.message || e); }
     try { aTokenStakingService.processAll(); } catch (e) { console.error('[A币质押]', e?.message || e); }
     try {
-      const r = aTokenTeamService.settleParityRewards();
+      const r = TEAM_JOBS_ENABLED ? aTokenTeamService.settleParityRewards() : null;
       if (r?.settled) console.log('[平级奖日结] daySlot', r.daySlot, r.count, '条，合计', r.totalA, 'AIX');
     } catch (e) { console.error('[平级奖日结]', e?.message || e); }
     try {
-      const r = aTokenTeamService.settleA10Pool();
+      const r = TEAM_JOBS_ENABLED ? aTokenTeamService.settleA10Pool() : null;
       if (r?.settled) console.log('[A10池日结]', r.settleDate, '人均', r.perShare, 'A10人数', r.participantCount);
     } catch (e) { console.error('[A10池日结]', e?.message || e); }
     // 全部步骤完成后再标记；各步骤均已 try/catch 不会冒泡，标记仅用于跳过窗口内的重复空跑
@@ -753,13 +757,15 @@ const aTokenA10SettleTimer = setInterval(() => {
 }, 60_000);
 aTokenTeamSnapshotTimer.unref?.();
 aTokenA10SettleTimer.unref?.();
-// 启动时先跑一次快照
-try { aTokenTeamService.snapshotAll(); } catch (e) { console.error('[团队快照] 启动失败', e?.message || e); }
+// 启动时先跑一次快照（团队任务停用期间跳过）
+if (TEAM_JOBS_ENABLED) { try { aTokenTeamService.snapshotAll(); } catch (e) { console.error('[团队快照] 启动失败', e?.message || e); } }
 // 启动时补跑平级奖日结：幂等，前一天已结算则快速跳过；重启/宕机错过 0 点窗口时自动补发
-try {
-  const r = aTokenTeamService.settleParityRewards();
-  if (r?.settled) console.log('[平级奖日结] 启动补发 daySlot', r.daySlot, r.count, '条，合计', r.totalA, 'AIX');
-} catch (e) { console.error('[平级奖日结] 启动补发失败', e?.message || e); }
+if (TEAM_JOBS_ENABLED) {
+  try {
+    const r = aTokenTeamService.settleParityRewards();
+    if (r?.settled) console.log('[平级奖日结] 启动补发 daySlot', r.daySlot, r.count, '条，合计', r.totalA, 'AIX');
+  } catch (e) { console.error('[平级奖日结] 启动补发失败', e?.message || e); }
+}
 
 let platformSpotFeed = null;
 let platformRiskFeed = null;
