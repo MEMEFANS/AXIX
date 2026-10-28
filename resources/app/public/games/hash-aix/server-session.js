@@ -1,7 +1,7 @@
 // 哈希星盘服务端会话（2026-10-27）：资金与随机源全部在服务端（/api/hash-aix/*），
 // 本类只负责状态编排：open（可押注）→ locked（已押注，揭晓动画）→ revealed。
 // 公平性承诺（serverSeedHash）由 /state 在押注前公布，局后随记录揭示明文。
-import { RULES } from './core.js';
+import { RULES } from './core.js?v=20261028c';
 
 export class ServerSession {
   constructor({ now = Date.now } = {}) {

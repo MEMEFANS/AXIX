@@ -2093,11 +2093,16 @@ export const server = http.createServer(async (request, res) => {
       }
       const cacheableImage = ['.png', '.svg', '.ico', '.woff2'].includes(ext);
       const cacheableCode = ['.js', '.css'].includes(ext);
+      // 游戏模块（/games/）的 JS/CSS 每次回源校验：模块 import 链无法保证全部带 ?v=，
+      // 30 天长缓存会让「新入口 + 旧模块」混载、整页 JS 崩溃（2026-10-28 余额读不到的根因）；
+      // 其余静态代码仍长缓存并配合 ?v= 版本号失效
       const cacheControl = cacheableImage
         ? 'public, max-age=604800'
-        : cacheableCode
-          ? 'public, max-age=2592000'
-          : 'no-store, no-cache, must-revalidate';
+        : file.startsWith('games/')
+          ? 'no-cache'
+          : cacheableCode
+            ? 'public, max-age=2592000'
+            : 'no-store, no-cache, must-revalidate';
       const headers = {
         'Content-Type': MIME[path.extname(full)] || 'application/octet-stream',
         'Cache-Control': cacheControl,

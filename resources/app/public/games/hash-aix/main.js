@@ -1,6 +1,6 @@
-import { CHOICES, RULES, verifyServerRecord, LEGACY_RULES_UNTIL, RULES_V3_SINCE } from './core.js';
+import { CHOICES, RULES, verifyServerRecord, LEGACY_RULES_UNTIL, RULES_V3_SINCE } from './core.js?v=20261028c';
 import { WebsiteSession } from '../run-aix/session.js?v=20261028b';
-import { ServerSession } from './server-session.js';
+import { ServerSession } from './server-session.js?v=20261028c';
 
 const $ = id => document.getElementById(id);
 const game = new ServerSession();

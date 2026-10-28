@@ -1,5 +1,5 @@
-import { PlayerProfile } from '../run-aix/player-profile.js';
-import { HashSession } from '../hash-aix/core.js';
+import { PlayerProfile } from '../run-aix/player-profile.js?v=20261028c';
+import { HashSession } from '../hash-aix/core.js?v=20261028c';
 import { WebsiteSession } from '../run-aix/session.js?v=20261028b';
 
 const $ = id => document.getElementById(id);
