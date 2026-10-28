@@ -10,7 +10,7 @@ const catalog = [
 ];
 const ids = new Set(catalog.map(game => game.id));
 let state = { favorites: [], visits: [] }, category = 'all', query = '', view = 'discover', toastTimer;
-let serverRun = null, serverHash = null, wallet = { status: 'loading' };
+let serverRun = null, serverHash = null, wallet = { status: 'loading' }, lastLobbyBalance = null, lastLobbyAddress = null;
 let storageAvailable = true, runnerData = null, runnerStars = 0, hashData = null, hashError = false, progressRequest = 0;
 function clean(value) {
   return { favorites: Array.isArray(value?.favorites) ? [...new Set(value.favorites.filter(id => ids.has(id)))] : [], visits: Array.isArray(value?.visits) ? value.visits.filter(v => ids.has(v?.id) && Number.isSafeInteger(v.at) && v.at > 0 && v.at <= Date.now() + 60000).slice(0, 10).map(v => ({ id: v.id, at: v.at })) : [] };
@@ -177,9 +177,13 @@ function requestLogin() {
 function renderPlayer() {
   const chip = $('player-chip'); if (!chip) return;
   const ready = wallet.status === 'ready';
-  chip.classList.toggle('ready', ready);
-  $('pc-label').textContent = ready ? `${wallet.address.slice(0, 6)}…${wallet.address.slice(-4)}` : '玩家';
-  $('pc-balance').textContent = ready ? `${fmt(wallet.balance)} AIX` : wallet.status === 'loading' ? '检测登录…' : wallet.status === 'unavailable' ? '平台未连接' : '登录开玩 ↗';
+  if (ready) { lastLobbyBalance = wallet.balance; lastLobbyAddress = wallet.address; }
+  else if (wallet.status === 'guest') { lastLobbyBalance = lastLobbyAddress = null; }
+  const known = ready || (lastLobbyBalance != null && wallet.status !== 'guest');
+  chip.classList.toggle('ready', known);
+  $('pc-label').textContent = ready ? `${wallet.address.slice(0, 6)}…${wallet.address.slice(-4)}` : lastLobbyAddress ? `${lastLobbyAddress.slice(0, 6)}…${lastLobbyAddress.slice(-4)}` : '玩家';
+  // 心跳/断连瞬间保留最后已知余额，不再闪「检测登录…」；只有从未拿到过余额时才显示状态文案
+  $('pc-balance').textContent = ready ? `${fmt(wallet.balance)} AIX` : known ? `${fmt(lastLobbyBalance)} AIX` : wallet.status === 'loading' ? '检测登录…' : wallet.status === 'unavailable' ? '平台未连接' : '登录开玩 ↗';
 }
 function tile(label, value, unit, note, tone = '') {
   const node = element('div', `ps-tile ${tone}`); const big = element('b', '', value); if (unit) big.append(element('small', '', unit));
@@ -187,7 +191,8 @@ function tile(label, value, unit, note, tone = '') {
 }
 function renderStats() {
   const tiles = $('ps-tiles'), feed = $('ps-feed'); if (!tiles) return;
-  if (wallet.status !== 'ready') {
+  // 心跳/断连瞬间保留最后已知战绩，不闪「登录后显示」；仅未登录或从未加载过时显示登录引导
+  if (wallet.status === 'guest' || (wallet.status !== 'ready' && !serverRun && !serverHash)) {
     tiles.replaceChildren(tile('钱包余额', '—', '', '登录后显示', 'gold'), tile('跑酷最远', '—', '', '登录后显示'), tile('星盘命中', '—', '', '登录后显示'), tile('可卖额度', '—', '', '流水 1% 累计', 'mint'));
     const cta = element('button', 'ps-login', wallet.status === 'loading' ? '正在检测登录…' : '登录钱包，记录你的每一局 ↗'); cta.type = 'button'; cta.onclick = requestLogin;
     feed.replaceChildren(cta); return;
@@ -197,7 +202,7 @@ function renderStats() {
   const hs = serverHash?.stats || {};
   const quota = serverRun?.sellQuota || serverHash?.sellQuota;
   tiles.replaceChildren(
-    tile('钱包余额', fmt(wallet.balance), ' AIX', '平台 AIX 余额', 'gold'),
+    tile('钱包余额', fmt(wallet.status === 'ready' ? wallet.balance : lastLobbyBalance), ' AIX', '平台 AIX 余额', 'gold'),
     tile('跑酷最远', runs.length ? String(best) : '—', runs.length ? ' m' : '', runs.length ? `近 ${runs.length} 局 · 共 ${serverRun?.runs || 0} 局` : '还没跑过，去试试'),
     tile('星盘命中', hs.recentBets ? `${Math.round(hs.wins / hs.recentBets * 100)}` : '—', hs.recentBets ? '%' : '', hs.recentBets ? `近 ${hs.recentBets} 局命中 ${hs.wins} 局` : '还没开过局'),
     tile('可卖额度', quota ? fmt(quota.availableA) : '—', quota ? ' AIX' : '', '流水 1% 自动累计', 'mint'),
@@ -210,7 +215,8 @@ function renderStats() {
   feed.replaceChildren(...events.map(item => { const node = element('span', `ps-event ${item.up ? 'up' : 'down'}`); node.append(element('b', '', item.text), element('small', '', item.detail)); return node; }));
 }
 async function loadServerStats() {
-  if (wallet.status !== 'ready') { serverRun = serverHash = null; renderStats(); renderJourney(); renderActivity(); return; }
+  if (wallet.status === 'guest') serverRun = serverHash = null;
+  if (wallet.status !== 'ready') { renderStats(); renderJourney(); renderActivity(); return; }
   const get = url => fetch(url, { credentials: 'same-origin', cache: 'no-store' }).then(r => (r.ok ? r.json() : null)).catch(() => null);
   [serverRun, serverHash] = await Promise.all([get('/api/run-aix/state'), get('/api/hash-aix/state')]);
   renderStats(); renderJourney(); renderActivity();
