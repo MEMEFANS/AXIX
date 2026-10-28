@@ -133,6 +133,14 @@ export function createRunAixGameApi({ aTokenService, database, send, readBody, g
     const payout = payoutUnitsFor(BigInt(run.stakeUnits), 0);
     const changed = db.settleRunAixRun(run.id, { status: 'expired', distance: 0, payoutUnits: payout.toString(), settledAt: Date.now() });
     if (changed && payout > 0n) aTokenService.creditA(run.wallet, payout);
+    // 作废局同样计亏损销毁（押注减保底返还），累计进交易大厅销毁数量
+    if (changed) {
+      const lossUnits = BigInt(run.stakeUnits) - payout;
+      if (lossUnits > 0n) {
+        try { aTokenService.burn(lossUnits, 'game_loss', '奔跑吧AIX作废局失利计销毁'); }
+        catch (e) { console.warn(`[奔跑吧AIX] ${run.wallet} 失利计销毁失败:`, e?.message || e); }
+      }
+    }
   }
 
   // 过期 pending 局就地作废（返还保底）。返回作废后的最新 pending（应为 null）。
@@ -292,6 +300,12 @@ export function createRunAixGameApi({ aTokenService, database, send, readBody, g
       if (payout > 0n) {
         aTokenService.creditA(wallet, payout);
         creditedUnits = payout;
+      }
+      // 2026-10-28：玩家亏损（押注减返还）已从流通移除——与销毁口径一致，直接累计进交易大厅销毁数量
+      const lossUnits = BigInt(run.stakeUnits) - payout;
+      if (lossUnits > 0n) {
+        try { aTokenService.burn(lossUnits, 'game_loss', `奔跑吧AIX结算失利计销毁 · ${replayedDistance}m`); }
+        catch (e) { console.warn(`[奔跑吧AIX] ${wallet} 失利计销毁失败:`, e?.message || e); }
       }
       return {
         distance: replayedDistance, completed: engine.result?.completed === true,

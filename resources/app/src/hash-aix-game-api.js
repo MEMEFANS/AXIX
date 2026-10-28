@@ -136,6 +136,12 @@ export function createHashAixGameApi({ aTokenService, database, send, readBody, 
           clientSeed, nonce: seed.nonce, quotaUnits: quotaUnits.toString(),
           createdAt: Date.now(),
         });
+        // 2026-10-28：玩家失利部分已从流通移除（平台任何地址未入账）——与销毁口径一致，直接累计进交易大厅销毁数量
+        const lossUnits = won ? 0n : stakeUnits;
+        if (lossUnits > 0n) {
+          try { aTokenService.burn(lossUnits, 'game_loss', `哈希星盘第 ${seed.nonce} 局失利计销毁`); }
+          catch (e) { console.warn(`[哈希星盘] ${wallet} 失利计销毁失败:`, e?.message || e); }
+        }
         // 揭示本局 seed 明文后立即轮换：旧 seed 可验算、不可预测后续局
         const nextSeed = crypto.randomBytes(SEED_BYTES).toString('hex');
         const next = db.upsertHashAixSeed(wallet, nextSeed, sha256(nextSeed), seed.nonce + 1);
