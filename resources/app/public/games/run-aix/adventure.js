@@ -5,7 +5,7 @@ import { WebsiteSession } from './session.js?v=20261028a';
 import { GameArt } from './art.js?v=20261028a';
 import { GameAudio } from './audio.js';
 import { artReady } from './sprites.js?v=20261027b';
-import { WAGER, wagerPercent, nextStep } from './wager.js?v=20261027b';
+import { WAGER, wagerPercent, nextStep } from './wager.js?v=20261028b';
 
 const $ = id => document.getElementById(id);
 const profile = new PlayerProfile();
@@ -363,7 +363,7 @@ async function launch(id) {
   if (walletState.status === 'ready') return promptStake(id);
   if (walletState.status === 'loading') return toast('正在确认登录状态，稍候再试');
   if (walletState.status === 'unavailable') return beginRun(id, null);
-  showDialog({ kicker: 'WALLET REQUIRED', title: '登录后押注起跑', copy: '星际航线已接入平台 AIX：自选押注，开跑即返 0.3 倍，1000 米保本，1500 米通关 5 倍；流水 1% 自动转可卖额度。', primary: '去登录 ↗', action: () => { closeDialog(); requestLogin(); }, secondary: '暂不出发', onSecondary: exitGame });
+  showDialog({ kicker: 'WALLET REQUIRED', title: '登录后押注起跑', copy: '星际航线已接入平台 AIX：自选押注，开跑即返 0.3 倍，1000 米保本，收益封顶保本；流水 1% 自动转可卖额度。', primary: '去登录 ↗', action: () => { closeDialog(); requestLogin(); }, secondary: '暂不出发', onSecondary: exitGame });
 }
 async function fetchRunState() {
   try {
@@ -414,7 +414,7 @@ async function promptStake(id, retried = false) {
   input.addEventListener('input', syncChips);
   syncChips();
   const hint = element('p', 'stake-hint');
-  hint.textContent = `钱包余额 ${balance} AIX · 押注 0.1 – 10000 AIX\n开跑即返 0.3 倍 · 1000 米保本 1.0 · 1200 米 2.0 · 1500 米通关 5.0 倍\n流水 1% 自动转 AIX 可卖额度`;
+  hint.textContent = `钱包余额 ${balance} AIX · 押注 0.1 – 10000 AIX\n开跑即返 0.3 倍 · 1000 米保本 1.0 · 收益封顶保本\n流水 1% 自动转 AIX 可卖额度`;
   showDialog({ kicker: 'WAGER · 押注起跑', title: '押上 AIX，冲进地狱航线', copy: '按最终距离结算，服务端回放全程操作核定成绩。', stats: [input, chips, hint], primary: '支付押注 · 起跑 ↗', action: () => confirmStake(id, input), secondary: '暂不出发', onSecondary: exitGame });
 }
 async function confirmStake(id, input) {

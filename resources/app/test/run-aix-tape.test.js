@@ -151,13 +151,12 @@ try {
   fs.rmSync(root, { recursive: true, force: true });
 }
 
-// 返还曲线：开跑 0.3×、1000 米保本 1.0×、1000 米后陡增、1500 米封顶 5×
+// 返还曲线：开跑 0.3×、1000 米保本 1.0×、1000 米后封顶保本（风控，2026-10-28）
 assert.equal(wagerPercent(0), 30);
 assert.equal(wagerPercent(49), 30);
 assert.equal(wagerPercent(100), 40);
 assert.equal(wagerPercent(300), 55);
 assert.equal(wagerPercent(1000), 100);
-assert.equal(wagerPercent(1200), 200);
-assert.equal(wagerPercent(1499), 380);
-assert.equal(wagerPercent(1500), 500);
-assert.equal(wagerPercent(99999), 500);
+assert.equal(wagerPercent(1200), 100);
+assert.equal(wagerPercent(1500), 100);
+assert.equal(wagerPercent(99999), 100);
