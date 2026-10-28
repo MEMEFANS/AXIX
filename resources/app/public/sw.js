@@ -6,7 +6,7 @@
  *  - 其余同源 GET     → 不接管，走浏览器默认行为
  * 注意：修改静态文件需升级对应 ?v= 版本号，或递增 SW_VERSION 重建缓存。
  */
-const SW_VERSION = 'axix-static-v17';
+const SW_VERSION = 'axix-static-v18';
 const STATIC_PREFIXES = ['/js/', '/styles/', '/vendor/', '/assets/'];
 
 self.addEventListener('install', () => {

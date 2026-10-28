@@ -42,3 +42,6 @@
 @keyframes hxSpark{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--dx),var(--dy)) scale(.3);opacity:0}}
 @keyframes hxBadge{0%{opacity:0;transform:scale(.6) rotate(-8deg)}12%{opacity:1;transform:scale(1.1) rotate(2deg)}20%{transform:none}85%{opacity:1}100%{opacity:0}}
 @media (prefers-reduced-motion:reduce){.core-stage.burst-win,.core-stage.burst-lose,.float-gain,.win-spark,.streak-badge,.core-face strong.tick{animation:none}}
+/* 通杀区（2026-10-28）：0、1、E、F 任一选项均判负 */
+.hex-ribbon>span.dead,.rule-digits>span.dead{opacity:.34;border-style:dashed;color:#6f7d95}
+.digit-ball.dead{opacity:.6;border-style:dashed;color:#e0b6c2;background:#d4a5b312;border-color:#d4a5b32e}

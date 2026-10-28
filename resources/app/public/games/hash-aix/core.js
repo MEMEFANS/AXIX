@@ -1,6 +1,6 @@
 // Local simulation only. These records are not blockchain transactions or assets.
 // Verification recomputes stored calculations; it does not authenticate a server.
-export const STORAGE_KEY = 'hash-aix:local:v1';
+export const STORAGE_KEY = 'hash-aix:local:v2';
 export const VERSION = 1;
 export const RULES = Object.freeze({
   betSeconds: 15,
@@ -17,16 +17,19 @@ export const RULES = Object.freeze({
   creditScale: 100,
   maxRecords: 100,
   seedBytes: 32,
-  chance: .5,
-  theoreticalReturn: .99,
+  chance: .375,
+  theoreticalReturn: .7425,
 });
+
+// 2026-10-28 规则改版（0、1、E、F 通杀）生效时刻：早于此时间结算的旧回合按旧规则（无通杀、各 50%）核验
+export const LEGACY_RULES_UNTIL = 1793197300000;
 
 const digits = Array.from({ length: 16 }, (_, value) => value);
 export const CHOICES = Object.freeze([
-  ['odd', '单', '末位转为 0–15 后是奇数', digits.filter(value => value % 2 === 1)],
-  ['even', '双', '末位转为 0–15 后是偶数', digits.filter(value => value % 2 === 0)],
-  ['small', '小', '末位是 0–7', digits.slice(0, 8)],
-  ['big', '大', '末位是 8–f', digits.slice(8)],
+  ['odd', '单', '末位是 2–D 中的奇数', digits.filter(value => value >= 2 && value <= 13 && value % 2 === 1)],
+  ['even', '双', '末位是 2–D 中的偶数', digits.filter(value => value >= 2 && value <= 13 && value % 2 === 0)],
+  ['small', '小', '末位是 2–7', digits.filter(value => value >= 2 && value <= 7)],
+  ['big', '大', '末位是 8–D', digits.filter(value => value >= 8 && value <= 13)],
 ].map(([id, label, description, values]) => Object.freeze({
   id, label, description,
   digits: Object.freeze(values.map(value => value.toString(16))),
@@ -81,11 +84,12 @@ export async function hashHex(text) {
 export function outcomeFromHash(hash) {
   if (typeof hash !== 'string' || !HEX.test(hash)) throw new TypeError('Expected a lowercase SHA-256 hash.');
   const hexDigit = hash.at(-1), digit = Number.parseInt(hexDigit, 16);
-  return { digit, hexDigit, parity: digit % 2 ? 'odd' : 'even', size: digit >= 8 ? 'big' : 'small' };
+  // 0、1、E、F 为通杀区；有效区 2–D——每项恰中 6/16 = 37.5%
+  return { digit, hexDigit, parity: digit % 2 ? 'odd' : 'even', size: digit >= 8 ? 'big' : 'small', live: digit >= 2 && digit <= 13 };
 }
 
 function winningChoice(choice, outcome) {
-  return choice === outcome.parity || choice === outcome.size;
+  return !!outcome.live && (choice === outcome.parity || choice === outcome.size);
 }
 
 function validBaseRound(round) {
@@ -138,9 +142,10 @@ export async function verifyRecord(record) {
   return { ...result, expectedHash: hash, expectedCommitment: commitment, expectedDigit: outcome.digit, expectedHexDigit: outcome.hexDigit, expectedPayoutCents: payoutCents };
 }
 
-// 服务端凭证验算（AIX 版，2026-10-27）：字段口径与 /api/hash-aix 返回的 record 一致。
+// 服务端凭证验算（AIX 版，2026-10-28 改版）：字段口径与 /api/hash-aix 返回的 record 一致。
 // 验算四件事：承诺一致（SHA256(serverSeed) === serverSeedHash）、开奖哈希一致
-// （SHA256(serverSeed:clientSeed:nonce) === hash）、末位判定一致、1.98× 返还一致。
+// （SHA256(serverSeed:clientSeed:nonce) === hash）、末位判定一致（0、1、E、F 通杀）、
+// 1.98× 返还一致。旧回合（rule=1 或 createdAt 早于 LEGACY_RULES_UNTIL）按旧规则核验。
 export async function verifyServerRecord(record) {
   const result = { ok: false, mode: 'server-proof', commitOk: false, hashOk: false, resultOk: false, payoutOk: false };
   const shape = object(record) && typeof record.serverSeed === 'string' && HEX.test(record.serverSeed)
@@ -150,6 +155,7 @@ export async function verifyServerRecord(record) {
     && uint(record.nonce) && record.nonce >= 1
     && CHOICE_IDS.has(record.choice)
     && Number.isSafeInteger(record.digit) && record.digit >= 0 && record.digit <= 15
+    && typeof record.hexDigit === 'string' && /^[a-f0-9]$/.test(record.hexDigit)
     && typeof record.won === 'boolean'
     && typeof record.stakeUnits === 'string' && /^\d+$/.test(record.stakeUnits)
     && typeof record.payoutUnits === 'string' && /^\d+$/.test(record.payoutUnits);
@@ -159,7 +165,10 @@ export async function verifyServerRecord(record) {
     hashHex(`${record.serverSeed}:${record.clientSeed}:${record.nonce}`),
   ]);
   const outcome = outcomeFromHash(hash);
-  const won = winningChoice(record.choice, outcome);
+  const usesDeadZone = record.rule === 2 || (record.rule === undefined && !(typeof record.createdAt === 'number' && record.createdAt < LEGACY_RULES_UNTIL));
+  const won = usesDeadZone
+    ? winningChoice(record.choice, outcome)
+    : record.choice === outcome.parity || record.choice === outcome.size;
   const expectedPayoutUnits = won ? BigInt(record.stakeUnits) * BigInt(RULES.payoutNumerator) / BigInt(RULES.payoutDenominator) : 0n;
   result.commitOk = commitment === record.serverSeedHash;
   result.hashOk = hash === record.hash;
@@ -374,8 +383,8 @@ export class HashSession {
         return { ok: true, phase: 'locked', revealed: false };
       }
       const hash = await hashHex(`${round.seed}:${round.clientSeed}:${round.nonce}`);
-      const { digit, hexDigit, parity, size } = outcomeFromHash(hash);
-      const won = round.choice === null ? null : winningChoice(round.choice, { parity, size });
+      const { digit, hexDigit, parity, size, live } = outcomeFromHash(hash);
+      const won = round.choice === null ? null : winningChoice(round.choice, { parity, size, live });
       const payoutCents = won ? round.stakeCents * RULES.payoutNumerator / RULES.payoutDenominator : 0;
       const record = {
         ...copy(round), status: 'revealed', revealedAt: now,

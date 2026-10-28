@@ -6,7 +6,7 @@ const $ = id => document.getElementById(id);
 const STORE = 'aix-play:lobby:v1';
 const catalog = [
   { id: 'runner', title: '奔跑吧 AIX', english: 'COSMIC RUNNER', category: 'adventure', label: '动作冒险', badge: 'AIX 押注', image: '/games/run-aix/assets/hub-v4.jpg', href: '/run-aix.html', desc: 'AIX 押注起跑的星际航线：开跑就返 0.3 倍，1000 米保本，收益封顶保本。', tags: ['单人闯关', '押注挑战'], glyph: '↗', odds: [['0.3×', ' 开跑即返'], ['1.0×', ' 1000 米保本'], ['保本', ' 收益封顶']] },
-  { id: 'hash', title: '哈希星盘', english: 'HASH ORBIT', category: 'quick', label: '轻量休闲', badge: 'AIX 押注', image: '/games/hash-aix/assets/hash-core.jpg', href: '/hash-aix.html', desc: '单双大小，押 AIX 猜哈希末位。先承诺后揭晓，每局可验算。', tags: ['单双 / 大小', '结果可核验'], glyph: '✦', odds: [['1.98×', ' 猜中'], ['50%', ' 概率']] },
+  { id: 'hash', title: '哈希星盘', english: 'HASH ORBIT', category: 'quick', label: '轻量休闲', badge: 'AIX 押注', image: '/games/hash-aix/assets/hash-core.jpg', href: '/hash-aix.html', desc: '单双大小，押 AIX 猜哈希末位，0/1/E/F 通杀。先承诺后揭晓，每局可验算。', tags: ['单双 / 大小', '结果可核验'], glyph: '✦', odds: [['1.98×', ' 猜中'], ['37.5%', ' 概率']] },
 ];
 const ids = new Set(catalog.map(game => game.id));
 let state = { favorites: [], visits: [] }, category = 'all', query = '', view = 'discover', toastTimer;
