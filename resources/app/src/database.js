@@ -1132,12 +1132,18 @@ export function openDatabase(dataRoot) {
       if (changed(cache.settings, 'wallet_meta', meta)) upsertSetting.run('wallet_meta', json(meta), Date.now());
   }
 
-  function replacePlatformState(state) {
-    return transaction(() => replacePlatformStateInside(state));
+  function replacePlatformState(state, touchedAccounts = null) {
+    return transaction(() => replacePlatformStateInside(state, touchedAccounts));
   }
 
-  function replacePlatformStateInside(state) {
-    for (const [address, account] of Object.entries(state.accounts || {})) if (changed(cache.accounts, address.toLowerCase(), account)) upsertAccount.run(address, Date.now(), json(account));
+  function replacePlatformStateInside(state, touchedAccounts = null) {
+    // 性能：账户循环默认全量（启动/独立写路径）；事务提交路径传入本事务实际触碰的
+    // 账户集合（platform-service transact 保证所有账户变更都先走 account()/touched.add），
+    // 只序列化这些账户即可，避免每次写入都对全量账户做百 MB 级 JSON 序列化比对。
+    const accountEntries = touchedAccounts
+      ? [...touchedAccounts].map(key => [key, state.accounts?.[key]]).filter(([, account]) => account)
+      : Object.entries(state.accounts || {});
+    for (const [address, account] of accountEntries) if (changed(cache.accounts, address.toLowerCase(), account)) upsertAccount.run(address, Date.now(), json(account));
     for (const item of state.orders || []) if (changed(cache.orders, item.id, item)) upsertOrder.run(item.id, item.address, item.clientOrderId || '', item.symbol || 'BTC', item.product || 'spot', item.side || '', item.status || '', item.limitPriceUnits || '0', timestamp(item.createdAt), json(item));
     for (const item of state.fills || []) if (changed(cache.fills, item.id, item)) upsertFill.run(item.id, item.address, item.clientOrderId || '', item.symbol || 'BTC', item.product || 'spot', timestamp(item.createdAt), json(item));
     for (let index = 0; index < (state.audit || []).length; index += 1) {
@@ -1153,12 +1159,12 @@ export function openDatabase(dataRoot) {
     if (changed(cache.settings, 'platform_meta', meta)) upsertSetting.run('platform_meta', json(meta), Date.now());
   }
 
-  function replaceLedgerStates(walletState, platformState) {
+  function replaceLedgerStates(walletState, platformState, touchedAccounts = null) {
     return transaction(() => {
       // Keep both sides of a trade in one durable commit.
       for (const user of Object.values(walletState.users || {})) if (changed(cache.users, user.address.toLowerCase(), user)) upsertUser.run(user.address, json(user.balances || {}), timestamp(user.createdAt), timestamp(user.updatedAt), json(user));
       for (const item of walletState.withdrawals || []) if (changed(cache.withdrawals, item.id, item)) upsertWithdrawal.run(item.id, item.wallet, item.requestId || '', item.network || '', item.txHash || null, item.asset || 'USDT', item.amountUnits || '0', item.status || '', item.automaticApproved ? 1 : 0, timestamp(item.createdAt), item.processedAt ? timestamp(item.processedAt) : null, json(item));
-      replacePlatformStateInside(platformState);
+      replacePlatformStateInside(platformState, touchedAccounts);
     });
   }
 
@@ -1326,6 +1332,14 @@ export function openDatabase(dataRoot) {
       ? db.prepare('SELECT payload_json FROM ai_managed_rewards WHERE wallet=? COLLATE NOCASE ORDER BY created_at DESC LIMIT ?').all(wallet, bounded)
       : db.prepare('SELECT payload_json FROM ai_managed_rewards ORDER BY created_at DESC LIMIT ?').all(bounded);
     return rows.map(row => parse(row.payload_json, {}));
+  }
+
+  // 风云榜聚合用：一次性拉全表 AI 托管奖励（当前几百行，按钱包分组复用，
+  // 替代旧版「每账户一次 listAiRewards」的 2.5 万次查询）。
+  function listAiRewardRowsForAggregation(limit = 200_000) {
+    const bounded = Math.min(Math.max(Number(limit) || 200_000, 1), 1_000_000);
+    return db.prepare('SELECT payload_json FROM ai_managed_rewards ORDER BY created_at DESC LIMIT ?')
+      .all(bounded).map(row => parse(row.payload_json, {}));
   }
 
   function upsertReferralLink(link) {
@@ -3032,7 +3046,7 @@ export function openDatabase(dataRoot) {
     return { deleted: r.changes > 0 };
   }
 
-  const api = { adjustmentById, listBalanceAdjustmentsByWallet, aiRewardById, updateAiReward, applyBalanceAdjustment, db, updateAiRewardKind, updateReferralReward, deleteAuthRecord, file, findExecution, getLatestAuthForWallet, hasPlatformData, hasSchemaMigration, hasWalletData, insertAiReward, insertPermitSignature, insertReferralReward, listAiBatches, listAiManagedActiveWallets, listAiRewards, listBalanceAdjustments, listAuthRecords, listReferralLinks, listReferralRewards, loadPlatformAccount, loadPlatformState, loadWalletState, markPermitSignatureUsed, platformRecords, recordSchemaMigration, referralRewardById, replaceLedgerStates, replacePlatformState, replaceWalletState, replaceWalletStateInside, transaction, upsertAiBatch, upsertReferralLink, walletRecords,
+  const api = { adjustmentById, listBalanceAdjustmentsByWallet, aiRewardById, updateAiReward, applyBalanceAdjustment, db, updateAiRewardKind, updateReferralReward, deleteAuthRecord, file, findExecution, getLatestAuthForWallet, hasPlatformData, hasSchemaMigration, hasWalletData, insertAiReward, insertPermitSignature, insertReferralReward, listAiBatches, listAiManagedActiveWallets, listAiRewards, listAiRewardRowsForAggregation, listBalanceAdjustments, listAuthRecords, listReferralLinks, listReferralRewards, loadPlatformAccount, loadPlatformState, loadWalletState, markPermitSignatureUsed, platformRecords, recordSchemaMigration, referralRewardById, replaceLedgerStates, replacePlatformState, replaceWalletState, replaceWalletStateInside, transaction, upsertAiBatch, upsertReferralLink, walletRecords,
     // A 币生态
     upsertATokenMinerRow, listATokenMiners, listActiveATokenMiners, listDueATokenMiners, listExpiringATokenMiners, adminListATokenMiners, adminMinerSummary, adminMinerTodaySummary, minerStats, insertATokenMinerReleaseRow, listATokenMinerReleases, listATokenMinerWallets, listATokenMinerWalletsByPlan, countATokenMinersByWallet,
     upsertATokenStakeRow, listATokenStakes, listActiveATokenStakes, listExpiringATokenStakes, insertATokenStakeRewardRow, listATokenStakeRewards,

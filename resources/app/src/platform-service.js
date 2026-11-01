@@ -175,13 +175,19 @@ export function createPlatformService({ dataRoot, walletService }) {
         assertState(activeTransaction.touched);
       }
       if (activeTransaction.dirty || walletUpdate?.isDirty()) {
-        if (walletUpdate) database.replaceLedgerStates(walletUpdate.exportState(), state);
-        else database.replacePlatformState(state);
+        // 性能：落库只序列化本事务触碰过的账户（assertState 已依赖同一不变量：
+        // 事务内所有账户变更必先经 account()/touched.add），避免每次全量序列化
+        // 2.5 万+ 账户（116MB 级 JSON）拖慢每次成交/审计写入。
+        if (walletUpdate) database.replaceLedgerStates(walletUpdate.exportState(), state, activeTransaction.touched);
+        else database.replacePlatformState(state, activeTransaction.touched);
       }
       walletUpdate?.finish();
       return result;
     } catch (error) {
       try { state = database.loadPlatformState(); } catch { /* 重载失败时维持抛出原事务错误，交由上层处理 */ }
+      // 账本已回滚重载，派生索引（持仓/运行策略）一并作废，下次使用时重建
+      perpHolderIndex = null;
+      runningStrategyIndex = null;
       try { walletUpdate?.rollback(); } catch { /* 钱包侧重载失败不掩盖原始错误 */ }
       throw error;
     } finally {
@@ -386,6 +392,7 @@ export function createPlatformService({ dataRoot, walletService }) {
     if (insuranceSettlement < 0n) chargeInsurance(insuranceSettlement);
     else if (realized !== 0n) chargeInsurance(-realized);
     Object.assign(position, { sizeUnits:newSize.toString(), entryPriceUnits:newEntry.toString(), marginUnits:newMargin.toString(), realizedPnlUnits:(BigInt(position.realizedPnlUnits) + realized).toString(), feeUnits:(BigInt(position.feeUnits || '0') + totalFee).toString(), leverage:newLeverage, marginMode: newSize === 0n ? 'isolated' : activeMarginMode });
+    markPerpHolder(address, position);
     const fill = recordFill(address, { symbol, product:'perp', side, sizeUnits:quantity.toString(), priceUnits:px.toString(), feeUnits:totalFee.toString(), pnlUnits:realized.toString(), reduceOnly:Boolean(reduceOnly), clientOrderId, requestHash });
     referralRewardsService?.distributeTradingFee(address, totalFee, fill.id, Date.parse(fill.createdAt));
     // 空投积分只计开仓量（平仓/减仓是对敲判定盲区，不计分防刷）
@@ -456,12 +463,44 @@ export function createPlatformService({ dataRoot, walletService }) {
     order.status = 'cancelled'; order.cancelledAt = nowIso(); audit(address, 'order_cancel', { orderId:order.id }); save(); return order;
   }
 
+  // ── 派生索引（性能） ─────────────────────────────────────────────────────
+  // 行情每个 tick 都要跑 liquidate()/processPrice()，旧实现每 tick 对全量 2.5 万+ 账户
+  // 逐个检查持仓/策略，是常驻 CPU 的最大来源。这里维护两个内存索引：
+  //   perpHolderIndex      — 任一合约品种 sizeUnits != 0 的账户（liquidate/settleFunding 用）
+  //   runningStrategyIndex — 有 running 策略的账户（internalStrategyAccounts 用）
+  // 索引只做加速：多算几个空账户是安全的（循环里会 continue），漏算才会出风控事故，
+  // 因此持仓只在开仓时加入（清仓后留在索引里无害），策略写入时按 running 增删；
+  // 账本回滚重载后统一置 null，下次使用时全量重建。
+  let perpHolderIndex = null;
+  let runningStrategyIndex = null;
+  function perpHolderKeys() {
+    if (!perpHolderIndex) {
+      perpHolderIndex = new Set();
+      for (const [key, user] of Object.entries(state.accounts)) {
+        for (const pos of Object.values(user?.perps || {})) {
+          if (String(pos?.sizeUnits || '0') !== '0') { perpHolderIndex.add(key); break; }
+        }
+      }
+    }
+    return perpHolderIndex;
+  }
+  function markPerpHolder(address, position) {
+    if (perpHolderIndex && String(position?.sizeUnits || '0') !== '0') perpHolderIndex.add(addressKey(address));
+  }
+  function markStrategyHolder(address, strategy) {
+    if (!runningStrategyIndex) return;
+    const key = addressKey(address);
+    if (strategy?.running) runningStrategyIndex.add(key);
+    else runningStrategyIndex.delete(key);
+  }
+
   function settleFunding(symbol, markPrice, now = Date.now()) {
     const lastFundingAt = Number(state.lastFundingAtBySymbol[symbol] || state.lastFundingAt || now);
     const intervals = Math.floor((now - lastFundingAt) / FUNDING_INTERVAL_MS); if (intervals <= 0) return;
     const px = units(markPrice, PRICE_DECIMALS, '标记价格');
-    for (const [key, user] of Object.entries(state.accounts)) {
-      const pos = user.perps[symbol], size = BigInt(pos.sizeUnits || '0'); if (!size) continue;
+    for (const key of perpHolderKeys()) {
+      const user = state.accounts[key], pos = user?.perps[symbol]; if (!pos) continue;
+      const size = BigInt(pos.sizeUnits || '0'); if (!size) continue;
       if (activeTransaction) activeTransaction.touched.add(key);
       const payment = notionalUnits(size, px) * FUNDING_BPS_PER_INTERVAL * BigInt(intervals) / 10_000n;
       const margin = BigInt(pos.marginUnits);
@@ -476,8 +515,9 @@ export function createPlatformService({ dataRoot, walletService }) {
   function liquidate(symbol, markPrice) {
     const px = units(markPrice, PRICE_DECIMALS, '标记价格');
     let changed = false;
-    for (const [key, user] of Object.entries(state.accounts)) {
-      const pos = user.perps[symbol], size = BigInt(pos.sizeUnits || '0'); if (!size) continue;
+    for (const key of perpHolderKeys()) {
+      const user = state.accounts[key], pos = user?.perps[symbol]; if (!pos) continue;
+      const size = BigInt(pos.sizeUnits || '0'); if (!size) continue;
       const margin = BigInt(pos.marginUnits), pnl = size * (px - BigInt(pos.entryPriceUnits)) / 10n ** BigInt(ASSET_DECIMALS);
       const maintenance = feeUnits(notionalUnits(size, px), MAINTENANCE_BPS);
       if (margin + pnl > maintenance) continue;
@@ -550,9 +590,13 @@ export function createPlatformService({ dataRoot, walletService }) {
     return structuredClone(account(address).internalStrategies[String(key)] || null);
   }
   function internalStrategyAccounts() {
-    return Object.values(state.accounts)
-      .filter(user => user?.internalStrategies && Object.values(user.internalStrategies).some(strategy => strategy?.running))
-      .map(user => user.address);
+    if (!runningStrategyIndex) {
+      runningStrategyIndex = new Set();
+      for (const [key, user] of Object.entries(state.accounts)) {
+        if (Object.values(user?.internalStrategies || {}).some(strategy => strategy?.running)) runningStrategyIndex.add(key);
+      }
+    }
+    return [...runningStrategyIndex].map(key => state.accounts[key]?.address).filter(Boolean);
   }
   function startInternalStrategy(address, key, strategy, capital) {
     const user = account(address), value = BigInt(capital);
@@ -561,6 +605,7 @@ export function createPlatformService({ dataRoot, walletService }) {
     if (user.internalStrategies[key]?.running) throw new Error('策略已经在运行');
     walletService.debitBalance(address, 'USDT', value);
     user.internalStrategies[key] = structuredClone(strategy);
+    markStrategyHolder(address, strategy);
     audit(address, 'internal_strategy_start', { strategy:key, amountUnits:value.toString() }); save();
   }
   function addToInternalStrategy(address, key, strategy, capital) {
@@ -569,12 +614,14 @@ export function createPlatformService({ dataRoot, walletService }) {
     if (walletService.balanceUnits(address, 'USDT') < value) throw new Error('平台账户余额不足');
     walletService.debitBalance(address, 'USDT', value);
     user.internalStrategies[key] = structuredClone(strategy);
+    markStrategyHolder(address, strategy);
     audit(address, 'internal_strategy_add', { strategy:key, amountUnits:value.toString() });
     save();
   }
   function updateInternalStrategy(address, key, strategy) {
     const user = account(address);
     user.internalStrategies[key] = structuredClone(strategy);
+    markStrategyHolder(address, strategy);
     audit(address, 'internal_strategy_update', { strategy:key }); save();
   }
   function settleInternalStrategy(address, key, strategy, settlement) {
@@ -585,6 +632,7 @@ export function createPlatformService({ dataRoot, walletService }) {
     walletService.creditBalance(address, 'USDT', value);
     chargeInsurance(capital - value);
     user.internalStrategies[key] = structuredClone(strategy);
+    markStrategyHolder(address, strategy);
     audit(address, 'internal_strategy_settle', { strategy:key, capitalUnits:capital.toString(), settlementUnits:value.toString() }); save();
   }
   function stake(address, amount) { const user=account(address); accrue(user.staking); const value=units(amount,USDT_DECIMALS,'质押数量'); walletService.debitBalance(address,'USDT',value); user.staking.principalUnits=(BigInt(user.staking.principalUnits)+value).toString(); audit(address,'stake',{amountUnits:value.toString()}); save(); }
@@ -878,11 +926,35 @@ export function createPlatformService({ dataRoot, walletService }) {
       leaderboardCache = { at: Date.now(), rows };
     }
     function computeRows() {
+    // 预聚合（性能）：旧实现对每个账户做 2 次 state.fills 全量过滤 + ~8 次 DB 查询，
+    // 2.5 万账户 ≈ 20 万次查询/次重算，同步阻塞事件循环十余秒、全站请求排队。
+    // 这里改为：fills 按钱包分组成 Map（一次遍历）；AI 托管奖励全表一次拉出按钱包分组。
+    // 榜单最终只保留 copyEarnedUnits > 0（即有 AI 托管收益）的账户，无托管策略又无
+    // 托管奖励的账户直接跳过——与原 filter 语义完全一致，输出不变。
+    const fillsByWallet = new Map();
+    for (const fill of state.fills) {
+      const k = String(fill.address || '').toLowerCase();
+      let list = fillsByWallet.get(k);
+      if (!list) { list = []; fillsByWallet.set(k, list); }
+      list.push(fill);
+    }
+    const aiRewardsByWallet = new Map();
+    for (const item of database.listAiRewardRowsForAggregation()) {
+      const k = String(item?.wallet || '').toLowerCase();
+      if (!k) continue;
+      let list = aiRewardsByWallet.get(k);
+      if (!list) { list = []; aiRewardsByWallet.set(k, list); }
+      list.push(item);
+    }
     return Object.values(state.accounts || {}).map(user => {
       const wallet = String(user.address || '');
       const walletKey = wallet.toLowerCase();
+      const strategyEntries = Object.entries(user.internalStrategies || {});
+      const hasAiStrategy = strategyEntries.some(([key]) => isAiManagedStrategy(key));
+      const aiManagedRewards = aiRewardsByWallet.get(walletKey) || [];
+      if (!hasAiStrategy && aiManagedRewards.length === 0) return null;
       const sumUnits = (items, field) => items.reduce((sum, item) => sum + BigInt(item?.[field] || '0'), 0n);
-      const fills = state.fills.filter(fill => String(fill.address || '').toLowerCase() === walletKey);
+      const fills = fillsByWallet.get(walletKey) || [];
       const tradingUnits = sumUnits(fills, 'pnlUnits');
       const recentTrading = fills.filter(fill => itemTime(fill) >= cutoff);
       const userStrategies = Object.entries(user.internalStrategies || {}).filter(([key]) => !isAiManagedStrategy(key));
@@ -908,8 +980,9 @@ export function createPlatformService({ dataRoot, walletService }) {
         ? (stakingAccumulatedUnits - stakingHistoryBaseline30 > 0n ? stakingAccumulatedUnits - stakingHistoryBaseline30 : 0n)
         : (Number(user.staking?.updatedAt || 0) >= cutoff ? stakingUnits : 0n); // fallback
 
-      const aiManagedRewards = database.listAiRewards(wallet, 5000).filter(item => item.kind !== 'referral' && item.kind !== 'loss' && item.kind !== 'start' && item.kind !== 'redeem' && item.kind !== 'adjust');
-      const aiManagedUnitsRewarded = aiManagedRewards.reduce((sum, item) => sum + BigInt(item.amountUnits || '0'), 0n);
+      // AI 托管奖励已在 computeRows 顶部全表预取（aiRewardsByWallet），这里只做口径过滤
+      const earnedAiRewards = aiManagedRewards.filter(item => item.kind !== 'referral' && item.kind !== 'loss' && item.kind !== 'start' && item.kind !== 'redeem' && item.kind !== 'adjust');
+      const aiManagedUnitsRewarded = earnedAiRewards.reduce((sum, item) => sum + BigInt(item.amountUnits || '0'), 0n);
       const aiManagedPendingUnits = (() => {
         let total = 0n;
         for (const [key, strategy] of Object.entries(user.internalStrategies || {})) {
@@ -921,7 +994,7 @@ export function createPlatformService({ dataRoot, walletService }) {
         return total > aiManagedUnitsRewarded ? total - aiManagedUnitsRewarded : 0n;
       })();
       const aiManagedUnits = aiManagedUnitsRewarded + aiManagedPendingUnits;
-      const recentAiManagedRewarded = aiManagedRewards.filter(item => itemTime(item) >= cutoff)
+      const recentAiManagedRewarded = earnedAiRewards.filter(item => itemTime(item) >= cutoff)
         .reduce((sum, item) => sum + BigInt(item.amountUnits || '0'), 0n);
       // 30d pending：totalEarnedUnits 30d 增量 − rewarded 30d 增量（同样兜底服务器空档）
       const recentAiManagedPending = (() => {
@@ -968,8 +1041,7 @@ export function createPlatformService({ dataRoot, walletService }) {
       //   (3) AI 托管模拟合约：internalStrategies.ai-managed-*.records (72 分钟/笔 simulated-grid)
       //       只取 notional（= 开仓名义 = size*openPrice 由 executionDetails 生成，ASSET_DECIMALS 口径），
       //       严格不用 profitUnits/reward，避免"收益=交易量"老 bug 再出现。
-      const perpFills30d = state.fills.filter(fill => String(fill.address || '').toLowerCase() === walletKey
-        && itemTime(fill) >= cutoff
+      const perpFills30d = fills.filter(fill => itemTime(fill) >= cutoff
         && String(fill.product || 'perp').toLowerCase() === 'perp');
       const strategyPerpFills30d = strategyFills.filter(fill => itemTime(fill) >= cutoff
         && String(fill.product || '').toLowerCase() === 'perp');
@@ -1062,7 +1134,7 @@ export function createPlatformService({ dataRoot, walletService }) {
         earned30Units, tradingVolume30Units, depositedUnits, roi30d,
         copyEarnedUnits, copyEarned30Units, copyPrincipalUnits, copyVolume30Units, copyRoi30d,
       };
-    }).filter(item => item.copyEarnedUnits > 0n)
+    }).filter(item => item && item.copyEarnedUnits > 0n)
       .sort((a, b) => a.copyEarnedUnits === b.copyEarnedUnits ? a.wallet.localeCompare(b.wallet) : a.copyEarnedUnits > b.copyEarnedUnits ? -1 : 1);
     }
     const bounded = Math.min(Math.max(Number(limit) || 100, 1), 500);
