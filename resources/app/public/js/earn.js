@@ -200,6 +200,7 @@
         <button class="earn-sub-tab${currentSubTab === 'miner' ? ' active' : ''}" onclick="window.earnSwitch('miner')">矿机</button>
         <button class="earn-sub-tab${currentSubTab === 'staking' ? ' active' : ''}" onclick="window.earnSwitch('staking')">质押</button>
         <button class="earn-sub-tab${currentSubTab === 'team' ? ' active' : ''}" onclick="window.earnSwitch('team')">团队</button>
+        <button class="earn-sub-tab${currentSubTab === 'matchpool' ? ' active' : ''}" onclick="window.earnSwitch('matchpool')">匹配池</button>
       </div>
       <div id="earn-content">${P.loading(6)}</div>
     </div>`;
@@ -280,7 +281,7 @@
       if (document.hidden) return;
       if (!document.getElementById('tab-earn')?.classList.contains('active')) return;
       if (!window.currentWalletProfile?.authenticated || earnRefreshBusy) return;
-      if (!['miner', 'team'].includes(currentSubTab)) return;
+      if (!['miner', 'team', 'matchpool'].includes(currentSubTab)) return;
       if (document.activeElement?.closest('input, select, textarea')) return;
       earnRefreshBusy = true;
       try {
@@ -543,8 +544,8 @@
   function stakeCardHtml(p, showButton = true) {
     const monthlyRate = p.days > 0 ? (Number(p.dailyRateBps) * 30 / 100).toFixed(0) : (Number(p.dailyRateBps) * 30 / 100).toFixed(1);
     const dailyRatePct = (Number(p.dailyRateBps) / 100).toFixed(2);
-    const minMap = { s30: '1,000 AIX', s60: '1,000 AIX', s90: '1,000 AIX' };
-    const minA = minMap[p.planId] || '1,000 AIX';
+    const minMap = { s30: '10 AIX', s60: '2,000 AIX', s90: '5,000 AIX' };
+    const minA = minMap[p.planId] || '10 AIX';
     const periodLabel = p.flexible ? '随进随出' : p.days + ' 天到期';
     const expectedLabel = p.flexible ? '收益每日到账' : '到期共 ' + (Number(p.dailyRateBps) * Number(p.days) / 100).toFixed(1) + '%';
     const planClass = p.planId || 'current';
@@ -568,6 +569,260 @@
       </div>`;
   }
 
+  // ── 匹配池（2026-10-31）：匹配额度 + 涡轮额度 1:1 进池 → 到期出 2× 可用额度 ──
+  let mpBusy = false;
+  let mpTicker = null;
+  let mpQuoteTimer = null;
+
+  // 匹配池专用样式（.mp- 前缀隔离，随 renderMatchPool 注入，重复注入内容相同无副作用）
+  const MP_CSS = `<style>
+    .mp-flow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:12px}
+    .mp-chip{padding:6px 12px;border-radius:999px;font-size:12px;font-weight:600;border:1px solid;white-space:nowrap}
+    .mp-chip.match{color:#f6c454;border-color:rgba(246,196,84,.35);background:rgba(246,196,84,.08)}
+    .mp-chip.turbo{color:#8ab4ff;border-color:rgba(138,180,255,.35);background:rgba(138,180,255,.08)}
+    .mp-chip.usable{color:#50d2b8;border-color:rgba(80,210,184,.35);background:rgba(80,210,184,.08)}
+    .mp-arrow{color:#5b6b67;font-size:12px;font-weight:700}
+    .mp-quota-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px}
+    .mp-quota{--ac:#f6c454;position:relative;padding:14px 16px 14px 19px;border-radius:14px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07)}
+    .mp-quota::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:3px;background:var(--ac)}
+    .mp-quota .q-top{display:flex;align-items:center;justify-content:space-between;font-size:12px;color:#a8bab6}
+    .mp-quota .q-ico{font-size:15px}
+    .mp-quota .q-num{margin-top:8px;font-size:24px;font-weight:700;color:var(--ac);line-height:1.1;word-break:break-all}
+    .mp-quota .q-num small{font-size:12px;color:#81918e;font-weight:400;margin-left:4px}
+    .mp-quota .q-sub{margin-top:6px;font-size:11px;color:#81918e}
+    .mp-dur{margin-top:14px;padding:14px 16px;border-radius:14px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07)}
+    .mp-dur .d-row{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap}
+    .mp-dur .d-day{font-size:15px;font-weight:700;color:#e6f1ee}
+    .mp-dur .d-lock{font-size:12px;color:#a8bab6}
+    .mp-dur .d-lock b{color:#f6c454;font-size:14px}
+    .mp-bar{height:8px;border-radius:99px;background:rgba(255,255,255,.06);overflow:hidden;margin-top:10px}
+    .mp-bar>i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#f6c454,#50d2b8);transition:width .4s ease}
+    .mp-dur .d-hint{margin-top:8px;font-size:11px;color:#81918e}
+    .mp-actions{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+    .mp-card{padding:16px;border-radius:14px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07)}
+    .mp-card .c-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px}
+    .mp-card .c-title{font-size:14px;font-weight:700;color:#e6f1ee}
+    .mp-card .c-tag{font-size:11px;color:#81918e}
+    .mp-btn{display:inline-flex;align-items:center;justify-content:center;padding:0 16px;height:38px;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;transition:filter .15s ease}
+    .mp-btn:hover:not(:disabled){filter:brightness(1.12)}
+    .mp-btn:disabled{opacity:.55;cursor:not-allowed}
+    .mp-btn.gold{background:linear-gradient(135deg,#f6c454,#e8a13a);color:#1a1405}
+    .mp-btn.teal{background:linear-gradient(135deg,#50d2b8,#2bb89b);color:#04211a}
+    .mp-btn.ghost{position:static;background:rgba(255,255,255,.08);color:#cfe0db;margin-left:6px}
+    .mp-entries{display:flex;flex-direction:column;gap:10px;margin-top:14px}
+    .mp-entry{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:13px 16px;border-radius:14px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07)}
+    .mp-entry .e-main{flex:1;min-width:0}
+    .mp-entry .e-amt{font-size:17px;font-weight:700;color:#50d2b8}
+    .mp-entry .e-amt small{font-size:11px;color:#81918e;font-weight:400;margin-left:4px}
+    .mp-entry .e-sub{margin-top:3px;font-size:11px;color:#81918e}
+    .mp-entry .mp-bar{margin-top:8px;height:6px}
+    .mp-entry .e-side{text-align:right;flex-shrink:0}
+    .mp-entry .e-chip{display:inline-block;padding:5px 11px;border-radius:999px;font-size:12px;font-weight:600}
+    .mp-entry .e-chip.locked{color:#f6c454;background:rgba(246,196,84,.1);border:1px solid rgba(246,196,84,.3)}
+    .mp-entry .e-chip.done{color:#50d2b8;background:rgba(80,210,184,.1);border:1px solid rgba(80,210,184,.3)}
+    .mp-entry .e-time{margin-top:5px;font-size:11px;color:#5b6b67}
+    .mp-empty{padding:26px 14px;text-align:center;color:#81918e;font-size:12px;border:1px dashed rgba(255,255,255,.12);border-radius:14px;margin-top:14px}
+    .mp-empty .big-emoji{font-size:26px;margin-bottom:6px}
+    .mp-sec-title{display:flex;align-items:center;justify-content:space-between;margin-top:20px;font-size:14px;font-weight:700;color:#e6f1ee}
+    .mp-sec-title span{font-size:11px;color:#81918e;font-weight:400}
+    @media(max-width:720px){.mp-quota-grid,.mp-actions{grid-template-columns:1fr}.mp-entry{flex-direction:column;align-items:stretch}.mp-entry .e-side{text-align:left;display:flex;align-items:center;justify-content:space-between;gap:8px}.mp-entry .e-time{margin-top:0}}
+  </style>`;
+
+  function renderMatchPool() {
+    const mp = profileCache?.matchPool;
+    if (!mp) return `<div class="ev2-empty" style="padding:18px">匹配池数据加载中…</div>`;
+    const matchAvail = Number(mp.matchQuota?.available || 0);
+    const turboAvail = Number(mp.turboQuota || 0);
+    const usableAvail = Number(mp.usableQuota?.available || 0);
+    const nextHours = Number(mp.nextDurationHours || 24);
+    const maxHours = Number(mp.maxDurationHours || 720);
+    const enterMax = Math.min(matchAvail, turboAvail);
+    const dayIndex = mp.started ? Number(mp.dayIndex || 1) : 0;
+    const durPct = Math.min(100, Math.round(nextHours / maxHours * 100));
+    const nowMs = Date.now();
+
+    const entriesHtml = (mp.entries || []).map(e => {
+      const locked = e.status === 'locked';
+      const span = Math.max(1, Number(e.maturesAt) - Number(e.createdAt));
+      const elapsedPct = locked ? Math.min(100, Math.max(0, Math.round((nowMs - Number(e.createdAt)) / span * 100))) : 100;
+      return `<div class="mp-entry">
+        <div class="e-main">
+          <div class="e-amt">+${fmtA(e.totalA)}<small>AIX 可用额度</small></div>
+          <div class="e-sub">匹配 ${fmtA(e.matchA)} + 涡轮 ${fmtA(e.turboA)} · 锁 ${e.durationHours} 小时</div>
+          <div class="mp-bar"><i style="width:${elapsedPct}%"></i></div>
+        </div>
+        <div class="e-side">
+          ${locked
+            ? `<span class="e-chip locked" data-mp-matures="${Number(e.maturesAt)}">⏱ ${timeLeft(Number(e.remainMs))} 后发放</span>`
+            : `<span class="e-chip done">已发放</span>`}
+          <div class="e-time">${new Date(Number(e.createdAt)).toLocaleString('zh-CN', { hour12: false, month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })} 放入</div>
+        </div>
+      </div>`;
+    }).join('') || `<div class="mp-empty"><div class="big-emoji">🌀</div>暂无匹配池记录，放入后这里显示每笔锁定与倒计时</div>`;
+
+    const purchaseRows = (mp.purchases || []).map(p => `<tr>
+      <td data-label="支付">${fmtNum(p.usdtIn, 2)} USDT</td>
+      <td data-label="获得"><b style="color:#8ab4ff">+${fmtA(p.turboOut)}</b> <small>AIX 涡轮</small></td>
+      <td data-label="成交价">$${escapeHtml(p.priceUsdt)}</td>
+      <td data-label="时间">${new Date(Number(p.createdAt)).toLocaleString('zh-CN', { hour12: false, month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}</td>
+    </tr>`).join('') || `<tr><td colspan="4" class="ev2-empty">暂无购买记录</td></tr>`;
+
+    return `${MP_CSS}
+      <div class="earn-v2-head-banner">
+        <h2>🌀 AIX 匹配池</h2>
+        <p style="margin:6px 0 0;font-size:12px;color:#a8bab6">质押产出的匹配额度不能直卖，与涡轮额度 1:1 进池，到期翻倍出可用额度，只有可用额度可卖出</p>
+        <div class="mp-flow">
+          <span class="mp-chip match">匹配额度</span><span class="mp-arrow">+</span>
+          <span class="mp-chip turbo">涡轮额度</span><span class="mp-arrow">→ 🔒 匹配池 →</span>
+          <span class="mp-chip usable">可用额度 ×2</span>
+        </div>
+      </div>
+
+      <div class="mp-quota-grid">
+        <div class="mp-quota" style="--ac:#f6c454">
+          <div class="q-top"><span>匹配额度</span><span class="q-ico">⛏️</span></div>
+          <div class="q-num">${fmtA(matchAvail)}<small>AIX</small></div>
+          <div class="q-sub">质押产出 · 不可直接卖出</div>
+        </div>
+        <div class="mp-quota" style="--ac:#8ab4ff">
+          <div class="q-top"><span>涡轮额度</span><span class="q-ico">🌀</span></div>
+          <div class="q-num">${fmtA(turboAvail)}<small>AIX</small></div>
+          <div class="q-sub">USDT 按实时价购买</div>
+        </div>
+        <div class="mp-quota" style="--ac:#50d2b8">
+          <div class="q-top"><span>可用额度</span><span class="q-ico">✅</span></div>
+          <div class="q-num">${fmtA(usableAvail)}<small>AIX</small></div>
+          <div class="q-sub">匹配池到期产出 · 可卖出</div>
+        </div>
+      </div>
+
+      <div class="mp-dur">
+        <div class="d-row">
+          <span class="d-day">${mp.started ? `⏳ 第 ${dayIndex} 天` : '⏳ 计时未开始'}</span>
+          <span class="d-lock">本次放入锁定 <b>${nextHours} 小时</b> / 封顶 ${maxHours} 小时</span>
+        </div>
+        <div class="mp-bar"><i style="width:${durPct}%"></i></div>
+        <div class="d-hint">${mp.started ? '首次放入已开始计时：每日 +24h，无论是否使用' : '首次放入后开始计时：第 1 天锁 24h，之后每日 +24h'}</div>
+      </div>
+
+      <div class="mp-actions">
+        <div class="mp-card">
+          <div class="c-head"><span class="c-title">🌀 购买涡轮额度</span><span class="c-tag">$${escapeHtml(mp.priceUsdt || '0')} / AIX</span></div>
+          <label class="stake-amount-label" for="mp-usdt-input">支付 USDT 数量</label>
+          <div class="stake-amount-field">
+            <input id="mp-usdt-input" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="最少 1 USDT" oninput="window.mpQuoteInput()">
+            <button type="button" class="mp-btn gold" style="margin:0 7px;height:40px" onclick="window.mpBuyTurbo()" ${mpBusy ? 'disabled' : ''}>${mpBusy ? '处理中…' : '一键购买'}</button>
+          </div>
+          <div id="mp-turbo-quote" class="stake-amount-hint">按实时价折算 · 站内 USDT 支付 · 需钱包签名</div>
+        </div>
+        <div class="mp-card">
+          <div class="c-head"><span class="c-title">🔒 放入匹配池</span><span class="c-tag">1 : 1 配比</span></div>
+          <label class="stake-amount-label" for="mp-enter-input">放入数量（匹配 + 等量涡轮）</label>
+          <div class="stake-amount-field" style="grid-template-columns:minmax(0,1fr) auto auto">
+            <input id="mp-enter-input" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="输入 AIX 数量">
+            <button type="button" class="mp-btn ghost" style="margin:0 4px;height:40px;padding:0 12px" onclick="window.mpEnterMax()">Max</button>
+            <button type="button" class="mp-btn teal" style="margin:0 7px 0 4px;height:40px" onclick="window.mpEnterPool()" ${mpBusy ? 'disabled' : ''}>${mpBusy ? '处理中…' : '放入'}</button>
+          </div>
+          <div class="stake-amount-hint">最多 ${fmtA(enterMax)} AIX · 锁 <b style="color:#f6c454">${nextHours}h</b> → 到期 <b style="color:#50d2b8">2×</b> 可用额度</div>
+        </div>
+      </div>
+
+      <div class="mp-sec-title">📒 已使用的匹配池 <span>${(mp.entries || []).length} 条 · 到期自动发放到资产账户</span></div>
+      <div class="mp-entries">${entriesHtml}</div>
+
+      <div class="mp-sec-title">🧾 涡轮额度购买记录 <span>${(mp.purchases || []).length} 条</span></div>
+      <div class="portal-table-wrap" style="margin-top:10px">
+        <table class="portal-table">
+          <thead><tr><th>支付</th><th>获得</th><th>成交价</th><th>时间</th></tr></thead>
+          <tbody>${purchaseRows}</tbody>
+        </table>
+      </div>`;
+  }
+
+  // 剩余时间倒计时：每 30s 就地刷新，不重绘表单
+  function startMpTicker() {
+    if (mpTicker) { clearInterval(mpTicker); mpTicker = null; }
+    if (currentSubTab !== 'matchpool') return;
+    mpTicker = setInterval(() => {
+      if (currentSubTab !== 'matchpool' || !document.getElementById('tab-earn')?.classList.contains('active')) {
+        clearInterval(mpTicker); mpTicker = null; return;
+      }
+      document.querySelectorAll('[data-mp-matures]').forEach(el => {
+        const remain = Number(el.getAttribute('data-mp-matures') || 0) - Date.now();
+        el.textContent = remain <= 0 ? '已到期 · 刷新页面后自动发放' : '⏱ ' + timeLeft(remain) + ' 后发放';
+      });
+    }, 30_000);
+  }
+
+  window.mpQuoteInput = () => {
+    clearTimeout(mpQuoteTimer);
+    mpQuoteTimer = setTimeout(async () => {
+      const el = document.getElementById('mp-turbo-quote');
+      const raw = String(document.getElementById('mp-usdt-input')?.value || '').trim();
+      if (!el) return;
+      if (!raw || Number(raw) <= 0) { el.textContent = '按 AIX 实时价格折算 · 站内 USDT 余额支付 · 购买需钱包签名确认'; return; }
+      try {
+        const q = await authApi('match-pool/quote?usdt=' + encodeURIComponent(raw));
+        if (document.getElementById('mp-turbo-quote') === el) el.textContent = q.hint || '';
+      } catch (e) { el.textContent = e?.message || '报价失败'; }
+    }, 400);
+  };
+
+  window.mpBuyTurbo = async () => {
+    if (mpBusy) return;
+    const usdt = normalizeStakeAmount(document.getElementById('mp-usdt-input')?.value);
+    if (!usdt) { showErr('请输入有效的 USDT 数量'); return; }
+    if (Number(usdt) < 1) { showErr('单次最少购买 1 USDT'); return; }
+    const addr = String(window.currentWalletConnection?.address || '').toLowerCase();
+    const provider = typeof connectedProvider !== 'undefined' ? connectedProvider : null;
+    if (!addr || !provider) { showErr('请先连接钱包'); return; }
+    if (!await confirmDialog('确认支付 ' + usdt + ' USDT 购买涡轮额度？按 AIX 实时价格折算，购买后不可退款。')) return;
+    mpBusy = true;
+    try {
+      const requestId = 'tbo_' + crypto.randomUUID().replaceAll('-', '');
+      const timestamp = String(Date.now());
+      const msg = 'AxiX 涡轮额度购买确认：支付 ' + usdt + ' USDT，编号 ' + requestId + '，时间：' + timestamp;
+      const signature = await provider.request({ method: 'personal_sign', params: [msg, addr] });
+      const r = await authApi('match-pool/buy-turbo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Idempotency-Key': requestId },
+        body: JSON.stringify({ usdt, timestamp, signature }),
+      });
+      showOk('购买成功：+' + r.turboOut + ' AIX 涡轮额度');
+      profileCache = await authApi('profile').catch(() => profileCache);
+      renderSubTab();
+    } catch (e) { showErr(friendlyError(e, '购买失败')); }
+    finally { mpBusy = false; }
+  };
+
+  window.mpEnterMax = () => {
+    const mp = profileCache?.matchPool;
+    const input = document.getElementById('mp-enter-input');
+    if (!mp || !input) return;
+    const max = Math.min(Number(mp.matchQuota?.available || 0), Number(mp.turboQuota || 0));
+    input.value = max > 0 ? max.toLocaleString('en-US', { maximumFractionDigits: 18, useGrouping: false }) : '';
+  };
+
+  window.mpEnterPool = async () => {
+    if (mpBusy) return;
+    const amount = normalizeStakeAmount(document.getElementById('mp-enter-input')?.value);
+    if (!amount) { showErr('请输入有效的 AIX 数量'); return; }
+    const hours = Number(profileCache?.matchPool?.nextDurationHours || 24);
+    if (!await confirmDialog('确认放入 ' + amount + ' AIX 匹配额度 + ' + amount + ' AIX 涡轮额度？锁定 ' + hours + ' 小时，到期获得 ' + (Number(amount) * 2) + ' AIX 可用额度。')) return;
+    mpBusy = true;
+    try {
+      const r = await authApi('match-pool/enter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount }),
+      });
+      showOk('已放入匹配池：锁定 ' + r.entry.durationHours + ' 小时，到期 +' + r.entry.totalA + ' AIX 可用额度');
+      profileCache = await authApi('profile').catch(() => profileCache);
+      renderSubTab();
+    } catch (e) { showErr(friendlyError(e, '放入失败')); }
+    finally { mpBusy = false; }
+  };
+
   // ── 入口分发 ──
   async function renderSubTab() {
     const host = document.getElementById('earn-content');
@@ -581,7 +836,9 @@
       case 'miner': host.innerHTML = renderMiners(); break;
       case 'staking': host.innerHTML = renderStaking(); break;
       case 'team': host.innerHTML = renderTeam(); break;
+      case 'matchpool': host.innerHTML = renderMatchPool(); break;
     }
+    startMpTicker();
   }
 
   // ── 激活 v2 ──
@@ -876,7 +1133,7 @@
     currentSubTab = tab;
     document.querySelectorAll('.earn-sub-tab').forEach(b => b.classList.remove('active'));
     document.querySelector(`.earn-sub-tab[onclick="window.earnSwitch('${tab}')"]`)?.classList.add('active');
-    if (tab === 'team') load();
+    if (tab === 'team' || tab === 'matchpool') load();
     else if (profileCache) renderSubTab();
     else load();
   };
@@ -946,9 +1203,9 @@
   }
 
   function openStakeModal(planId) {
-    const minMap = { s30: '1000', s60: '1000', s90: '1000' };
+    const minMap = { s30: '10', s60: '2000', s90: '5000' };
     const labelMap = { s30: '1号 · 30天', s60: '2号 · 60天', s90: '3号 · 90天' };
-    const min = minMap[planId] || '1000';
+    const min = minMap[planId] || '10';
     const label = labelMap[planId] || planId;
     closeStakeModal();
 

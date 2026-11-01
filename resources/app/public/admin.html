@@ -54,6 +54,7 @@
         <button type="button" data-admin-page="lottery"><span class="admin-nav-icon">🎰</span>抽奖管理</button>
         <button type="button" data-admin-page="support"><span class="admin-nav-icon">💬</span>在线客服<span id="admin-support-nav-badge" class="admin-nav-badge" hidden>0</span></button>
         <button type="button" data-admin-page="agents"><span class="admin-nav-icon">🤝</span>代理管理</button>
+        <button type="button" data-admin-page="mall"><span class="admin-nav-icon">🛍️</span>商城商户</button>
       </nav>
       <div class="admin-sidebar-account">
         <span>当前管理员</span>
@@ -304,6 +305,43 @@
           <div id="admin-agents-list"></div>
         </div>
       </section>
+      <section class="admin-page-panel" data-admin-panel="mall">
+        <div class="admin-content-block">
+          <header class="admin-list-header">
+            <div><h2>商城商户审核</h2><p>用户缴纳保证金（USDT / AIX）后进入待审核；通过后店铺开业，拒绝将自动退回保证金</p></div>
+            <div class="admin-filters">
+              <select id="admin-mall-filter">
+                <option value="pending">入驻待审核</option>
+                <option value="closing">关店待审核</option>
+                <option value="active">已通过</option>
+                <option value="rejected">已拒绝</option>
+                <option value="closed">已关店</option>
+                <option value="">全部</option>
+              </select>
+              <button class="admin-secondary-button" type="button" id="admin-mall-refresh">🔄 刷新</button>
+            </div>
+          </header>
+          <div id="admin-mall-status" class="admin-inline-status"></div>
+          <div id="admin-mall-list" style="display:grid;gap:10px;padding:18px"></div>
+        </div>
+        <div class="admin-content-block">
+          <header class="admin-list-header">
+            <div><h2>商城订单总览</h2><p>担保账户在冻资金 <b id="admin-mall-frozen" style="color:#50d2c2">—</b> AIX（已付款+已发货订单货款合计）</p></div>
+            <div class="admin-filters">
+              <select id="admin-mall-order-filter">
+                <option value="">全部状态</option>
+                <option value="paid">待发货</option>
+                <option value="shipped">已发货</option>
+                <option value="completed">已完成</option>
+                <option value="cancelled">已取消</option>
+              </select>
+              <button class="admin-secondary-button" type="button" id="admin-mall-order-refresh">🔄 刷新</button>
+            </div>
+          </header>
+          <div id="admin-mall-order-status" class="admin-inline-status"></div>
+          <div id="admin-mall-orders" style="display:grid;gap:10px;padding:18px"></div>
+        </div>
+      </section>
     </section>
   </div>
   <script src="/js/admin-dialogs.js?v=20261011-security-1"></script>
@@ -311,5 +349,6 @@
   <script src="/js/admin-lottery.js?v=20261012-admin-speed-1"></script>
   <script src="/js/operator-admin.js?v=20261021-miner-today-1"></script>
   <script src="/js/admin-agents.js?v=20261012-admin-speed-1"></script>
+  <script src="/js/admin-mall.js?v=20261031c"></script>
 </body>
 </html>

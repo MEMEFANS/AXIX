@@ -1,0 +1,114 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#090e0c"><meta name="description" content="AIX 商城商户后台：上架商品、管理订单与发货。"><title>商户后台 · AIX 商城</title><link rel="icon" href="/assets/brand/favicon-32.png"><link rel="stylesheet" href="/games/mall/mall.css?v=20261031h"></head><body>
+<svg class="icon-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="display:none"><symbol id="icon-shop" viewBox="0 0 24 24"><path d="M4 7h16l-1.5 13h-13Z"/><path d="M8 10V6a4 4 0 0 1 8 0v4"/></symbol><symbol id="icon-orders" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/><circle cx="19" cy="18" r="2"/></symbol><symbol id="icon-merchant" viewBox="0 0 24 24"><path d="M4 9h16v11H4z"/><path d="M4 9l2-4h12l2 4"/><path d="M9 20v-6h6v6"/></symbol><symbol id="icon-back" viewBox="0 0 24 24"><path d="M20 12H4m6-6-6 6 6 6"/></symbol></svg>
+
+<div class="mall-shell">
+<aside class="mall-sidebar">
+  <a class="mall-brand" href="/mall.html"><img class="logo-img" src="/assets/brand/logo.png" alt="AIX"><span><b>AIX 商城</b><small>MERCHANT</small></span></a>
+  <a class="back-link" href="/mall.html"><svg width="14" height="14"><use href="#icon-back"/></svg>返回商城</a>
+  <span class="side-label">商户后台</span>
+  <nav class="side-nav" aria-label="商户后台导航">
+    <a href="#products" data-nav="products"><svg><use href="#icon-shop"/></svg>商品管理</a>
+    <a href="#orders" data-nav="orders"><svg><use href="#icon-orders"/></svg>订单管理</a>
+  </nav>
+  <div class="side-foot"><span class="live-dot"></span>买家确认收货后货款到账</div>
+</aside>
+
+<div class="mall-workspace">
+<header class="mall-topbar">
+  <a class="mobile-brand" href="/mall-merchant.html">✦ 商户<b style="color:var(--accent-2)">后台</b></a>
+  <div class="breadcrumb">AIX 商城 <span>/</span> <b id="breadcrumb-current">商户后台</b></div>
+  <div class="topbar-actions">
+    <button id="wallet-login" class="login-button" hidden>连接钱包</button>
+    <div class="balance-pill"><span>✦</span><div><small>AIX 余额</small><b id="balance">—</b></div></div>
+  </div>
+</header>
+
+<main class="mall-main" id="main" tabindex="-1">
+
+  <!-- 未开店：申请 -->
+  <section class="view" id="view-apply" hidden>
+    <div class="page-heading"><span class="eyebrow">MERCHANT</span><h1>开通你的店铺</h1><p>缴纳保证金并提交审核，通过后开店；买家付款由平台担保，确认收货后货款结算到你的 AIX 余额。</p></div>
+    <div class="panel" id="apply-status" hidden style="margin-bottom:16px;padding:14px 18px;color:var(--muted);font-size:13px;line-height:1.7"></div>
+    <section class="panel">
+      <form id="apply-form">
+        <div class="form-grid">
+          <div class="full"><label class="field-label" for="apply-shop-name">店铺名称 <span>1–40 字</span></label><input class="input" id="apply-shop-name" maxlength="40" placeholder="给店铺起个名字" required></div>
+          <div class="full"><label class="field-label" for="apply-intro">店铺简介 <span>买家在下单时会看到</span></label><input class="input" id="apply-intro" maxlength="200" placeholder="一句话介绍你的店（选填）"></div>
+          <div class="full"><label class="field-label">开店保证金 <span>二选一，审核不通过全额退回</span></label>
+            <div class="deposit-options">
+              <label class="deposit-option"><input type="radio" name="deposit-currency" value="USDT" checked><span class="deposit-card"><b>100 USDT</b><small>从平台 USDT 余额扣除</small></span></label>
+              <label class="deposit-option"><input type="radio" name="deposit-currency" value="AIX"><span class="deposit-card"><b>5000 AIX</b><small>从平台 AIX 余额扣除</small></span></label>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top:16px"><button class="primary-button" type="submit">缴纳保证金并提交审核</button></div>
+        <p class="form-message" id="apply-message" role="status"></p>
+      </form>
+    </section>
+  </section>
+
+  <!-- 商品管理 -->
+  <section class="view" id="view-products" hidden>
+    <div class="page-heading"><span class="eyebrow">PRODUCTS</span><h1>商品管理</h1><p>上架商品并管理价格、库存与上下架状态。</p></div>
+    <div id="shop-banner"></div>
+    <section class="panel">
+      <div class="panel-title"><h2>上架新商品</h2><span>买家确认收货后货款结算到账</span></div>
+      <form id="product-form">
+        <div class="form-grid">
+          <div class="full"><label class="field-label" for="p-title">商品标题 <span>1–60 字</span></label><input class="input" id="p-title" maxlength="60" placeholder="商品名称" required></div>
+          <div class="full"><label class="field-label" for="p-summary">商品简介 <span>不超过 200 字，列表与详情顶部展示</span></label><input class="input" id="p-summary" maxlength="200" placeholder="一句话卖点，例如：全新正品 · 48 小时内发货"></div>
+          <div><label class="field-label" for="p-price">价格（AIX）<span>最多 6 位小数</span></label><input class="input" id="p-price" inputmode="decimal" placeholder="例如 12.5" required></div>
+          <div><label class="field-label" for="p-stock">库存 <span>1–999999</span></label><input class="input" id="p-stock" type="number" min="1" max="999999" placeholder="件数" required></div>
+          <div class="full"><label class="field-label" for="p-spec">规格尺寸 <span>可选，不超过 120 字</span></label><input class="input" id="p-spec" maxlength="120" placeholder="例如：尺码 S/M/L/XL · 长约 30cm · 净重 500g"></div>
+          <div class="full"><label class="field-label">商品图片 <span>http(s) 外链，最多 6 张，第 1 张为主图</span></label>
+            <div class="image-inputs" id="p-images">
+              <input class="input" data-image placeholder="主图链接 https://…">
+              <input class="input" data-image placeholder="图片 2（选填）">
+              <input class="input" data-image placeholder="图片 3（选填）">
+              <input class="input" data-image placeholder="图片 4（选填）">
+              <input class="input" data-image placeholder="图片 5（选填）">
+              <input class="input" data-image placeholder="图片 6（选填）">
+            </div>
+          </div>
+          <div class="full"><label class="field-label" for="p-desc">商品详细描述 <span>不超过 1000 字</span></label><textarea class="input" id="p-desc" rows="4" maxlength="1000" placeholder="介绍商品规格、成色、发货说明等"></textarea></div>
+        </div>
+        <div style="margin-top:16px"><button class="primary-button" type="submit">上架商品</button></div>
+        <p class="form-message" id="product-message" role="status"></p>
+      </form>
+    </section>
+    <section class="panel">
+      <div class="panel-title"><h2>在售与仓库商品</h2><span id="product-count"></span></div>
+      <div style="overflow-x:auto"><table class="mini-table" id="product-table">
+        <thead><tr><th>商品</th><th>价格 AIX</th><th>库存</th><th>已售</th><th>状态</th><th>操作</th></tr></thead>
+        <tbody id="product-rows"></tbody>
+      </table></div>
+      <div id="product-empty" class="empty-state" hidden><span>⌁</span><h3>还没有商品</h3><p>用上面的表单上架第一件商品。</p></div>
+    </section>
+  </section>
+
+  <!-- 订单管理 -->
+  <section class="view" id="view-orders" hidden>
+    <div class="page-heading"><span class="eyebrow">ORDERS</span><h1>订单管理</h1><p>买家付款由平台担保，确认收货后结算；请按买家收货地址及时发货并登记物流单号。</p></div>
+    <div class="filter-tabs" id="order-filters">
+      <button data-filter="paid" class="active">待发货</button>
+      <button data-filter="shipped">已发货</button>
+      <button data-filter="completed">已完成</button>
+      <button data-filter="all">全部</button>
+    </div>
+    <div id="orders-list"></div>
+    <div id="orders-empty" class="empty-state" hidden><span>⌁</span><h3>还没有订单</h3><p>商品上架后，买家下单会出现在这里。</p></div>
+  </section>
+
+</main>
+<footer class="mall-footer"><span><b>AIX MALL</b> 商户后台</span><a href="/mall.html">返回商城 ↗</a><span>平台担保 · 确认收货后结算</span></footer>
+</div>
+</div>
+
+<nav class="mobile-nav" aria-label="商户后台移动导航">
+  <a href="#products" data-nav="products"><svg><use href="#icon-shop"/></svg>商品</a>
+  <a href="#orders" data-nav="orders"><svg><use href="#icon-orders"/></svg>订单</a>
+</nav>
+<div class="toast" id="toast" role="status"></div>
+<script src="/vendor/wallet/connector.js"></script>
+<script type="module" src="/games/mall/merchant.js?v=20261101a"></script>
+</body></html>

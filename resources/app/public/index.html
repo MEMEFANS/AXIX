@@ -45,6 +45,7 @@
     <button class="tab-btn active" data-nav-zh="AxiX矿机" onclick="switchTab('earn')">AxiX矿机</button>
     <button class="tab-btn" data-nav-zh="积分抽奖" onclick="switchTab('points')">积分抽奖</button>
     <button class="tab-btn" id="open-game-ecosystem" onclick="openAixGames()">游戏生态</button>
+    <button class="tab-btn" id="open-aix-mall" onclick="switchTab('mall')">AIX 商城</button>
     <span class="tab-sep" aria-hidden="true"></span>
     <button class="tab-btn" data-nav-zh="现货交易" data-trade-nav="spot" onclick="openTradePage('spot')">现货交易</button>
     <button class="tab-btn" data-nav-zh="合约交易" data-trade-nav="perp" onclick="openTradePage('perp')">合约交易</button>
@@ -661,6 +662,16 @@
 </div>
 <div id="tab-a-token-trade" class="tab-panel portal-page"></div>
 <div id="tab-support" class="tab-panel portal-page"></div>
+<!-- AIX 商城：站内标签页嵌入（iframe 同源，高度自适应；商城自身页头页脚在 ?embed=1 下隐藏） -->
+<div id="tab-mall" class="tab-panel portal-page"><iframe id="mall-frame" src="/mall.html?embed=1&v=20261031g" title="AIX 商城" style="width:100%;border:0;display:block;min-height:75vh;background:transparent" loading="lazy"></iframe></div>
+<script>
+addEventListener('message', e => {
+  if (e.origin === location.origin && e.data?.type === 'mall-height') {
+    const f = document.getElementById('mall-frame');
+    if (f) f.style.height = Math.max(600, e.data.h + 4) + 'px';
+  }
+});
+</script>
 
 <div class="market-picker-backdrop" id="trade-market-picker" hidden>
   <div class="market-picker-dialog">
@@ -1424,8 +1435,8 @@
 <script defer src="/js/core.js?v=20261011-pages-1"></script>
 <script defer src="/js/wallet.js?v=20261011-pages-1"></script>
 <script defer src="/js/portal-shared.js?v=20261011-pages-1"></script>
-<script defer src="/js/page-loader.js?v=20261027-refresh-1"></script>
-<script defer src="/js/earn.js?v=20261028-stake-day-1"></script>
+<script defer src="/js/page-loader.js?v=20261031-matchpool-1"></script>
+<script defer src="/js/earn.js?v=20261031-mpui-3"></script>
 <script defer src="/js/announcement.js?v=20261017-announce-4"></script>
 <!-- Wallet scripts are independent of the chart/trading download queue. -->
 <script>

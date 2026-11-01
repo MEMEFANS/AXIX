@@ -1,0 +1,146 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#090e0c"><meta name="description" content="AIX 商城，商户上架好物，AIX 余额直接购买。"><title>AIX 商城</title><link rel="icon" href="/assets/brand/favicon-32.png"><link rel="stylesheet" href="/games/mall/mall.css?v=20261031h">
+<script>
+// 嵌入主站标签页模式（/mall.html?embed=1）：隐藏自带页头页脚（由主站框架提供），并向父页面同步内容高度
+if (new URLSearchParams(location.search).has('embed')) {
+  document.documentElement.classList.add('embedded');
+  addEventListener('load', () => {
+    document.querySelectorAll('a[href^="/mall-merchant"]').forEach(a => { a.target = '_top'; });
+    const report = () => parent.postMessage({ type: 'mall-height', h: Math.max(document.body.scrollHeight, document.documentElement.scrollHeight) }, location.origin);
+    new ResizeObserver(report).observe(document.body);
+    report();
+  });
+}
+</script></head><body>
+<svg class="icon-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="display:none"><symbol id="icon-shop" viewBox="0 0 24 24"><path d="M4 7h16l-1.5 13h-13Z"/><path d="M8 10V6a4 4 0 0 1 8 0v4"/></symbol><symbol id="icon-orders" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/><circle cx="19" cy="18" r="2"/></symbol><symbol id="icon-address" viewBox="0 0 24 24"><path d="M12 21s-7-5.5-7-11a7 7 0 0 1 14 0c0 5.5-7 11-7 11Z"/><circle cx="12" cy="10" r="2.5"/></symbol><symbol id="icon-merchant" viewBox="0 0 24 24"><path d="M4 9h16v11H4z"/><path d="M4 9l2-4h12l2 4"/><path d="M9 20v-6h6v6"/></symbol><symbol id="icon-back" viewBox="0 0 24 24"><path d="M20 12H4m6-6-6 6 6 6"/></symbol><symbol id="icon-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.8-3.8"/></symbol></svg>
+
+<!-- ══ 顶部导航 ══ -->
+<header class="shop-header">
+  <div class="shop-header-inner">
+    <a class="shop-logo" href="/mall.html"><img class="logo-img" src="/assets/brand/logo.png" alt="AIX"><span class="word">AIX<b>商城</b></span></a>
+    <div class="shop-search">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><use href="#icon-search"/></svg>
+      <input id="search-input" type="search" placeholder="搜索商品或店铺…" autocomplete="off" maxlength="40">
+    </div>
+    <nav class="shop-quicknav" aria-label="快捷入口">
+      <a href="#orders" data-nav="orders"><svg><use href="#icon-orders"/></svg>我的订单</a>
+      <a href="#address" data-nav="address"><svg><use href="#icon-address"/></svg>收货地址</a>
+      <a href="#merchant" data-nav="merchant"><svg><use href="#icon-merchant"/></svg>商户入驻</a>
+    </nav>
+    <div class="topbar-actions">
+      <button id="wallet-login" class="login-button" hidden>登录钱包</button>
+      <div class="balance-pill"><span>✦</span><div><small>AIX 余额</small><b id="balance">—</b></div></div>
+    </div>
+  </div>
+</header>
+
+<main class="shop-container" id="main" tabindex="-1">
+
+  <!-- ══ 逛商城 ══ -->
+  <section class="view" id="view-shop">
+    <div class="shop-hero">
+      <img class="hero-banner" src="/assets/mall/hero-banner-dark.jpg?v=20261031g" alt="AIX 商城" loading="eager">
+      <div class="hero-text">
+        <span class="eyebrow">AIX MALL · 官方商城</span>
+        <h1>链上好物<br>AIX 一站购齐</h1>
+        <p>商户缴纳保证金开店，平台担保交易：确认收货后货款才结算给商户，购物更安心。</p>
+        <div class="hero-actions">
+          <a class="hero-cta" href="#shop" id="hero-cta">立即选购 ↓</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="shop-toolbar" id="shop-toolbar">
+      <div class="toolbar-title"><h2>为你推荐</h2><span id="result-count"></span></div>
+      <div class="sort-tabs" id="sort-tabs">
+        <button data-sort="default" class="active">综合</button>
+        <button data-sort="sold">销量优先</button>
+        <button data-sort="priceAsc">价格从低到高</button>
+        <button data-sort="priceDesc">价格从高到低</button>
+      </div>
+    </div>
+
+    <div id="shop-grid" class="mall-grid"></div>
+    <div id="shop-empty" class="empty-state" hidden><span>✦</span><h3>没有找到相关商品</h3><p>换个关键词试试，或<a href="#merchant" style="color:var(--accent-2)">申请开店上架第一件商品 ↗</a></p></div>
+  </section>
+
+  <!-- ══ 商品详情（JS 渲染） ══ -->
+  <section class="view" id="view-product" hidden></section>
+
+  <!-- ══ 我的订单 ══ -->
+  <section class="view" id="view-orders" hidden>
+    <div class="page-heading"><span class="eyebrow">ORDERS</span><h1>我的订单</h1><p>待发货的订单可取消并全额退款；发货后可查看物流信息，收货后请确认。</p></div>
+    <div class="filter-tabs" id="order-filters">
+      <button data-filter="all" class="active">全部</button>
+      <button data-filter="paid">待发货</button>
+      <button data-filter="shipped">已发货</button>
+      <button data-filter="completed">已完成</button>
+      <button data-filter="cancelled">已取消</button>
+    </div>
+    <div id="orders-list"></div>
+    <div id="orders-empty" class="empty-state" hidden><span>⌁</span><h3>还没有订单</h3><p>去商城挑一件想要的商品。<a href="#shop" style="color:var(--accent-2)">逛商城 ↗</a></p></div>
+  </section>
+
+  <!-- ══ 收货地址 ══ -->
+  <section class="view" id="view-address" hidden>
+    <div class="page-heading"><span class="eyebrow">ADDRESSES</span><h1>收货地址</h1><p>保存常用地址，下单时直接选择；最多 10 条。</p></div>
+    <div id="address-grid" class="addr-grid"></div>
+    <div id="address-empty" class="empty-state" hidden><span>⌖</span><h3>还没有收货地址</h3><p>添加第一个地址，下单时会自动设为默认。</p></div>
+    <section class="panel" style="margin-top:18px"><div class="panel-title"><h2>新增收货地址</h2><span>保存在你的平台账户</span></div>
+      <form id="address-form">
+        <div class="form-grid">
+          <div><label class="field-label" for="addr-receiver">收货人</label><input class="input" id="addr-receiver" maxlength="30" autocomplete="name" required></div>
+          <div><label class="field-label" for="addr-phone">联系电话</label><input class="input" id="addr-phone" maxlength="20" autocomplete="tel" placeholder="收件人电话" required></div>
+          <div class="full"><label class="field-label" for="addr-region">所在地区 <span>省 / 市 / 区</span></label><input class="input" id="addr-region" maxlength="60" placeholder="例如：广东省 深圳市 南山区" required></div>
+          <div class="full"><label class="field-label" for="addr-detail">详细地址</label><input class="input" id="addr-detail" maxlength="200" placeholder="街道、门牌号、楼层等" required></div>
+          <div class="full"><label style="display:flex;align-items:center;gap:8px;color:var(--muted);font-size:13px;margin-top:6px"><input type="checkbox" id="addr-default" checked>设为默认地址</label></div>
+        </div>
+        <div style="margin-top:16px"><button class="primary-button" type="submit">保存地址</button></div>
+        <p class="form-message" id="address-message" role="status"></p>
+      </form>
+    </section>
+  </section>
+
+  <!-- ══ 商户入驻 ══ -->
+  <section class="view" id="view-merchant" hidden>
+    <div class="page-heading"><span class="eyebrow">MERCHANT</span><h1>商户入驻</h1><p>缴纳保证金并提交审核，通过后即可开店上架商品；买家付款由平台担保，确认收货后货款结算到你的 AIX 余额。</p></div>
+    <div id="merchant-existing" hidden>
+      <div class="shop-banner"><div class="shop-avatar" id="my-shop-avatar">店</div><div><h2 id="my-shop-name"></h2><p id="my-shop-intro"></p></div><div style="margin-left:auto"><a class="primary-button" href="/mall-merchant.html">进入商户后台 ↗</a></div></div>
+    </div>
+    <div id="merchant-pending" hidden>
+      <section class="panel" style="text-align:center;padding:36px 24px">
+        <h2>入驻申请审核中</h2>
+        <p style="color:var(--muted);margin-top:10px">保证金已缴纳并冻结，平台审核通过后即可开店上架商品。<br>若审核未通过，保证金将全额原路退回。</p>
+      </section>
+    </div>
+    <section class="panel" id="merchant-apply">
+      <div class="panel-title"><h2>申请开店</h2><span>平台审核 · 需缴纳保证金</span></div>
+      <form id="apply-form">
+        <div class="form-grid">
+          <div class="full"><label class="field-label" for="apply-shop-name">店铺名称 <span>1–40 字</span></label><input class="input" id="apply-shop-name" maxlength="40" placeholder="给店铺起个名字" required></div>
+          <div class="full"><label class="field-label" for="apply-intro">店铺简介 <span>买家在下单时会看到</span></label><input class="input" id="apply-intro" maxlength="200" placeholder="一句话介绍你的店（选填）"></div>
+          <div class="full"><label class="field-label">开店保证金 <span>二选一，缴纳后立即开店</span></label>
+            <div class="deposit-options">
+              <label class="deposit-option"><input type="radio" name="deposit-currency" value="USDT" checked><span class="deposit-card"><b id="deposit-usdt-amount">100 USDT</b><small>从平台 USDT 余额扣除</small></span></label>
+              <label class="deposit-option"><input type="radio" name="deposit-currency" value="AIX"><span class="deposit-card"><b id="deposit-aix-amount">5000 AIX</b><small>从平台 AIX 余额扣除</small></span></label>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top:16px"><button class="primary-button" type="submit">缴纳保证金并提交审核</button></div>
+        <p class="form-message" id="apply-message" role="status"></p>
+      </form>
+    </section>
+  </section>
+
+</main>
+
+<footer class="shop-footer">
+  <div class="shop-footer-inner">
+    <span><b>AIX MALL</b> · AIX 支付 · 平台账户</span>
+    <a href="/index.html">返回 AxiX 首页 ↗</a>
+    <a href="/games.html">游戏大厅 ↗</a>
+  </div>
+</footer>
+<div class="toast" id="toast" role="status"></div>
+<script src="/vendor/wallet/connector.js"></script>
+<script type="module" src="/games/mall/main.js?v=20261031k"></script>
+</body></html>

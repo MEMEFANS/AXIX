@@ -120,8 +120,8 @@ export function createATokenOrderService({ aTokenService, database, teamService,
     }
     if (BigInt(order.input_a_units || '0') > 0n) {
       at.creditA(wallet, BigInt(order.input_a_units));
-      // 撤单返还已占用的可卖额度（旧单未占用过额度时 used 归零，不会凭空发放额度）
-      try { db.refundATokenSellQuota?.(wallet, BigInt(order.input_a_units)); } catch {}
+      // 撤单返还已占用的可用额度（旧单未占用过额度时 used 归零，不会凭空发放额度）
+      try { db.refundATokenUsableQuota?.(wallet, BigInt(order.input_a_units)); } catch {}
     }
   }
 
@@ -240,15 +240,15 @@ export function createATokenOrderService({ aTokenService, database, teamService,
         throw new Error(`A 币可用余额不足：需 ${formatUnits(a, A_TOKEN_DECIMALS)} A`);
       }
       if (a < MIN_SELL_A) throw new Error(`AIX 卖出最低 ${formatUnits(MIN_SELL_A, A_TOKEN_DECIMALS)} 个起，买入不限制`);
-      // 2026-10-25：只有质押释放的产出（本金滴灌+利息）才可以卖，其他来源的 AIX 不能挂卖
-      const quotaSnapshot = db.getATokenSellQuota(wallet);
+      // 2026-10-31 匹配池规则：只有经匹配池转换的「可用额度」才可以卖，质押产出（匹配额度）不能直接挂卖
+      const quotaSnapshot = db.getATokenUsableQuota(wallet);
       const quotaAvailable = BigInt(quotaSnapshot.releasedUnits) - BigInt(quotaSnapshot.usedUnits);
       if (quotaAvailable < a) {
         const avail = quotaAvailable > 0n ? quotaAvailable : 0n;
-        throw new Error(`可用额度不足：只有质押释放的产出可以卖出，当前可用 ${formatUnits(avail, A_TOKEN_DECIMALS)} AIX`);
+        throw new Error(`可用额度不足：可用额度需通过匹配池转换获得，当前可用 ${formatUnits(avail, A_TOKEN_DECIMALS)} AIX`);
       }
       at.debitA(wallet, a);
-      db.consumeATokenSellQuota(wallet, a);
+      db.consumeATokenUsableQuota(wallet, a);
       inputAUnits = a;
     }
 
@@ -841,9 +841,9 @@ export function createATokenOrderService({ aTokenService, database, teamService,
     return { feeRateBps: Number(fee), feePct: (Number(fee) / 100).toFixed(0) + '%', directCount };
   }
 
-  // 可卖额度（2026-10-25）：只有质押释放的产出可以卖；挂单占用、撤单返还
+  // 可用额度（2026-10-31 匹配池规则）：只有经匹配池转换的可用额度可以卖；挂单占用、撤单返还
   function sellQuota(wallet) {
-    const q = db.getATokenSellQuota(String(wallet || '').toLowerCase());
+    const q = db.getATokenUsableQuota(String(wallet || '').toLowerCase());
     const released = BigInt(q.releasedUnits);
     const used = BigInt(q.usedUnits);
     const available = released > used ? released - used : 0n;

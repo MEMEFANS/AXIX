@@ -22,7 +22,7 @@ function errorCode(error) {
 }
 
 export function createATokenApi({
-  aTokenService, poolService, minerService, stakingService, transferService, activationService, klineService, orderService, withdrawalService, claimService, walletService, teamService,
+  aTokenService, poolService, minerService, stakingService, transferService, activationService, klineService, orderService, withdrawalService, claimService, walletService, teamService, matchPoolService,
   send, readBody, getSession, withAccountLock = (addr, op) => op(),
 }) {
   const RATE_LIMIT_KEY = 'a-token-mutation';
@@ -140,8 +140,10 @@ export function createATokenApi({
         try { prof.locked = orderService?.myLocks?.(session.address) || { usdt: '0', a: '0' }; } catch { prof.locked = { usdt: '0', a: '0' }; }
         // 卖出阶梯费率档案（前端下单面板直接展示当前费率）
         try { prof.sellFee = orderService?.sellFeeProfile?.(session.address) || null; } catch { prof.sellFee = null; }
-        // 可卖额度（2026-10-25）：只有质押释放的产出可卖，前端卖出面板展示
+        // 可卖额度（2026-10-31 起 = 可用额度）：只有匹配池产出的可用额度可卖，前端卖出面板展示
         try { prof.sellQuota = orderService?.sellQuota?.(session.address) || null; } catch { prof.sellQuota = null; }
+        // 匹配池总览（匹配额度/涡轮额度/可用额度 + 锁定条目），矿机页「匹配池」tab 使用
+        try { prof.matchPool = matchPoolService?.overview?.(session.address) || null; } catch { prof.matchPool = null; }
         return send(res, 200, prof);
       }
       if (isGet && pathname === '/api/a-token/team/summary') {
@@ -186,6 +188,19 @@ export function createATokenApi({
       if (isGet && pathname === '/api/a-token/activation-request') {
         const params = new URLSearchParams(request.url?.split('?')[1] || '');
         return send(res, 200, { record: activationService.getRequest(session.address, params.get('plan'), params.get('requestId')) });
+      }
+      // ===== 匹配池（2026-10-31）=====
+      // GET /api/a-token/match-pool：总览（匹配额度/涡轮额度/可用额度 + 条目 + 购买记录）
+      if (isGet && pathname === '/api/a-token/match-pool') {
+        if (!matchPoolService) return send(res, 503, { error: '匹配池未启用', code: 'MATCH_POOL_DISABLED' });
+        return send(res, 200, matchPoolService.overview(session.address));
+      }
+      // GET /api/a-token/match-pool/quote?usdt=100：USDT → 涡轮额度报价（按 AIX 实时价）
+      if (isGet && pathname === '/api/a-token/match-pool/quote') {
+        if (!matchPoolService) return send(res, 503, { error: '匹配池未启用', code: 'MATCH_POOL_DISABLED' });
+        const sp = new URLSearchParams(request.url?.split('?')[1] || '');
+        try { return send(res, 200, matchPoolService.quoteTurbo(String(sp.get('usdt') || ''))); }
+        catch (e) { return sendError(res, e); }
       }
       // 我的委托（含 OPEN / FILLED / CANCELLED）
       if (isGet && pathname === '/api/a-token/orders') {
@@ -277,6 +292,38 @@ export function createATokenApi({
       }
       const body = await readBody(request);
 
+      // ===== 匹配池（2026-10-31）=====
+      // POST /api/a-token/match-pool/buy-turbo：USDT 一键购买涡轮额度
+      //   body: { usdt: '100', timestamp: 1730000000000, signature: '0x...' }
+      //   幂等键：header 'idempotency-key'（签名绑定编号防重放）
+      if (pathname === '/api/a-token/match-pool/buy-turbo') {
+        if (!matchPoolService) return send(res, 503, { error: '匹配池未启用', code: 'MATCH_POOL_DISABLED' });
+        const requestId = idempotencyKey(request);
+        try {
+          walletService.verifyOperationSignature({
+            address: session.address,
+            message: `AxiX 涡轮额度购买确认：支付 ${String(body.usdt ?? '')} USDT，编号 ${requestId}，时间：${String(body.timestamp ?? '')}`,
+            signature: String(body.signature ?? ''),
+          });
+        } catch (e) { return sendError(res, e); }
+        try {
+          const result = await withAccountLock(session.address, () => matchPoolService.buyTurbo({
+            wallet: session.address, usdtAmount: String(body.usdt ?? ''), requestId,
+          }));
+          return send(res, 200, { ok: true, ...result });
+        } catch (e) { return sendError(res, e); }
+      }
+      // POST /api/a-token/match-pool/enter：匹配额度 + 涡轮额度 1:1 放入匹配池
+      //   body: { amount: '100' }（放入的匹配额度 AIX 数量，涡轮额度自动同量配比）
+      if (pathname === '/api/a-token/match-pool/enter') {
+        if (!matchPoolService) return send(res, 503, { error: '匹配池未启用', code: 'MATCH_POOL_DISABLED' });
+        try {
+          const result = await withAccountLock(session.address, () => matchPoolService.enterPool({
+            wallet: session.address, amount: String(body.amount ?? ''),
+          }));
+          return send(res, 200, { ok: true, entry: result });
+        } catch (e) { return sendError(res, e); }
+      }
       if (pathname === '/api/a-token/quote') {
         const side = body.side === 'sell' ? 'sell' : 'buy';
         return send(res, 200, poolService.quote(side, String(body.amount ?? '')));

@@ -20,10 +20,10 @@ const bjDaySlot = (ts) => Math.floor((Number(ts) + BJ_OFFSET_MS) / DAY_MS);
 export const STAKE_PLANS = Object.freeze({
   // 活期已下线（2026-10-25）：存量已退本金结清，仅保留配置供历史记录展示
   current: { planId:'current', label:'活期', days:0, dailyRateBps:30, minUnits:(100n * A_UNIT).toString(), flexible:true },
-  // 2026-10-25 起三档统一 1000 A 起步
-  s30: { planId:'s30', label:'1号 30天', days:30, dailyRateBps:80, minUnits:(1000n * A_UNIT).toString(), flexible:false },
-  s60: { planId:'s60', label:'2号 60天', days:60, dailyRateBps:100, minUnits:(1000n * A_UNIT).toString(), flexible:false },
-  s90: { planId:'s90', label:'3号 90天', days:90, dailyRateBps:120, minUnits:(1000n * A_UNIT).toString(), flexible:false },
+  // 2026-10-31 起质押门槛：30天 10 A 起、60天 2000 A 起、90天 5000 A 起
+  s30: { planId:'s30', label:'1号 30天', days:30, dailyRateBps:80, minUnits:(10n * A_UNIT).toString(), flexible:false },
+  s60: { planId:'s60', label:'2号 60天', days:60, dailyRateBps:100, minUnits:(2000n * A_UNIT).toString(), flexible:false },
+  s90: { planId:'s90', label:'3号 90天', days:90, dailyRateBps:120, minUnits:(5000n * A_UNIT).toString(), flexible:false },
 });
 
 export function createATokenStakingService({ aTokenService, database, teamService, clock = () => Date.now() }) {
@@ -81,7 +81,7 @@ export function createATokenStakingService({ aTokenService, database, teamServic
     if (principal > 0n) aTokenService.creditA(stake.wallet, principal);
     const granted = principal + grantedInterest;
     if (granted <= 0n) return 0n;
-    // 2026-10-25：质押释放的产出（本金滴灌 + 利息）计入可卖额度——平台上只有这部分 AIX 能挂卖
+    // 2026-10-31：质押释放的产出（本金滴灌 + 利息）计入匹配额度（原可卖额度账本）——匹配额度需经匹配池转换为可用额度后才能挂卖
     try { db.addATokenSellQuota?.(stake.wallet, granted); }
     catch (e) { console.warn(`[质押额度] ${stake.wallet} 额度累加失败:`, e?.message || e); }
     const record = { id:rewardId, stakeId:stake.id, wallet:stake.wallet, amountUnits:granted.toString(),
@@ -199,7 +199,7 @@ export function createATokenStakingService({ aTokenService, database, teamServic
 
   // 全部质押一次性退回（2026-10-25）：所有在架质押（含 30/60/90 天固定档）退还剩余未返还本金、
   // 标记结清、停止产出。已日结发放的利息不追回；未结算的零头利息不再发放。
-  // 退回的本金不计入可卖额度（可卖额度只来自质押每日释放的产出）。
+  // 退回的本金不计入匹配额度（匹配额度只来自质押每日释放的产出）。
   function refundAllStakes(now = clock()) {
     const all = db.listActiveATokenStakes();
     let refunded = 0;

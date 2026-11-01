@@ -10,7 +10,7 @@
   let platform = null;
   let transfersSeq = 0, revenueSeq = 0;
   let aixPriceFallback = 0, aixPriceRequest = null, platformFailed = false;
-  // 可卖额度（2026-10-25）：只有质押释放的产出可以卖，资产页 AIX 行展示
+  // 可用额度（2026-10-31 匹配池规则）：只有匹配池产出的可用额度可以卖，资产页 AIX 行展示
   let sellQuota = null, sellQuotaFor = '';
 
   function node(id) { return document.getElementById(id); }
@@ -90,7 +90,7 @@
     return { symbol, available, frozen, total, valuation:total * price };
   }
 
-  // 可卖额度（2026-10-25）：平台上只有质押释放的产出可以卖出，资产页 AIX 行同步展示
+  // 可用额度（2026-10-31 匹配池规则）：平台上只有匹配池产出的可用额度可以卖出，资产页 AIX 行同步展示
   function ensureSellQuota() {
     const addr = String(wallet?.address || '').toLowerCase();
     if (!addr) { sellQuota = null; sellQuotaFor = ''; return; }

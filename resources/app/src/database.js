@@ -424,8 +424,9 @@ export function openDatabase(dataRoot) {
     CREATE INDEX IF NOT EXISTS a_token_team_levels_level_idx
       ON a_token_team_levels(level);
 
-    -- AIX 可卖额度（2026-10-25）：只有质押释放的产出（每日本金滴灌+利息）才能挂卖。
-    -- released_units = 累计发放的可卖额度；used_units = 已挂单占用（撤单返还）。
+    -- AIX 匹配额度（原可卖额度，2026-10-31 改名）：质押释放产出 / 游戏流水 1% / 商城货款计入。
+    -- 匹配额度不能直接挂卖，必须与涡轮额度 1:1 进匹配池，到期转成「可用额度」才能卖出。
+    -- released_units = 累计发放的匹配额度；used_units = 已进匹配池消耗。
     CREATE TABLE IF NOT EXISTS a_token_sell_quotas (
       wallet TEXT PRIMARY KEY COLLATE NOCASE,
       released_units TEXT NOT NULL DEFAULT '0',
@@ -433,6 +434,70 @@ export function openDatabase(dataRoot) {
       updated_at INTEGER NOT NULL,
       FOREIGN KEY(wallet) REFERENCES wallet_users(address)
     ) STRICT;
+
+    -- AIX 可用额度（2026-10-31）：挂卖唯一消耗对象，仅来自匹配池到期释放。
+    -- released_units = 匹配池累计放出；used_units = 已挂单占用（撤单返还）。
+    CREATE TABLE IF NOT EXISTS a_token_usable_quotas (
+      wallet TEXT PRIMARY KEY COLLATE NOCASE,
+      released_units TEXT NOT NULL DEFAULT '0',
+      used_units TEXT NOT NULL DEFAULT '0',
+      updated_at INTEGER NOT NULL,
+      FOREIGN KEY(wallet) REFERENCES wallet_users(address)
+    ) STRICT;
+
+    -- AIX 涡轮额度（2026-10-31）：USDT 按 AIX 实时价格折算购买，与匹配额度 1:1 进匹配池。
+    CREATE TABLE IF NOT EXISTS a_token_turbo_quotas (
+      wallet TEXT PRIMARY KEY COLLATE NOCASE,
+      units TEXT NOT NULL DEFAULT '0',
+      updated_at INTEGER NOT NULL,
+      FOREIGN KEY(wallet) REFERENCES wallet_users(address)
+    ) STRICT;
+
+    -- 匹配池状态（每钱包一行）：first_pool_at = 首次使用匹配池时间，
+    -- 之后无论是否使用，每过一天新放入的锁定时长 +24h（第1天24h … 第30天起封顶720h）。
+    CREATE TABLE IF NOT EXISTS a_token_match_pool_state (
+      wallet TEXT PRIMARY KEY COLLATE NOCASE,
+      first_pool_at INTEGER NOT NULL DEFAULT 0,
+      updated_at INTEGER NOT NULL,
+      FOREIGN KEY(wallet) REFERENCES wallet_users(address)
+    ) STRICT;
+
+    -- 匹配池条目：匹配额度 + 涡轮额度 1:1 锁入，到期 total_units 转入可用额度。
+    CREATE TABLE IF NOT EXISTS a_token_match_pool_entries (
+      id TEXT PRIMARY KEY,
+      wallet TEXT NOT NULL COLLATE NOCASE,
+      match_units TEXT NOT NULL,
+      turbo_units TEXT NOT NULL,
+      total_units TEXT NOT NULL,
+      duration_hours INTEGER NOT NULL,
+      created_at INTEGER NOT NULL,
+      matures_at INTEGER NOT NULL,
+      status TEXT NOT NULL DEFAULT 'locked',
+      released_at INTEGER NOT NULL DEFAULT 0,
+      payload_json TEXT NOT NULL DEFAULT '{}',
+      FOREIGN KEY(wallet) REFERENCES wallet_users(address)
+    ) STRICT;
+    CREATE INDEX IF NOT EXISTS a_token_match_pool_entries_wallet_idx
+      ON a_token_match_pool_entries(wallet, created_at DESC);
+    CREATE INDEX IF NOT EXISTS a_token_match_pool_entries_due_idx
+      ON a_token_match_pool_entries(status, matures_at);
+
+    -- 涡轮额度购买记录：request_id 幂等（同一请求重复提交不重复扣款），同时留购买流水。
+    CREATE TABLE IF NOT EXISTS a_token_turbo_purchases (
+      id TEXT PRIMARY KEY,
+      wallet TEXT NOT NULL COLLATE NOCASE,
+      request_id TEXT NOT NULL,
+      usdt_units TEXT NOT NULL,
+      turbo_units TEXT NOT NULL,
+      price_units TEXT NOT NULL,
+      created_at INTEGER NOT NULL,
+      payload_json TEXT NOT NULL DEFAULT '{}',
+      FOREIGN KEY(wallet) REFERENCES wallet_users(address)
+    ) STRICT;
+    CREATE UNIQUE INDEX IF NOT EXISTS a_token_turbo_purchases_wallet_request_unique
+      ON a_token_turbo_purchases(wallet, request_id COLLATE NOCASE);
+    CREATE INDEX IF NOT EXISTS a_token_turbo_purchases_wallet_created_idx
+      ON a_token_turbo_purchases(wallet, created_at DESC);
 
     -- 奔跑吧 AIX 押注局（2026-10-27）：开跑扣 AIX 押注，终点按距离阶梯返还；
     -- 每局流水的 1% 累计为 AIX 可卖额度（同步写入 a_token_sell_quotas）。
@@ -821,6 +886,116 @@ export function openDatabase(dataRoot) {
     ) STRICT;
     CREATE INDEX IF NOT EXISTS support_messages_ticket_created_idx
       ON support_messages(ticket_id, created_at ASC);
+
+    -- AIX 商城（2026-10-30）：商户 / 商品 / 用户收货地址 / 订单 / 订单事件流。
+    -- 商户=平台钱包账户，货款走平台 A 账本（debitA/creditA）；
+    -- 订单内嵌收货地址快照（receiver/phone/region/detail），商户发货记录物流公司与单号。
+    CREATE TABLE IF NOT EXISTS mall_merchants (
+      wallet TEXT PRIMARY KEY COLLATE NOCASE,
+      shop_name TEXT NOT NULL,
+      intro TEXT NOT NULL DEFAULT '',
+      status TEXT NOT NULL DEFAULT 'active',
+      created_at INTEGER NOT NULL,
+      updated_at INTEGER NOT NULL,
+      payload_json TEXT NOT NULL DEFAULT '{}',
+      FOREIGN KEY(wallet) REFERENCES wallet_users(address)
+    ) STRICT;
+    CREATE INDEX IF NOT EXISTS mall_merchants_status_idx
+      ON mall_merchants(status, created_at DESC);
+
+    CREATE TABLE IF NOT EXISTS mall_products (
+      id TEXT PRIMARY KEY,
+      merchant_wallet TEXT NOT NULL COLLATE NOCASE,
+      title TEXT NOT NULL,
+      description TEXT NOT NULL DEFAULT '',
+      price_units TEXT NOT NULL,
+      stock INTEGER NOT NULL DEFAULT 0,
+      sold INTEGER NOT NULL DEFAULT 0,
+      image_url TEXT NOT NULL DEFAULT '',
+      status TEXT NOT NULL DEFAULT 'active',
+      created_at INTEGER NOT NULL,
+      updated_at INTEGER NOT NULL,
+      payload_json TEXT NOT NULL DEFAULT '{}',
+      FOREIGN KEY(merchant_wallet) REFERENCES wallet_users(address)
+    ) STRICT;
+    CREATE INDEX IF NOT EXISTS mall_products_status_idx
+      ON mall_products(status, created_at DESC);
+    CREATE INDEX IF NOT EXISTS mall_products_merchant_idx
+      ON mall_products(merchant_wallet, created_at DESC);
+
+    CREATE TABLE IF NOT EXISTS mall_addresses (
+      id TEXT PRIMARY KEY,
+      wallet TEXT NOT NULL COLLATE NOCASE,
+      receiver TEXT NOT NULL,
+      phone TEXT NOT NULL,
+      region TEXT NOT NULL,
+      detail TEXT NOT NULL,
+      is_default INTEGER NOT NULL DEFAULT 0,
+      created_at INTEGER NOT NULL,
+      payload_json TEXT NOT NULL DEFAULT '{}',
+      FOREIGN KEY(wallet) REFERENCES wallet_users(address)
+    ) STRICT;
+    CREATE INDEX IF NOT EXISTS mall_addresses_wallet_idx
+      ON mall_addresses(wallet, created_at DESC);
+
+    CREATE TABLE IF NOT EXISTS mall_orders (
+      id TEXT PRIMARY KEY,
+      buyer_wallet TEXT NOT NULL COLLATE NOCASE,
+      merchant_wallet TEXT NOT NULL COLLATE NOCASE,
+      product_id TEXT NOT NULL,
+      product_title TEXT NOT NULL,
+      quantity INTEGER NOT NULL,
+      price_units TEXT NOT NULL,
+      total_units TEXT NOT NULL,
+      receiver TEXT NOT NULL,
+      phone TEXT NOT NULL,
+      region TEXT NOT NULL,
+      detail TEXT NOT NULL,
+      status TEXT NOT NULL DEFAULT 'paid',
+      ship_company TEXT NOT NULL DEFAULT '',
+      ship_tracking TEXT NOT NULL DEFAULT '',
+      shipped_at INTEGER NOT NULL DEFAULT 0,
+      completed_at INTEGER NOT NULL DEFAULT 0,
+      cancelled_at INTEGER NOT NULL DEFAULT 0,
+      created_at INTEGER NOT NULL,
+      payload_json TEXT NOT NULL DEFAULT '{}',
+      FOREIGN KEY(buyer_wallet) REFERENCES wallet_users(address)
+    ) STRICT;
+    CREATE INDEX IF NOT EXISTS mall_orders_buyer_idx
+      ON mall_orders(buyer_wallet, created_at DESC);
+    CREATE INDEX IF NOT EXISTS mall_orders_merchant_idx
+      ON mall_orders(merchant_wallet, created_at DESC);
+
+    CREATE TABLE IF NOT EXISTS mall_order_events (
+      id TEXT PRIMARY KEY,
+      order_id TEXT NOT NULL,
+      actor TEXT NOT NULL,
+      type TEXT NOT NULL,
+      note TEXT NOT NULL DEFAULT '',
+      created_at INTEGER NOT NULL,
+      payload_json TEXT NOT NULL DEFAULT '{}',
+      FOREIGN KEY(order_id) REFERENCES mall_orders(id)
+    ) STRICT;
+    CREATE INDEX IF NOT EXISTS mall_order_events_order_idx
+      ON mall_order_events(order_id, created_at ASC);
+
+    -- 买家评论：一笔 completed 订单一条，公开展示在商品详情页。
+    CREATE TABLE IF NOT EXISTS mall_reviews (
+      id TEXT PRIMARY KEY,
+      order_id TEXT NOT NULL UNIQUE,
+      product_id TEXT NOT NULL,
+      buyer_wallet TEXT NOT NULL COLLATE NOCASE,
+      merchant_wallet TEXT NOT NULL COLLATE NOCASE,
+      rating INTEGER NOT NULL,
+      content TEXT NOT NULL DEFAULT '',
+      created_at INTEGER NOT NULL,
+      payload_json TEXT NOT NULL DEFAULT '{}',
+      FOREIGN KEY(order_id) REFERENCES mall_orders(id)
+    ) STRICT;
+    CREATE INDEX IF NOT EXISTS mall_reviews_product_idx
+      ON mall_reviews(product_id, created_at DESC);
+    CREATE INDEX IF NOT EXISTS mall_reviews_buyer_idx
+      ON mall_reviews(buyer_wallet, created_at DESC);
   `);
 
   // Internal AIX payments have no chain hash. Preserve the historical NOT NULL column,
@@ -1488,6 +1663,41 @@ export function openDatabase(dataRoot) {
     (wallet,released_units,used_units,updated_at) VALUES(?,?,?,?)
     ON CONFLICT(wallet) DO UPDATE SET released_units=excluded.released_units,
     used_units=excluded.used_units,updated_at=excluded.updated_at`);
+  // 可用额度（匹配池产出，挂卖消耗）
+  const getATokenUsableQuotaStmt = db.prepare(`SELECT released_units,used_units,updated_at
+    FROM a_token_usable_quotas WHERE wallet=? COLLATE NOCASE`);
+  const upsertATokenUsableQuotaStmt = db.prepare(`INSERT INTO a_token_usable_quotas
+    (wallet,released_units,used_units,updated_at) VALUES(?,?,?,?)
+    ON CONFLICT(wallet) DO UPDATE SET released_units=excluded.released_units,
+    used_units=excluded.used_units,updated_at=excluded.updated_at`);
+  // 涡轮额度（USDT 购买的单币余额）
+  const getATokenTurboQuotaStmt = db.prepare(`SELECT units,updated_at
+    FROM a_token_turbo_quotas WHERE wallet=? COLLATE NOCASE`);
+  const upsertATokenTurboQuotaStmt = db.prepare(`INSERT INTO a_token_turbo_quotas
+    (wallet,units,updated_at) VALUES(?,?,?)
+    ON CONFLICT(wallet) DO UPDATE SET units=excluded.units,updated_at=excluded.updated_at`);
+  // 匹配池状态 + 条目
+  const getATokenMatchPoolStateStmt = db.prepare(`SELECT first_pool_at,updated_at
+    FROM a_token_match_pool_state WHERE wallet=? COLLATE NOCASE`);
+  const upsertATokenMatchPoolStateStmt = db.prepare(`INSERT INTO a_token_match_pool_state
+    (wallet,first_pool_at,updated_at) VALUES(?,?,?)
+    ON CONFLICT(wallet) DO UPDATE SET first_pool_at=excluded.first_pool_at,updated_at=excluded.updated_at`);
+  const insertATokenMatchPoolEntryStmt = db.prepare(`INSERT INTO a_token_match_pool_entries
+    (id,wallet,match_units,turbo_units,total_units,duration_hours,created_at,matures_at,status,released_at,payload_json)
+    VALUES(?,?,?,?,?,?,?,?,?,?,?)`);
+  const listATokenMatchPoolEntriesStmt = db.prepare(`SELECT * FROM a_token_match_pool_entries
+    WHERE wallet=? COLLATE NOCASE ORDER BY created_at DESC LIMIT ?`);
+  const listDueATokenMatchPoolEntriesStmt = db.prepare(`SELECT * FROM a_token_match_pool_entries
+    WHERE status='locked' AND matures_at<=? ORDER BY matures_at LIMIT ?`);
+  const markATokenMatchPoolEntryReleasedStmt = db.prepare(`UPDATE a_token_match_pool_entries
+    SET status='released',released_at=? WHERE id=? AND status='locked'`);
+  const insertATokenTurboPurchaseStmt = db.prepare(`INSERT INTO a_token_turbo_purchases
+    (id,wallet,request_id,usdt_units,turbo_units,price_units,created_at,payload_json)
+    VALUES(?,?,?,?,?,?,?,?)`);
+  const getATokenTurboPurchaseStmt = db.prepare(`SELECT * FROM a_token_turbo_purchases
+    WHERE wallet=? COLLATE NOCASE AND request_id=? COLLATE NOCASE`);
+  const listATokenTurboPurchasesStmt = db.prepare(`SELECT * FROM a_token_turbo_purchases
+    WHERE wallet=? COLLATE NOCASE ORDER BY created_at DESC LIMIT ?`);
 
   // 奔跑吧 AIX 押注局
   const insertRunAixRunStmt = db.prepare(`INSERT INTO run_aix_runs
@@ -1528,6 +1738,80 @@ export function openDatabase(dataRoot) {
     turnover_units=excluded.turnover_units,bets=hash_aix_stats.bets+1,updated_at=excluded.updated_at`);
   const getHashAixStatsStmt = db.prepare(`SELECT turnover_units,bets,updated_at
     FROM hash_aix_stats WHERE wallet=? COLLATE NOCASE`);
+
+  // ── AIX 商城 ──
+  const getMallMerchantStmt = db.prepare(`SELECT wallet,shop_name,intro,status,created_at,updated_at,payload_json
+    FROM mall_merchants WHERE wallet=? COLLATE NOCASE`);
+  const upsertMallMerchantStmt = db.prepare(`INSERT INTO mall_merchants(wallet,shop_name,intro,status,created_at,updated_at,payload_json)
+    VALUES(?,?,?,?,?,?,?) ON CONFLICT(wallet) DO UPDATE SET shop_name=excluded.shop_name,
+    intro=excluded.intro,status=excluded.status,updated_at=excluded.updated_at,payload_json=excluded.payload_json`);
+  const listMallMerchantsStmt = db.prepare(`SELECT wallet,shop_name,intro,status,created_at,updated_at,payload_json
+    FROM mall_merchants WHERE (?='' OR status=?) ORDER BY created_at DESC`);
+  const updateMallMerchantStatusStmt = db.prepare(`UPDATE mall_merchants SET status=?,updated_at=?,payload_json=? WHERE wallet=? COLLATE NOCASE`);
+  const insertMallProductStmt = db.prepare(`INSERT INTO mall_products
+    (id,merchant_wallet,title,description,price_units,stock,sold,image_url,status,created_at,updated_at,payload_json)
+    VALUES(?,?,?,?,?,?,?,?,?,?,?,?)`);
+  const updateMallProductStmt = db.prepare(`UPDATE mall_products SET title=?,description=?,price_units=?,stock=?,image_url=?,status=?,updated_at=?,payload_json=?
+    WHERE id=? AND merchant_wallet=? COLLATE NOCASE`);
+  const getMallProductStmt = db.prepare(`SELECT id,merchant_wallet,title,description,price_units,stock,sold,image_url,status,created_at,updated_at,payload_json
+    FROM mall_products WHERE id=?`);
+  const listMallProductsStmt = db.prepare(`SELECT id,merchant_wallet,title,description,price_units,stock,sold,image_url,status,created_at,updated_at,payload_json
+    FROM mall_products WHERE status='active' ORDER BY created_at DESC LIMIT ?`);
+  const listMallProductsByMerchantStmt = db.prepare(`SELECT id,merchant_wallet,title,description,price_units,stock,sold,image_url,status,created_at,updated_at,payload_json
+    FROM mall_products WHERE merchant_wallet=? COLLATE NOCASE ORDER BY created_at DESC LIMIT ?`);
+  // 原子扣库存：仅 active 且库存足够时成功（changes=0 即库存不足）
+  const consumeMallStockStmt = db.prepare(`UPDATE mall_products SET stock=stock-?,sold=sold+?,updated_at=?
+    WHERE id=? AND status='active' AND stock>=?`);
+  const restoreMallStockStmt = db.prepare(`UPDATE mall_products SET stock=stock+?,updated_at=?
+    WHERE id=?`);
+  const insertMallAddressStmt = db.prepare(`INSERT INTO mall_addresses(id,wallet,receiver,phone,region,detail,is_default,created_at,payload_json)
+    VALUES(?,?,?,?,?,?,?,?,?)`);
+  const listMallAddressesStmt = db.prepare(`SELECT id,wallet,receiver,phone,region,detail,is_default,created_at,payload_json
+    FROM mall_addresses WHERE wallet=? COLLATE NOCASE ORDER BY is_default DESC, created_at DESC`);
+  const getMallAddressStmt = db.prepare(`SELECT id,wallet,receiver,phone,region,detail,is_default,created_at,payload_json
+    FROM mall_addresses WHERE id=?`);
+  const deleteMallAddressStmt = db.prepare(`DELETE FROM mall_addresses WHERE id=? AND wallet=? COLLATE NOCASE`);
+  const clearMallDefaultAddressStmt = db.prepare(`UPDATE mall_addresses SET is_default=0 WHERE wallet=? COLLATE NOCASE`);
+  const setMallDefaultAddressStmt = db.prepare(`UPDATE mall_addresses SET is_default=1 WHERE id=? AND wallet=? COLLATE NOCASE`);
+  const insertMallOrderStmt = db.prepare(`INSERT INTO mall_orders
+    (id,buyer_wallet,merchant_wallet,product_id,product_title,quantity,price_units,total_units,
+     receiver,phone,region,detail,status,created_at,payload_json)
+    VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`);
+  const getMallOrderStmt = db.prepare(`SELECT id,buyer_wallet,merchant_wallet,product_id,product_title,quantity,price_units,total_units,
+    receiver,phone,region,detail,status,ship_company,ship_tracking,shipped_at,completed_at,cancelled_at,created_at,payload_json
+    FROM mall_orders WHERE id=?`);
+  const listMallOrdersByBuyerStmt = db.prepare(`SELECT id,buyer_wallet,merchant_wallet,product_id,product_title,quantity,price_units,total_units,
+    receiver,phone,region,detail,status,ship_company,ship_tracking,shipped_at,completed_at,cancelled_at,created_at,payload_json
+    FROM mall_orders WHERE buyer_wallet=? COLLATE NOCASE ORDER BY created_at DESC LIMIT ?`);
+  const listMallOrdersByMerchantStmt = db.prepare(`SELECT id,buyer_wallet,merchant_wallet,product_id,product_title,quantity,price_units,total_units,
+    receiver,phone,region,detail,status,ship_company,ship_tracking,shipped_at,completed_at,cancelled_at,created_at,payload_json
+    FROM mall_orders WHERE merchant_wallet=? COLLATE NOCASE ORDER BY created_at DESC LIMIT ?`);
+  const shipMallOrderStmt = db.prepare(`UPDATE mall_orders SET status='shipped',ship_company=?,ship_tracking=?,shipped_at=?
+    WHERE id=? AND status='paid'`);
+  const listMallOrdersByStatusStmt = db.prepare(`SELECT id,buyer_wallet,merchant_wallet,product_id,product_title,quantity,price_units,total_units,
+    receiver,phone,region,detail,status,ship_company,ship_tracking,shipped_at,completed_at,cancelled_at,created_at,payload_json
+    FROM mall_orders WHERE status=? ORDER BY created_at DESC LIMIT ?`);
+  const listMallShippedBeforeStmt = db.prepare(`SELECT id,buyer_wallet,merchant_wallet,product_id,product_title,quantity,price_units,total_units,
+    receiver,phone,region,detail,status,ship_company,ship_tracking,shipped_at,completed_at,cancelled_at,created_at,payload_json
+    FROM mall_orders WHERE status='shipped' AND shipped_at>0 AND shipped_at<? ORDER BY shipped_at ASC LIMIT ?`);
+  const completeMallOrderStmt = db.prepare(`UPDATE mall_orders SET status='completed',completed_at=?
+    WHERE id=? AND status='shipped'`);
+  const cancelMallOrderStmt = db.prepare(`UPDATE mall_orders SET status='cancelled',cancelled_at=?
+    WHERE id=? AND status='paid'`);
+  const insertMallOrderEventStmt = db.prepare(`INSERT INTO mall_order_events(id,order_id,actor,type,note,created_at,payload_json)
+    VALUES(?,?,?,?,?,?,?)`);
+  const listMallOrderEventsStmt = db.prepare(`SELECT id,order_id,actor,type,note,created_at,payload_json
+    FROM mall_order_events WHERE order_id=? ORDER BY created_at ASC`);
+  const insertMallReviewStmt = db.prepare(`INSERT INTO mall_reviews
+    (id,order_id,product_id,buyer_wallet,merchant_wallet,rating,content,created_at,payload_json)
+    VALUES(?,?,?,?,?,?,?,?,?)`);
+  const getMallReviewByOrderStmt = db.prepare(`SELECT id,order_id,product_id,buyer_wallet,merchant_wallet,rating,content,created_at,payload_json
+    FROM mall_reviews WHERE order_id=?`);
+  const listMallReviewsByProductStmt = db.prepare(`SELECT id,order_id,product_id,buyer_wallet,merchant_wallet,rating,content,created_at,payload_json
+    FROM mall_reviews WHERE product_id=? ORDER BY created_at DESC LIMIT ?`);
+  const listMallReviewStatsStmt = db.prepare(`SELECT product_id, COUNT(*) AS cnt, AVG(rating) AS avg_rating
+    FROM mall_reviews GROUP BY product_id`);
+  const listMallReviewedOrderIdsStmt = db.prepare(`SELECT order_id FROM mall_reviews WHERE buyer_wallet=? COLLATE NOCASE`);
 
   const insertATokenTeamReward = db.prepare(`INSERT INTO a_token_team_rewards
     (id,recipient_wallet,source_wallet,kind,level,rate_bps,amount_units,created_at,payload_json)
@@ -1879,6 +2163,16 @@ export function openDatabase(dataRoot) {
     upsertATokenSellQuotaStmt.run(String(wallet || '').toLowerCase(), released, cur.usedUnits, Date.now());
     return { releasedUnits: released, usedUnits: cur.usedUnits };
   }
+  // 回退已释放的可卖额度（如商城订单取消：货款已释放额度需同步收回，released 下限 0）
+  function reduceATokenSellQuota(wallet, units) {
+    const delta = BigInt(units || '0');
+    if (delta <= 0n) return getATokenSellQuota(wallet);
+    const cur = getATokenSellQuota(wallet);
+    let released = BigInt(cur.releasedUnits) - delta;
+    if (released < 0n) released = 0n;
+    upsertATokenSellQuotaStmt.run(String(wallet || '').toLowerCase(), released.toString(), cur.usedUnits, Date.now());
+    return { releasedUnits: released.toString(), usedUnits: cur.usedUnits };
+  }
   function consumeATokenSellQuota(wallet, units) {
     const delta = BigInt(units || '0');
     if (delta <= 0n) return getATokenSellQuota(wallet);
@@ -1895,6 +2189,120 @@ export function openDatabase(dataRoot) {
     if (used < 0n) used = 0n;
     upsertATokenSellQuotaStmt.run(String(wallet || '').toLowerCase(), cur.releasedUnits, used.toString(), Date.now());
     return { releasedUnits: cur.releasedUnits, usedUnits: used.toString() };
+  }
+  // AIX 可用额度（匹配池到期产出，挂卖唯一消耗对象）：released 累计放出，used 挂单占用
+  function getATokenUsableQuota(wallet) {
+    const row = getATokenUsableQuotaStmt.get(String(wallet || ''));
+    return row
+      ? { releasedUnits: row.released_units, usedUnits: row.used_units, updatedAt: row.updated_at }
+      : { releasedUnits: '0', usedUnits: '0', updatedAt: 0 };
+  }
+  function addATokenUsableQuota(wallet, units) {
+    const delta = BigInt(units || '0');
+    if (delta <= 0n) return getATokenUsableQuota(wallet);
+    const cur = getATokenUsableQuota(wallet);
+    const released = (BigInt(cur.releasedUnits) + delta).toString();
+    upsertATokenUsableQuotaStmt.run(String(wallet || '').toLowerCase(), released, cur.usedUnits, Date.now());
+    return { releasedUnits: released, usedUnits: cur.usedUnits };
+  }
+  function consumeATokenUsableQuota(wallet, units) {
+    const delta = BigInt(units || '0');
+    if (delta <= 0n) return getATokenUsableQuota(wallet);
+    const cur = getATokenUsableQuota(wallet);
+    const used = (BigInt(cur.usedUnits) + delta).toString();
+    upsertATokenUsableQuotaStmt.run(String(wallet || '').toLowerCase(), cur.releasedUnits, used, Date.now());
+    return { releasedUnits: cur.releasedUnits, usedUnits: used };
+  }
+  function refundATokenUsableQuota(wallet, units) {
+    const delta = BigInt(units || '0');
+    if (delta <= 0n) return getATokenUsableQuota(wallet);
+    const cur = getATokenUsableQuota(wallet);
+    let used = BigInt(cur.usedUnits) - delta;
+    if (used < 0n) used = 0n;
+    upsertATokenUsableQuotaStmt.run(String(wallet || '').toLowerCase(), cur.releasedUnits, used.toString(), Date.now());
+    return { releasedUnits: cur.releasedUnits, usedUnits: used.toString() };
+  }
+  // AIX 涡轮额度：单值余额（units 只增只减，购入+、进池-）
+  function getATokenTurboQuota(wallet) {
+    const row = getATokenTurboQuotaStmt.get(String(wallet || ''));
+    return row ? { units: row.units, updatedAt: row.updated_at } : { units: '0', updatedAt: 0 };
+  }
+  function addATokenTurboQuota(wallet, units) {
+    const delta = BigInt(units || '0');
+    if (delta <= 0n) return getATokenTurboQuota(wallet);
+    const cur = getATokenTurboQuota(wallet);
+    const next = (BigInt(cur.units) + delta).toString();
+    upsertATokenTurboQuotaStmt.run(String(wallet || '').toLowerCase(), next, Date.now());
+    return { units: next };
+  }
+  function consumeATokenTurboQuota(wallet, units) {
+    const delta = BigInt(units || '0');
+    if (delta <= 0n) return getATokenTurboQuota(wallet);
+    const cur = getATokenTurboQuota(wallet);
+    let next = BigInt(cur.units) - delta;
+    if (next < 0n) next = 0n;
+    upsertATokenTurboQuotaStmt.run(String(wallet || '').toLowerCase(), next.toString(), Date.now());
+    return { units: next.toString() };
+  }
+  // 匹配池状态：首次使用时间（用于每日 +24h 的锁定时长递增）
+  function getATokenMatchPoolState(wallet) {
+    const row = getATokenMatchPoolStateStmt.get(String(wallet || ''));
+    return row ? { firstPoolAt: Number(row.first_pool_at) || 0, updatedAt: row.updated_at }
+      : { firstPoolAt: 0, updatedAt: 0 };
+  }
+  // 仅首次写入 first_pool_at；已存在则原样返回
+  function touchATokenMatchPoolState(wallet, firstPoolAt) {
+    const cur = getATokenMatchPoolState(wallet);
+    if (cur.firstPoolAt > 0) return cur;
+    const at = Number(firstPoolAt) || Date.now();
+    upsertATokenMatchPoolStateStmt.run(String(wallet || '').toLowerCase(), at, Date.now());
+    return { firstPoolAt: at, updatedAt: Date.now() };
+  }
+  const matchPoolEntryRow = row => row && {
+    id: row.id, wallet: row.wallet, matchUnits: row.match_units, turboUnits: row.turbo_units,
+    totalUnits: row.total_units, durationHours: Number(row.duration_hours) || 0,
+    createdAt: Number(row.created_at) || 0, maturesAt: Number(row.matures_at) || 0,
+    status: row.status, releasedAt: Number(row.released_at) || 0, payload: parse(row.payload_json, {}),
+  };
+  function insertATokenMatchPoolEntry(entry) {
+    const wallet = String(entry.wallet || '').toLowerCase();
+    insertATokenMatchPoolEntryStmt.run(entry.id, wallet, entry.matchUnits, entry.turboUnits,
+      entry.totalUnits, Number(entry.durationHours) || 0, Number(entry.createdAt) || Date.now(),
+      Number(entry.maturesAt) || 0, entry.status || 'locked', Number(entry.releasedAt) || 0, json(entry));
+    return entry;
+  }
+  function listATokenMatchPoolEntries(wallet, limit = 100) {
+    return listATokenMatchPoolEntriesStmt.all(String(wallet || ''), Math.min(Math.max(Number(limit) || 100, 1), 500)).map(matchPoolEntryRow);
+  }
+  function listDueATokenMatchPoolEntries(now, limit = 200) {
+    return listDueATokenMatchPoolEntriesStmt.all(Number(now) || Date.now(), Math.min(Math.max(Number(limit) || 200, 1), 1000)).map(matchPoolEntryRow);
+  }
+  // 原子标记释放（并发下只会有一个调用成功，防止重复发放可用额度）
+  function markATokenMatchPoolEntryReleased(id, releasedAt) {
+    return markATokenMatchPoolEntryReleasedStmt.run(Number(releasedAt) || Date.now(), String(id || '')).changes > 0;
+  }
+  // 涡轮额度购买记录（幂等：wallet+request_id 唯一；冲突返回 null 表示重复请求）
+  const turboPurchaseRow = row => row && {
+    id: row.id, wallet: row.wallet, requestId: row.request_id,
+    usdtUnits: row.usdt_units, turboUnits: row.turbo_units, priceUnits: row.price_units,
+    createdAt: Number(row.created_at) || 0, payload: parse(row.payload_json, {}),
+  };
+  function insertATokenTurboPurchase(p) {
+    const wallet = String(p.wallet || '').toLowerCase();
+    try {
+      insertATokenTurboPurchaseStmt.run(p.id, wallet, String(p.requestId || ''), p.usdtUnits || '0',
+        p.turboUnits || '0', p.priceUnits || '0', Number(p.createdAt) || Date.now(), json(p));
+    } catch (e) {
+      if (String(e?.message || '').includes('UNIQUE')) return null;   // 重复 requestId：幂等命中
+      throw e;
+    }
+    return p;
+  }
+  function getATokenTurboPurchase(wallet, requestId) {
+    return turboPurchaseRow(getATokenTurboPurchaseStmt.get(String(wallet || '').toLowerCase(), String(requestId || '')));
+  }
+  function listATokenTurboPurchases(wallet, limit = 20) {
+    return listATokenTurboPurchasesStmt.all(String(wallet || '').toLowerCase(), Math.min(Math.max(Number(limit) || 20, 1), 100)).map(turboPurchaseRow);
   }
   // 奔跑吧 AIX 押注局：行存储 + 每钱包流水汇总（开跑即累计）
   const runAixRow = row => row && {
@@ -1973,6 +2381,203 @@ export function openDatabase(dataRoot) {
     const row = getHashAixStatsStmt.get(String(wallet || '').toLowerCase());
     return { turnoverUnits: row?.turnover_units || '0', bets: Number(row?.bets) || 0, updatedAt: Number(row?.updated_at) || 0 };
   }
+
+  // ── AIX 商城 ──
+  // 扩展字段（保证金/多图/规格/简介）存于 payload_json，免 schema 迁移。
+  function mallMerchantRow(row) {
+    if (!row) return null;
+    const payload = parse(row.payload_json, {}) || {};
+    return { wallet: row.wallet, shopName: row.shop_name, intro: row.intro, status: row.status,
+      deposit: payload.deposit || null,
+      createdAt: Number(row.created_at) || 0, updatedAt: Number(row.updated_at) || 0 };
+  }
+  function mallProductRow(row) {
+    if (!row) return null;
+    const payload = parse(row.payload_json, {}) || {};
+    const images = Array.isArray(payload.images) ? payload.images.filter(u => typeof u === 'string' && u) : [];
+    return { id: row.id, merchantWallet: row.merchant_wallet, title: row.title, description: row.description,
+      priceUnits: row.price_units, stock: Number(row.stock) || 0, sold: Number(row.sold) || 0,
+      imageUrl: row.image_url, images: images.length ? images : (row.image_url ? [row.image_url] : []),
+      spec: typeof payload.spec === 'string' ? payload.spec : '',
+      summary: typeof payload.summary === 'string' ? payload.summary : '',
+      status: row.status,
+      createdAt: Number(row.created_at) || 0, updatedAt: Number(row.updated_at) || 0 };
+  }
+  function mallAddressRow(row) {
+    if (!row) return null;
+    return { id: row.id, wallet: row.wallet, receiver: row.receiver, phone: row.phone,
+      region: row.region, detail: row.detail, isDefault: Number(row.is_default) === 1,
+      createdAt: Number(row.created_at) || 0 };
+  }
+  function mallOrderRow(row) {
+    if (!row) return null;
+    return { id: row.id, buyerWallet: row.buyer_wallet, merchantWallet: row.merchant_wallet,
+      productId: row.product_id, productTitle: row.product_title,
+      quantity: Number(row.quantity) || 1, priceUnits: row.price_units, totalUnits: row.total_units,
+      address: { receiver: row.receiver, phone: row.phone, region: row.region, detail: row.detail },
+      status: row.status, shipCompany: row.ship_company, shipTracking: row.ship_tracking,
+      shippedAt: Number(row.shipped_at) || 0, completedAt: Number(row.completed_at) || 0,
+      cancelledAt: Number(row.cancelled_at) || 0, createdAt: Number(row.created_at) || 0 };
+  }
+  function getMallMerchant(wallet) {
+    return mallMerchantRow(getMallMerchantStmt.get(String(wallet || '').toLowerCase()));
+  }
+  function upsertMallMerchant(merchant) {
+    const wallet = String(merchant.wallet || '').toLowerCase();
+    const existing = getMallMerchant(wallet);
+    const now = Date.now();
+    upsertMallMerchantStmt.run(wallet, String(merchant.shopName || '').trim(), String(merchant.intro || '').trim(),
+      merchant.status || 'active', existing?.createdAt || now, now, json(merchant));
+    return getMallMerchant(wallet);
+  }
+  function listMallMerchants(status = '') {
+    const s = String(status || '');
+    return listMallMerchantsStmt.all(s, s).map(mallMerchantRow);
+  }
+  function setMallMerchantStatus(wallet, status, extra = {}) {
+    const merchant = getMallMerchant(wallet);
+    if (!merchant) return null;
+    const merged = { ...merchant, ...extra, status };
+    updateMallMerchantStatusStmt.run(status, Date.now(), json(merged), String(wallet || '').toLowerCase());
+    return getMallMerchant(wallet);
+  }
+  function insertMallProduct(product) {
+    insertMallProductStmt.run(product.id, String(product.merchantWallet || '').toLowerCase(), product.title,
+      product.description || '', product.priceUnits, Number(product.stock) || 0, 0, product.imageUrl || '',
+      product.status || 'active', Number(product.createdAt) || Date.now(), Date.now(), json(product));
+    return getMallProduct(product.id);
+  }
+  function updateMallProduct(merchantWallet, fields) {
+    const product = getMallProduct(fields.id);
+    if (!product || String(product.merchantWallet).toLowerCase() !== String(merchantWallet || '').toLowerCase()) return null;
+    const merged = { ...product, ...fields };
+    updateMallProductStmt.run(fields.title ?? product.title, fields.description ?? product.description,
+      fields.priceUnits ?? product.priceUnits, Number(fields.stock ?? product.stock) || 0,
+      fields.imageUrl ?? product.imageUrl, fields.status ?? product.status, Date.now(), json(merged), fields.id,
+      String(merchantWallet || '').toLowerCase());
+    return getMallProduct(fields.id);
+  }
+  function getMallProduct(id) {
+    return mallProductRow(getMallProductStmt.get(String(id || '')));
+  }
+  function listMallProducts(limit = 200) {
+    return listMallProductsStmt.all(Math.min(Math.max(Number(limit) || 200, 1), 500)).map(mallProductRow);
+  }
+  function listMallProductsByMerchant(wallet, limit = 200) {
+    return listMallProductsByMerchantStmt.all(String(wallet || '').toLowerCase(),
+      Math.min(Math.max(Number(limit) || 200, 1), 500)).map(mallProductRow);
+  }
+  function consumeMallStock(productId, quantity) {
+    const res = consumeMallStockStmt.run(Number(quantity) || 0, Number(quantity) || 0, Date.now(),
+      String(productId || ''), Number(quantity) || 0);
+    return res.changes > 0;
+  }
+  function restoreMallStock(productId, quantity) {
+    restoreMallStockStmt.run(Number(quantity) || 0, Date.now(), String(productId || ''));
+  }
+  function insertMallAddress(address) {
+    const wallet = String(address.wallet || '').toLowerCase();
+    if (address.isDefault) clearMallDefaultAddressStmt.run(wallet);
+    insertMallAddressStmt.run(address.id, wallet, address.receiver, address.phone, address.region,
+      address.detail, address.isDefault ? 1 : 0, Number(address.createdAt) || Date.now(), json(address));
+    return mallAddressRow(getMallAddressStmt.get(address.id));
+  }
+  function listMallAddresses(wallet) {
+    return listMallAddressesStmt.all(String(wallet || '').toLowerCase()).map(mallAddressRow);
+  }
+  function getMallAddress(id) {
+    return mallAddressRow(getMallAddressStmt.get(String(id || '')));
+  }
+  function deleteMallAddress(id, wallet) {
+    const res = deleteMallAddressStmt.run(String(id || ''), String(wallet || '').toLowerCase());
+    return res.changes > 0;
+  }
+  function setMallDefaultAddress(id, wallet) {
+    const address = getMallAddress(id);
+    if (!address || String(address.wallet).toLowerCase() !== String(wallet || '').toLowerCase()) return false;
+    clearMallDefaultAddressStmt.run(String(wallet || '').toLowerCase());
+    setMallDefaultAddressStmt.run(String(id || ''), String(wallet || '').toLowerCase());
+    return true;
+  }
+  function insertMallOrder(order) {
+    insertMallOrderStmt.run(order.id, String(order.buyerWallet || '').toLowerCase(),
+      String(order.merchantWallet || '').toLowerCase(), order.productId, order.productTitle,
+      Number(order.quantity) || 1, order.priceUnits, order.totalUnits,
+      order.address?.receiver || '', order.address?.phone || '', order.address?.region || '', order.address?.detail || '',
+      order.status || 'paid', Number(order.createdAt) || Date.now(), json(order));
+    return getMallOrder(order.id);
+  }
+  function getMallOrder(id) {
+    return mallOrderRow(getMallOrderStmt.get(String(id || '')));
+  }
+  function listMallOrdersByBuyer(wallet, limit = 100) {
+    return listMallOrdersByBuyerStmt.all(String(wallet || '').toLowerCase(),
+      Math.min(Math.max(Number(limit) || 100, 1), 500)).map(mallOrderRow);
+  }
+  function listMallOrdersByMerchant(wallet, limit = 200) {
+    return listMallOrdersByMerchantStmt.all(String(wallet || '').toLowerCase(),
+      Math.min(Math.max(Number(limit) || 200, 1), 1000)).map(mallOrderRow);
+  }
+  function shipMallOrder(id, company, tracking) {
+    const res = shipMallOrderStmt.run(String(company || ''), String(tracking || ''), Date.now(), String(id || ''));
+    return res.changes > 0 ? getMallOrder(id) : null;
+  }
+  function completeMallOrder(id) {
+    const res = completeMallOrderStmt.run(Date.now(), String(id || ''));
+    return res.changes > 0 ? getMallOrder(id) : null;
+  }
+  // 管理后台：按状态列订单；自动确认：发货时间早于 cutoff 的已发货订单
+  function listMallOrdersByStatus(status, limit = 300) {
+    return listMallOrdersByStatusStmt.all(String(status || ''), Math.min(Math.max(Number(limit) || 300, 1), 1000)).map(mallOrderRow);
+  }
+  function listMallShippedBefore(cutoffTs, limit = 200) {
+    return listMallShippedBeforeStmt.all(Number(cutoffTs) || 0, Math.min(Math.max(Number(limit) || 200, 1), 1000)).map(mallOrderRow);
+  }
+  function cancelMallOrder(id) {
+    const res = cancelMallOrderStmt.run(Date.now(), String(id || ''));
+    return res.changes > 0 ? getMallOrder(id) : null;
+  }
+  function insertMallOrderEvent(event) {
+    insertMallOrderEventStmt.run(event.id, event.orderId, event.actor, event.type,
+      String(event.note || ''), Number(event.createdAt) || Date.now(), json(event));
+    return event;
+  }
+  function listMallOrderEvents(orderId) {
+    return listMallOrderEventsStmt.all(String(orderId || '')).map(row => ({
+      id: row.id, orderId: row.order_id, actor: row.actor, type: row.type, note: row.note,
+      createdAt: Number(row.created_at) || 0 }));
+  }
+  // ── 商城评论 ──
+  function mallReviewRow(row) {
+    if (!row) return null;
+    return { id: row.id, orderId: row.order_id, productId: row.product_id,
+      buyerWallet: row.buyer_wallet, merchantWallet: row.merchant_wallet,
+      rating: Number(row.rating) || 5, content: row.content, createdAt: Number(row.created_at) || 0 };
+  }
+  function insertMallReview(review) {
+    insertMallReviewStmt.run(review.id, review.orderId, review.productId,
+      String(review.buyerWallet || '').toLowerCase(), String(review.merchantWallet || '').toLowerCase(),
+      Number(review.rating) || 5, String(review.content || ''), Number(review.createdAt) || Date.now(), json(review));
+    return mallReviewRow(getMallReviewByOrderStmt.get(review.orderId));
+  }
+  function getMallReviewByOrder(orderId) {
+    return mallReviewRow(getMallReviewByOrderStmt.get(String(orderId || '')));
+  }
+  function listMallReviewsByProduct(productId, limit = 100) {
+    return listMallReviewsByProductStmt.all(String(productId || ''),
+      Math.min(Math.max(Number(limit) || 100, 1), 500)).map(mallReviewRow);
+  }
+  function listMallReviewStats() {
+    const stats = {};
+    for (const row of listMallReviewStatsStmt.all()) {
+      stats[row.product_id] = { count: Number(row.cnt) || 0, avg: Math.round((Number(row.avg_rating) || 0) * 10) / 10 };
+    }
+    return stats;
+  }
+  function listMallReviewedOrderIds(wallet) {
+    return new Set(listMallReviewedOrderIdsStmt.all(String(wallet || '').toLowerCase()).map(r => r.order_id));
+  }
+
   function insertATokenTeamRewardRow(reward) {
     const item = { ...reward };
     const res = insertATokenTeamReward.run(item.id, item.recipientWallet, item.sourceWallet,
@@ -2441,9 +3046,21 @@ export function openDatabase(dataRoot) {
     upsertATokenWithdrawalRow, getATokenWithdrawalById, getATokenWithdrawalByRequestId, listATokenWithdrawalsByWallet, listPendingATokenWithdrawals, listATokenWithdrawalsByStatus, sumATokenWithdrawalsByWalletToday,
     upsertATokenClaimRow, getATokenClaimById, listATokenClaimsByWallet, listPendingATokenClaims, sumATokenClaimsByWalletToday,
     upsertATokenTeamLevelRow, getATokenTeamLevel,
-    getATokenSellQuota, addATokenSellQuota, consumeATokenSellQuota, refundATokenSellQuota,
+    getATokenSellQuota, addATokenSellQuota, reduceATokenSellQuota, consumeATokenSellQuota, refundATokenSellQuota,
+    getATokenUsableQuota, addATokenUsableQuota, consumeATokenUsableQuota, refundATokenUsableQuota,
+    getATokenTurboQuota, addATokenTurboQuota, consumeATokenTurboQuota,
+    getATokenMatchPoolState, touchATokenMatchPoolState,
+    insertATokenMatchPoolEntry, listATokenMatchPoolEntries, listDueATokenMatchPoolEntries, markATokenMatchPoolEntryReleased,
+    insertATokenTurboPurchase, getATokenTurboPurchase, listATokenTurboPurchases,
     insertRunAixRun, getRunAixRun, getPendingRunAixRun, settleRunAixRun, updateRunAixPayload, listRunAixRuns, getRunAixStats,
     getHashAixSeed, upsertHashAixSeed, insertHashAixBet, listHashAixBets, getHashAixStats,
+    getMallMerchant, upsertMallMerchant, listMallMerchants, setMallMerchantStatus, insertMallProduct, updateMallProduct, getMallProduct,
+    listMallProducts, listMallProductsByMerchant, consumeMallStock, restoreMallStock,
+    insertMallAddress, listMallAddresses, getMallAddress, deleteMallAddress, setMallDefaultAddress,
+    insertMallOrder, getMallOrder, listMallOrdersByBuyer, listMallOrdersByMerchant,
+    listMallOrdersByStatus, listMallShippedBefore,
+    shipMallOrder, completeMallOrder, cancelMallOrder, insertMallOrderEvent, listMallOrderEvents,
+    insertMallReview, getMallReviewByOrder, listMallReviewsByProduct, listMallReviewStats, listMallReviewedOrderIds,
     insertATokenTeamRewardRow, listATokenTeamRewards,
     insertATokenDirectCountRewardRow, listATokenDirectCountRewards,
     listATokenTeamLevelsByLevel, listAllATokenTeamLevels,

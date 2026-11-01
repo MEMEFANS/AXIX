@@ -54,8 +54,8 @@ export function createATokenAdminApi({
         if (BigInt(order.input_usdt_units || '0') > 0n) aTokenService.creditUsdt(wallet, BigInt(order.input_usdt_units));
         if (BigInt(order.input_a_units || '0') > 0n) {
           aTokenService.creditA(wallet, BigInt(order.input_a_units));
-          // 2026-10-25：后台撤卖单时返还已占用的可卖额度
-          try { walletService.database?.refundATokenSellQuota?.(wallet, BigInt(order.input_a_units)); } catch {}
+          // 2026-10-31：后台撤卖单时返还已占用的可用额度（匹配池产出）
+          try { walletService.database?.refundATokenUsableQuota?.(wallet, BigInt(order.input_a_units)); } catch {}
         }
         const now = Date.now();
         const info = walletService.database?.markATokenOrderCancelled?.(orderId, { cancelledAt: now, updatedAt: now, reason });

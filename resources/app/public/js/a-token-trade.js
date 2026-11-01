@@ -302,7 +302,7 @@
   function quoteBoxSell() {
     const q = profile?.sellQuota;
     const quotaTxt = q?.available ? `${fmtA(q.available)} AIX` : '0 AIX';
-    return `<div class="q-row"><span>可用额度（仅质押产出可卖）</span><b style="color:#f6c454" id="q-sell-quota">${quotaTxt}</b></div>
+    return `<div class="q-row"><span>可用额度（匹配池产出）</span><b style="color:#f6c454" id="q-sell-quota">${quotaTxt}</b></div>
       <div class="q-row"><span>净得 USDT</span><b class="gain" id="q-sell-usdt">—</b></div>
       <div class="q-row"><span id="q-sell-fee-lbl">${sellFeeLabel()}</span><b class="loss" id="q-sell-fee">—</b></div>
       <div class="q-row"><span>&nbsp;&nbsp;· 销毁 (手续费50%)</span><b style="color:#f26c78" id="q-sell-burn">—</b></div>

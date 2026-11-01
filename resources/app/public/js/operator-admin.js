@@ -569,7 +569,7 @@
     ++usersRequestSeq;
     clearTimeout(userSearchTimer);
     currentPage = page;
-    const titles = { overview:'首页总览', users:'用户管理', deposits:'充值记录', tokens:'代币管理', stocks:'股票管理', agents:'代理管理', support:'在线客服', community:'社群链接', 'a-kline':'AIX 行情调控', 'a-token-balance':'AIX 代币管理', 'a-miner':'AIX 矿机管理', 'team-activations':'团队激活查询', lottery:'抽奖管理', announcement:'平台公告' };
+    const titles = { overview:'首页总览', users:'用户管理', deposits:'充值记录', tokens:'代币管理', stocks:'股票管理', agents:'代理管理', mall:'商城商户审核', support:'在线客服', community:'社群链接', 'a-kline':'AIX 行情调控', 'a-token-balance':'AIX 代币管理', 'a-miner':'AIX 矿机管理', 'team-activations':'团队激活查询', lottery:'抽奖管理', announcement:'平台公告' };
     document.querySelectorAll('[data-admin-page]').forEach(button => button.classList.toggle('active', button.dataset.adminPage === page));
     document.querySelectorAll('[data-admin-panel]').forEach(panel => panel.classList.toggle('active', panel.dataset.adminPanel === page));
     byId('admin-page-title').textContent = titles[page] || '管理后台';

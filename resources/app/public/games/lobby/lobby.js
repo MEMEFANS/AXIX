@@ -193,7 +193,7 @@ function renderStats() {
   const tiles = $('ps-tiles'), feed = $('ps-feed'); if (!tiles) return;
   // 心跳/断连瞬间保留最后已知战绩，不闪「登录后显示」；仅未登录或从未加载过时显示登录引导
   if (wallet.status === 'guest' || (wallet.status !== 'ready' && !serverRun && !serverHash)) {
-    tiles.replaceChildren(tile('钱包余额', '—', '', '登录后显示', 'gold'), tile('跑酷最远', '—', '', '登录后显示'), tile('星盘命中', '—', '', '登录后显示'), tile('可卖额度', '—', '', '流水 1% 累计', 'mint'));
+    tiles.replaceChildren(tile('钱包余额', '—', '', '登录后显示', 'gold'), tile('跑酷最远', '—', '', '登录后显示'), tile('星盘命中', '—', '', '登录后显示'), tile('匹配额度', '—', '', '流水 1% 累计', 'mint'));
     const cta = element('button', 'ps-login', wallet.status === 'loading' ? '正在检测登录…' : '登录钱包，记录你的每一局 ↗'); cta.type = 'button'; cta.onclick = requestLogin;
     feed.replaceChildren(cta); return;
   }
@@ -205,7 +205,7 @@ function renderStats() {
     tile('钱包余额', fmt(wallet.status === 'ready' ? wallet.balance : lastLobbyBalance), ' AIX', '平台 AIX 余额', 'gold'),
     tile('跑酷最远', runs.length ? String(best) : '—', runs.length ? ' m' : '', runs.length ? `近 ${runs.length} 局 · 共 ${serverRun?.runs || 0} 局` : '还没跑过，去试试'),
     tile('星盘命中', hs.recentBets ? `${Math.round(hs.wins / hs.recentBets * 100)}` : '—', hs.recentBets ? '%' : '', hs.recentBets ? `近 ${hs.recentBets} 局命中 ${hs.wins} 局` : '还没开过局'),
-    tile('可卖额度', quota ? fmt(quota.availableA) : '—', quota ? ' AIX' : '', '流水 1% 自动累计', 'mint'),
+    tile('匹配额度', quota ? fmt(quota.availableA) : '—', quota ? ' AIX' : '', '流水 1% 自动累计', 'mint'),
   );
   const events = [
     ...runs.map(run => ({ at: run.settledAt || run.startedAt, text: `跑酷 ${run.distance} m`, detail: `押 ${fmt(run.stakeA)} → 返 ${fmt(run.payoutA)}`, up: Number(run.payoutA) >= Number(run.stakeA) })),

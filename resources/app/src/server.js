@@ -48,9 +48,11 @@ import { createATokenTransferService } from './a-token-transfer-service.js';
 import { createATokenActivationService } from './a-token-activation-service.js';
 import { createATokenKlineService } from './a-token-kline-service.js';
 import { createATokenOrderService } from './a-token-order-service.js';
+import { createATokenMatchPoolService } from './a-token-match-pool-service.js';
 import { createATokenApi } from './a-token-api.js';
 import { createRunAixGameApi } from './run-aix-game-api.js';
 import { createHashAixGameApi } from './hash-aix-game-api.js';
+import { createMallApi } from './mall-api.js';
 import { createATokenAdminApi } from './a-token-admin-api.js';
 import { createSupportService } from './support-service.js';
 import { createSupportApi } from './support-api.js';
@@ -614,6 +616,10 @@ const aTokenOrderService = createATokenOrderService({
 const aTokenKlineService = createATokenKlineService({
   database: walletService.database, aTokenService, orderService: aTokenOrderService,
 });
+// AIX 匹配池（2026-10-31）：匹配额度（质押产出）+ 涡轮额度（USDT 购买）1:1 进池，到期出 2× 可用额度
+const aTokenMatchPoolService = createATokenMatchPoolService({
+  aTokenService, database: walletService.database,
+});
 // 启动时若任一周期 K 线 < 30 根 → 自动播种种子历史 K 线
 try { aTokenKlineService.ensureSeeded(); } catch (e) { console.error('[A币K线] 初始化种子失败', e?.message || e); }
 // A 币链上提现服务（BSC 单链，依赖 A_TOKEN_CONTRACT_ADDRESS + A_TOKEN_HOT_WALLET + A_TOKEN_HOT_PRIVATE_KEY）
@@ -677,7 +683,7 @@ const aTokenApi = createATokenApi({
       stakingService: aTokenStakingService, transferService: aTokenTransferService, activationService: aTokenActivationService,
       klineService: aTokenKlineService, orderService: aTokenOrderService, withdrawalService: aTokenWithdrawalService,
       claimService: aTokenClaimService,
-      walletService, teamService: aTokenTeamService,
+      walletService, teamService: aTokenTeamService, matchPoolService: aTokenMatchPoolService,
       send, readBody, getSession: walletSession, withAccountLock: platformApi.withAccountLock,
     });
 // 奔跑吧 AIX 押注经济（自选押注 + 距离阶梯返还 + 1% 流水转可卖额度）
@@ -690,6 +696,14 @@ const hashAixGameApi = createHashAixGameApi({
   aTokenService, database: walletService.database,
   send, readBody, getSession: walletSession, withAccountLock: platformApi.withAccountLock,
 });
+// AIX 商城（商户上架 + AIX 支付 + 收货地址 / 物流发货记录）
+const mallApi = createMallApi({
+  aTokenService, database: walletService.database, walletService,
+  send, readBody, getSession: walletSession, withAccountLock: platformApi.withAccountLock,
+});
+// 商城超时自动确认收货：启动 1 分钟后先跑一轮，之后每 10 分钟扫描（发货满 15 天自动结算给商户）
+setTimeout(() => { try { mallApi.autoConfirmStaleOrders(); } catch (e) { console.error('[AIX商城] 自动确认任务异常:', e?.message || e); } }, 60 * 1000);
+setInterval(() => { try { mallApi.autoConfirmStaleOrders(); } catch (e) { console.error('[AIX商城] 自动确认任务异常:', e?.message || e); } }, 10 * 60 * 1000);
 const aTokenAdminApi = createATokenAdminApi({
   aTokenService, poolService: aTokenPoolService, minerService: aTokenMinerService,
   stakingService: aTokenStakingService, activationService: aTokenActivationService,
@@ -716,6 +730,11 @@ const aTokenMinerTimer = setInterval(() => {
 const aTokenStakeTimer = setInterval(() => {
   try { aTokenStakingService.processAll(); } catch (e) { console.error('[A币质押]', e?.message || e); }
 }, 60_000);
+// 60s 定时：匹配池到期条目释放（total → 可用额度；用户拉取总览时也会懒释放本人条目）
+const aTokenMatchPoolTimer = setInterval(() => {
+  try { aTokenMatchPoolService.releaseDue(); } catch (e) { console.error('[匹配池]', e?.message || e); }
+}, 60_000);
+aTokenMatchPoolTimer.unref?.();
 // 20s 定时：K 线实时推进 + 价格联动
 const aTokenKlineTimer = setInterval(() => {
   try { aTokenKlineService.tickLiveBar(); } catch (e) { console.error('[A币K线] tick失败', e?.message || e); }
@@ -974,7 +993,7 @@ const exHandler = makeExchangeHandler('/api/ex', exBot, exExchange, cfg.ex, exCl
 const rsHandler = makeExchangeHandler('/api/rs', rsBot, rsExchange, cfg.rs, rsClients, 'RISEx');
 
 // 游戏页需要被站内「游戏生态」弹层以同源 iframe 嵌入，其余页面维持禁止嵌入
-const GAME_PAGE_PATHS = new Set(['/games.html', '/run-aix.html', '/hash-aix.html', '/run-aix-classic.html', '/run-aix-config.html']);
+const GAME_PAGE_PATHS = new Set(['/games.html', '/run-aix.html', '/hash-aix.html', '/run-aix-classic.html', '/run-aix-config.html', '/mall.html']);
 
 // ── HTTP 服务器 ───────────────────────────────────────────────────────────────
 export const server = http.createServer(async (request, res) => {
@@ -1078,6 +1097,7 @@ export const server = http.createServer(async (request, res) => {
       if (!adminSession(request)) return send(res, 401, { error:'后台登录已失效，请重新登录', code:'ADMIN_AUTH_REQUIRED' });
       if (isLegacyFundsPath(p)) return send(res, 403, { error:'此操作已移至独立资金后台，请单独验证资金权限', code:'FUNDS_ADMIN_REQUIRED' });
       if (await supportApi.handleAdmin(request, res, p)) return;
+      if (await mallApi.handleAdmin(request, res, p)) return;
       if (await aTokenAdminApi.handle(request, res, p, { operatorSession, url, allowRequest })) return;
       if (await lotteryApi.handle(request, res, p)) return;
       // 手动触发平级奖 + A10 池日结（幂等；服务重启错过 0 点窗口时补发用）
@@ -1565,6 +1585,7 @@ export const server = http.createServer(async (request, res) => {
     if (await aTokenApi.handle(request, res, p)) return;
     if (await runAixGameApi.handle(request, res, p)) return;
     if (await hashAixGameApi.handle(request, res, p)) return;
+    if (await mallApi.handle(request, res, p)) return;
     if (await supportApi.handle(request, res, p)) return;
     if (await lotteryApi.handle(request, res, p)) return;
     // 空投积分（独立账本，登录钱包可见）
