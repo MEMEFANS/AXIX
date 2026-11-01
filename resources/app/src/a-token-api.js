@@ -195,11 +195,14 @@ export function createATokenApi({
         if (!matchPoolService) return send(res, 503, { error: '匹配池未启用', code: 'MATCH_POOL_DISABLED' });
         return send(res, 200, matchPoolService.overview(session.address));
       }
-      // GET /api/a-token/match-pool/quote?usdt=100：USDT → 涡轮额度报价（按 AIX 实时价）
+      // GET /api/a-token/match-pool/quote?aix=2000：AIX 数量 → 应付 USDT 报价（按 AIX 实时价）
       if (isGet && pathname === '/api/a-token/match-pool/quote') {
         if (!matchPoolService) return send(res, 503, { error: '匹配池未启用', code: 'MATCH_POOL_DISABLED' });
         const sp = new URLSearchParams(request.url?.split('?')[1] || '');
-        try { return send(res, 200, matchPoolService.quoteTurbo(String(sp.get('usdt') || ''))); }
+        try {
+          if (sp.get('aix')) return send(res, 200, matchPoolService.quoteTurboByA(String(sp.get('aix'))));
+          return send(res, 200, matchPoolService.quoteTurbo(String(sp.get('usdt') || '')));
+        }
         catch (e) { return sendError(res, e); }
       }
       // 我的委托（含 OPEN / FILLED / CANCELLED）
@@ -293,22 +296,25 @@ export function createATokenApi({
       const body = await readBody(request);
 
       // ===== 匹配池（2026-10-31）=====
-      // POST /api/a-token/match-pool/buy-turbo：USDT 一键购买涡轮额度
-      //   body: { usdt: '100', timestamp: 1730000000000, signature: '0x...' }
-      //   幂等键：header 'idempotency-key'（签名绑定编号防重放）
+      // POST /api/a-token/match-pool/buy-turbo：按 AIX 数量购买涡轮额度（USDT 按实时价折算）
+      //   body: { aix: '2000', timestamp: 1730000000000, signature: '0x...' }
+      //   签名金额由服务端按实时价计算（与报价一致），幂等键：header 'idempotency-key'
       if (pathname === '/api/a-token/match-pool/buy-turbo') {
         if (!matchPoolService) return send(res, 503, { error: '匹配池未启用', code: 'MATCH_POOL_DISABLED' });
         const requestId = idempotencyKey(request);
+        let cost;
+        try { cost = matchPoolService.costForA(String(body.aix ?? '')); }
+        catch (e) { return sendError(res, e); }
         try {
           walletService.verifyOperationSignature({
             address: session.address,
-            message: `AxiX 涡轮额度购买确认：支付 ${String(body.usdt ?? '')} USDT，编号 ${requestId}，时间：${String(body.timestamp ?? '')}`,
+            message: `AxiX 涡轮额度购买确认：支付 ${cost.usdtStr} USDT，编号 ${requestId}，时间：${String(body.timestamp ?? '')}`,
             signature: String(body.signature ?? ''),
           });
         } catch (e) { return sendError(res, e); }
         try {
-          const result = await withAccountLock(session.address, () => matchPoolService.buyTurbo({
-            wallet: session.address, usdtAmount: String(body.usdt ?? ''), requestId,
+          const result = await withAccountLock(session.address, () => matchPoolService.buyTurboByA({
+            wallet: session.address, aixAmount: String(body.aix ?? ''), usdtUnits: cost.usdt.toString(), requestId,
           }));
           return send(res, 200, { ok: true, ...result });
         } catch (e) { return sendError(res, e); }

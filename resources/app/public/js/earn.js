@@ -708,12 +708,12 @@
       <div class="mp-actions">
         <div class="mp-card">
           <div class="c-head"><span class="c-title">🌀 购买涡轮额度</span><span class="c-tag">$${escapeHtml(mp.priceUsdt || '0')} / AIX</span></div>
-          <label class="stake-amount-label" for="mp-usdt-input">支付 USDT 数量</label>
+          <label class="stake-amount-label" for="mp-aix-input">购买数量（AIX 涡轮额度）</label>
           <div class="stake-amount-field">
-            <input id="mp-usdt-input" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="最少 1 USDT" oninput="window.mpQuoteInput()">
+            <input id="mp-aix-input" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="输入要购买的 AIX 数量" oninput="window.mpQuoteInput()">
             <button type="button" class="mp-btn gold" style="margin:0 7px;height:40px" onclick="window.mpBuyTurbo()" ${mpBusy ? 'disabled' : ''}>${mpBusy ? '处理中…' : '一键购买'}</button>
           </div>
-          <div id="mp-turbo-quote" class="stake-amount-hint">按实时价折算 · 站内 USDT 支付 · 需钱包签名</div>
+          <div id="mp-turbo-quote" class="stake-amount-hint">按实时价折算应付 USDT · 站内余额支付 · 需钱包签名</div>
         </div>
         <div class="mp-card">
           <div class="c-head"><span class="c-title">🔒 放入匹配池</span><span class="c-tag">1 : 1 配比</span></div>
@@ -758,11 +758,11 @@
     clearTimeout(mpQuoteTimer);
     mpQuoteTimer = setTimeout(async () => {
       const el = document.getElementById('mp-turbo-quote');
-      const raw = String(document.getElementById('mp-usdt-input')?.value || '').trim();
+      const raw = String(document.getElementById('mp-aix-input')?.value || '').trim();
       if (!el) return;
-      if (!raw || Number(raw) <= 0) { el.textContent = '按 AIX 实时价格折算 · 站内 USDT 余额支付 · 购买需钱包签名确认'; return; }
+      if (!raw || Number(raw) <= 0) { el.textContent = '按实时价折算应付 USDT · 站内余额支付 · 需钱包签名'; return; }
       try {
-        const q = await authApi('match-pool/quote?usdt=' + encodeURIComponent(raw));
+        const q = await authApi('match-pool/quote?aix=' + encodeURIComponent(raw));
         if (document.getElementById('mp-turbo-quote') === el) el.textContent = q.hint || '';
       } catch (e) { el.textContent = e?.message || '报价失败'; }
     }, 400);
@@ -770,25 +770,26 @@
 
   window.mpBuyTurbo = async () => {
     if (mpBusy) return;
-    const usdt = normalizeStakeAmount(document.getElementById('mp-usdt-input')?.value);
-    if (!usdt) { showErr('请输入有效的 USDT 数量'); return; }
-    if (Number(usdt) < 1) { showErr('单次最少购买 1 USDT'); return; }
+    const aix = normalizeStakeAmount(document.getElementById('mp-aix-input')?.value);
+    if (!aix) { showErr('请输入有效的 AIX 数量'); return; }
     const addr = String(window.currentWalletConnection?.address || '').toLowerCase();
     const provider = typeof connectedProvider !== 'undefined' ? connectedProvider : null;
     if (!addr || !provider) { showErr('请先连接钱包'); return; }
-    if (!await confirmDialog('确认支付 ' + usdt + ' USDT 购买涡轮额度？按 AIX 实时价格折算，购买后不可退款。')) return;
     mpBusy = true;
     try {
+      // 先取实时报价拿到应付 USDT，签名锁定该金额；价格跳动时服务端会拒绝并提示重签
+      const q = await authApi('match-pool/quote?aix=' + encodeURIComponent(aix));
+      if (!await confirmDialog('购买 ' + q.aixIn + ' AIX 涡轮额度，需支付 ' + q.usdtOut + ' USDT（实时价 $' + q.priceUsdt + '），购买后不可退款。确认？')) return;
       const requestId = 'tbo_' + crypto.randomUUID().replaceAll('-', '');
       const timestamp = String(Date.now());
-      const msg = 'AxiX 涡轮额度购买确认：支付 ' + usdt + ' USDT，编号 ' + requestId + '，时间：' + timestamp;
+      const msg = 'AxiX 涡轮额度购买确认：支付 ' + q.usdtOut + ' USDT，编号 ' + requestId + '，时间：' + timestamp;
       const signature = await provider.request({ method: 'personal_sign', params: [msg, addr] });
       const r = await authApi('match-pool/buy-turbo', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Idempotency-Key': requestId },
-        body: JSON.stringify({ usdt, timestamp, signature }),
+        body: JSON.stringify({ aix, timestamp, signature }),
       });
-      showOk('购买成功：+' + r.turboOut + ' AIX 涡轮额度');
+      showOk('购买成功：+' + r.turboOut + ' AIX 涡轮额度（支付 ' + r.usdtIn + ' USDT）');
       profileCache = await authApi('profile').catch(() => profileCache);
       renderSubTab();
     } catch (e) { showErr(friendlyError(e, '购买失败')); }

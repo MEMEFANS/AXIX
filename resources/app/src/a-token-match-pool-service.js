@@ -22,6 +22,7 @@ const DAY_MS = 86_400_000;
 const HOUR_MS = 3_600_000;
 const MAX_DURATION_HOURS = 720;                 // 封顶 720 小时（第 30 天起）
 const MIN_TURBO_USDT = 10n ** BigInt(USDT_DECIMALS); // 单次最少购买 1 USDT
+const A_UNIT = 10n ** BigInt(A_TOKEN_DECIMALS);
 // 涡轮额度 USDT 归集地址：仅平台收款记账，不属任何真实用户。
 const TURBO_COLLECT_WALLET = '0x0000000000000000000000000000000000007db0';
 
@@ -109,6 +110,89 @@ export function createATokenMatchPoolService({ aTokenService, database, clock = 
       usdtIn: fmtU(usdt),
       turboOut: fmtA(turbo),
       priceUsdt: fmtU(price),
+      turboBalance: fmtA(db.getATokenTurboQuota(wallet).units),
+      purchaseId,
+    };
+  }
+
+  // ── 按 AIX 数量反推 USDT 成本（向上取整到 0.000001 USDT，平台不吃小数亏）──
+  function costForA(aixAmount) {
+    const a = at.parseA(aixAmount, '购买 AIX 数量');
+    if (a <= 0n) throw new Error('购买数量必须大于 0');
+    const price = at.getPriceUsdtUnits();
+    if (price <= 0n) throw new Error('当前价格无效，暂不能购买');
+    const usdt = (a * price + A_UNIT - 1n) / A_UNIT;
+    if (usdt < MIN_TURBO_USDT) {
+      throw new Error(`按实时价折算最少购买约 ${fmtA(at.usdtToA(MIN_TURBO_USDT, price))} AIX（≈${fmtU(MIN_TURBO_USDT)} USDT）`);
+    }
+    return { a, usdt, price, aixStr: fmtA(a), usdtStr: fmtU(usdt), priceStr: fmtU(price) };
+  }
+
+  // ── 涡轮额度报价：AIX 数量 → 应付 USDT（按实时价）──
+  function quoteTurboByA(aixAmount) {
+    const c = costForA(aixAmount);
+    return {
+      aixIn: c.aixStr,
+      usdtOut: c.usdtStr,
+      priceUsdt: c.priceStr,
+      hint: `按实时价 $${c.priceStr}：${c.aixStr} AIX 涡轮额度 ≈ 支付 ${c.usdtStr} USDT`,
+    };
+  }
+
+  // ── 按 AIX 数量购买涡轮额度：扣站内 USDT（签名时锁定金额）→ 平台归集地址，涡轮额度精确入账 ──
+  // requestId 幂等：同一请求重复提交直接返回首次结果，不重复扣款
+  function buyTurboByA({ wallet, aixAmount, usdtUnits, requestId }) {
+    wallet = String(wallet || '').toLowerCase();
+    const reqId = String(requestId || '').trim();
+    if (reqId) {
+      const dup = db.getATokenTurboPurchase(wallet, reqId);
+      if (dup) {
+        return {
+          aixIn: fmtA(dup.turboUnits), usdtIn: fmtU(dup.usdtUnits), turboOut: fmtA(dup.turboUnits),
+          priceUsdt: fmtU(dup.priceUnits),
+          turboBalance: fmtA(db.getATokenTurboQuota(wallet).units), purchaseId: dup.id, idempotent: true,
+        };
+      }
+    }
+    const c = costForA(aixAmount);
+    // 签名消息里锁定的金额必须与本次实时计算一致（报价到签名之间价格跳动则拒绝，让用户重签）
+    if (usdtUnits !== undefined && String(usdtUnits) !== c.usdt.toString()) {
+      throw new Error('价格已变动，请刷新报价后重新确认');
+    }
+    if (at.balanceUsdt(wallet) < c.usdt) throw new Error('USDT 可用余额不足');
+    at.debitUsdt(wallet, c.usdt);
+    try { at.creditUsdt(TURBO_COLLECT_WALLET, c.usdt); }
+    catch (e) {
+      try { at.creditUsdt(wallet, c.usdt); } catch (e2) { console.error(`[匹配池] ${wallet} 购买涡轮退款失败，需人工处理:`, e2?.message || e2); }
+      throw e;
+    }
+    const purchaseId = makeId('atp');
+    if (reqId) {
+      const inserted = db.insertATokenTurboPurchase({
+        id: purchaseId, wallet, requestId: reqId,
+        usdtUnits: c.usdt.toString(), turboUnits: c.a.toString(), priceUnits: c.price.toString(),
+        createdAt: clock(),
+      });
+      if (!inserted) {   // 并发下另一请求已入库：回吐刚扣的 USDT，按首次结果返回
+        try { at.debitUsdt(TURBO_COLLECT_WALLET, c.usdt); at.creditUsdt(wallet, c.usdt); }
+        catch (e) { console.error(`[匹配池] ${wallet} 重复购买回吐失败，需人工处理:`, e?.message || e); }
+        const dup = db.getATokenTurboPurchase(wallet, reqId);
+        if (dup) {
+          return {
+            aixIn: fmtA(dup.turboUnits), usdtIn: fmtU(dup.usdtUnits), turboOut: fmtA(dup.turboUnits),
+            priceUsdt: fmtU(dup.priceUnits),
+            turboBalance: fmtA(db.getATokenTurboQuota(wallet).units), purchaseId: dup.id, idempotent: true,
+          };
+        }
+        throw new Error('购买请求冲突，请稍后重试');
+      }
+    }
+    db.addATokenTurboQuota(wallet, c.a);
+    return {
+      aixIn: c.aixStr,
+      usdtIn: c.usdtStr,
+      turboOut: c.aixStr,
+      priceUsdt: c.priceStr,
       turboBalance: fmtA(db.getATokenTurboQuota(wallet).units),
       purchaseId,
     };
@@ -222,5 +306,5 @@ export function createATokenMatchPoolService({ aTokenService, database, clock = 
     };
   }
 
-  return { quoteTurbo, buyTurbo, enterPool, overview, releaseDue, durationHoursFor, TURBO_COLLECT_WALLET };
+  return { quoteTurbo, buyTurbo, quoteTurboByA, buyTurboByA, costForA, enterPool, overview, releaseDue, durationHoursFor, TURBO_COLLECT_WALLET };
 }

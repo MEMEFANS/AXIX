@@ -78,37 +78,39 @@ async function test() {
   check('可用额度 = 0', Number(ov0.data.usableQuota?.available) === 0);
   check('未开始计时（nextDuration=24h）', ov0.data.started === false && Number(ov0.data.nextDurationHours) === 24, JSON.stringify({ started: ov0.data.started, h: ov0.data.nextDurationHours }));
 
-  console.log('[3] 涡轮报价');
-  const quote = await api('/api/a-token/match-pool/quote?usdt=200', { cookie });
-  check('报价接口可用', quote.status === 200 && Number(quote.data.turboOut) > 0, JSON.stringify(quote.data).slice(0, 120));
-  const turboExpected = Number(quote.data.turboOut);
+  console.log('[3] 涡轮报价（按 AIX 数量 → 应付 USDT）');
+  const quote = await api('/api/a-token/match-pool/quote?aix=2000', { cookie });
+  check('报价接口可用', quote.status === 200 && Number(quote.data.usdtOut) > 0, JSON.stringify(quote.data).slice(0, 120));
+  check('报价 AIX 数量回显', quote.data.aixIn === '2000.0' || quote.data.aixIn === '2000', `got ${quote.data.aixIn}`);
   check('报价含实时价', Number(quote.data.priceUsdt) > 0, `price=${quote.data.priceUsdt}`);
-  check('报价数量足够测试（>=150）', turboExpected >= 150, `turbo=${turboExpected}（价格异常时请检查 K 线价格）`);
-  const tooSmall = await api('/api/a-token/match-pool/quote?usdt=0.5', { cookie });
-  check('低于 1 USDT 报价被拒', tooSmall.status === 400, `got ${tooSmall.status}`);
+  const usdtCost = Number(quote.data.usdtOut);
+  check('USDT 成本在种子余额内', usdtCost > 0 && usdtCost < 2000, `cost=${usdtCost}（价格异常时请检查 K 线价格）`);
+  const tooSmall = await api('/api/a-token/match-pool/quote?aix=1', { cookie });
+  check('低于 1 USDT 等值报价被拒', tooSmall.status === 400, `got ${tooSmall.status}`);
 
   console.log('[4] 购买涡轮额度（签名 + 幂等）');
-  const noSign = await api('/api/a-token/match-pool/buy-turbo', { method: 'POST', cookie, body: { usdt: '200' } });
+  const noSign = await api('/api/a-token/match-pool/buy-turbo', { method: 'POST', cookie, body: { aix: '2000' } });
   check('无签名购买被拒', noSign.status === 401 || noSign.status === 400, `got ${noSign.status}`);
   const prof0 = await api('/api/a-token/profile', { cookie });
   const usdtBefore = Number(prof0.data.balances?.USDT);
   const reqId = 'tbo_test_' + Date.now();
   const t1 = ts();
-  const sign1 = await tester.signMessage(`AxiX 涡轮额度购买确认：支付 200 USDT，编号 ${reqId}，时间：${t1}`);
+  const sign1 = await tester.signMessage(`AxiX 涡轮额度购买确认：支付 ${quote.data.usdtOut} USDT，编号 ${reqId}，时间：${t1}`);
   const bought = await api('/api/a-token/match-pool/buy-turbo', { method: 'POST', cookie,
     headers: { 'Idempotency-Key': reqId },
-    body: { usdt: '200', timestamp: t1, signature: sign1 } });
-  check('签名购买成功', bought.status === 200 && Number(bought.data.turboOut) > 0, JSON.stringify(bought.data).slice(0, 150));
-  check('到账数量与报价一致', bought.data.turboOut === quote.data.turboOut, `${bought.data.turboOut} vs ${quote.data.turboOut}`);
-  check('涡轮余额累计', Number(bought.data.turboBalance) === turboExpected, `got ${bought.data.turboBalance}`);
+    body: { aix: '2000', timestamp: t1, signature: sign1 } });
+  check('签名购买成功', bought.status === 200 && Number(bought.data.turboOut) === 2000, JSON.stringify(bought.data).slice(0, 150));
+  check('到账 AIX 数量精确 = 2000', bought.data.turboOut === '2000.0' || bought.data.turboOut === '2000', `got ${bought.data.turboOut}`);
+  check('扣款 USDT 与报价一致', bought.data.usdtIn === quote.data.usdtOut, `${bought.data.usdtIn} vs ${quote.data.usdtOut}`);
+  check('涡轮余额累计 2000', Number(bought.data.turboBalance) === 2000, `got ${bought.data.turboBalance}`);
   // 幂等重放：同编号同签名 → 不重复扣款
   const replay = await api('/api/a-token/match-pool/buy-turbo', { method: 'POST', cookie,
     headers: { 'Idempotency-Key': reqId },
-    body: { usdt: '200', timestamp: t1, signature: sign1 } });
-  check('幂等重放不重复扣款', replay.status === 200 && replay.data.idempotent === true && Number(replay.data.turboBalance) === turboExpected, JSON.stringify(replay.data).slice(0, 150));
-  // USDT 恰好扣 200（相对值断言：服务端余额为内存态，seed 重跑不影响）
+    body: { aix: '2000', timestamp: t1, signature: sign1 } });
+  check('幂等重放不重复扣款', replay.status === 200 && replay.data.idempotent === true && Number(replay.data.turboBalance) === 2000, JSON.stringify(replay.data).slice(0, 150));
+  // USDT 恰好扣报价金额（相对值断言：服务端余额为内存态，seed 重跑不影响）
   const prof1 = await api('/api/a-token/profile', { cookie });
-  check('USDT 恰好扣 200', usdtBefore - Number(prof1.data.balances?.USDT) === 200, `${usdtBefore} → ${prof1.data.balances?.USDT}`);
+  check('USDT 恰好扣报价金额', Math.abs(usdtBefore - Number(prof1.data.balances?.USDT) - usdtCost) < 1e-6, `${usdtBefore} → ${prof1.data.balances?.USDT}（报价 ${usdtCost}）`);
   const ov1 = await api('/api/a-token/match-pool', { cookie });
   check('购买记录入列', (ov1.data.purchases || []).some(p => p.id === bought.data.purchaseId));
 
@@ -128,7 +130,7 @@ async function test() {
   check('到期产出 2× = 300', Number(enter.data.entry?.totalA) === 300, `got ${enter.data.entry?.totalA}`);
   const ov2 = await api('/api/a-token/match-pool', { cookie });
   check('匹配额度扣 150', Number(ov2.data.matchQuota?.available) === 1850, `got ${ov2.data.matchQuota?.available}`);
-  check('涡轮额度扣 150', Math.abs(Number(ov2.data.turboQuota) - (turboExpected - 150)) < 1e-6, `got ${ov2.data.turboQuota}`);
+  check('涡轮额度扣 150', Number(ov2.data.turboQuota) === 1850, `got ${ov2.data.turboQuota}`);
   check('已开始计时（第 1 天）', ov2.data.started === true && Number(ov2.data.dayIndex) === 1);
   check('条目入列且为锁定态', ov2.data.entries?.[0]?.status === 'locked' && Number(ov2.data.entries?.[0]?.remainMs) > 0);
 
