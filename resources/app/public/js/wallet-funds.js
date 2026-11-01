@@ -203,14 +203,14 @@ async function submitWithdrawal() {
     if (!connectedWalletAddress || walletProfile?.address?.toLowerCase() !== connectedWalletAddress.toLowerCase()) {
       throw new Error('当前连接钱包核对失败，请重新连接钱包');
     }
-    // 最小提现金额 10 USDT 前端预校验
+    // 最小提现金额 1 USDT 前端预校验（与后端 requestWithdrawal 同口径）
     const amountRaw = $('withdraw-amount').value.trim();
     const amountNum = Number(amountRaw);
     if (!Number.isFinite(amountNum) || amountNum <= 0) {
       throw new Error('请输入有效的提现金额');
     }
-    if (amountNum < 10) {
-      throw new Error('最小提现金额为 10 USDT');
+    if (amountNum < 1) {
+      throw new Error('最小提现金额为 1 USDT');
     }
     assertMultipleOfTen(amountNum);
     const fingerprint = `${connectedWalletAddress}:${$('withdraw-network').value}:${amountRaw}`;
@@ -279,8 +279,8 @@ async function submitWithdrawal() {
             <div class="awd-status" id="uswd-status"></div>
             <div class="awd-field">
               <label>提现数量（USDT）</label>
-              <input id="uswd-amount" type="number" step="0.000001" min="0" placeholder="最小 10 USDT">
-              <div class="awd-hint" id="uswd-rule-hint">单笔最小 10 USDT · 无手续费</div>
+              <input id="uswd-amount" type="number" step="0.000001" min="0" placeholder="最小 1 USDT">
+              <div class="awd-hint" id="uswd-rule-hint">单笔最小 1 USDT · 无手续费</div>
             </div>
             <div class="awd-field">
               <label>提现网络</label>

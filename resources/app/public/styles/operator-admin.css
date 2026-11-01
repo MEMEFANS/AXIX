@@ -50,7 +50,7 @@
 .admin-sidebar-brand span { display:grid; gap:3px; }
 .admin-sidebar-brand b { font-size:13px; }
 .admin-sidebar-brand small { color:var(--admin-muted); font-size:9px; }
-.admin-navigation { display:grid; gap:4px; padding:18px 12px; }
+.admin-navigation { flex:1; min-height:0; overflow-y:auto; display:grid; gap:4px; align-content:start; padding:18px 12px; }
 .admin-navigation button { height:42px; display:flex; align-items:center; gap:11px; padding:0 12px; border:0; border-radius:4px; background:transparent; color:#9aa7a3; cursor:pointer; text-align:left; font:inherit; font-size:12px; }
 .admin-navigation button:hover { background:#141a19; color:var(--admin-text); }
 .admin-navigation button.active { background:#19302a; color:#7ee4ce; }
