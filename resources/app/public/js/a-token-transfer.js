@@ -87,8 +87,8 @@
   }
 
   // 当前钱包手续费率（bps），打开弹窗时从 /api/a-token/transfer-quote 拉取；
-  // 与 AIX 交易卖盘同一阶梯：直推 0~1→50%, 2~3→40%, 4~5→30%, 6~7→20%, 8~9→10%, ≥10→3%
-  let feeRateBps = 5000;
+  // 全站统一 3%（与 AIX 交易卖盘一致，不再按直推人数分档）
+  let feeRateBps = 300;
   let directCount = 0;
 
   function refreshFee() {
