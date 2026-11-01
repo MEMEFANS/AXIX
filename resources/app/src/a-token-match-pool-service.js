@@ -211,7 +211,7 @@ export function createATokenMatchPoolService({ aTokenService, database, clock = 
     }
     const turbo = BigInt(db.getATokenTurboQuota(wallet).units);
     if (turbo < a) {
-      throw new Error(`涡轮额度不足：需 1:1 配比 ${fmtA(a)} AIX 涡轮额度，当前 ${fmtA(turbo > 0n ? turbo : 0n)} AIX，请先用 USDT 购买`);
+      throw new Error(`涡轮额度不足：需 1:1 配比 ${fmtA(a)} AIX 涡轮额度，当前 ${fmtA(turbo > 0n ? turbo : 0n)} AIX，可用 USDT 购买或在 AIX 交易大厅买入获得`);
     }
     const now = clock();
     const state = db.touchATokenMatchPoolState(wallet, now);   // 首次使用落锚，之后每日 +24h

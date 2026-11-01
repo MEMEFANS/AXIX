@@ -452,6 +452,9 @@ export function createATokenOrderService({ aTokenService, database, teamService,
 
     // 1) 买家收 A（冻结的 USDT 直接核销给卖家）
     at.creditA(bWallet, aFill);
+    // 2026-11-02 交易大厅买到的 AIX 同步计入涡轮额度（1:1 数量），矿机匹配池可直接使用
+    try { db.addATokenTurboQuota(bWallet, aFill); }
+    catch (e) { console.error(`[交易] ${bWallet} 涡轮额度累加失败:`, e?.message || e); }
     // 2) 卖家收 USDT（其冻结的 A 中净额部分转移给买家）
     at.creditUsdt(sWallet, usdtFill);
     // 3) 手续费划扣：50% 销毁
