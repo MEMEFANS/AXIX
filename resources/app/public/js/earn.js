@@ -200,7 +200,7 @@
         <button class="earn-sub-tab${currentSubTab === 'miner' ? ' active' : ''}" onclick="window.earnSwitch('miner')">矿机</button>
         <button class="earn-sub-tab${currentSubTab === 'staking' ? ' active' : ''}" onclick="window.earnSwitch('staking')">质押</button>
         <button class="earn-sub-tab${currentSubTab === 'team' ? ' active' : ''}" onclick="window.earnSwitch('team')">团队</button>
-        <button class="earn-sub-tab${currentSubTab === 'matchpool' ? ' active' : ''}" onclick="window.earnSwitch('matchpool')">匹配池</button>
+        <button class="earn-sub-tab earn-sub-tab--matchpool${currentSubTab === 'matchpool' ? ' active' : ''}" onclick="window.earnSwitch('matchpool')">匹配池</button>
       </div>
       <div id="earn-content">${P.loading(6)}</div>
     </div>`;
