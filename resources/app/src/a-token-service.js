@@ -306,7 +306,7 @@ export function createATokenService({ database, walletService, clock = () => Dat
   // ── 余额工具 ──
   function balanceA(wallet) { return walletService.balanceUnits(wallet, 'A'); }
   function balanceUsdt(wallet) { return walletService.balanceUnits(wallet, 'USDT'); }
-  function creditA(wallet, units) { walletService.creditBalance(wallet, 'A', units); }
+  function creditA(wallet, units, options) { walletService.creditBalance(wallet, 'A', units, options); }
   // ── 产出份额入账：激活矿机/质押各占总量 50%，渠道额度挖完即停止发放（尾部截断） ──
   function mintByShare(metaKey, capUnits, wallet, units) {
     const amount = BigInt(units);
@@ -324,7 +324,7 @@ export function createATokenService({ database, walletService, clock = () => Dat
   function creditMinerA(wallet, units) { return mintByShare('minerMintedUnits', MINER_SHARE, wallet, units); }
   function creditStakingA(wallet, units) { return mintByShare('stakeMintedUnits', STAKE_SHARE, wallet, units); }
   function debitA(wallet, units) { walletService.debitBalance(wallet, 'A', units); }
-  function creditUsdt(wallet, units) { walletService.creditBalance(wallet, 'USDT', units); }
+  function creditUsdt(wallet, units, options) { walletService.creditBalance(wallet, 'USDT', units, options); }
   function debitUsdt(wallet, units) { walletService.debitBalance(wallet, 'USDT', units); }
 
   // ── profile 聚合（前端赚取/交易页用）──

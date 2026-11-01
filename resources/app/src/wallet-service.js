@@ -374,9 +374,10 @@ export function createWalletService(options = {}) {
     return amount / scale;
   }
 
-  function ensureUser(address) {
+  // ignoreBlock：后台撤单/驳回等资金返还场景需要给已封禁账户入账（解冻不能因封禁丢失）
+  function ensureUser(address, { ignoreBlock = false } = {}) {
     const checksum = normalizeAddress(address);
-    assertAccountAllowed(checksum);
+    if (!ignoreBlock) assertAccountAllowed(checksum);
     const key = checksum.toLowerCase();
     const defaultBalances = { USDT: '0', A: '0', ...Object.fromEntries(Object.keys(assets).map(s => [s, '0'])) };
     if (!state.users[key]) {
@@ -408,8 +409,8 @@ export function createWalletService(options = {}) {
     return user;
   }
 
-  function addBalance(address, symbol, units) {
-    const user = ensureUser(address);
+  function addBalance(address, symbol, units, options) {
+    const user = ensureUser(address, options);
     const current = BigInt(user.balances[symbol] || '0');
     user.balances[symbol] = (current + BigInt(units)).toString();
     user.updatedAt = nowIso();
@@ -431,11 +432,11 @@ export function createWalletService(options = {}) {
     return BigInt(user.balances[asset.symbol] || '0');
   }
 
-  function creditBalance(address, symbol, units) {
+  function creditBalance(address, symbol, units, options) {
     const asset = assetConfig(symbol);
     const amount = BigInt(units);
     if (amount < 0n) throw new Error('入账金额不能为负数');
-    addBalance(address, asset.symbol, amount);
+    addBalance(address, asset.symbol, amount, options);
     saveState();
   }
 

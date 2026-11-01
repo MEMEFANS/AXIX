@@ -51,12 +51,14 @@ export function createATokenAdminApi({
         let cancelled = 0;
         const failed = [];
         const now = Date.now();
+        // 后台强制解冻必须给已封禁账户入账，否则封禁用户被驳回的资金会丢失
+        const refundOpt = { ignoreBlock: true };
         for (const order of sells) {
           try {
             const wallet = String(order.wallet || '').toLowerCase();
-            if (BigInt(order.input_usdt_units || '0') > 0n) aTokenService.creditUsdt(wallet, BigInt(order.input_usdt_units));
+            if (BigInt(order.input_usdt_units || '0') > 0n) aTokenService.creditUsdt(wallet, BigInt(order.input_usdt_units), refundOpt);
             if (BigInt(order.input_a_units || '0') > 0n) {
-              aTokenService.creditA(wallet, BigInt(order.input_a_units));
+              aTokenService.creditA(wallet, BigInt(order.input_a_units), refundOpt);
               try { walletService.database?.refundATokenUsableQuota?.(wallet, BigInt(order.input_a_units)); } catch {}
             }
             const info = walletService.database?.markATokenOrderCancelled?.(order.id, { cancelledAt: now, updatedAt: now, reason });
@@ -76,11 +78,12 @@ export function createATokenAdminApi({
         const order = walletService.database?.getATokenOrder?.(orderId);
         if (!order) return send(res, 404, { error: '订单不存在' });
         if (order.status !== 'OPEN') return send(res, 400, { error: '仅 OPEN 状态订单可撤单' });
-        // 解冻
+        // 解冻（ignoreBlock：封禁账户也要返还冻结资金）
+        const refundOpt = { ignoreBlock: true };
         const wallet = String(order.wallet || '').toLowerCase();
-        if (BigInt(order.input_usdt_units || '0') > 0n) aTokenService.creditUsdt(wallet, BigInt(order.input_usdt_units));
+        if (BigInt(order.input_usdt_units || '0') > 0n) aTokenService.creditUsdt(wallet, BigInt(order.input_usdt_units), refundOpt);
         if (BigInt(order.input_a_units || '0') > 0n) {
-          aTokenService.creditA(wallet, BigInt(order.input_a_units));
+          aTokenService.creditA(wallet, BigInt(order.input_a_units), refundOpt);
           // 2026-10-31：后台撤卖单时返还已占用的可用额度（匹配池产出）
           try { walletService.database?.refundATokenUsableQuota?.(wallet, BigInt(order.input_a_units)); } catch {}
         }
