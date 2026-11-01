@@ -118,7 +118,7 @@
       const actions = item.symbol === 'USDT'
         ? '<button onclick="window.ExchangeAssets.openFunding(\'deposit\')">充值</button><button onclick="window.ExchangeAssets.openFunding(\'withdraw\')">提现</button>'
         : item.symbol === 'A'
-          ? '<button onclick="window.ExchangeAssets.openAix(\'transfer\',this)">互转</button><button onclick="window.ExchangeAssets.openAix(\'withdrawal\',this)">提现</button><button onclick="window.ExchangeAssets.openTrade(\'A\')">交易</button>'
+          ? '<button onclick="window.ExchangeAssets.openAix(\'withdrawal\',this)">提现</button><button onclick="window.ExchangeAssets.openTrade(\'A\')">交易</button>'
           : `<button onclick="window.ExchangeAssets.openTrade('${item.symbol}')">交易</button>`;
       const fallbackLogo = `/assets/tokens/${item.symbol.toLowerCase()}.png?v=5`;
       const quotaTip = item.symbol === 'A'

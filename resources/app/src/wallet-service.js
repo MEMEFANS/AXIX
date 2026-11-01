@@ -887,11 +887,11 @@ export function createWalletService(options = {}) {
     try { amountUnits = parseUnits(String(body.amount || '').trim(), asset.decimals); }
     catch { throw new Error('提现金额格式不正确'); }
     if (amountUnits <= 0n) throw new Error('提现金额必须大于 0');
-    // USDT 最小提现金额 10 U
-    if (asset.symbol === 'USDT' && amountUnits < parseUnits('10', asset.decimals)) {
-      throw new Error('最小提现金额为 10 USDT');
+    // USDT 最小提现金额 1 U
+    if (asset.symbol === 'USDT' && amountUnits < parseUnits('1', asset.decimals)) {
+      throw new Error('最小提现金额为 1 USDT');
     }
-    // 后台开关：开启后 USDT 提现金额必须为 10 的整数倍（10/20/30...）；关闭时仅限制 10 起提
+    // 后台开关：开启后 USDT 提现金额必须为 10 的整数倍（10/20/30...）；关闭时仅限制 1 起提
     if (asset.symbol === 'USDT' && state.withdrawalAutomation.usdtMultipleOfTen) {
       const stepUnits = parseUnits('10', asset.decimals);
       if (amountUnits % stepUnits !== 0n) {

@@ -35,8 +35,8 @@ function userFacingReason(reason) {
 // 提现规则文案：后台开启整十提现后，明确提示金额必须为 10 的整数倍
 function withdrawRuleText() {
   return walletConfig?.usdtMultipleOfTen
-    ? '单笔最小 10 USDT，且金额必须为 10 的整数倍（10/20/30…）· 无手续费'
-    : '单笔最小 10 USDT · 无手续费';
+    ? '单笔最小 1 USDT，且金额必须为 10 的整数倍（10/20/30…）· 无手续费'
+    : '单笔最小 1 USDT · 无手续费';
 }
 
 function updateWithdrawRuleHints() {
@@ -361,7 +361,7 @@ async function submitWithdrawal() {
       const amountRaw = String($('uswd-amount').value || '').trim();
       const amountNum = Number(amountRaw);
       if (!Number.isFinite(amountNum) || amountNum <= 0) throw new Error('请输入有效的提现金额');
-      if (amountNum < 10) throw new Error('最小提现金额为 10 USDT');
+      if (amountNum < 1) throw new Error('最小提现金额为 1 USDT');
       assertMultipleOfTen(amountNum);
       const network = $('uswd-network').value;
       if (!network) throw new Error('请选择提现网络');

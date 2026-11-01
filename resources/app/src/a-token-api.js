@@ -177,10 +177,9 @@ export function createATokenApi({
         return send(res, 200, { transfers: transferService.myTransfers(session.address) });
       }
       // 互转报价预览：GET /api/a-token/transfer-quote?amount=123
-      // 返回当前钱包的阶梯手续费率（按直推有效人数）与费用明细
+      // 2026-11-01 起互转功能关闭（保留历史记录查询 my-transfers）
       if (isGet && pathname === '/api/a-token/transfer-quote') {
-        const sp = new URLSearchParams(request.url?.split('?')[1] || '');
-        return send(res, 200, transferService.quote(session.address, String(sp.get('amount') || '')));
+        return send(res, 403, { error: 'AIX 互转功能已关闭', code: 'TRANSFER_DISABLED' });
       }
       if (isGet && pathname === '/api/a-token/activations') {
         return send(res, 200, { activations: activationService.listByWallet(session.address) });
@@ -437,15 +436,8 @@ export function createATokenApi({
         } catch (e) { return sendError(res, e); }
       }
       if (pathname === '/api/a-token/transfer') {
-        const requestId = idempotencyKey(request);
-        // 钱包签名确认：互转必须由用户本人钱包 personal_sign 授权（签名绑定幂等编号防重放）
-        walletService.verifyOperationSignature({
-          address: session.address,
-          message: `AxiX 互转确认：数量 ${String(body.amount ?? '')} AIX，收款方 ${String(body.toUserId ?? '')}，编号 ${requestId}，时间：${String(body.timestamp ?? '')}`,
-          signature: String(body.signature ?? ''),
-        });
-        const result = await withAccountLock(session.address, () => transferService.transferByUserId(session.address, String(body.toUserId ?? ''), String(body.amount ?? ''), requestId));
-        return send(res, 200, result);
+        // 2026-11-01 起互转功能关闭（保留历史记录查询 my-transfers）
+        return send(res, 403, { error: 'AIX 互转功能已关闭', code: 'TRANSFER_DISABLED' });
       }
       if (pathname === '/api/a-token/stake') {
         const result = await withAccountLock(session.address, () => stakingService.stake(session.address, String(body.planId ?? ''), String(body.principal ?? '')));
