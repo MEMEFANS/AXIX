@@ -208,12 +208,23 @@ export function createATokenTeamService({ database, walletService, rotationAddre
   function isBanned(address) {
     try { return Boolean(walletService?.isAccountBlocked?.(address)); } catch { return false; }
   }
+  // 团队上下文缓存（15s TTL）：activeLinks 过滤（3.4 万行 × 封禁判定）与
+  // planMinerWallets（两次 3.5 万行 SQL 扫描）原本每次团队页/快照请求都重算。
+  // 新绑定/新激活最迟 15s 后反映到团队统计（绑定与激活本身即时落库，不受影响）。
+  const TEAM_CTX_TTL_MS = 15_000;
+  let _activeLinksCache = null;
   function activeLinks() {
-    return database.listReferralLinks().filter(item => !isBanned(item.wallet) && !isBanned(item.referrerWallet));
+    if (_activeLinksCache && Date.now() - _activeLinksCache.at < TEAM_CTX_TTL_MS) return _activeLinksCache.links;
+    const links = database.listReferralLinks().filter(item => !isBanned(item.wallet) && !isBanned(item.referrerWallet));
+    _activeLinksCache = { links, at: Date.now() };
+    return links;
   }
 
   // ── 推荐树：referrer -> [直推...] 一次构建，供批量快照/递归复用 ──
+  // 按入参 links 的引用做记忆化：同一批（缓存命中的）links 只建一次树。
+  let _treeCache = null;
   function buildReferralTree(links) {
+    if (_treeCache?.links === links) return _treeCache.childrenMap;
     const childrenMap = new Map();
     for (const item of links) {
       const key = k(item.referrerWallet);
@@ -221,6 +232,7 @@ export function createATokenTeamService({ database, walletService, rotationAddre
       if (!childrenMap.has(key)) childrenMap.set(key, []);
       childrenMap.get(key).push(item.wallet);
     }
+    _treeCache = { links, childrenMap };
     return childrenMap;
   }
 
@@ -229,11 +241,15 @@ export function createATokenTeamService({ database, walletService, rotationAddre
   const VIRTUAL_MINI_HOLD_UNITS = 100n * 10n ** BigInt(A_TOKEN_DECIMALS);
   const VIRTUAL_PRO_HOLD_UNITS = 1500n * 10n ** BigInt(A_TOKEN_DECIMALS);
 
+  let _planMinerCache = null;
   function planMinerWallets() {
-    return {
+    if (_planMinerCache && Date.now() - _planMinerCache.at < TEAM_CTX_TTL_MS) return { mini:_planMinerCache.mini, pro:_planMinerCache.pro };
+    const result = {
       mini: database.listATokenMinerWalletsByPlan?.('mini120') || new Set(),
       pro: database.listATokenMinerWalletsByPlan?.('pro1500') || new Set(),
     };
+    _planMinerCache = { at: Date.now(), mini:result.mini, pro:result.pro };
+    return result;
   }
 
   // 真实团队统计：人数按去重钱包计；Mini/Pro 按矿机档位分别统计（同一人开两档则各计一次）

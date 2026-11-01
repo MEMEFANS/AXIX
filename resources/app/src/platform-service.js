@@ -178,7 +178,7 @@ export function createPlatformService({ dataRoot, walletService }) {
         // 性能：落库只序列化本事务触碰过的账户（assertState 已依赖同一不变量：
         // 事务内所有账户变更必先经 account()/touched.add），避免每次全量序列化
         // 2.5 万+ 账户（116MB 级 JSON）拖慢每次成交/审计写入。
-        if (walletUpdate) database.replaceLedgerStates(walletUpdate.exportState(), state, activeTransaction.touched);
+        if (walletUpdate) database.replaceLedgerStates(walletUpdate.exportState(), walletUpdate.touchedSummary(), state, activeTransaction.touched);
         else database.replacePlatformState(state, activeTransaction.touched);
       }
       walletUpdate?.finish();

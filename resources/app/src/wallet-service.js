@@ -122,6 +122,7 @@ export function createWalletService(options = {}) {
     for (const [k, v] of Object.entries(state.sessions)) {
       if (v && String(v.address || '').toLowerCase() === key) delete state.sessions[k];
     }
+    markAuthChanged();
     saveState();
     return { already: false, wallet: key };
   }
@@ -259,7 +260,10 @@ export function createWalletService(options = {}) {
   }
   let atomicUpdate = null;
 
-  function assertState() {
+  // onlyKeys：事务内只可能改动被 touchUser 标记过的账户（addBalance/subtractBalance/setUserLevel
+  // 等全部经由 ensureUser），传入触碰集合即可把每次提交的 O(全量用户) 校验降为 O(触碰数)；
+  // null（启动加载或事务外独立写路径）时仍做全量校验。
+  function assertState(onlyKeys = null) {
     if (!state.withdrawalAutomation || typeof state.withdrawalAutomation.enabled !== 'boolean'
       || !/^\d+$/.test(String(state.withdrawalAutomation.reviewThresholdUnits || ''))
       || BigInt(state.withdrawalAutomation.reviewThresholdUnits) <= 0n
@@ -268,7 +272,10 @@ export function createWalletService(options = {}) {
       || typeof state.withdrawalAutomation.usdtMultipleOfTen !== 'boolean') {
       throw new Error('自动提现设置状态无效');
     }
-    for (const user of Object.values(state.users)) {
+    const scoped = onlyKeys == null
+      ? Object.values(state.users)
+      : [...onlyKeys].map(k => state.users[k]).filter(Boolean);
+    for (const user of scoped) {
       if (!user || typeof user !== 'object' || !EVM_ADDRESS_RE.test(String(user.address || ''))) {
         throw new Error('钱包资金账本包含无效账户');
       }
@@ -308,12 +315,14 @@ export function createWalletService(options = {}) {
     if (atomicUpdate) throw new Error('平台余额事务已在进行中');
     // 性能：旧实现每次事务都 structuredClone(整库) 做回滚快照，随账户/流水增长单次克隆耗时毫秒级并产生大量垃圾触发 GC。
     // 成功路径用不到快照；失败时直接从 SQLite 重新载入上一个已提交状态即可（写库为单事务原子提交，事务期间并未落库）。
-    atomicUpdate = { dirty:false };
+    // touchedUsers/authChanged：增量落库标记（见 replaceWalletStateInside），提交时只序列化/校验被触碰的账户。
+    atomicUpdate = { dirty:false, touchedUsers:new Set(), authChanged:false };
     let closed = false;
     return {
       // 写库方(replaceWalletState(Inside)/replaceLedgerStates)只读取并 JSON 序列化入参，不持有或修改它，直接返回同一引用即可。
       exportState() { return state; },
       isDirty() { return Boolean(atomicUpdate?.dirty); },
+      touchedSummary() { return atomicUpdate ? { users:atomicUpdate.touchedUsers, authChanged:atomicUpdate.authChanged } : null; },
       finish() { if (!closed) { closed = true; atomicUpdate = null; } },
       rollback() {
         if (closed) return;
@@ -322,6 +331,13 @@ export function createWalletService(options = {}) {
         atomicUpdate = null;
       },
     };
+  }
+  // 事务内标记某账户被触碰（增量落库/校验用）；事务外调用为 no-op（走全量路径）
+  function touchUser(address) {
+    if (atomicUpdate) atomicUpdate.touchedUsers.add(String(address || '').toLowerCase());
+  }
+  function markAuthChanged() {
+    if (atomicUpdate) atomicUpdate.authChanged = true;
   }
 
   function assetConfig(symbol) {
@@ -386,6 +402,9 @@ export function createWalletService(options = {}) {
       else if (!/^\d+$/.test(String(user.balances[symbol]))) throw new Error(`${symbol} 平台余额状态无效`);
     }
     if (balancesChanged) saveState();
+    // 增量落库标记：ensureUser 可能补全字段/规范化地址（幂等但仍有写入可能），
+    // 统一打标保证事务内任何经此路径的账户变更不会被增量提交漏掉（多标只多一次序列化比对，安全）。
+    touchUser(key);
     return user;
   }
 
@@ -447,8 +466,12 @@ export function createWalletService(options = {}) {
         }
       }
     }
-    if (stateChanged) saveState();
+    if (stateChanged) { markAuthChanged(); saveState(); }
   }
+  // 过期会话清理改为低频定时（旧实现每个认证请求都全量遍历 sessions+pendingLogins，
+  // 会话数千时是稳定的 CPU/GC 热点；getSession 自身已做过期判断，正确性不受影响）
+  const authCleanupTimer = setInterval(() => { try { cleanupAuth(); } catch { /* best effort */ } }, 60_000);
+  authCleanupTimer.unref?.();
 
   // 构造登录签名挑战（personal_sign 纯文本，钱包弹窗显示人类可读消息）
   function buildLoginChallenge(address, context = {}) {
@@ -476,7 +499,7 @@ export function createWalletService(options = {}) {
   }
 
   function getSession(token) {
-    cleanupAuth();
+    // 过期会话清理已移至 60s 定时（cleanupAuth）；此处仅做过期判断，避免每个请求全量遍历
     if (!token) return null;
     const session = state.sessions[sessionKey(token)];
     if (session && blockedWallets.has(String(session.address || '').toLowerCase())) return null;
@@ -488,6 +511,7 @@ export function createWalletService(options = {}) {
     const key = sessionKey(token);
     if (state.sessions[key]) {
       delete state.sessions[key];
+      markAuthChanged();
       saveState();
     }
   }
@@ -1542,6 +1566,7 @@ export function createWalletService(options = {}) {
     const token = crypto.randomBytes(32).toString('hex');
     const expiresAt = Date.now() + sessionTtlMs;
     state.sessions[sessionKey(token)] = { address: checksum, expiresAt };
+    markAuthChanged();
     saveState();
 
     return {

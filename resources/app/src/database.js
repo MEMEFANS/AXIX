@@ -1113,18 +1113,27 @@ export function openDatabase(dataRoot) {
     return transaction(() => replaceWalletStateInside(state));
   }
 
-  function replaceWalletStateInside(state) {
+  // touched = { users:Set(小写地址), authChanged:bool } | null
+  // 事务提交时的增量落库：只序列化被触碰的用户；会话未变更时跳过全量会话扫描
+  // （3.5 万用户 + 数千会话逐个 JSON.stringify 是每次账务提交的固定开销）。
+  // deposits/withdrawals 量小（数百行）恒全量；null = 启动迁移/事务外独立写路径，走全量。
+  function replaceWalletStateInside(state, touched = null) {
     if (!db.isTransaction) throw new Error('Wallet state update requires a transaction');
-      for (const user of Object.values(state.users || {})) {
+      const userEntries = touched?.users
+        ? [...touched.users].map(key => state.users?.[key]).filter(Boolean)
+        : Object.values(state.users || {});
+      for (const user of userEntries) {
         if (changed(cache.users, user.address.toLowerCase(), user)) upsertUser.run(user.address, json(user.balances || {}), timestamp(user.createdAt), timestamp(user.updatedAt), json(user));
       }
-      const activeSessions = new Set(Object.keys(state.sessions || {}));
-      for (const tokenHash of cache.sessions.keys()) if (!activeSessions.has(tokenHash)) {
-        db.prepare('DELETE FROM wallet_sessions WHERE token_hash=?').run(tokenHash);
-        removed(cache.sessions, tokenHash);
-      }
-      for (const [tokenHash, session] of Object.entries(state.sessions || {})) {
-        if (changed(cache.sessions, tokenHash, session)) upsertSession.run(tokenHash, session.address, Number(session.expiresAt), json(session));
+      if (!touched || touched.authChanged) {
+        const activeSessions = new Set(Object.keys(state.sessions || {}));
+        for (const tokenHash of cache.sessions.keys()) if (!activeSessions.has(tokenHash)) {
+          db.prepare('DELETE FROM wallet_sessions WHERE token_hash=?').run(tokenHash);
+          removed(cache.sessions, tokenHash);
+        }
+        for (const [tokenHash, session] of Object.entries(state.sessions || {})) {
+          if (changed(cache.sessions, tokenHash, session)) upsertSession.run(tokenHash, session.address, Number(session.expiresAt), json(session));
+        }
       }
       for (const item of state.deposits || []) if (changed(cache.deposits, item.id, item)) upsertDeposit.run(item.id, item.wallet, item.network || '', item.txHash || '', item.asset || 'USDT', item.amountUnits || '', item.status || '', timestamp(item.createdAt), item.confirmedAt ? timestamp(item.confirmedAt) : null, json(item));
       for (const item of state.withdrawals || []) if (changed(cache.withdrawals, item.id, item)) upsertWithdrawal.run(item.id, item.wallet, item.requestId || '', item.network || '', item.txHash || null, item.asset || 'USDT', item.amountUnits || '0', item.status || '', item.automaticApproved ? 1 : 0, timestamp(item.createdAt), item.processedAt ? timestamp(item.processedAt) : null, json(item));
@@ -1159,11 +1168,11 @@ export function openDatabase(dataRoot) {
     if (changed(cache.settings, 'platform_meta', meta)) upsertSetting.run('platform_meta', json(meta), Date.now());
   }
 
-  function replaceLedgerStates(walletState, platformState, touchedAccounts = null) {
+  function replaceLedgerStates(walletState, walletTouched, platformState, touchedAccounts = null) {
     return transaction(() => {
       // Keep both sides of a trade in one durable commit.
-      for (const user of Object.values(walletState.users || {})) if (changed(cache.users, user.address.toLowerCase(), user)) upsertUser.run(user.address, json(user.balances || {}), timestamp(user.createdAt), timestamp(user.updatedAt), json(user));
-      for (const item of walletState.withdrawals || []) if (changed(cache.withdrawals, item.id, item)) upsertWithdrawal.run(item.id, item.wallet, item.requestId || '', item.network || '', item.txHash || null, item.asset || 'USDT', item.amountUnits || '0', item.status || '', item.automaticApproved ? 1 : 0, timestamp(item.createdAt), item.processedAt ? timestamp(item.processedAt) : null, json(item));
+      // walletTouched：平台事务内被触碰的钱包账户集合（增量落库，见 replaceWalletStateInside）
+      replaceWalletStateInside(walletState, walletTouched);
       replacePlatformStateInside(platformState, touchedAccounts);
     });
   }
@@ -1347,11 +1356,19 @@ export function openDatabase(dataRoot) {
     db.prepare(`INSERT INTO platform_referral_links(wallet,code,referrer_wallet,created_at,payload_json)
       VALUES(?,?,?,?,?) ON CONFLICT(wallet) DO UPDATE SET code=excluded.code,referrer_wallet=excluded.referrer_wallet,payload_json=excluded.payload_json`)
       .run(item.wallet, item.code, item.referrerWallet || null, timestamp(item.createdAt), json(item));
+    referralLinksCache = null; // 本表唯一写入点：立即失效全表缓存
     return item;
   }
 
+  // 推荐关系全表缓存（15s TTL + 写入即失效）：3.4 万行逐行 JSON.parse 是
+  // 团队统计/推荐服务的最大 JSON.parse 热点（旧实现每次调用全表扫描）。
+  // 本表唯一写入点 upsertReferralLink，写入后立即失效，绑定关系 15s 内对统计可见（绑定本身即时落库）。
+  let referralLinksCache = null;
   function listReferralLinks() {
-    return db.prepare('SELECT payload_json FROM platform_referral_links ORDER BY created_at').all().map(row => parse(row.payload_json, {}));
+    if (referralLinksCache && Date.now() - referralLinksCache.at < 15_000) return referralLinksCache.rows;
+    const rows = db.prepare('SELECT payload_json FROM platform_referral_links ORDER BY created_at').all().map(row => parse(row.payload_json, {}));
+    referralLinksCache = { rows, at: Date.now() };
+    return rows;
   }
 
   function referralRewardById(id) {

@@ -246,7 +246,7 @@ export function createReferralService({ database, walletService }) {
           if (database.aiRewardById?.(reward.id)) database.updateAiReward?.(reward.id, patch);
           else database.updateReferralReward?.(reward.id, patch);
         }
-        if (walletUpdate?.isDirty()) database.replaceWalletStateInside(walletUpdate.exportState());
+        if (walletUpdate?.isDirty()) database.replaceWalletStateInside(walletUpdate.exportState(), walletUpdate.touchedSummary());
       });
       walletUpdate?.finish();
       return { amount:formatUnits(total, USDT_DECIMALS), count };

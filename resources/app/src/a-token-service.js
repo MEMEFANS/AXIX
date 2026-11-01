@@ -381,7 +381,16 @@ export function createATokenService({ database, walletService, clock = () => Dat
     } catch { return '0'; }
   }
 
+  // 矿池总览 5s 缓存：/api/a-token/pool 每次轮询都全表扫活跃矿机（3.5 万行 BigInt 聚合）+ K 线，
+  // 是被前端高频轮询放大的 CPU 热点；价格/成交量类字段 5s 粒度对展示足够（K 线服务 20s 一 tick）。
+  let _poolStatsCache = null;
   function poolStats() {
+    if (_poolStatsCache && Date.now() - _poolStatsCache.at < 5_000) return _poolStatsCache.value;
+    const value = computePoolStats();
+    _poolStatsCache = { at: Date.now(), value };
+    return value;
+  }
+  function computePoolStats() {
     const meta = settleDailyBurn();
     const burned = BigInt(meta.totalBurnedUnits);
     const todayBurned = BigInt(meta.todayBurnedUnits || '0');
