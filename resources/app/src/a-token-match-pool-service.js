@@ -106,6 +106,9 @@ export function createATokenMatchPoolService({ aTokenService, database, clock = 
       }
     }
     db.addATokenTurboQuota(wallet, turbo);
+    // 2026-11-02 一键购买涡轮额度也累计进交易大厅 24h 成交量（AIX 量 + USDT 额）
+    try { at.addVolume(turbo, usdt); }
+    catch (e) { console.error(`[匹配池] ${wallet} 一键购买成交量累加失败:`, e?.message || e); }
     return {
       usdtIn: fmtU(usdt),
       turboOut: fmtA(turbo),
