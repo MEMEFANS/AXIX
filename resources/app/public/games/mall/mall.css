@@ -317,7 +317,7 @@ input, select, textarea { font-family: inherit; font-size: 14px; }
 .image-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
 /* 嵌入主站标签页模式（?embed=1）：隐藏自带页头/页脚，融入主站框架 */
-html.embedded, html.embedded body { background: transparent; }
+html.embedded, html.embedded body { background: var(--bg); }  /* 保持深色：嵌入主站 iframe 时与主站 #090e0c 无缝融合；若被当顶层页面直接打开也不会透成白色 */
 html.embedded .shop-header, html.embedded .shop-footer { display: none; }
 html.embedded .shop-container { padding-top: 8px; min-height: 0; }
 
