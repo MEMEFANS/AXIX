@@ -41,6 +41,33 @@ export function createATokenAdminApi({
           stats: orderService?.stats?.() || null,
         });
       }
+      // 后台一键驳回全部卖单（2026-11-01）：逐单解冻并置为 CANCELLED
+      if (request.method === 'POST' && pathname === '/api/admin/a-token/orders/cancel-sells') {
+        if (allowRequest && !allowRequest(request, res, 'a-token-admin', 5, 60_000)) return true;
+        const body = await readBody(request).catch(() => ({}));
+        const reason = String(body.reason || 'admin_sell_orders_rejected').slice(0, 120);
+        const open = walletService.database?.listATokenOpenOrders?.() || [];
+        const sells = open.filter(r => String(r.status) === 'OPEN' && String(r.side) === 'sell');
+        let cancelled = 0;
+        const failed = [];
+        const now = Date.now();
+        for (const order of sells) {
+          try {
+            const wallet = String(order.wallet || '').toLowerCase();
+            if (BigInt(order.input_usdt_units || '0') > 0n) aTokenService.creditUsdt(wallet, BigInt(order.input_usdt_units));
+            if (BigInt(order.input_a_units || '0') > 0n) {
+              aTokenService.creditA(wallet, BigInt(order.input_a_units));
+              try { walletService.database?.refundATokenUsableQuota?.(wallet, BigInt(order.input_a_units)); } catch {}
+            }
+            const info = walletService.database?.markATokenOrderCancelled?.(order.id, { cancelledAt: now, updatedAt: now, reason });
+            if (info?.changes) cancelled += 1; else failed.push(order.id);
+          } catch (error) {
+            failed.push(`${order.id}:${error?.message || 'unknown'}`);
+          }
+        }
+        return send(res, 200, { ok: true, total: sells.length, cancelled, failed });
+      }
+
       // 后台强制撤单（按 orderId，可指定 reason）
       if (request.method === 'POST' && pathname === '/api/admin/a-token/orders/cancel') {
         const body = await readBody(request);

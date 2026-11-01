@@ -68,7 +68,7 @@
     const root = document.getElementById('tab-a-token-trade');
     if (!root) return;
     root.innerHTML = `<div class="portal-shell">
-      ${P.header('AIX 代币交易', 'AIX / 泰达币（USDT）· 买方 0 手续费 · 卖方按直推人数阶梯手续费（50%销毁 + 50%进A10分红池）')}
+      ${P.header('AIX 代币交易', 'AIX / 泰达币（USDT）· 买方 0 手续费 · 卖方统一 3% 手续费（50%销毁 + 50%进A10分红池）')}
       <div id="atrade-content">${P.loading(6)}</div>
     </div>`;
   }
@@ -293,11 +293,11 @@
       <div class="q-row"><span>成交单价</span><b id="q-buy-price">—</b></div>
       <div class="q-row"><span>买方手续费</span><b style="color:#50d2b8">$0.00（免）</b></div>`;
   }
-  // 卖出手续费标签：优先用登录用户 profile 里的阶梯费率档案（随直推激活人数实时更新）
+  // 卖出手续费标签：全站统一 3%（profile 下发费率档案）
   function sellFeeLabel() {
     const sf = profile?.sellFee;
-    if (sf?.feePct) return `手续费 (${sf.feePct}${sf.directCount != null ? ` · 直推${sf.directCount}人` : ''} · 成交时扣)`;
-    return '手续费 (按直推阶梯 · 成交时扣)';
+    if (sf?.feePct) return `手续费 (${sf.feePct} · 成交时扣)`;
+    return '手续费 (3% · 成交时扣)';
   }
   function quoteBoxSell() {
     const q = profile?.sellQuota;
@@ -769,9 +769,9 @@
           if (sf) sf.textContent = '$0.00（买方免）';
         } else {
           if (e('q-sell-usdt')) e('q-sell-usdt').textContent = fmtUsdt(q.usdtOut);
-          // 卖方手续费按直推人数阶梯：未登录或直推 0~1→50%, 2~3→40%, 4~5→30%, 6~7→20%, 8~9→10%, ≥10→3%
+          // 卖方手续费全站统一 3%
           const feeLbl = e('q-sell-fee-lbl');
-          if (feeLbl && q.feePct) feeLbl.textContent = `手续费 (${q.feePct}${q.directCount != null ? ` · 直推${q.directCount}人` : ''} · 成交时扣)`;
+          if (feeLbl && q.feePct) feeLbl.textContent = `手续费 (${q.feePct} · 成交时扣)`;
           if (e('q-sell-fee'))  e('q-sell-fee').textContent  = `-${fmtA(q.feeA)} AIX`;
           // 手续费固定 50% 销毁 + 50% 进 A10 池（不受后台销毁开关影响）
           if (e('q-sell-burn')) e('q-sell-burn').textContent = `-${fmtA(Number(q.feeA)/2)} AIX`;

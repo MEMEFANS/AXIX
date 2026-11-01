@@ -14,9 +14,9 @@ const DAILY_BURN_TARGET = 1_000_000n * 10n ** BigInt(A_TOKEN_DECIMALS);
 // 产出分配：50% 由激活包矿机产出，50% 由质押挖出，两个渠道各自封顶
 const MINER_SHARE = TOTAL_SUPPLY / 2n; // 10 亿 — 矿机产出份额上限
 const STAKE_SHARE = TOTAL_SUPPLY / 2n; // 10 亿 — 质押产出份额上限
-// 默认 0.1 USDT/A，手续费 50%（50% 销毁 + 50% 进 A10 分红池，与 a-token-order-service / a-token-transfer-service 一致）
+// 默认 0.1 USDT/A，手续费统一 3%（50% 销毁 + 50% 进 A10 分红池，与 a-token-order-service / a-token-transfer-service 一致）
 const DEFAULT_PRICE_USDT = '0.1';
-const DEFAULT_FEE_RATE_BPS = 5000;
+const DEFAULT_FEE_RATE_BPS = 300;
 const BURN_RATE_BPS = 5000;     // 手续费中的销毁比例（50%）
 const DIVIDEND_RATE_BPS = 5000; // 手续费中的 A10 分红池比例（50%）
 

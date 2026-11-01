@@ -3,12 +3,11 @@ import { formatUnits } from 'ethers';
 import { A_TOKEN_DECIMALS, USDT_DECIMALS } from './a-token-service.js';
 
 // A 币互转：按用户ID（8位数字+字母）转账，转让方承担手续费，接收方得净额。
-// 手续费率与 AIX 交易卖盘一致，按转让方直推有效人数阶梯：
-//   直推 0~1→50%, 2~3→40%, 4~5→30%, 6~7→20%, 8~9→10%, ≥10→3%
+// 手续费率与 AIX 交易卖盘一致：所有用户统一 3%
 // 手续费去向：50% 销毁 + 50% 进 A10 团队分红池（日结均分给所有 A10 用户）。
 const BPS = 10_000n;
 const MIN_TRANSFER_A = 20n * 10n ** BigInt(A_TOKEN_DECIMALS);   // 互转最低 20 AIX
-const FEE_RATE_BPS_DEFAULT = 5000n;   // 默认 50%
+const FEE_RATE_BPS_DEFAULT = 300n;    // 统一 3%（2026-11-01 取消直推阶梯）
 const BURN_SHARE_BPS = 5000n;         // 手续费的 50% 销毁
 const DIVIDEND_SHARE_BPS = 5000n;     // 手续费的 50% 进 A10 分红池
 const id = prefix => `${prefix}_${crypto.randomBytes(8).toString('hex')}`;
@@ -16,36 +15,15 @@ const id = prefix => `${prefix}_${crypto.randomBytes(8).toString('hex')}`;
 export function createATokenTransferService({ aTokenService, database, referralService = null, teamService = null, walletService = null, clock = () => Date.now() }) {
   const db = database;
 
-  // 直推人数 → 手续费率（bps）；与 a-token-order-service 卖盘阶梯完全一致
-  function feeBpsByDirectCount(n) {
-    const cnt = Number(n) || 0;
-    if (cnt >= 10) return 300n;
-    if (cnt >= 8)  return 1000n;
-    if (cnt >= 6)  return 2000n;
-    if (cnt >= 4)  return 3000n;
-    if (cnt >= 2)  return 4000n;
-    return FEE_RATE_BPS_DEFAULT;
-  }
-
   function minerDirectCountOf(wallet) {
     try { return referralService?.minerDirectCount?.(String(wallet || '').toLowerCase()) ?? 0; }
     catch { return 0; }
   }
 
-  // 后台费率覆盖（service_settings.a_token_fee_overrides）：指定地址直接用配置费率（bps），优先于直推阶梯
-  function feeOverrideBpsOf(wallet) {
-    try {
-      const raw = db.getSetting?.('a_token_fee_overrides');
-      if (!raw) return null;
-      const bps = Number(JSON.parse(raw)?.wallets?.[String(wallet || '').toLowerCase()]);
-      return Number.isFinite(bps) && bps >= 0 && bps <= 10000 ? BigInt(Math.floor(bps)) : null;
-    } catch { return null; }
-  }
-
-  // 转让方费率快照：后台覆盖优先，其次按直推阶梯；手续费内部分配（50% 销毁 / 50% 分红池）不变
+  // 转让方费率快照：全站统一 3%；手续费内部分配（50% 销毁 / 50% 分红池）不变
   function feeRatesFor(wallet) {
     const directCount = minerDirectCountOf(wallet);
-    const fee = feeOverrideBpsOf(wallet) ?? feeBpsByDirectCount(directCount);
+    const fee = FEE_RATE_BPS_DEFAULT;
     return { fee, directCount, burnShare: BURN_SHARE_BPS, dividendShare: DIVIDEND_SHARE_BPS };
   }
 

@@ -58,7 +58,7 @@
           </div>
           <div class="awd-quote">
             <div class="awd-quote-row"><span>转让总量</span><b id="at-q-amt">0 AIX</b></div>
-            <div class="awd-quote-row"><span id="at-q-fee-lbl">💥 手续费（50%）</span><b id="at-q-fee" style="color:#f26c78">- 0 AIX</b></div>
+            <div class="awd-quote-row"><span id="at-q-fee-lbl">💥 手续费（3%）</span><b id="at-q-fee" style="color:#f26c78">- 0 AIX</b></div>
             <div class="awd-quote-row"><span>　└ 销毁（手续费 50%）</span><b id="at-q-burn" style="color:#f26c78">- 0 AIX</b></div>
             <div class="awd-quote-row"><span>　└ 分红池（手续费 50%）</span><b id="at-q-div" style="color:#f6c454">- 0 AIX</b></div>
             <div class="awd-quote-row"><span>✅ 对方实收</span><b id="at-q-net" style="color:#50d2c2">0 AIX</b></div>
@@ -133,19 +133,19 @@
       window.__atTransferBalanceA = 0;
       if ($('at-balance')) $('at-balance').textContent = '0 AIX';
     }
-    // 拉取当前钱包的阶梯手续费率（按直推有效人数）
+    // 拉取当前钱包的手续费率（全站统一 3%）
     try {
       const q = await api('/api/a-token/transfer-quote');
-      feeRateBps = Number(q?.feeRateBps ?? 5000) || 5000;
+      feeRateBps = Number(q?.feeRateBps ?? 300) || 300;
       directCount = Number(q?.directCount ?? 0) || 0;
       const pct = (feeRateBps / 100).toFixed(0);
       const hint = $('at-fee-hint');
       if (hint) {
-        hint.innerHTML = `我的手续费率 <b style="color:#f6c454">${pct}%</b>（直推有效 ${directCount} 人）· 手续费由转让方承担，50% 销毁 + 50% 进分红池`;
+        hint.innerHTML = `手续费率 <b style="color:#f6c454">${pct}%</b>（全站统一）· 手续费由转让方承担，50% 销毁 + 50% 进分红池`;
       }
     } catch {
       const hint = $('at-fee-hint');
-      if (hint) hint.textContent = '手续费率：默认 50%（直推人数越多费率越低，最低 3%）';
+      if (hint) hint.textContent = '手续费率：全站统一 3%（50% 销毁 + 50% 进分红池）';
     }
     refreshFee();
   }

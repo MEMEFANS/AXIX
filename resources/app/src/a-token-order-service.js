@@ -25,7 +25,7 @@ const MIN_SELL_A = 100n * 10n ** BigInt(A_TOKEN_DECIMALS);
 //
 // 手续费口径（均由卖方承担，按投入量收取）：
 //   卖家想卖出 n 个 A，冻结 n；手续费 = 消耗投入 × feeRate，净额 = 消耗投入 − 手续费：
-//   例：50% 费率卖 1000 个 A → 手续费 500、净额 500 进入成交，卖家实收 净额 × 成交价。
+//   例：3% 费率卖 1000 个 A → 手续费 30、净额 970 进入成交，卖家实收 净额 × 成交价。
 //   手续费 50% 销毁、50% 进 A10 分红池。
 //   买单零手续费，USDT 全额支付给卖家。
 //
@@ -61,47 +61,23 @@ export function createATokenOrderService({ aTokenService, database, teamService,
   const SMALL_FIRST_COUNT = Math.min(SMALL_FIRST_WINDOW, Math.max(0, Math.floor(Number(matchSmallFirstCount) || 0)));
   let matchAttemptSeq = 0;
 
-  // 手续费分配规则（按用户规则）：
-  //   卖方手续费 = 成交量 × feeBps（阶梯：直推 0~1→50%, 2~3→40%, 4~5→30%, 6~7→20%, 8~9→10%, ≥10→3%）
+  // 手续费分配规则（2026-11-01 用户规则调整）：
+  //   卖方手续费 = 成交量 × 3%（所有用户统一费率，取消原直推人数阶梯 50%/40%/30%/20%/10%/3%）
   //   手续费去向：50% 销毁 + 50% 进 A10 团队分红池（A10 用户日结均分）
   //   分红池（divRateBps）= 0：团队分润由 A10 池统一承担，不再单设分红池
   const BURN_RATE_BPS_DEFAULT = 5000n;   // 销毁：手续费的 50%
   const DIV_RATE_BPS_DEFAULT  = 0n;      // 分红池：0%（A10 池承担团队分润）
-  const FEE_RATE_BPS_DEFAULT  = 5000n;   // 默认卖方合计 50% 手续费
-
-  // 直推人数 → 卖方手续费率（bps）；规则：2→40% 4→30% 6→20% 8→10% 10→3%（含 10）
-  function feeBpsByDirectCount(n) {
-    const cnt = Number(n) || 0;
-    if (cnt >= 10) return 300n;
-    if (cnt >= 8)  return 1000n;
-    if (cnt >= 6)  return 2000n;
-    if (cnt >= 4)  return 3000n;
-    if (cnt >= 2)  return 4000n;
-    return FEE_RATE_BPS_DEFAULT;
-  }
-
-  // 后台费率覆盖（service_settings.a_token_fee_overrides）：指定地址直接用配置费率（bps），优先于直推阶梯
-  function feeOverrideBpsOf(wallet) {
-    try {
-      const raw = db.getSetting?.('a_token_fee_overrides');
-      if (!raw) return null;
-      const bps = Number(JSON.parse(raw)?.wallets?.[String(wallet || '').toLowerCase()]);
-      return Number.isFinite(bps) && bps >= 0 && bps <= 10000 ? BigInt(Math.floor(bps)) : null;
-    } catch { return null; }
-  }
+  const FEE_RATE_BPS_DEFAULT  = 300n;    // 卖方统一手续费率 3%
 
   function minerDirectCountOf(wallet) {
     try { return referralService?.minerDirectCount?.(String(wallet || '').toLowerCase()) ?? 0; }
     catch { return 0; }
   }
 
-  function feeRates(wallet) {
-    const meta = at.getPoolMeta();
-    // 卖方手续费：后台覆盖（a_token_fee_overrides）优先，其次直推阶梯（用户规则）：
-    // 0~1→50%, 2~3→40%, 4~5→30%, 6~7→20%, 8~9→10%, ≥10→3%
-    const fee = feeOverrideBpsOf(wallet) ?? feeBpsByDirectCount(minerDirectCountOf(wallet));
+  function feeRates() {
+    // 手续费率全站统一 3%，不再按直推人数或地址白名单区分
     return {
-      fee,
+      fee: FEE_RATE_BPS_DEFAULT,
       // 销毁 = 手续费的 50%；A10 池 = 手续费的 50%（不再单设分红池）
       burn: BURN_RATE_BPS_DEFAULT,
       div:  DIV_RATE_BPS_DEFAULT,
@@ -172,7 +148,7 @@ export function createATokenOrderService({ aTokenService, database, teamService,
       };
     }
 
-    const rates = feeRates(wallet);   // 直推阶梯费率：0~1→50%, 2~3→40%, 4~5→30%, 6~7→20%, 8~9→10%, ≥10→3%
+    const rates = feeRates();   // 卖方统一 3% 手续费
     const directCnt = minerDirectCountOf(wallet);
 
     // sell：冻结 = 卖出数量本身；手续费按投入量的费率比例划扣
@@ -196,7 +172,7 @@ export function createATokenOrderService({ aTokenService, database, teamService,
       feeRateBps: Number(rates.fee),
       directCount: directCnt,
       feePct: (Number(rates.fee) / 100).toFixed(0) + '%',
-      hint: `只冻结卖出数量 ${formatUnits(a, A_TOKEN_DECIMALS)} A；当前有效直推 ${directCnt} 人 → 手续费 ${(Number(rates.fee) / 100).toFixed(0)}%（按投入量收取，50%销毁 + 50%进A10分红池），预计实收约 ${formatUnits(usdtOut, USDT_DECIMALS)} USDT`,
+      hint: `只冻结卖出数量 ${formatUnits(a, A_TOKEN_DECIMALS)} A；卖出手续费统一 ${(Number(rates.fee) / 100).toFixed(0)}%（按投入量收取，50%销毁 + 50%进A10分红池），预计实收约 ${formatUnits(usdtOut, USDT_DECIMALS)} USDT`,
     };
   }
 
@@ -219,7 +195,7 @@ export function createATokenOrderService({ aTokenService, database, teamService,
       ? at.parseUsdt(priceUsdt, '限价')
       : currentPrice;
     if (limitPriceRaw <= 0n) throw new Error('限价必须大于 0');
-    const rates = feeRates(wallet);   // 卖方按直推阶梯费率（下单时快照进 payload，撮合按快照结算）
+    const rates = feeRates();   // 卖方统一 3% 手续费（下单时快照进 payload，撮合按快照结算）
 
     let inputUsdtUnits = 0n;
     let inputAUnits = 0n;
@@ -834,10 +810,10 @@ export function createATokenOrderService({ aTokenService, database, teamService,
     };
   }
 
-  // 卖出手续费档案：后台覆盖优先，其次阶梯费率 + 激活矿机的直推人数（供报价/前端展示）
+  // 卖出手续费档案：全站统一 3%（供报价/前端展示）
   function sellFeeProfile(wallet) {
     const directCount = minerDirectCountOf(wallet);
-    const fee = feeOverrideBpsOf(wallet) ?? feeBpsByDirectCount(directCount);
+    const fee = FEE_RATE_BPS_DEFAULT;
     return { feeRateBps: Number(fee), feePct: (Number(fee) / 100).toFixed(0) + '%', directCount };
   }
 
