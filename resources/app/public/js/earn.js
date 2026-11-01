@@ -634,6 +634,8 @@
     const matchAvail = Number(mp.matchQuota?.available || 0);
     const turboAvail = Number(mp.turboQuota || 0);
     const usableAvail = Number(mp.usableQuota?.available || 0);
+    // 购买涡轮额度用站内 USDT 余额支付，卡片上直接显示用户自己有多少 USDT
+    const balUsdt = profileCache?.balances?.USDT ?? null;
     const nextHours = Number(mp.nextDurationHours || 24);
     const maxHours = Number(mp.maxDurationHours || 720);
     const enterMax = Math.min(matchAvail, turboAvail);
@@ -713,6 +715,7 @@
             <input id="mp-aix-input" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="输入要购买的 AIX 数量" oninput="window.mpQuoteInput()">
             <button type="button" class="mp-btn gold" style="margin:0 7px;height:40px" onclick="window.mpBuyTurbo()" ${mpBusy ? 'disabled' : ''}>${mpBusy ? '处理中…' : '一键购买'}</button>
           </div>
+          <div class="stake-amount-hint">我的 USDT 余额：<b style="color:#50d2b8">${balUsdt == null ? '—' : '$' + fmtNum(balUsdt, 2)}</b> · 站内余额支付</div>
           <div id="mp-turbo-quote" class="stake-amount-hint">按实时价折算应付 USDT · 站内余额支付 · 需钱包签名</div>
         </div>
         <div class="mp-card">
