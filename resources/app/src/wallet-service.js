@@ -524,7 +524,7 @@ export function createWalletService(options = {}) {
       automaticWithdrawals: state.withdrawalAutomation.enabled,
       // 提现规则下发给前端做提示与预校验（后端仍会强制校验，前端仅体验优化）
       usdtMultipleOfTen: Boolean(state.withdrawalAutomation.usdtMultipleOfTen),
-      minWithdrawalUsdt: 10,
+      minWithdrawalUsdt: 1,
       bridge:bridgeService?.publicConfig() || { enabled:false, settlementNetwork:'' },
       // RPC endpoints are used by the connected wallet only for chain switching;
       // server verification endpoints remain private implementation details.
