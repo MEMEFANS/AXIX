@@ -855,6 +855,12 @@ export function createPlatformService({ dataRoot, walletService }) {
       lastFundingAt:new Date(state.lastFundingAt).toISOString(),
     };
   }
+  // 风云榜重计算缓存：全量账户 × 十余张表（fills/奖励/质押/矿机…）逐用户扫描非常重，
+  // 页面每次打开都全量重算会拖垮服务（用户反馈"打不开、很卡"）。
+  // 口径数据 60 秒刷新一次足够实时；rank/isCurrent/limit 等用户维度装饰在缓存外按请求即时生成。
+  const LEADERBOARD_CACHE_MS = 60_000;
+  let leaderboardCache = { at: 0, rows: null };
+
   function earningsLeaderboard({ limit = 100, address = '', markPrices = {} } = {}) {
     const cutoff = Date.now() - 30 * 24 * 60 * 60_000;
     // AI 托管的收益不会走到 internalStrategies 真实交易结算，realizedPnlUnits 里会把「奖励发放+本金回退+手续费退补」
@@ -865,7 +871,14 @@ export function createPlatformService({ dataRoot, walletService }) {
     const itemTime = item => Number(item?.t || 0) || Date.parse(item?.createdAt || '') || Number(item?.createdAt || 0);
     const aPriceUsdtUnits = aTokenPriceProvider ? BigInt(aTokenPriceProvider() || 0n) : 0n;
     const aAssetToUsdt = aUnits => aPriceUsdtUnits > 0n ? (BigInt(aUnits || 0n) * aPriceUsdtUnits) / (10n ** BigInt(A_DECIMALS)) : 0n;
-    const rows = Object.values(state.accounts || {}).map(user => {
+    // 命中 60s 缓存则跳过重扫描，直接复用已排序的全量行（用户维度装饰在下方按请求生成）
+    let rows = leaderboardCache.rows;
+    if (!rows || Date.now() - leaderboardCache.at > LEADERBOARD_CACHE_MS) {
+      rows = computeRows();
+      leaderboardCache = { at: Date.now(), rows };
+    }
+    function computeRows() {
+    return Object.values(state.accounts || {}).map(user => {
       const wallet = String(user.address || '');
       const walletKey = wallet.toLowerCase();
       const sumUnits = (items, field) => items.reduce((sum, item) => sum + BigInt(item?.[field] || '0'), 0n);
@@ -1051,6 +1064,7 @@ export function createPlatformService({ dataRoot, walletService }) {
       };
     }).filter(item => item.copyEarnedUnits > 0n)
       .sort((a, b) => a.copyEarnedUnits === b.copyEarnedUnits ? a.wallet.localeCompare(b.wallet) : a.copyEarnedUnits > b.copyEarnedUnits ? -1 : 1);
+    }
     const bounded = Math.min(Math.max(Number(limit) || 100, 1), 500);
     const items = rows.slice(0, bounded).map((item, index) => ({
       rank:index + 1,

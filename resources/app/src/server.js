@@ -1568,13 +1568,10 @@ export const server = http.createServer(async (request, res) => {
     if (p.startsWith('/api/hyperliquid/') && !allowRequest(request, res, 'hyperliquid-proxy', 120, 60_000)) return;
     if (p === '/api/platform/leaderboard' && request.method === 'GET') {
       const session = walletSession(request);
-      const priceEntries = await Promise.all(PLATFORM_SYMBOLS.map(async symbol => [
-        symbol,
-        await platformApi.marketPrice('perp', symbol, { allowStale:true }).catch(() => 0),
-      ]));
+      // 不再预拉行情：earningsLeaderboard 的收益口径全部来自站内账本/数据库，
+      // markPrices 参数本就未被使用，原先每次请求阻塞等全品种行情（慢时 8s+）纯属浪费
       return send(res, 200, platformService.earningsLeaderboard({
         address:session?.address || '',
-        markPrices:Object.fromEntries(priceEntries),
       }));
     }
     if (await platformApi.handle(request, res, p)) return;
