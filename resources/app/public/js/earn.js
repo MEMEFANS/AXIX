@@ -782,6 +782,28 @@
     try {
       // 先取实时报价拿到应付 USDT，签名锁定该金额；价格跳动时服务端会拒绝并提示重签
       const q = await authApi('match-pool/quote?aix=' + encodeURIComponent(aix));
+      // 涡轮额度按实时价从 AIX 交易盘口买入：盘口没有卖单时无法直接成交，
+      // 先询问是否转为「委托求购」（按实时价冻结 USDT 挂单，等卖单出现后自动成交）
+      const market = await api('pool').catch(() => null);
+      if (!Number(market?.depth?.openSellCount || 0)) {
+        const goOrder = await confirmDialog(
+          '当前 AIX 交易盘口暂无卖单，无法买入 ' + q.aixIn + ' AIX 涡轮额度。是否转为「委托求购」？'
+          + '将按实时价 $' + q.priceUsdt + ' 冻结 ' + q.usdtOut + ' USDT 挂单，有卖单时自动成交。',
+          { title: '暂无卖单' },
+        );
+        if (!goOrder) return;
+        const r = await authApi('orders', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ side: 'buy', orderType: 'market', amount: q.usdtOut }),
+        });
+        showOk(r?.orderStatus === 'FILLED'
+          ? '已买入 ' + fmtNum(r?.aReceived, 4) + ' AIX（支付 ' + fmtNum(r?.usdtPaid || q.usdtOut, 2) + ' USDT）'
+          : '盘口暂无卖单 · 已挂委托求购，冻结 ' + fmtNum(r?.lockedUsdt || q.usdtOut, 2) + ' USDT，有卖单后自动成交');
+        profileCache = await authApi('profile').catch(() => profileCache);
+        renderSubTab();
+        return;
+      }
       if (!await confirmDialog('购买 ' + q.aixIn + ' AIX 涡轮额度，需支付 ' + q.usdtOut + ' USDT（实时价 $' + q.priceUsdt + '），购买后不可退款。确认？')) return;
       const requestId = 'tbo_' + crypto.randomUUID().replaceAll('-', '');
       const timestamp = String(Date.now());

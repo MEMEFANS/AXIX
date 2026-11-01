@@ -813,6 +813,16 @@
       if (Number(pv) <= 0) { showErr('限价必须大于 0'); return; }
       priceUsdt = pv;
     }
+    // 市价买入先看盘口：没有卖单时不会立即成交，先确认是否转为「委托求购」再冻结 USDT
+    if (currentSide === 'buy' && submitOrderType === 'market') {
+      const hasAsks = (bookData.asks || []).length > 0 || Number(poolStats?.depth?.openSellCount || 0) > 0;
+      if (!hasAsks) {
+        const goOrder = typeof confirmDialog === 'function'
+          ? await confirmDialog(`当前盘口没有卖单，买入无法立即成交。是否转为「委托求购」？将冻结 ${fmtUsdt(Number(amt))} USDT 挂单，有卖单时自动成交。`, { title: '暂无卖单' })
+          : true;
+        if (!goOrder) return;
+      }
+    }
     try {
       const r = await authApi('orders', {
         method: 'POST',
