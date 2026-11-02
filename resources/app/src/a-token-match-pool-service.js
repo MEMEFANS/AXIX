@@ -113,6 +113,7 @@ export function createATokenMatchPoolService({ aTokenService, database, clock = 
       }
     }
     db.addATokenTurboQuota(wallet, turbo);
+    at.creditA(wallet, turbo);   // 买涡轮额度即买到对应 AIX 币，币同步到账
     // 2026-11-02 一键购买涡轮额度也累计进交易大厅 24h 成交量（AIX 量 + USDT 额）
     try { at.addVolume(turbo, usdt); }
     catch (e) { console.error(`[匹配池] ${wallet} 一键购买成交量累加失败:`, e?.message || e); }
@@ -198,6 +199,7 @@ export function createATokenMatchPoolService({ aTokenService, database, clock = 
       }
     }
     db.addATokenTurboQuota(wallet, c.a);
+    at.creditA(wallet, c.a);   // 买涡轮额度即买到对应 AIX 币，币同步到账
     return {
       aixIn: c.aixStr,
       usdtIn: c.usdtStr,
@@ -223,12 +225,22 @@ export function createATokenMatchPoolService({ aTokenService, database, clock = 
     if (turbo < a) {
       throw new Error(`涡轮额度不足：需 1:1 配比 ${fmtA(a)} AIX 涡轮额度，当前 ${fmtA(turbo > 0n ? turbo : 0n)} AIX，可用 USDT 购买或在 AIX 交易大厅买入获得`);
     }
-    // 涡轮额度本身就对应已买入的 AIX 币，进池只需 匹配额度 + 涡轮额度，不额外扣币
+    // 进池同时扣掉等额 AIX 币（涡轮额度对应的就是买到的币），到期按 2 倍发币
+    const coins = at.balanceA(wallet);
+    if (coins < a) {
+      throw new Error(`AIX 币不足：进池需锁定 ${fmtA(a)} AIX（当前 ${fmtA(coins > 0n ? coins : 0n)}），可用 USDT 购买涡轮额度或在 AIX 交易大厅买入`);
+    }
     const now = clock();
     const state = db.touchATokenMatchPoolState(wallet, now);   // 首次使用落锚，之后每日 +24h
     const durationHours = durationHoursFor(state.firstPoolAt, now);
-    db.consumeATokenSellQuota(wallet, a);                      // 匹配额度消耗（不可撤销）
-    db.consumeATokenTurboQuota(wallet, a);                     // 涡轮额度消耗
+    at.debitA(wallet, a);                                      // 进池扣币
+    try {
+      db.consumeATokenSellQuota(wallet, a);                    // 匹配额度消耗（不可撤销）
+      db.consumeATokenTurboQuota(wallet, a);                   // 涡轮额度消耗
+    } catch (e) {
+      try { at.creditA(wallet, a); } catch (e2) { console.error(`[匹配池] ${wallet} 进池回退币失败:`, e2?.message || e2); }
+      throw e;
+    }
     const entry = db.insertATokenMatchPoolEntry({
       id: makeId('amp'), wallet,
       matchUnits: a.toString(), turboUnits: a.toString(),

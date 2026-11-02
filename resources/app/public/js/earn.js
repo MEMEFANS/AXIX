@@ -638,7 +638,8 @@
     const balUsdt = profileCache?.balances?.USDT ?? null;
     const nextHours = Number(mp.nextDurationHours || 24);
     const maxHours = Number(mp.maxDurationHours || 720);
-    const enterMax = Math.min(matchAvail, turboAvail);
+    const balA = Number(profileCache?.balances?.A ?? 0);
+    const enterMax = Math.min(matchAvail, turboAvail, balA);
     const dayIndex = mp.started ? Number(mp.dayIndex || 1) : 0;
     const durPct = Math.min(100, Math.round(nextHours / maxHours * 100));
     const nowMs = Date.now();
@@ -720,13 +721,13 @@
         </div>
         <div class="mp-card">
           <div class="c-head"><span class="c-title">🔒 放入匹配池</span><span class="c-tag">1 : 1 配比</span></div>
-          <label class="stake-amount-label" for="mp-enter-input">放入数量（匹配 + 等量涡轮）</label>
+          <label class="stake-amount-label" for="mp-enter-input">放入数量（匹配 + 等量涡轮 + 等量 AIX 币）</label>
           <div class="stake-amount-field" style="grid-template-columns:minmax(0,1fr) auto auto">
             <input id="mp-enter-input" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="输入 AIX 数量">
             <button type="button" class="mp-btn ghost" style="margin:0 4px;height:40px;padding:0 12px" onclick="window.mpEnterMax()">Max</button>
             <button type="button" class="mp-btn teal" style="margin:0 7px 0 4px;height:40px" onclick="window.mpEnterPool()" ${mpBusy ? 'disabled' : ''}>${mpBusy ? '处理中…' : '放入'}</button>
           </div>
-          <div class="stake-amount-hint">最多 ${fmtA(enterMax)} AIX（受匹配额度 / 涡轮额度取小）· 锁 <b style="color:#f6c454">${nextHours}h</b> → 到期 <b style="color:#50d2b8">2×</b> 可用额度 + 2× AIX 币</div>
+          <div class="stake-amount-hint">最多 ${fmtA(enterMax)} AIX（受匹配额度 / 涡轮额度 / AIX 余额取小）· 锁 <b style="color:#f6c454">${nextHours}h</b> → 到期 <b style="color:#50d2b8">2×</b> 可用额度 + 2× AIX 币</div>
         </div>
       </div>
 
@@ -834,7 +835,7 @@
     const amount = normalizeStakeAmount(document.getElementById('mp-enter-input')?.value);
     if (!amount) { showErr('请输入有效的 AIX 数量'); return; }
     const hours = Number(profileCache?.matchPool?.nextDurationHours || 24);
-    if (!await confirmDialog('确认放入 ' + amount + ' AIX 匹配额度 + ' + amount + ' AIX 涡轮额度？锁定 ' + hours + ' 小时，到期获得 ' + (Number(amount) * 2) + ' AIX 可用额度 + ' + (Number(amount) * 2) + ' AIX。')) return;
+    if (!await confirmDialog('确认放入 ' + amount + ' AIX 匹配额度 + ' + amount + ' AIX 涡轮额度 + 锁定 ' + amount + ' AIX 币？锁定 ' + hours + ' 小时，到期获得 ' + (Number(amount) * 2) + ' AIX 可用额度 + ' + (Number(amount) * 2) + ' AIX。')) return;
     mpBusy = true;
     try {
       const r = await authApi('match-pool/enter', {
