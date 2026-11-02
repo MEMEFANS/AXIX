@@ -35,10 +35,17 @@ export function createATokenMatchPoolService({ aTokenService, database, clock = 
   const db = database;
 
   // 锁定时长（小时）：首次使用起每过一天 +24h，封顶 720h
+  // 2026-11-03 修正：按「北京时间自然日」计第几天（首次使用当天=第 1 天，跨日即第 2 天），
+  // 不再用「满 24 小时」滚动窗口 — 否则首次使用 23 小时后再次进池仍按 24h 计算。
+  const DAY_TZ_OFFSET_MS = 8 * 60 * 60 * 1000;
+  const dayIndexOf = (firstAt, now) => {
+    const day = t => Math.floor((Number(t) + DAY_TZ_OFFSET_MS) / DAY_MS);
+    return Math.max(1, day(now) - day(firstAt) + 1);
+  };
   function durationHoursFor(firstPoolAt, now = clock()) {
     const first = Number(firstPoolAt) || 0;
     if (first <= 0) return 24;
-    const dayIndex = Math.floor((Number(now) - first) / DAY_MS) + 1;
+    const dayIndex = dayIndexOf(first, now);
     return Math.min(dayIndex * 24, MAX_DURATION_HOURS);
   }
 
@@ -297,7 +304,7 @@ export function createATokenMatchPoolService({ aTokenService, database, clock = 
       },
       firstPoolAt: state.firstPoolAt || 0,
       started,
-      dayIndex: started ? Math.floor((now - state.firstPoolAt) / DAY_MS) + 1 : 0,
+      dayIndex: started ? dayIndexOf(state.firstPoolAt, now) : 0,
       nextDurationHours: durationHoursFor(started ? state.firstPoolAt : now, now),
       maxDurationHours: MAX_DURATION_HOURS,
       priceUsdt: fmtU(at.getPriceUsdtUnits()),
