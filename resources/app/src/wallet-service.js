@@ -843,6 +843,135 @@ export function createWalletService(options = {}) {
     }
   }
 
+  // ── 充值自动扫链对账（2026-11-02）────────────────────────────────────────
+  // 定时扫描平台充值地址的 USDT 转入，把「链上已到、站内无记录」的充值自动补录并入账，
+  // 避免用户不提交交易哈希就永远不到账（如 2026-11-02 的 568 USDT 漏单）。
+  // 只认从已注册用户钱包发起的转账；未注册地址的转入不自动入账，保留人工处理。
+  const RECONCILE_CURSOR_KEY = 'deposit_reconcile_cursor';
+  const RECONCILE_LOOKBACK_BLOCKS = 20000;  // 首次运行回溯约 6 小时
+  const RECONCILE_CHUNK_BLOCKS = 5000;      // 单次 eth_getLogs 跨越区块数
+  const TRANSFER_TOPIC = transferInterface.getEvent('Transfer').topicHash;
+  const padTopic = (value) => '0x' + '0'.repeat(24) + String(value || '').toLowerCase().replace(/^0x/, '');
+  let reconcileProvider = null;
+  let reconciling = false;
+
+  async function reconcileOnchainDeposits() {
+    if (!depositAddress || reconciling) return { scanned: 0, credited: 0 };
+    const network = networks.get('bsc');
+    if (!network?.provider) return { scanned: 0, credited: 0 };
+    if (!reconcileProvider) {
+      reconcileProvider = new JsonRpcProvider(
+        String(options.depositReconcileRpcUrl || network.rpcUrl),
+        network.chainId,
+        { staticNetwork: true, batchStallTime: 30 },
+      );
+    }
+    reconciling = true;
+    try {
+      const latestBlock = await reconcileProvider.getBlockNumber();
+      let cursor = Number(database.getSetting(RECONCILE_CURSOR_KEY) || 0);
+      if (!Number.isFinite(cursor) || cursor <= 0 || cursor > latestBlock
+        || latestBlock - cursor > RECONCILE_LOOKBACK_BLOCKS * 6) {
+        cursor = Math.max(0, latestBlock - RECONCILE_LOOKBACK_BLOCKS);
+      }
+      if (cursor >= latestBlock) return { scanned: 0, credited: 0 };
+      const known = new Set(state.deposits
+        .filter((item) => item.network === network.id)
+        .map((item) => String(item.txHash || '').toLowerCase()));
+      // 已注册用户集合（小写地址），一轮扫描只构建一次，避免逐条日志遍历全部用户
+      const registered = new Set(Object.values(state.users)
+        .map((user) => String(user?.address || '').toLowerCase())
+        .filter(Boolean));
+      let scanned = 0;
+      let credited = 0;
+      // 游标只推进到「已完整处理完」的区块，避免无转账的区间每轮重复扫描；
+      // 遇到未达确认数的转账则回退到该区块前一个块，下一轮再处理。
+      let nextCursor = cursor;
+      for (let from = cursor + 1; from <= latestBlock; from += RECONCILE_CHUNK_BLOCKS) {
+        const to = Math.min(latestBlock, from + RECONCILE_CHUNK_BLOCKS - 1);
+        const logs = await reconcileProvider.getLogs({
+          address: network.tokenContract,
+          fromBlock: from,
+          toBlock: to,
+          topics: [TRANSFER_TOPIC, null, padTopic(depositAddress)],
+        });
+        let chunkDirty = false;
+        let stop = false;
+        for (const log of logs) {
+          const confirmations = latestBlock - Number(log.blockNumber) + 1;
+          if (confirmations < network.confirmations) {
+            // 未达确认数：停在这里，下一轮从该区块重新扫描
+            nextCursor = Math.min(nextCursor, Number(log.blockNumber) - 1);
+            stop = true;
+            break;
+          }
+          scanned += 1;
+          const txHash = String(log.transactionHash || '').toLowerCase();
+          if (!txHash || known.has(txHash)) continue;
+          let fromWallet = '';
+          let chainUnits = 0n;
+          try {
+            const parsed = transferInterface.parseLog(log);
+            fromWallet = String(parsed.args[0]);
+            chainUnits = BigInt(parsed.args[2]);
+          } catch { continue; }
+          const wallet = fromWallet.toLowerCase();
+          // 只有平台已注册的用户钱包才自动入账
+          if (!registered.has(wallet)) {
+            console.warn(`[充值对账] 未注册地址转入，跳过：${fromWallet} ${formatUnits(chainUnits, network.tokenDecimals)} USDT tx=${txHash}`);
+            continue;
+          }
+          let amountUnits;
+          try { amountUnits = chainToLedgerUnits(chainUnits, network); }
+          catch (error) { console.warn(`[充值对账] ${wallet} 金额无法换算：${error.message} tx=${txHash}`); continue; }
+          if (amountUnits < MIN_DEPOSIT_LEDGER_UNITS) {
+            console.warn(`[充值对账] ${wallet} 金额低于最小充值额（1 USDT），跳过 tx=${txHash}`);
+            continue;
+          }
+          let createdAt = nowIso();
+          try {
+            const block = await reconcileProvider.getBlock(Number(log.blockNumber));
+            if (block?.timestamp) createdAt = new Date(Number(block.timestamp) * 1000).toISOString();
+          } catch { /* 取不到区块时间就用当前时间 */ }
+          const record = {
+            id: `dep_${crypto.randomBytes(8).toString('hex')}`,
+            wallet: getAddress(fromWallet),
+            txHash,
+            asset: 'USDT',
+            network: network.id,
+            bridge: false,
+            routeTool: '',
+            amountUnits: amountUnits.toString(),
+            chainAmountUnits: chainUnits.toString(),
+            blockNumber: Number(log.blockNumber),
+            confirmations,
+            status: 'confirmed',
+            createdAt,
+            confirmedAt: nowIso(),
+            note: '自动扫链对账补录',
+          };
+          state.deposits.push(record);
+          addBalance(record.wallet, 'USDT', amountUnits);
+          known.add(txHash);
+          credited += 1;
+          chunkDirty = true;
+          console.warn(`[充值对账] 已自动补录充值 ${formatUnits(amountUnits, LEDGER_DECIMALS)} USDT → ${record.wallet} tx=${txHash}`);
+        }
+        // 每个分块处理完立即落库，避免整轮扫描中途失败导致已入账记录只存在内存里
+        if (chunkDirty) saveState();
+        if (stop) break;
+        nextCursor = to;
+      }
+      database.saveSetting(RECONCILE_CURSOR_KEY, String(Math.max(cursor, nextCursor)));
+      return { scanned, credited };
+    } catch (error) {
+      console.warn(`[充值对账] 扫描失败：${error?.shortMessage || error?.message || error}`);
+      return { scanned: 0, credited: 0 };
+    } finally {
+      reconciling = false;
+    }
+  }
+
   async function profile(wallet) {
     const address = normalizeAddress(wallet);
     await reconcilePending(address);
@@ -1814,6 +1943,7 @@ export function createWalletService(options = {}) {
     setWithdrawalQuotaHook,
     verifyOperationSignature,
     submitDeposit,
+    reconcileOnchainDeposits,
     updateWithdrawalAutomationSettings,
     withdrawalAutomationSettings,
     ensureUser,

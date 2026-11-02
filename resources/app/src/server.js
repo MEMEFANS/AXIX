@@ -227,7 +227,9 @@ const bridgeService = createBridgeService({
   networks:cfg.wallet.networks,
   depositAddress:cfg.wallet.depositAddress,
 });
-const walletService = createWalletService({ ...cfg.wallet, dataRoot: DATA_ROOT, bridgeService, withdrawalPrivateKey: cfg.wallet.withdrawalPrivateKey });
+const walletService = createWalletService({ ...cfg.wallet, dataRoot: DATA_ROOT, bridgeService, withdrawalPrivateKey: cfg.wallet.withdrawalPrivateKey,
+  // 充值自动扫链对账专用 RPC（需支持 eth_getLogs；主 RPC 一般不支持）
+  depositReconcileRpcUrl: process.env.DEPOSIT_RECONCILE_RPC_URL || 'https://bsc-mainnet.nodereal.io/v1/64a9df0874fb4a93b9d0a3849de012d3' });
 const referralService = createReferralService({ database:walletService.database, walletService });
 const withdrawalPayoutService = createWithdrawalPayoutService({
   walletService,
@@ -704,6 +706,17 @@ const mallApi = createMallApi({
 // 商城超时自动确认收货：启动 1 分钟后先跑一轮，之后每 10 分钟扫描（发货满 15 天自动结算给商户）
 setTimeout(() => { try { mallApi.autoConfirmStaleOrders(); } catch (e) { console.error('[AIX商城] 自动确认任务异常:', e?.message || e); } }, 60 * 1000);
 setInterval(() => { try { mallApi.autoConfirmStaleOrders(); } catch (e) { console.error('[AIX商城] 自动确认任务异常:', e?.message || e); } }, 10 * 60 * 1000);
+// 充值自动扫链对账（2026-11-02）：启动 20s 后首跑，之后每 60s 扫一次新增区块；
+// 把「链上已到、站内无记录」的 USDT 充值自动补录并入账（只认已注册用户钱包发起）。
+const depositReconcileTick = () => {
+  try {
+    walletService.reconcileOnchainDeposits().catch((e) => console.warn('[充值对账] 异常:', e?.message || e));
+  } catch (e) { console.warn('[充值对账] 异常:', e?.message || e); }
+};
+const depositReconcileStartTimer = setTimeout(depositReconcileTick, 20 * 1000);
+depositReconcileStartTimer.unref?.();
+const depositReconcileTimer = setInterval(depositReconcileTick, 60 * 1000);
+depositReconcileTimer.unref?.();
 const aTokenAdminApi = createATokenAdminApi({
   aTokenService, poolService: aTokenPoolService, minerService: aTokenMinerService,
   stakingService: aTokenStakingService, activationService: aTokenActivationService,
