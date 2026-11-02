@@ -223,11 +223,22 @@ export function createATokenMatchPoolService({ aTokenService, database, clock = 
     if (turbo < a) {
       throw new Error(`涡轮额度不足：需 1:1 配比 ${fmtA(a)} AIX 涡轮额度，当前 ${fmtA(turbo > 0n ? turbo : 0n)} AIX，可用 USDT 购买或在 AIX 交易大厅买入获得`);
     }
+    // 进池同时锁定等额 AIX 币，到期发 2 倍币后即可直接挂卖
+    const coins = at.balanceA(wallet);
+    if (coins < a) {
+      throw new Error(`AIX 币余额不足：进池需同时锁定 ${fmtA(a)} AIX（当前 ${fmtA(coins > 0n ? coins : 0n)}），可在 AIX 交易大厅买入或由其他账户转入`);
+    }
     const now = clock();
     const state = db.touchATokenMatchPoolState(wallet, now);   // 首次使用落锚，之后每日 +24h
     const durationHours = durationHoursFor(state.firstPoolAt, now);
-    db.consumeATokenSellQuota(wallet, a);                      // 匹配额度消耗（不可撤销）
-    db.consumeATokenTurboQuota(wallet, a);                     // 涡轮额度消耗
+    at.debitA(wallet, a);                                      // 进池锁定 AIX 币
+    try {
+      db.consumeATokenSellQuota(wallet, a);                    // 匹配额度消耗（不可撤销）
+      db.consumeATokenTurboQuota(wallet, a);                   // 涡轮额度消耗
+    } catch (e) {
+      try { at.creditA(wallet, a); } catch (e2) { console.error(`[匹配池] ${wallet} 进池回退币失败:`, e2?.message || e2); }
+      throw e;
+    }
     const entry = db.insertATokenMatchPoolEntry({
       id: makeId('amp'), wallet,
       matchUnits: a.toString(), turboUnits: a.toString(),
@@ -255,18 +266,25 @@ export function createATokenMatchPoolService({ aTokenService, database, clock = 
     };
   }
 
-  // ── 到期释放：total_units → 可用额度（原子标记防重，定时任务每轮扫全量）──
+  // ── 到期释放：total_units → 可用额度 + 等额 AIX 币 ──
+  // 2026-11-03：进池时锁定等额 AIX 币，到期发 2 倍币 + 2 倍可用额度，出池即可全额挂卖。
+  function releaseOne(entry, now) {
+    if (!db.markATokenMatchPoolEntryReleased(entry.id, now)) return false;  // 已被并发释放
+    try {
+      const units = BigInt(entry.totalUnits);
+      db.addATokenUsableQuota(entry.wallet, units);
+      at.creditA(entry.wallet, units);
+    } catch (e) {
+      console.error(`[匹配池] ${entry.id} 出池发放失败（条目已标记释放，需人工补发）:`, e?.message || e);
+    }
+    return true;
+  }
+
   function releaseDue(limit = 200) {
     const now = clock();
     let released = 0;
     for (const entry of db.listDueATokenMatchPoolEntries(now, limit)) {
-      if (!db.markATokenMatchPoolEntryReleased(entry.id, now)) continue;  // 已被并发释放
-      try {
-        db.addATokenUsableQuota(entry.wallet, BigInt(entry.totalUnits));
-        released += 1;
-      } catch (e) {
-        console.error(`[匹配池] ${entry.id} 可用额度发放失败（条目已标记释放，需人工补发）:`, e?.message || e);
-      }
+      if (releaseOne(entry, now)) released += 1;
     }
     return released;
   }
@@ -278,9 +296,7 @@ export function createATokenMatchPoolService({ aTokenService, database, clock = 
     const now = clock();
     for (const entry of db.listDueATokenMatchPoolEntries(now, 500)) {
       if (String(entry.wallet).toLowerCase() !== wallet) continue;
-      if (!db.markATokenMatchPoolEntryReleased(entry.id, now)) continue;
-      try { db.addATokenUsableQuota(wallet, BigInt(entry.totalUnits)); }
-      catch (e) { console.error(`[匹配池] ${entry.id} 懒释放发放失败:`, e?.message || e); }
+      releaseOne(entry, now);
     }
     const matchQuota = db.getATokenSellQuota(wallet);
     const matchReleased = BigInt(matchQuota.releasedUnits);
