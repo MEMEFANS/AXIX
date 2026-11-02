@@ -223,22 +223,12 @@ export function createATokenMatchPoolService({ aTokenService, database, clock = 
     if (turbo < a) {
       throw new Error(`涡轮额度不足：需 1:1 配比 ${fmtA(a)} AIX 涡轮额度，当前 ${fmtA(turbo > 0n ? turbo : 0n)} AIX，可用 USDT 购买或在 AIX 交易大厅买入获得`);
     }
-    // 进池同时锁定等额 AIX 币，到期发 2 倍币后即可直接挂卖
-    const coins = at.balanceA(wallet);
-    if (coins < a) {
-      throw new Error(`AIX 币余额不足：进池需同时锁定 ${fmtA(a)} AIX（当前 ${fmtA(coins > 0n ? coins : 0n)}），可在 AIX 交易大厅买入或由其他账户转入`);
-    }
+    // 涡轮额度本身就对应已买入的 AIX 币，进池只需 匹配额度 + 涡轮额度，不额外扣币
     const now = clock();
     const state = db.touchATokenMatchPoolState(wallet, now);   // 首次使用落锚，之后每日 +24h
     const durationHours = durationHoursFor(state.firstPoolAt, now);
-    at.debitA(wallet, a);                                      // 进池锁定 AIX 币
-    try {
-      db.consumeATokenSellQuota(wallet, a);                    // 匹配额度消耗（不可撤销）
-      db.consumeATokenTurboQuota(wallet, a);                   // 涡轮额度消耗
-    } catch (e) {
-      try { at.creditA(wallet, a); } catch (e2) { console.error(`[匹配池] ${wallet} 进池回退币失败:`, e2?.message || e2); }
-      throw e;
-    }
+    db.consumeATokenSellQuota(wallet, a);                      // 匹配额度消耗（不可撤销）
+    db.consumeATokenTurboQuota(wallet, a);                     // 涡轮额度消耗
     const entry = db.insertATokenMatchPoolEntry({
       id: makeId('amp'), wallet,
       matchUnits: a.toString(), turboUnits: a.toString(),
