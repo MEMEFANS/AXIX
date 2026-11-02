@@ -629,7 +629,26 @@
           <li>A10 不参与级差 / 平级，收益全部来自该池（级别越高人数越少，单份越大）。</li>
         </ul>
 
-        <h3>七、合约跟单</h3>
+        <h3>七、涡轮额度与匹配池（AIX 匹配池）</h3>
+        <p>平台把卖盘权限拆成三层额度：<strong>匹配额度 → 涡轮额度 → 可用额度</strong>，只有「可用额度」可以挂卖 AIX。</p>
+        <table class="portal-table whitepaper-table">
+          <thead><tr><th>额度</th><th>来源</th><th>用途</th></tr></thead>
+          <tbody>
+            <tr><td data-label="额度" style="text-align:left">匹配额度</td><td data-label="来源">矿机 / 质押产出释放</td><td data-label="用途">不能直接卖出，只能与涡轮额度 1:1 进匹配池</td></tr>
+            <tr><td data-label="额度" style="text-align:left">涡轮额度</td><td data-label="来源">① AIX 交易大厅买入，按买入数量 1:1 同步计入（2026-11-02 起）② 站内 USDT 按 AIX 实时价一键购买，单笔最低约 1 USDT 等值</td><td data-label="用途">与匹配额度 1:1 配比进池</td></tr>
+            <tr><td data-label="额度" style="text-align:left">可用额度</td><td data-label="来源">匹配池到期发放</td><td data-label="用途">唯一可挂卖 AIX 的额度</td></tr>
+          </tbody>
+        </table>
+        <ul>
+          <li><strong>进池比例</strong>：匹配额度 : 涡轮额度 = <strong>1 : 1</strong>，放入数量即两边各消耗同等数量，进池后不可撤销。</li>
+          <li><strong>锁定时长</strong>：从首次使用匹配池起算，第 1 天放入锁 24 小时，每过一天新增的锁定 +24 小时（第 2 天 48 小时、第 3 天 72 小时……），第 30 天起封顶 <strong>720 小时</strong>。</li>
+          <li><strong>到期产出</strong>：匹配额度 + 涡轮额度合计 <strong>2 倍</strong>发放为可用额度到资产账户，可挂卖或继续持有。</li>
+          <li><strong>交易大厅买入</strong>：买入 AIX 的同时按相同数量计入涡轮额度，买入 0 手续费；卖出仍统一 3% 手续费（50% 销毁 + 50% A10 分红池）。</li>
+          <li><strong>一键购买</strong>：用站内 USDT 按 AIX 实时价格折算购买涡轮额度（1 USDT 购买等值 AIX），成交后涡轮额度即时到账，支付的 USDT 进入平台归集账户且不可退款；交易大厅暂无卖单时会提示转为「委托求购」。</li>
+          <li>交易大厅撮合成交与一键购买均计入交易大厅当日成交量。</li>
+        </ul>
+
+        <h3>八、合约跟单</h3>
         <ul>
           <li>跟单采用 <strong>VIP 会员制</strong>：销毁 <strong>100 AIX</strong> 开通 <strong>30 天</strong>跟单权益（永久销毁、不返还），到期续费需重新销毁。</li>
           <li>跟单<strong>最低 100 USDT 起步</strong>，月化收益 <strong>15%–20%</strong> 随机浮动。</li>
@@ -637,7 +656,7 @@
           <li>跟单收益的推荐佣金：<strong>直推 10%、间推 0</strong>（与矿机分润 15% / 10% 是两套独立体系）。</li>
         </ul>
 
-        <h3>八、充值与提现</h3>
+        <h3>九、充值与提现</h3>
         <table class="portal-table whitepaper-table">
           <tbody>
             <tr><td data-label="项目" style="width:28%;text-align:left">充值</td><td data-label="规则"><strong>1 USDT 起充</strong>，跨链全额入账，0 手续费</td></tr>
