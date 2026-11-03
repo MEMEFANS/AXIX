@@ -471,7 +471,7 @@ try {
   assert.equal(at.balanceUsdt(B6), b6Before, '撤销限价买单应返还冻结资金');
   await assert.rejects(async () => orderService.placeOrder({ wallet:B6, side:'sell', orderType:'limit', priceUsdt:'0.1', amount:'10' }), /余额不足/, 'A 不足应拒绝');
   await assert.rejects(async () => orderService.placeOrder({ wallet:B6, side:'hold', amount:'10' }), /side 必须是/, '非法 side 应拒绝');
-  await assert.rejects(async () => orderService.placeOrder({ wallet:B5, side:'sell', orderType:'market', amount:'50' }), /最低 100/, '卖出低于 100 AIX 应拒绝');
+  await assert.rejects(async () => orderService.placeOrder({ wallet:B5, side:'sell', orderType:'market', amount:'0.5' }), /最低 1/, '卖出低于 1 AIX 应拒绝');
   pass('下单边界校验');
 
   // ════════════════ 四、代币互转 ════════════════

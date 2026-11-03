@@ -2,8 +2,9 @@ import crypto from 'node:crypto';
 import { formatUnits } from 'ethers';
 import { A_TOKEN_DECIMALS, USDT_DECIMALS } from './a-token-service.js';
 
-// 卖出最低门槛：100 AIX（买入不限制）
-const MIN_SELL_A = 100n * 10n ** BigInt(A_TOKEN_DECIMALS);
+// 卖出最低门槛：1 AIX（买入不限制）
+// 2026-11-03 用户要求：涡轮产出的币不再 100 个起卖，1 个即可挂卖
+const MIN_SELL_A = 10n ** BigInt(A_TOKEN_DECIMALS);
 
 // ─────────────────────────────────────────────────────────────
 // A 币委托撮合服务（P2P 模式 v2）
@@ -215,7 +216,7 @@ export function createATokenOrderService({ aTokenService, database, teamService,
       if (at.balanceA(wallet) < a) {
         throw new Error(`A 币可用余额不足：需 ${formatUnits(a, A_TOKEN_DECIMALS)} A`);
       }
-      if (a < MIN_SELL_A) throw new Error(`AIX 卖出最低 ${formatUnits(MIN_SELL_A, A_TOKEN_DECIMALS)} 个起，买入不限制`);
+      if (a < MIN_SELL_A) throw new Error('AIX 卖出最低 1 个起，买入不限制');
       // 2026-10-31 匹配池规则：只有经匹配池转换的「可用额度」才可以卖，质押产出（匹配额度）不能直接挂卖
       const quotaSnapshot = db.getATokenUsableQuota(wallet);
       const quotaAvailable = BigInt(quotaSnapshot.releasedUnits) - BigInt(quotaSnapshot.usedUnits);

@@ -278,7 +278,7 @@
       <div class="aentry-sum"><span>订单价值</span><b id="atrade-summary-value">$0.00</b></div>
       <div class="aentry-sum"><span>预计手续费</span><b id="atrade-summary-fee">0 AIX</b></div>
       <div class="aentry-sum match"><span>撮合说明</span><b style="font-size:11px;font-weight:500;color:#b7c5c1">${isLimit ? '与对手方挂单撮合 · 未成转委托' : '按现价吃对手方挂单 · 未成转委托'}</b></div>
-      <div class="aentry-sum match"><span>卖出规则</span><b style="font-size:11px;font-weight:500;color:#b7c5c1">最少 100 AIX 起卖 · 买入不限制</b></div>
+      <div class="aentry-sum match"><span>卖出规则</span><b style="font-size:11px;font-weight:500;color:#b7c5c1">最少 1 AIX 起卖 · 买入不限制</b></div>
     </aside>`;
   }
   function atradeSubmitButtonLabel() {
@@ -801,7 +801,7 @@
       return;
     }
 
-    if (currentSide === 'sell' && Number(amt) < 100) { showErr('AIX 卖出最低 100 个起，买入不限制'); return; }
+    if (currentSide === 'sell' && Number(amt) < 1) { showErr('AIX 卖出最低 1 个起，买入不限制'); return; }
 
     // 买卖双方均支持市价跟随 / 限价委托
     const submitOrderType = currentOrderType;
